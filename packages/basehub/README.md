@@ -10,7 +10,7 @@ npm i basehub
 
 ## Quickstart for Next.js
 
-1. Set required environment variable:
+#### 1. Set required environment variable:
 
 ```zsh
 # .env
@@ -20,7 +20,7 @@ BASEHUB_URL="https://basehub.com/<team-slug>/<repo-slug>/graphql?token=<read-tok
 
 - Get your read token in the Connect panel: `https://basehub.com/<team-slug>/<repo-slug>/connect`
 
-2. Run your first query:
+#### 2. Run your first query:
 
 ```tsx
 // /app/page.ts
@@ -38,7 +38,7 @@ const Page = async () => {
 export default Page;
 ```
 
-3. (Optional) Generate TypeScript types for Intellisense:
+#### 3. (Optional) Generate TypeScript types for Intellisense:
 
 ```zsh
 npm run basehub
