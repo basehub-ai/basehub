@@ -1,4 +1,4 @@
-# basehub
+# basehub 🪄
 
 The First AI-Native Headless CMS. JavaScript / TypeScript SDK.
 
