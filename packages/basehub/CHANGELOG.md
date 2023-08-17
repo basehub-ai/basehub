@@ -1,5 +1,11 @@
 # basehub
 
+## 0.0.4
+
+### Patch Changes
+
+- 51ca886: receive draft query param, if sent
+
 ## 0.0.3
 
 ### Patch Changes
