@@ -23,7 +23,7 @@ BASEHUB_URL="https://basehub.com/<team-slug>/<repo-slug>/graphql?token=<read-tok
 #### 2. Run your first query:
 
 ```tsx
-// /app/page.ts
+// src/app/page.ts
 
 import { basehub } from "basehub";
 
