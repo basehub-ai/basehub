@@ -14,6 +14,7 @@ npm i basehub
 
 ```zsh
 # .env
+
 BASEHUB_URL="https://basehub.com/<team-slug>/<repo-slug>/graphql?token=<read-token>"
 ```
 
@@ -23,6 +24,7 @@ BASEHUB_URL="https://basehub.com/<team-slug>/<repo-slug>/graphql?token=<read-tok
 
 ```tsx
 // /app/page.ts
+
 import { basehub } from "basehub";
 
 const Page = async () => {
