@@ -9,11 +9,11 @@ function help(code: number) {
   console.log(`
   Usage:
   
-  basehub [--dir=<dir>]
+  basehub [--verbose]
 
   Options:
 
-    --dir, -d  An example option. [default: "example"]
+  --verbose, -v  Verbose output
   
   `);
   process.exit(code);
@@ -29,10 +29,9 @@ if (!cmd || cmd.startsWith("-")) {
 const args = arg(
   {
     // types
-    "--dir": String,
     "--verbose": Boolean,
     // aliases
-    "-d": "--dir",
+    "-v": "--verbose",
   },
   { permissive: true }
 );

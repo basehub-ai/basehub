@@ -1,7 +1,7 @@
 import { generate } from "@genql/cli";
 import path from "path";
 import { Args } from ".";
-import dotenv from "dotenv";
+import dotenv from "dotenv-flow";
 import { z } from "zod";
 import fs from "fs";
 
@@ -22,12 +22,14 @@ export const main = async (args: Args) => {
       .string()
       .safeParse(process.env.BASEHUB_TOKEN);
     const parsedBasehubRefEnv = z.string().safeParse(process.env.BASEHUB_REF);
+    const parsedBasehubDraftEnv = z
+      .string()
+      .safeParse(process.env.BASEHUB_DRAFT);
 
     if (
       parsedBasehubTeamEnv.success === false ||
       parsedBasehubRepoEnv.success === false ||
-      parsedBasehubTokenEnv.success === false ||
-      parsedBasehubRefEnv.success === false
+      parsedBasehubTokenEnv.success === false
     ) {
       console.log("BASEHUB_URL not found.");
       process.exit(0);
@@ -36,7 +38,11 @@ export const main = async (args: Args) => {
     urlCandidate = `${basehubOrigin}/${parsedBasehubTeamEnv.data}/${
       parsedBasehubRepoEnv.data
     }/graphql?token=${parsedBasehubTokenEnv.data}${
-      parsedBasehubRefEnv.data ? `&ref=${parsedBasehubRefEnv.data}` : ""
+      parsedBasehubRefEnv.success ? `&ref=${parsedBasehubRefEnv.data}` : ""
+    }${
+      parsedBasehubDraftEnv.success
+        ? `&draft=${parsedBasehubDraftEnv.data}`
+        : ""
     }`;
   } else {
     urlCandidate = parsedBasehubUrlEnv.data;
