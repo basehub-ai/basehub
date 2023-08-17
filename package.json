@@ -10,7 +10,7 @@
     "generate": "turbo run generate",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "version:packages": "pnpm changeset version",
-    "release": "pnpm build:packages && pnpm changeset publish"
+    "release": "pnpm build && pnpm changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.22.0",
