@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:analyze": "cross-env ANALYZE=true yarn build",
+    "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
     "generate": "basehub",
@@ -24,6 +24,7 @@
     "@next/bundle-analyzer": "13.4.16",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
+    "cross-env": "^7.0.3",
     "sass": "1.62.0",
     "tsconfig": "workspace:*"
   }

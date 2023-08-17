@@ -2,20 +2,20 @@
 
 ## Development
 
-1. Install yarn:
+1. Install pnpm:
 
    ```
-   npm install -g yarn
+   npm install -g pnpm
    ```
 
 2. Install the dependencies with:
 
    ```
-   yarn
+   pnpm
    ```
 
 3. Start developing and watch for code changes:
 
    ```
-   yarn dev
+   pnpm dev
    ```
