@@ -16,6 +16,11 @@ npm i basehub
 # .env
 
 BASEHUB_URL="https://basehub.com/<team-slug>/<repo-slug>/graphql?token=<read-token>"
+
+# or disambiguated
+BASEHUB_TEAM="<team-slug>"
+BASEHUB_REPO="<repo-slug>"
+BASEHUB_TOKEN="<read-token>"
 ```
 
 - Get your read token in the Connect panel: `https://basehub.com/<team-slug>/<repo-slug>/connect`
