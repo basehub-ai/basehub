@@ -1,0 +1,30 @@
+{
+  "name": "playground",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:analyze": "cross-env ANALYZE=true yarn build",
+    "start": "next start",
+    "lint": "next lint",
+    "generate": "basehub",
+    "postinstall": "pnpm generate"
+  },
+  "dependencies": {
+    "basehub": "workspace:^",
+    "clsx": "^1.2.1",
+    "eslint-config-custom": "workspace:*",
+    "next": "^13.4.16",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sharp": "^0.32.0"
+  },
+  "devDependencies": {
+    "@next/bundle-analyzer": "13.4.16",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "sass": "1.62.0",
+    "tsconfig": "workspace:*"
+  }
+}
