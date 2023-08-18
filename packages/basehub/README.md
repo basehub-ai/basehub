@@ -32,7 +32,7 @@ BASEHUB_TOKEN="<read-token>"
 npm run basehub
 ```
 
-❗️ Important: make sure you run the generator at your app's build step. A common pattern is to run it in your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
+❗️ Important: make sure you run the generator before your app's build step. A common pattern is to run it in your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
 
 #### 3. Use in your app:
 
