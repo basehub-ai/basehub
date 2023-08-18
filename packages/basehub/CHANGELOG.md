@@ -1,5 +1,11 @@
 # basehub
 
+## 0.0.5
+
+### Patch Changes
+
+- 509b984: bundle generated client with esbuild
+
 ## 0.0.4
 
 ### Patch Changes
