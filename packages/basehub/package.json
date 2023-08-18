@@ -12,6 +12,7 @@
   },
   "files": [
     "dist",
+    "scripts",
     "index.js",
     "index.d.ts",
     "react.js",
