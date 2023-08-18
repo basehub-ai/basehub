@@ -1,5 +1,11 @@
 # basehub
 
+## 0.0.8
+
+### Patch Changes
+
+- 9a2b88f: debug
+
 ## 0.0.7
 
 ### Patch Changes
