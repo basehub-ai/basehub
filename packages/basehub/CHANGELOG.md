@@ -1,5 +1,11 @@
 # basehub
 
+## 0.0.6
+
+### Patch Changes
+
+- 09fc5ca: test postinstall hook
+
 ## 0.0.5
 
 ### Patch Changes
