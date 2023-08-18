@@ -26,8 +26,14 @@ function run(cmd, params, cwd = process.cwd()) {
 }
 
 async function main() {
-  console.log("basehub running postinstall script...");
-  const basehubModulePath = path.resolve("./dist/bin.js");
+  console.log("Running postinstall script...");
+  const basehubModulePath = path.resolve(
+    process.cwd(),
+    "node_modules",
+    "basehub",
+    "dist",
+    "bin.js"
+  );
 
   console.log({ basehubModulePath });
 
