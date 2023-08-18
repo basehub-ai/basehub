@@ -23,7 +23,7 @@
     "build": "pnpm build:bin & pnpm build:client",
     "build:bin": "tsup --config tsup-bin.config.ts",
     "build:client": "tsup --config tsup-client.config.ts",
-    "postinstall": "node ./dist/bin.js"
+    "postinstall": "node ./scripts/postinstall.js"
   },
   "peerDependencies": {
     "react": "^18.2.0",
