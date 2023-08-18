@@ -8,7 +8,7 @@ The First AI-Native Headless CMS. JavaScript / TypeScript SDK.
 npm i basehub
 ```
 
-## Quickstart for Next.js
+## Quickstart
 
 #### 1. Set required environment variable:
 
@@ -24,7 +24,7 @@ BASEHUB_REPO="<repo-slug>"
 BASEHUB_TOKEN="<read-token>"
 ```
 
-- Get your read token in the Connect panel: `https://basehub.com/<team-slug>/<repo-slug>/connect`
+💡 Get your read token in the Connect panel: `https://basehub.com/<team-slug>/<repo-slug>/connect`
 
 #### 2. Generate SDK:
 
@@ -33,6 +33,8 @@ npm run basehub
 ```
 
 #### 3. Use in your app:
+
+This is example uses [Next.js](https://nextjs.org/), but you can use any JavaScript framework.
 
 ```tsx
 // app/page.tsx
@@ -50,4 +52,12 @@ const Page = async () => {
 export default Page;
 ```
 
-Tip: to keep your types up to date, you can add `basehub` to your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
+Tip: to keep your types up to date, you can add `npm run basehub` to your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
+
+## API Reference
+
+The `basehub` sdk is generated with GenQL. It features:
+
+- Comes with types inferred from your schema... _meaning IDE intellisense works great._
+- No dependency on graphql... _meaning your bundle is more lightweight._
+- Works in the browser, Vercel Edge Functions, Node, Deno, Cloudflare Workers, etc... _meaning you can use it anywhere._
