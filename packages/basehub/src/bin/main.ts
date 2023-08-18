@@ -4,6 +4,7 @@ import { Args } from ".";
 import dotenv from "dotenv-flow";
 import { z } from "zod";
 import fs from "fs";
+import * as esbuild from "esbuild";
 
 const basehubOrigin = "https://basehub.com";
 
@@ -64,11 +65,10 @@ export const main = async (args: Args) => {
     process.exit(1);
   }
 
-  const basehubDistPath = path.resolve(
+  const basehubModulePath = path.resolve(
     process.cwd(),
     "node_modules",
-    "basehub",
-    "dist"
+    "basehub"
   );
 
   await generate({
@@ -77,18 +77,34 @@ export const main = async (args: Args) => {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    output: path.join(basehubDistPath, "generated-client"),
+    output: path.join(basehubModulePath, "dist", "generated-client"),
     verbose: args["--verbose"] ?? false,
   });
 
   const generatedMainExportPath = path.join(
-    basehubDistPath,
+    basehubModulePath,
+    "dist",
     "generated-client",
     "index.ts"
   );
 
   // extra generated
   fs.appendFileSync(generatedMainExportPath, basehubExport);
+
+  await esbuild.build({
+    entryPoints: [generatedMainExportPath],
+    bundle: true,
+    outfile: path.join(
+      basehubModulePath,
+      "dist",
+      "generated-client",
+      "index.js"
+    ),
+    // minify: true,
+    // sourcemap: true,
+    format: "cjs",
+    // tsconfig: path.resolve(basehubModulePath, "tsconfig.json"),
+  });
 
   console.log("🪄 Generated `basehub` client");
   return;

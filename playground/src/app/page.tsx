@@ -4,7 +4,7 @@ import { RenderBaseHubRichText } from "basehub/react";
 export default async function HomePage() {
   const firstQuery = await basehub().query({
     homepage: {
-      text: true,
+      _title: true,
     },
   });
 
