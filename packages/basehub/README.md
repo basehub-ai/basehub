@@ -60,4 +60,4 @@ The `basehub` sdk is generated with GenQL. It features:
 
 - Comes with types inferred from your schema... _meaning IDE intellisense works great._
 - No dependency on graphql... _meaning your bundle is more lightweight._
-- Works in the browser, Vercel Edge Functions, Node, Deno, Cloudflare Workers, etc... _meaning you can use it anywhere._
+- Works in the browser, Vercel Edge Functions, Node, Deno, etc... _meaning you can use it anywhere._
