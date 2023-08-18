@@ -100,10 +100,8 @@ export const main = async (args: Args) => {
       "generated-client",
       "index.js"
     ),
-    // minify: true,
-    // sourcemap: true,
+    minify: true,
     format: "cjs",
-    // tsconfig: path.resolve(basehubModulePath, "tsconfig.json"),
   });
 
   console.log("🪄 Generated `basehub` client");

@@ -18,11 +18,12 @@ const prependUseClientPlugin = {
 
 export default defineConfig((options) => {
   return {
-    minify: false,
+    minify: !options.watch,
     dts: true,
     entry: {
       react: "./src/react/index.ts",
     },
+    format: ["cjs"],
     esbuildPlugins: [prependUseClientPlugin],
   };
 });
