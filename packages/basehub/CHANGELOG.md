@@ -1,5 +1,11 @@
 # basehub
 
+## 0.0.7
+
+### Patch Changes
+
+- c354c23: include scripts on bundle
+
 ## 0.0.6
 
 ### Patch Changes
