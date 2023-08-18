@@ -1,5 +1,11 @@
 # basehub
 
+## 0.0.10
+
+### Patch Changes
+
+- 158e1a3: remove console logs
+
 ## 0.0.9
 
 ### Patch Changes
