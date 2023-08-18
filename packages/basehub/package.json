@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native headless cms.",
   "author": "JB <jb@basehub.com>",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
