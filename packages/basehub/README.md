@@ -32,9 +32,11 @@ BASEHUB_TOKEN="<read-token>"
 npm run basehub
 ```
 
+❗️ Important: make sure you run the generator at your app's build step. A common pattern is to run it in your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
+
 #### 3. Use in your app:
 
-This is example uses [Next.js](https://nextjs.org/), but you can use any JavaScript framework.
+This example uses [Next.js](https://nextjs.org/), but you can use any JavaScript framework.
 
 ```tsx
 // app/page.tsx
@@ -51,8 +53,6 @@ const Page = async () => {
 
 export default Page;
 ```
-
-Tip: to keep your types up to date, you can add `npm run basehub` to your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
 
 ## About the SDK
 
