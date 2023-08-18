@@ -1,5 +1,11 @@
 # basehub
 
+## 0.0.9
+
+### Patch Changes
+
+- bab5c5b: Debug
+
 ## 0.0.8
 
 ### Patch Changes
