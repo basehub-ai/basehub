@@ -54,9 +54,9 @@ export default Page;
 
 Tip: to keep your types up to date, you can add `npm run basehub` to your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
 
-## API Reference
+## About the SDK
 
-The `basehub` sdk is generated with GenQL. It features:
+The `basehub` sdk is generated with [GenQL](https://genql.dev/) (read their [docs](https://genql.dev/docs)). It features:
 
 - Comes with types inferred from your schema... _meaning IDE intellisense works great._
 - No dependency on graphql... _meaning your bundle is more lightweight._
