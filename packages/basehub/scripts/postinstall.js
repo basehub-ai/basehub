@@ -35,21 +35,15 @@ async function main() {
     "bin.js"
   );
 
-  console.log({ basehubModulePath });
-
   if (fs.existsSync(basehubModulePath)) {
-    console.log("HAS BEEN INSTALLED");
     // has been installed, so we run it
     try {
       await run("node", [basehubModulePath]);
-      console.log("generated in postinstall ✅");
+      console.log("SDK generated in postinstall ✅");
     } catch (error) {
-      console.log("failed", error);
       // ignore error (silent fail)
     }
   }
-
-  console.log("done.");
 }
 
 main();
