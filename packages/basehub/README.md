@@ -1,6 +1,13 @@
 # basehub 🪄
 
-The First AI-Native Headless CMS. JavaScript / TypeScript SDK.
+The First AI-Native Headless CMS.
+
+This is our JavaScript / TypeScript SDK.
+
+- ✨ Infers types from your BaseHub repository... _meaning IDE autocompletion works great._
+- 🏎️ No dependency on graphql... _meaning your bundle is more lightweight._
+- 🌐 Works everywhere `fetch` is supported... _meaning you can use it anywhere._
+
 
 ## Install
 
@@ -32,7 +39,7 @@ BASEHUB_TOKEN="<read-token>"
 npm run basehub
 ```
 
-❗️ Important: make sure you run the generator before your app's build step. A common pattern is to run it in your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
+**❗️ Important:** make sure you run the generator before your app's build step. A common pattern is to run it in your [postinstall script](https://docs.npmjs.com/cli/v9/using-npm/scripts).
 
 #### 3. Use in your app:
 
@@ -56,8 +63,4 @@ export default Page;
 
 ## About the SDK
 
-The `basehub` sdk is generated with [GenQL](https://genql.dev/) (read their [docs](https://genql.dev/docs)). It features:
-
-- Comes with types inferred from your schema... _meaning IDE intellisense works great._
-- No dependency on graphql... _meaning your bundle is more lightweight._
-- Works in the browser, Vercel Edge Functions, Node, Deno, etc... _meaning you can use it anywhere._
+The `basehub` sdk is generated with [GenQL](https://genql.dev/) (read their [docs](https://genql.dev/docs)). Thank you [Morse](https://github.com/remorses) for creating such a great package.
