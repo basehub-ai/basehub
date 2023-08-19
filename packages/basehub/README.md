@@ -1,8 +1,8 @@
 # basehub 🪄
 
-The First AI-Native Headless CMS.
+JavaScript / TypeScript SDK for [BaseHub](https://basehub.com/), the first AI-native content hub.
 
-This is our JavaScript / TypeScript SDK.
+**Features:**
 
 - ✨ Infers types from your BaseHub repository... _meaning IDE autocompletion works great._
 - 🏎️ No dependency on graphql... _meaning your bundle is more lightweight._
@@ -33,7 +33,7 @@ BASEHUB_TOKEN="<read-token>"
 
 💡 Get your read token in the Connect panel: `https://basehub.com/<team-slug>/<repo-slug>/connect`
 
-#### 2. Generate SDK:
+#### 2. Generate client:
 
 ```zsh
 npm run basehub
