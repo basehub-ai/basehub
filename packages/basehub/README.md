@@ -31,7 +31,7 @@ BASEHUB_REPO="<repo-slug>"
 BASEHUB_TOKEN="<read-token>"
 ```
 
-💡 Get your read token in the Connect panel: `https://basehub.com/<team-slug>/<repo-slug>/connect`
+💡 Get your read token from the Connect panel: `https://basehub.com/<team-slug>/<repo-slug>/connect`
 
 #### 2. Generate client:
 
