@@ -1,69 +1,17 @@
 import { generate } from "@genql/cli";
 import path from "path";
 import { Args } from ".";
-import dotenv from "dotenv-flow";
-import { z } from "zod";
 import fs from "fs";
 import * as esbuild from "esbuild";
-
-const basehubOrigin = "https://basehub.com";
+import {
+  getBaseHubUrlFromEnv,
+  runtime__getBaseHubUrlFromEnvString,
+} from "./util/get-basehub-url-from-env";
 
 export const main = async (args: Args) => {
   console.log("🪄 Generating...");
 
-  dotenv.config();
-
-  let urlCandidate = "";
-  let parsedBasehubUrlEnv = z.string().safeParse(process.env.BASEHUB_URL);
-  if (parsedBasehubUrlEnv.success === false) {
-    // try disambiguated
-    const parsedBasehubTeamEnv = z.string().safeParse(process.env.BASEHUB_TEAM);
-    const parsedBasehubRepoEnv = z.string().safeParse(process.env.BASEHUB_REPO);
-    const parsedBasehubTokenEnv = z
-      .string()
-      .safeParse(process.env.BASEHUB_TOKEN);
-    const parsedBasehubRefEnv = z.string().safeParse(process.env.BASEHUB_REF);
-    const parsedBasehubDraftEnv = z
-      .string()
-      .safeParse(process.env.BASEHUB_DRAFT);
-
-    if (
-      parsedBasehubTeamEnv.success === false ||
-      parsedBasehubRepoEnv.success === false ||
-      parsedBasehubTokenEnv.success === false
-    ) {
-      console.log("BASEHUB_URL not found.");
-      process.exit(0);
-    }
-
-    urlCandidate = `${basehubOrigin}/${parsedBasehubTeamEnv.data}/${
-      parsedBasehubRepoEnv.data
-    }/graphql?token=${parsedBasehubTokenEnv.data}${
-      parsedBasehubRefEnv.success ? `&ref=${parsedBasehubRefEnv.data}` : ""
-    }${
-      parsedBasehubDraftEnv.success
-        ? `&draft=${parsedBasehubDraftEnv.data}`
-        : ""
-    }`;
-  } else {
-    urlCandidate = parsedBasehubUrlEnv.data;
-  }
-
-  const basehubUrl = new URL(urlCandidate);
-
-  if (basehubUrl.origin !== basehubOrigin) {
-    console.log(
-      `Origin mismatch. The BASEHUB_URL should point to ${basehubOrigin}`
-    );
-    process.exit(1);
-  }
-
-  if (!basehubUrl.searchParams.get("token")) {
-    console.log(
-      "Token not found. Make sure to include the token in the `token` query parameter."
-    );
-    process.exit(1);
-  }
+  const basehubUrl = getBaseHubUrlFromEnv();
 
   const basehubModulePath = path.resolve(
     process.cwd(),
@@ -78,7 +26,7 @@ export const main = async (args: Args) => {
       "Content-Type": "application/json",
     },
     output: path.join(basehubModulePath, "dist", "generated-client"),
-    verbose: args["--verbose"] ?? false,
+    verbose: false,
   });
 
   const generatedMainExportPath = path.join(
@@ -88,8 +36,39 @@ export const main = async (args: Args) => {
     "index.ts"
   );
 
-  // extra generated
-  fs.appendFileSync(generatedMainExportPath, basehubExport);
+  // We'll patch some things from the generated code.
+  let schemaFileContents = fs.readFileSync(generatedMainExportPath, "utf-8");
+
+  // 1. remove hardcoded URL and replace with our function that infers it from .env
+  // on all ocurrances.
+
+  const basehubUrlRegex = new RegExp(
+    // match ", or ', or ` (as the start/end of a string)
+    // match basehubUrl but escape the ? of the query param with a \. Escape the \ with another \ so prettier doesn't remove it.
+    `['"\`]${basehubUrl.toString().replace("?", "\\?")}['"\`]`,
+    "g"
+  );
+  schemaFileContents = schemaFileContents.replace(
+    basehubUrlRegex,
+    "getBaseHubUrlFromEnv()" // function injected below
+  );
+
+  // 1.1. append that function to end of file.
+  schemaFileContents = schemaFileContents.concat(
+    `\n${runtime__getBaseHubUrlFromEnvString}`
+  );
+
+  // 2. remove export for `createClient`, as it holds options that we don't want to expose.
+  schemaFileContents = schemaFileContents.replace(
+    "export const createClient = ",
+    "const createClient = "
+  );
+
+  // 3. append our basehub function to the end of the file.
+  schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
+
+  // 4. write the file back.
+  fs.writeFileSync(generatedMainExportPath, schemaFileContents);
 
   await esbuild.build({
     entryPoints: [generatedMainExportPath],
@@ -109,7 +88,24 @@ export const main = async (args: Args) => {
 };
 
 const basehubExport = `
+// we limit options to only the ones we want to expose.
 type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'>
 
+/**
+ * Create a basehub client.
+ *
+ * @param options (optional) Options for the \`fetch\` request; for example in Next.js, you can do \`{ next: { revalidate: 60 } }\` to tweak your app's cache.
+ * @returns A basehub client.
+ *
+ * @example
+ * import { basehub } from 'basehub'
+ *
+ * const firstQuery = await basehub().query({
+ *   __typename: true,
+ * });
+ *
+ * console.log(firstQuery.__typename) // => 'Query'
+ *
+ */
 export const basehub = (options?: Options) => createClient(options)
 `;

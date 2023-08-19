@@ -3,42 +3,53 @@
 import arg from "arg";
 import { main } from "./main";
 import { formatError } from "./util/format-error";
+import fs from "fs";
+
+// Get package.json
+const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+// Get version from package.json
+const version = packageJson.version;
 
 // Show usage and exit with code
 function help(code: number) {
   console.log(`
-  Usage:
-  
-  basehub [--verbose]
+  Usage
+    $ basehub
 
-  Options:
-
-  --verbose, -v  Verbose output
-  
-  `);
+  Options
+    --version, -v  Version number.
+    --help, -h     Display this message.`);
   process.exit(code);
 }
 
 // Get CLI arguments
 let [, , cmd] = process.argv;
 
-if (!cmd || cmd.startsWith("-")) {
+if (!cmd) {
   cmd = "generate";
 }
 
 const args = arg(
   {
     // types
-    "--verbose": Boolean,
+    "--version": Boolean,
+    "--help": Boolean,
     // aliases
-    "-v": "--verbose",
+    "-v": "--version",
+    "-h": "--help",
   },
   { permissive: true }
 );
 
+if (args["--version"] || args["-v"]) {
+  console.log(`basehub v${version}`);
+  process.exit(0);
+}
+
 // CLI commands
 const cmds: { [key: string]: (args: Args) => Promise<void> } = {
   generate: main,
+  help: async () => help(0),
 };
 
 // Run CLI

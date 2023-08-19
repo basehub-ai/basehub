@@ -8,7 +8,7 @@
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "basehub"
+    "postinstall": "basehub"
   },
   "dependencies": {
     "basehub": "workspace:^",
