@@ -1,5 +1,11 @@
 # basehub
 
+## 1.0.0
+
+### Major Changes
+
+- 36a4e02: Some extra security measures, and we're in v1!
+
 ## 0.0.10
 
 ### Patch Changes
