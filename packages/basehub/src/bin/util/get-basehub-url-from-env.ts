@@ -35,12 +35,12 @@ export const getBaseHubUrlFromEnv = () => {
 
   const basehubUrl = new URL(urlCandidate);
 
-  if (basehubUrl.origin !== basehubOrigin) {
-    console.log(
-      `Origin mismatch. The BASEHUB_URL's origin should be: ${basehubOrigin}`
-    );
-    process.exit(1);
-  }
+  // if (basehubUrl.origin !== basehubOrigin) {
+  //   console.log(
+  //     `Origin mismatch. The BASEHUB_URL's origin should be: ${basehubOrigin}`
+  //   );
+  //   process.exit(1);
+  // }
 
   // These params can either come disambiguated, or in the URL.
   // Params that come from the URL take precedence.
@@ -104,7 +104,7 @@ export const getBaseHubUrlFromEnv = () => {
  * doesn't use Zod nor dotenv-flow. Assumes the env vars are already loaded.
  */
 export const runtime__getBaseHubUrlFromEnvString = /**JavaScript */ `
-const basehubOrigin = "https://basehub.com";
+const basehubOrigin = "${basehubOrigin}";
 
 const getBaseHubUrlFromEnv = () => {
     let urlCandidate = "";
@@ -127,9 +127,9 @@ const getBaseHubUrlFromEnv = () => {
 
     const basehubUrl = new URL(urlCandidate);
 
-    if (basehubUrl.origin !== basehubOrigin) {
-        throw new Error(\`Origin mismatch. The BASEHUB_URL's origin should be: \${basehubOrigin}\`);
-    }
+    // if (basehubUrl.origin !== basehubOrigin) {
+    //     throw new Error(\`Origin mismatch. The BASEHUB_URL's origin should be: \${basehubOrigin}\`);
+    // }
 
     // These params can either come disambiguated, or in the URL.
     // Params that come from the URL take precedence.
