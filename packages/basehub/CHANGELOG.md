@@ -1,5 +1,11 @@
 # basehub
 
+## 1.0.1
+
+### Patch Changes
+
+- ef95aad: Don't throw an error for origin mismatches
+
 ## 1.0.0
 
 ### Major Changes
