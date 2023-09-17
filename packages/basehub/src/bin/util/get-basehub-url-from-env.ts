@@ -1,4 +1,4 @@
-import dotenv from "dotenv-flow";
+import { dotenvLoad } from "dotenv-mono";
 import { z } from "zod";
 
 /**
@@ -8,7 +8,7 @@ import { z } from "zod";
 export const basehubOrigin = "https://basehub.com";
 
 export const getBaseHubUrlFromEnv = () => {
-  dotenv.config();
+  dotenvLoad();
 
   let urlCandidate = "";
 
