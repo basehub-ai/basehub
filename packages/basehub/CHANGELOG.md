@@ -1,5 +1,11 @@
 # basehub
 
+## 1.1.0
+
+### Minor Changes
+
+- 1cce612: Support .env in monorepos, and .env.development, etc...
+
 ## 1.0.1
 
 ### Patch Changes
