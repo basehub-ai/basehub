@@ -5,42 +5,22 @@ import { z } from "zod";
  * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
  */
 
-export const basehubOrigin = "https://basehub.com";
+export const basehubAPIOrigin = "https://api.basehub.com";
 
 export const getBaseHubUrlFromEnv = () => {
   dotenvLoad();
 
-  let urlCandidate = "";
-
-  const parsedBasehubUrlEnv = z.string().safeParse(process.env.BASEHUB_URL);
-  // or disambiguated
-  const parsedBasehubTeamEnv = z.string().safeParse(process.env.BASEHUB_TEAM);
-  const parsedBasehubRepoEnv = z.string().safeParse(process.env.BASEHUB_REPO);
+  const parsedDebugForcedURL = z
+    .string()
+    .safeParse(process.env.BASEHUB_DEBUG_FORCED_URL);
 
   // 1. let's first form the base URL
 
-  if (parsedBasehubUrlEnv.success) {
-    urlCandidate = parsedBasehubUrlEnv.data;
-  } else {
-    if (
-      parsedBasehubTeamEnv.success === false ||
-      parsedBasehubRepoEnv.success === false
-    ) {
-      console.log("BASEHUB_URL not found.");
-      process.exit(0);
-    }
-
-    urlCandidate = `${basehubOrigin}/${parsedBasehubTeamEnv.data}/${parsedBasehubRepoEnv.data}/graphql`;
-  }
-
-  const basehubUrl = new URL(urlCandidate);
-
-  // if (basehubUrl.origin !== basehubOrigin) {
-  //   console.log(
-  //     `Origin mismatch. The BASEHUB_URL's origin should be: ${basehubOrigin}`
-  //   );
-  //   process.exit(1);
-  // }
+  const basehubUrl = new URL(
+    parsedDebugForcedURL.success
+      ? parsedDebugForcedURL.data
+      : `${basehubAPIOrigin}/graphql`
+  );
 
   // These params can either come disambiguated, or in the URL.
   // Params that come from the URL take precedence.
@@ -77,17 +57,7 @@ export const getBaseHubUrlFromEnv = () => {
 
   // 2. let's validate the URL
 
-  if (basehubUrl.pathname.split("/").length !== 4) {
-    console.log(
-      `Invalid URL. Make sure to include the team and repo in the BASEHUB_URL, or in the BASEHUB_TEAM and BASEHUB_REPO env vars.
-      
-      It should look like this: https://basehub.com/<team>/<repo>/graphql?token=bshb_pk_*****
-`
-    );
-    process.exit(1);
-  }
-
-  if (basehubUrl.pathname.split("/")[3] !== "graphql") {
+  if (basehubUrl.pathname.split("/")[1] !== "graphql") {
     console.log(
       `Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql`
     );
@@ -101,35 +71,21 @@ export const getBaseHubUrlFromEnv = () => {
 
 /**
  * Will inject to generated code, so we keep the same logic and don't hardcode the URL in the generated output.
- * doesn't use Zod nor dotenv-flow. Assumes the env vars are already loaded.
+ * doesn't use Zod nor dotenv-flow (so we don't ship extra stuff to the generated bundle). Assumes the env vars are already loaded.
  */
 export const runtime__getBaseHubUrlFromEnvString = /**JavaScript */ `
-const basehubOrigin = "${basehubOrigin}";
+const basehubOrigin = "${basehubAPIOrigin}";
 
 const getBaseHubUrlFromEnv = () => {
     let urlCandidate = "";
 
-    const parsedBasehubUrlEnv = process.env.BASEHUB_URL;
-    // or disambiguated
-    const parsedBasehubTeamEnv = process.env.BASEHUB_TEAM;
-    const parsedBasehubRepoEnv = process.env.BASEHUB_REPO;
+    const parsedDebugForcedURL = process.env.BASEHUB_DEBUG_FORCED_URL;
 
-    // 1. let's first form the base URL
-
-    if (parsedBasehubUrlEnv) {
-        urlCandidate = parsedBasehubUrlEnv;
-    } else {
-        if (!parsedBasehubTeamEnv || !parsedBasehubRepoEnv) {
-            throw new Error("BASEHUB_URL not found.");
-        }
-        urlCandidate = \`\${basehubOrigin}/\${parsedBasehubTeamEnv}/\${parsedBasehubRepoEnv}/graphql\`;
-    }
-
-    const basehubUrl = new URL(urlCandidate);
-
-    // if (basehubUrl.origin !== basehubOrigin) {
-    //     throw new Error(\`Origin mismatch. The BASEHUB_URL's origin should be: \${basehubOrigin}\`);
-    // }
+    const basehubUrl = new URL(
+      parsedDebugForcedURL
+        ? parsedDebugForcedURL
+        : \`${basehubAPIOrigin}/graphql\`
+    );
 
     // These params can either come disambiguated, or in the URL.
     // Params that come from the URL take precedence.
@@ -164,11 +120,7 @@ const getBaseHubUrlFromEnv = () => {
 
     // 2. let's validate the URL
 
-    if (basehubUrl.pathname.split("/").length !== 4) {
-        throw new Error(\`Invalid URL. Make sure to include the team and repo in the BASEHUB_URL, or in the BASEHUB_TEAM and BASEHUB_REPO env vars.\`);
-    }
-
-    if (basehubUrl.pathname.split("/")[3] !== "graphql") {
+    if (basehubUrl.pathname.split("/")[1] !== "graphql") {
         throw new Error(\`Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql\`);
     }
 
