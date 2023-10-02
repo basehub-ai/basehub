@@ -4,14 +4,14 @@ import { Args } from ".";
 import fs from "fs";
 import * as esbuild from "esbuild";
 import {
-  getBaseHubUrlFromEnv,
-  runtime__getBaseHubUrlFromEnvString,
-} from "./util/get-basehub-url-from-env";
+  getStuffFromEnv,
+  runtime__getStuffFromEnvString,
+} from "./util/get-stuff-from-env";
 
 export const main = async (args: Args) => {
   console.log("🪄 Generating...");
 
-  const basehubUrl = getBaseHubUrlFromEnv();
+  const { url, headers } = getStuffFromEnv();
 
   const basehubModulePath = path.resolve(
     process.cwd(),
@@ -20,8 +20,9 @@ export const main = async (args: Args) => {
   );
 
   await generate({
-    endpoint: basehubUrl.toString(),
+    endpoint: url.toString(),
     headers: {
+      ...headers,
       Accept: "application/json",
       "Content-Type": "application/json",
     },
@@ -42,26 +43,36 @@ export const main = async (args: Args) => {
   // 1. remove hardcoded URL and replace with our function that infers it from .env
   // on all ocurrances.
 
+  schemaFileContents = schemaFileContents.replace(
+    "return createClientOriginal({",
+    "const { url, headers } = getStuffFromEnv()\n  return createClientOriginal({" // function injected below
+  );
+
   const basehubUrlRegex = new RegExp(
     // match ", or ', or ` (as the start/end of a string)
     // match basehubUrl but escape the ? of the query param with a \. Escape the \ with another \ so prettier doesn't remove it.
-    `['"\`]${basehubUrl.toString().replace("?", "\\?")}['"\`]`,
+    `['"\`]${url.toString().replace("?", "\\?")}['"\`]`,
     "g"
   );
   schemaFileContents = schemaFileContents.replace(
     basehubUrlRegex,
-    "getBaseHubUrlFromEnv()" // function injected below
+    "url.toString()"
   );
 
-  // 1.1. append that function to end of file.
-  schemaFileContents = schemaFileContents.concat(
-    `\n${runtime__getBaseHubUrlFromEnvString}`
+  schemaFileContents = schemaFileContents.replace(
+    "...options",
+    "...options,\n    headers: { ...options?.headers, ...headers }"
   );
 
   // 2. remove export for `createClient`, as it holds options that we don't want to expose.
   schemaFileContents = schemaFileContents.replace(
     "export const createClient = ",
     "const createClient = "
+  );
+
+  // this should go at the end so that it doesn't suffer any modifications.
+  schemaFileContents = schemaFileContents.concat(
+    `\n${runtime__getStuffFromEnvString}`
   );
 
   // 3. append our basehub function to the end of the file.

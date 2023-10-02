@@ -14,7 +14,7 @@
     "basehub": "workspace:^",
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
-    "next": "^13.4.16",
+    "next": "^13.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sharp": "^0.32.0"
