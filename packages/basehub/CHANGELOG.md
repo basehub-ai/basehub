@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.0
+
+### Minor Changes
+
+- 244d9c1: Accept just BASEHUB_TOKEN, update to use the new API, with backwards compat.
+
 ## 1.1.0
 
 ### Minor Changes
