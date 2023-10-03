@@ -1,10 +1,10 @@
-import { basehub } from "basehub";
+import * as bshb from "basehub";
 import { RenderBaseHubRichText } from "basehub/react";
 
 export default async function HomePage() {
-  const firstQuery = await basehub().query({
-    homepage: {
-      _title: true,
+  const firstQuery = await bshb.basehub({ next: { revalidate: 1 } }).query({
+    blogIndex: {
+      blogIndex: true,
     },
   });
 
