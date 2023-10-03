@@ -2,9 +2,9 @@ import * as bshb from "basehub";
 import { RenderBaseHubRichText } from "basehub/react";
 
 export default async function HomePage() {
-  const firstQuery = await bshb.basehub().query({
-    myFirstBlockSarasa: {
-      __scalar: true,
+  const firstQuery = await bshb.basehub({ next: { revalidate: 1 } }).query({
+    blogIndex: {
+      blogIndex: true,
     },
   });
 
