@@ -11,3 +11,7 @@ export const RenderBaseHubRichText = ({ html }: RenderBaseHubRichTextProps) => {
     />
   );
 };
+
+export default RenderBaseHubRichText;
+
+export { TOCRenderer } from './toc-renderer'
