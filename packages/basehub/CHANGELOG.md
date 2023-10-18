@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.1
+
+### Patch Changes
+
+- 8224267: Remove postinstall script which sometimes throws
+
 ## 1.2.1-next.0
 
 ### Patch Changes
