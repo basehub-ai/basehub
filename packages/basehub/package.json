@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "1.2.0",
+  "version": "1.2.1-next.0",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -23,8 +23,7 @@
     "dev": "pnpm build --watch",
     "build": "pnpm build:bin & pnpm build:client",
     "build:bin": "tsup --config tsup-bin.config.ts",
-    "build:client": "tsup --config tsup-client.config.ts",
-    "postinstall": "node scripts/postinstall.js"
+    "build:client": "tsup --config tsup-client.config.ts"
   },
   "peerDependencies": {
     "react": "^18.2.0",
