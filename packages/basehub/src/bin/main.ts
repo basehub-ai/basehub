@@ -8,7 +8,7 @@ import {
   runtime__getStuffFromEnvString,
 } from "./util/get-stuff-from-env";
 
-export const main = async (args: Args) => {
+export const main = async (_args: Args) => {
   console.log("🪄 Generating...");
 
   const { url, headers } = getStuffFromEnv();
@@ -99,6 +99,8 @@ export const main = async (args: Args) => {
 };
 
 const basehubExport = `
+import { createFetcher } from "./runtime";
+
 // we limit options to only the ones we want to expose.
 type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'>
 
@@ -118,5 +120,14 @@ type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 
  * console.log(firstQuery.__typename) // => 'Query'
  *
  */
-export const basehub = (options?: Options) => createClient(options)
+export const basehub = (options?: Options) => {
+  const { url, headers } = getStuffFromEnv();
+
+  return {
+    ...createClient(options),
+    raw: createFetcher({ ...options, url, headers }) as <Cast = unknown>(
+      gql: GraphqlOperation
+    ) => Promise<Cast>,
+  };
+};
 `;
