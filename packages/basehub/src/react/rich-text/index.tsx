@@ -182,8 +182,8 @@ export const RichText = <
 >(
   props: RichTextProps<CustomBlocks>
 ) => {
-  const value = props.children as Node[];
-  return value.map((node, index) => {
+  const value = props.children as Node[] | undefined;
+  return value?.map((node, index) => {
     return (
       <Node
         node={node}
