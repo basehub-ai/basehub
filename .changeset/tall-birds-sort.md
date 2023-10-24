@@ -2,4 +2,4 @@
 "basehub": patch
 ---
 
-New TOC Renderer for React added.
+New RichText Renderer for React.
