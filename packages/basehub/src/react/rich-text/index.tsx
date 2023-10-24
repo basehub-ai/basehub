@@ -494,6 +494,10 @@ const Marks = ({
     return <></>;
   }
 
-  // @ts-ignore
-  return <Marks marks={marks}>{handler(props)}</Marks>;
+  return (
+    <Marks marks={marks} components={components}>
+      {/* @ts-ignore */}
+      {handler(props)}
+    </Marks>
+  );
 };
