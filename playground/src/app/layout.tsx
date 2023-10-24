@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { siteOrigin } from "~/lib/constants";
+import { siteOrigin } from "../lib/constants";
 
 export const metadata: Metadata = {
   title: "BaseHub SDK Playground",
