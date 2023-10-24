@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.3
+
+### Patch Changes
+
+- cfeb13b: guard for undefined value in rich text
+
 ## 1.2.2
 
 ### Patch Changes
