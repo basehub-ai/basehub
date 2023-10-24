@@ -97,77 +97,73 @@ type Node =
     };
 
 type Handlers = {
-  p: (props: { children?: React.ReactNode }) => React.ReactElement;
-  b: (props: { children?: React.ReactNode }) => React.ReactElement;
-  em: (props: { children?: React.ReactNode }) => React.ReactElement;
-  s: (props: { children?: React.ReactNode }) => React.ReactElement;
+  p: (props: { children: React.ReactNode }) => React.ReactElement;
+  b: (props: { children: React.ReactNode }) => React.ReactElement;
+  em: (props: { children: React.ReactNode }) => React.ReactElement;
+  s: (props: { children: React.ReactNode }) => React.ReactElement;
   code: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     isInline: boolean;
   }) => React.ReactElement;
-  a: (props: {
-    children?: React.ReactNode;
-    href: string;
-  }) => React.ReactElement;
-  ol: (props: { children?: React.ReactNode }) => React.ReactElement;
+  a: (props: { children: React.ReactNode; href: string }) => React.ReactElement;
+  ol: (props: { children: React.ReactNode }) => React.ReactElement;
   ul: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     isTasksList: boolean;
   }) => React.ReactElement;
   li: (
     props: {
-      children?: React.ReactNode;
+      children: React.ReactNode;
     } & ({ isTaskListItem: false } | { isTaskListItem: true; checked: boolean })
   ) => React.ReactElement;
   h1: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     id: string | null;
   }) => React.ReactElement;
   h2: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     id: string | null;
   }) => React.ReactElement;
   h3: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     id: string | null;
   }) => React.ReactElement;
   h4: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     id: string | null;
   }) => React.ReactElement;
   h5: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     id: string | null;
   }) => React.ReactElement;
   h6: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     id: string | null;
   }) => React.ReactElement;
   hr: () => React.ReactElement;
   img: (props: {
-    children?: React.ReactNode;
     src: string;
     alt?: string;
     width?: number;
     height?: number;
   }) => React.ReactElement;
   video: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     src: string;
     width?: number;
     height?: number;
   }) => React.ReactElement;
-  blockquote: (props: { children?: React.ReactNode }) => React.ReactElement;
-  pre: (props: { children?: React.ReactNode }) => React.ReactElement;
-  table: (props: { children?: React.ReactNode }) => React.ReactElement;
-  tr: (props: { children?: React.ReactNode }) => React.ReactElement;
+  blockquote: (props: { children: React.ReactNode }) => React.ReactElement;
+  pre: (props: { children: React.ReactNode }) => React.ReactElement;
+  table: (props: { children: React.ReactNode }) => React.ReactElement;
+  tr: (props: { children: React.ReactNode }) => React.ReactElement;
   td: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     colspan: number;
     rowspan: number;
   }) => React.ReactElement;
   th: (props: {
-    children?: React.ReactNode;
+    children: React.ReactNode;
     colspan: number;
     rowspan: number;
   }) => React.ReactElement;
@@ -202,16 +198,20 @@ export const RichText = <
   props: RichTextProps<CustomBlocks>
 ) => {
   const value = props.children as Node[] | undefined;
-  return value?.map((node, index) => {
-    return (
-      <Node
-        node={node}
-        key={index}
-        components={props.components}
-        blocks={props.blocks}
-      />
-    );
-  });
+  return (
+    <>
+      {value?.map((node, index) => {
+        return (
+          <Node
+            node={node}
+            key={index}
+            components={props.components}
+            blocks={props.blocks}
+          />
+        );
+      })}
+    </>
+  );
 };
 
 const defaultHandlers: Handlers = {
@@ -385,7 +385,6 @@ const Node = ({
     case "image":
       handler = components?.img ?? defaultHandlers.img;
       props = {
-        children,
         src: node.attrs.src,
         width: node.attrs.width,
         height: node.attrs.height,
