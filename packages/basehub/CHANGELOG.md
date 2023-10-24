@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.4
+
+### Patch Changes
+
+- da951ae: pass id prop to heading nodes
+
 ## 1.2.3
 
 ### Patch Changes
