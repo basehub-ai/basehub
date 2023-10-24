@@ -219,12 +219,12 @@ const defaultHandlers: Handlers = {
       </li>
     );
   },
-  h1: ({ children, id }) => <h1 id={id}>{children}</h1>,
-  h2: ({ children, id }) => <h2 id={id}>{children}</h2>,
-  h3: ({ children, id }) => <h3 id={id}>{children}</h3>,
-  h4: ({ children, id }) => <h4 id={id}>{children}</h4>,
-  h5: ({ children, id }) => <h5 id={id}>{children}</h5>,
-  h6: ({ children, id }) => <h6 id={id}>{children}</h6>,
+  h1: ({ children }) => <h1>{children}</h1>,
+  h2: ({ children }) => <h2>{children}</h2>,
+  h3: ({ children }) => <h3>{children}</h3>,
+  h4: ({ children }) => <h4>{children}</h4>,
+  h5: ({ children }) => <h5>{children}</h5>,
+  h6: ({ children }) => <h6>{children}</h6>,
   hr: () => <hr />,
   img: (props) => <img {...props} />,
   video: (props) => <video {...props} />,
