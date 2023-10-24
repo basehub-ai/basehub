@@ -1,14 +1,12 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import * as React from "react";
-import { extractTextFromChildren } from "./util/extract-text-from-react-node";
+import { type ReactNode, type ReactElement, useMemo } from "react";
+import { extractTextFromNode, incrementID } from "./util/heading-id";
 
 /**
  * TODOs
  *
- * - similar api to react-markdown
  * - support json, html, markdown, plain text? we'd need to see the impact on bundle size
- * - support custom blocks (with types)
  */
 
 // type Formats =
@@ -27,7 +25,7 @@ type Mark =
 
 type Marks = Array<Mark>;
 
-type Node =
+export type Node =
   | {
       type:
         | "paragraph"
@@ -97,83 +95,58 @@ type Node =
     };
 
 type Handlers = {
-  p: (props: { children: React.ReactNode }) => React.ReactElement;
-  b: (props: { children: React.ReactNode }) => React.ReactElement;
-  em: (props: { children: React.ReactNode }) => React.ReactElement;
-  s: (props: { children: React.ReactNode }) => React.ReactElement;
-  code: (props: {
-    children: React.ReactNode;
-    isInline: boolean;
-  }) => React.ReactElement;
-  a: (props: { children: React.ReactNode; href: string }) => React.ReactElement;
-  ol: (props: { children: React.ReactNode }) => React.ReactElement;
-  ul: (props: {
-    children: React.ReactNode;
-    isTasksList: boolean;
-  }) => React.ReactElement;
+  p: (props: { children: ReactNode }) => ReactElement;
+  b: (props: { children: ReactNode }) => ReactElement;
+  em: (props: { children: ReactNode }) => ReactElement;
+  s: (props: { children: ReactNode }) => ReactElement;
+  code: (props: { children: ReactNode; isInline: boolean }) => ReactElement;
+  a: (props: { children: ReactNode; href: string }) => ReactElement;
+  ol: (props: { children: ReactNode }) => ReactElement;
+  ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactElement;
   li: (
     props: {
-      children: React.ReactNode;
+      children: ReactNode;
     } & ({ isTaskListItem: false } | { isTaskListItem: true; checked: boolean })
-  ) => React.ReactElement;
-  h1: (props: {
-    children: React.ReactNode;
-    id: string | null;
-  }) => React.ReactElement;
-  h2: (props: {
-    children: React.ReactNode;
-    id: string | null;
-  }) => React.ReactElement;
-  h3: (props: {
-    children: React.ReactNode;
-    id: string | null;
-  }) => React.ReactElement;
-  h4: (props: {
-    children: React.ReactNode;
-    id: string | null;
-  }) => React.ReactElement;
-  h5: (props: {
-    children: React.ReactNode;
-    id: string | null;
-  }) => React.ReactElement;
-  h6: (props: {
-    children: React.ReactNode;
-    id: string | null;
-  }) => React.ReactElement;
-  hr: () => React.ReactElement;
+  ) => ReactElement;
+  h1: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
+  h2: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
+  h3: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
+  h4: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
+  h5: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
+  h6: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
+  hr: () => ReactElement;
   img: (props: {
     src: string;
     alt?: string;
     width?: number;
     height?: number;
-  }) => React.ReactElement;
+  }) => ReactElement;
   video: (props: {
-    children: React.ReactNode;
+    children: ReactNode;
     src: string;
     width?: number;
     height?: number;
-  }) => React.ReactElement;
-  blockquote: (props: { children: React.ReactNode }) => React.ReactElement;
-  pre: (props: { children: React.ReactNode }) => React.ReactElement;
-  table: (props: { children: React.ReactNode }) => React.ReactElement;
-  tr: (props: { children: React.ReactNode }) => React.ReactElement;
+  }) => ReactElement;
+  blockquote: (props: { children: ReactNode }) => ReactElement;
+  pre: (props: { children: ReactNode }) => ReactElement;
+  table: (props: { children: ReactNode }) => ReactElement;
+  tr: (props: { children: ReactNode }) => ReactElement;
   td: (props: {
-    children: React.ReactNode;
+    children: ReactNode;
     colspan: number;
     rowspan: number;
-  }) => React.ReactElement;
+  }) => ReactElement;
   th: (props: {
-    children: React.ReactNode;
+    children: ReactNode;
     colspan: number;
     rowspan: number;
-  }) => React.ReactElement;
+  }) => ReactElement;
 
   // todo etc...
 };
 
-type ExtractPropsForHandler<
-  Handler extends (props: any) => React.ReactElement,
-> = Parameters<Handler>[0];
+type ExtractPropsForHandler<Handler extends (props: any) => ReactElement> =
+  Parameters<Handler>[0];
 
 type CustomBlockBase = { readonly __typename: string };
 
@@ -182,7 +155,7 @@ type HandlerMapping<
 > = {
   [K in Blocks[number]["__typename"]]: (
     props: Extract<Blocks[number], { __typename: K }>
-  ) => React.ReactElement;
+  ) => ReactElement;
 };
 
 export type RichTextProps<
@@ -192,12 +165,19 @@ export type RichTextProps<
   components?: Partial<Handlers & HandlerMapping<CustomBlocks>>;
 };
 
+type GeneratedIDsRecord = Record<
+  number, // level
+  Array<string>
+>;
+
 export const RichText = <
   CustomBlocks extends readonly CustomBlockBase[] = readonly any[],
 >(
   props: RichTextProps<CustomBlocks>
 ) => {
   const value = props.children as Node[] | undefined;
+  const generatedIDs: GeneratedIDsRecord = useMemo(() => ({}), []);
+
   return (
     <>
       {value?.map((node, index) => {
@@ -207,6 +187,8 @@ export const RichText = <
             key={index}
             components={props.components}
             blocks={props.blocks}
+            level={0}
+            generatedIDs={generatedIDs}
           />
         );
       })}
@@ -237,12 +219,12 @@ const defaultHandlers: Handlers = {
       </li>
     );
   },
-  h1: ({ children }) => <h1>{children}</h1>,
-  h2: ({ children }) => <h2>{children}</h2>,
-  h3: ({ children }) => <h3>{children}</h3>,
-  h4: ({ children }) => <h4>{children}</h4>,
-  h5: ({ children }) => <h5>{children}</h5>,
-  h6: ({ children }) => <h6>{children}</h6>,
+  h1: ({ children, id }) => <h1 id={id}>{children}</h1>,
+  h2: ({ children, id }) => <h2 id={id}>{children}</h2>,
+  h3: ({ children, id }) => <h3 id={id}>{children}</h3>,
+  h4: ({ children, id }) => <h4 id={id}>{children}</h4>,
+  h5: ({ children, id }) => <h5 id={id}>{children}</h5>,
+  h6: ({ children, id }) => <h6 id={id}>{children}</h6>,
   hr: () => <hr />,
   img: (props) => <img {...props} />,
   video: (props) => <video {...props} />,
@@ -267,11 +249,15 @@ const Node = ({
   components,
   blocks,
   parent,
+  level,
+  generatedIDs,
 }: {
   node: Node;
   components?: Partial<Handlers>;
   blocks?: readonly CustomBlockBase[];
   parent?: Node;
+  level: number;
+  generatedIDs: GeneratedIDsRecord;
 }) => {
   const children = node.content?.map((childNode, index) => {
     return (
@@ -281,6 +267,8 @@ const Node = ({
         key={index}
         components={components}
         blocks={blocks}
+        level={level + 1}
+        generatedIDs={generatedIDs}
       />
     );
   });
@@ -301,7 +289,7 @@ const Node = ({
           attrs: { isInline: false },
         } satisfies Mark);
       }
-      handler = ({ children }: { children?: React.ReactNode }) => (
+      handler = ({ children }: { children?: ReactNode }) => (
         <Marks marks={node.marks} components={components}>
           {children}
         </Marks>
@@ -339,9 +327,27 @@ const Node = ({
       const handlerTag = `h${node.attrs.level}` as keyof Handlers;
       handler = components?.[handlerTag] ?? defaultHandlers[handlerTag];
 
-      const id =
-        extractTextFromChildren(children).toLowerCase().replace(/\s/g, "-") ||
-        null;
+      // initialize the array for this level
+      generatedIDs[level] = generatedIDs[level] ?? [];
+
+      function getUniqueID(id: string | undefined) {
+        // make sure there are no collisions
+        if (id) {
+          if (generatedIDs[level]?.includes(id)) {
+            return getUniqueID(incrementID(id));
+          }
+        }
+
+        return id;
+      }
+
+      const id = getUniqueID(
+        extractTextFromNode(node).toLowerCase().replace(/\s/g, "-") || undefined
+      );
+
+      if (id) {
+        generatedIDs[level]?.push(id);
+      }
 
       props = { children, id } satisfies ExtractPropsForHandler<Handlers["h1"]>;
       break;
@@ -439,7 +445,7 @@ const Marks = ({
   components,
 }: {
   marks?: Marks;
-  children: React.ReactNode;
+  children: ReactNode;
   components?: Partial<Handlers>;
 }) => {
   if (!marks) return <>{children}</>;
@@ -491,25 +497,3 @@ const Marks = ({
   // @ts-ignore
   return <Marks marks={marks}>{handler(props)}</Marks>;
 };
-
-// const Example = () => {
-//   return (
-//     <RichText
-//       type="html"
-//       components={{
-//         sarasa: (props) => {
-//           return <div></div>;
-//         },
-//         anotherComponent: (props) => {
-//           return <div></div>;
-//         },
-//       }}
-//       blocks={[
-//         { __typename: "sarasa", anotherThing: 5 } as const,
-//         { __typename: "anotherComponent" } as const,
-//       ]}
-//     >
-//       {"<h1>What's up</h1>"}
-//     </RichText>
-//   );
-// };
