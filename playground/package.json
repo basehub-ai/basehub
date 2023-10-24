@@ -4,11 +4,11 @@
   "version": "0.0.14",
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm basehub && next build",
+    "build": "next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "pnpm basehub"
+    "generate": "basehub"
   },
   "dependencies": {
     "basehub": "workspace:^",
