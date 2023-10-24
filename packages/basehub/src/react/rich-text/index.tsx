@@ -34,7 +34,9 @@ type Node =
         | "listItem"
         | "taskList"
         | "blockquote"
-        | "codeBlock";
+        | "codeBlock"
+        | "table"
+        | "tableRow";
       attrs?: Attrs;
       marks?: Array<Mark>;
       content?: Array<Node>;
@@ -77,6 +79,12 @@ type Node =
   | {
       type: "video";
       attrs: { src: string; width?: number; height?: number };
+      marks?: Array<Mark>;
+      content?: Array<Node>;
+    }
+  | {
+      type: "tableCell" | "tableHeader" | "tableFooter";
+      attrs: { colspan: number; rowspan: number };
       marks?: Array<Mark>;
       content?: Array<Node>;
     }
@@ -132,6 +140,19 @@ type Handlers = {
   }) => React.ReactElement;
   blockquote: (props: { children?: React.ReactNode }) => React.ReactElement;
   pre: (props: { children?: React.ReactNode }) => React.ReactElement;
+  table: (props: { children?: React.ReactNode }) => React.ReactElement;
+  tr: (props: { children?: React.ReactNode }) => React.ReactElement;
+  td: (props: {
+    children?: React.ReactNode;
+    colspan: number;
+    rowspan: number;
+  }) => React.ReactElement;
+  th: (props: {
+    children?: React.ReactNode;
+    colspan: number;
+    rowspan: number;
+  }) => React.ReactElement;
+
   // todo etc...
 };
 
@@ -208,6 +229,18 @@ const defaultHandlers: Handlers = {
   video: (props) => <video {...props} />,
   blockquote: ({ children }) => <blockquote>{children}</blockquote>,
   pre: ({ children }) => <pre>{children}</pre>,
+  table: ({ children }) => <table>{children}</table>,
+  tr: ({ children }) => <tr>{children}</tr>,
+  td: ({ children, colspan, rowspan }) => (
+    <td colSpan={colspan} rowSpan={rowspan}>
+      {children}
+    </td>
+  ),
+  th: ({ children, colspan, rowspan }) => (
+    <th colSpan={colspan} rowSpan={rowspan}>
+      {children}
+    </th>
+  ),
 };
 
 const Node = ({
@@ -301,6 +334,30 @@ const Node = ({
       handler = components?.pre ?? defaultHandlers.pre;
       props = { children } satisfies ExtractPropsForHandler<Handlers["pre"]>;
       break;
+    case "table":
+      handler = components?.table ?? defaultHandlers.table;
+      props = { children } satisfies ExtractPropsForHandler<Handlers["table"]>;
+      break;
+    case "tableRow":
+      handler = components?.tr ?? defaultHandlers.tr;
+      props = { children } satisfies ExtractPropsForHandler<Handlers["tr"]>;
+      break;
+    case "tableCell":
+      handler = components?.td ?? defaultHandlers.td;
+      props = {
+        children,
+        colspan: node.attrs.colspan,
+        rowspan: node.attrs.rowspan,
+      } satisfies ExtractPropsForHandler<Handlers["td"]>;
+      break;
+    case "tableHeader":
+      handler = components?.th ?? defaultHandlers.th;
+      props = {
+        children,
+        colspan: node.attrs.colspan,
+        rowspan: node.attrs.rowspan,
+      } satisfies ExtractPropsForHandler<Handlers["th"]>;
+      break;
     case "image":
       handler = components?.img ?? defaultHandlers.img;
       props = {
@@ -345,8 +402,6 @@ const Node = ({
 
   // @ts-ignore
   if (!handler) {
-    console.log("node", node);
-
     console.warn(`No handler found for node type ${node.type}`);
     return <></>;
   }

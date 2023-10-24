@@ -55,9 +55,7 @@ export default async function HomePage() {
               {children}
             </code>
           ),
-          TweetComponent: ({ tweetId, ...rest }) => {
-            console.log("rest", rest);
-            console.log("tweetId", tweetId);
+          TweetComponent: ({ tweetId }) => {
             return <Tweet id={tweetId} />;
           },
           video: ({ src }) => {
