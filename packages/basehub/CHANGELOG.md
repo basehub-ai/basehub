@@ -1,5 +1,12 @@
 # basehub
 
+## 1.2.6
+
+### Patch Changes
+
+- 46232c4: fix generated IDs
+- 8b13701: don't add the id to headings
+
 ## 1.2.5
 
 ### Patch Changes
