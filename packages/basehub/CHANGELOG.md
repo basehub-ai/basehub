@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.2
+
+### Patch Changes
+
+- 01b6865: New RichText Renderer for React.
+
 ## 1.2.1
 
 ### Patch Changes
