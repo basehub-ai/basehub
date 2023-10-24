@@ -1,22 +1,6 @@
-import { defineConfig } from "tsup";
+import { defineConfig, type Options } from "tsup";
 
-const prependUseClientPlugin = {
-  name: "prepend-use-client",
-  setup(build: any) {
-    build.onEnd((result: any) => {
-      result.outputFiles
-        ?.filter((file: any) => file.path.endsWith(".js"))
-        .forEach(async (file: any) => {
-          // add 'use client' for RSC
-          Object.defineProperty(file, "text", {
-            value: `"use client";\n${file.text}`,
-          });
-        });
-    });
-  },
-};
-
-export default defineConfig((options) => {
+export default defineConfig((options: Options) => {
   return {
     minify: !options.watch,
     dts: true,
@@ -24,6 +8,5 @@ export default defineConfig((options) => {
       react: "./src/react/index.ts",
     },
     format: ["cjs"],
-    esbuildPlugins: [prependUseClientPlugin],
   };
 });
