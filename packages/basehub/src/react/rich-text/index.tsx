@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import * as React from "react";
+import { extractTextFromChildren } from "./util/extract-text-from-react-node";
 
 /**
  * TODOs
@@ -118,12 +119,30 @@ type Handlers = {
       children?: React.ReactNode;
     } & ({ isTaskListItem: false } | { isTaskListItem: true; checked: boolean })
   ) => React.ReactElement;
-  h1: (props: { children?: React.ReactNode }) => React.ReactElement;
-  h2: (props: { children?: React.ReactNode }) => React.ReactElement;
-  h3: (props: { children?: React.ReactNode }) => React.ReactElement;
-  h4: (props: { children?: React.ReactNode }) => React.ReactElement;
-  h5: (props: { children?: React.ReactNode }) => React.ReactElement;
-  h6: (props: { children?: React.ReactNode }) => React.ReactElement;
+  h1: (props: {
+    children?: React.ReactNode;
+    id: string | null;
+  }) => React.ReactElement;
+  h2: (props: {
+    children?: React.ReactNode;
+    id: string | null;
+  }) => React.ReactElement;
+  h3: (props: {
+    children?: React.ReactNode;
+    id: string | null;
+  }) => React.ReactElement;
+  h4: (props: {
+    children?: React.ReactNode;
+    id: string | null;
+  }) => React.ReactElement;
+  h5: (props: {
+    children?: React.ReactNode;
+    id: string | null;
+  }) => React.ReactElement;
+  h6: (props: {
+    children?: React.ReactNode;
+    id: string | null;
+  }) => React.ReactElement;
   hr: () => React.ReactElement;
   img: (props: {
     children?: React.ReactNode;
@@ -319,7 +338,12 @@ const Node = ({
     case "heading":
       const handlerTag = `h${node.attrs.level}` as keyof Handlers;
       handler = components?.[handlerTag] ?? defaultHandlers[handlerTag];
-      props = { children } satisfies ExtractPropsForHandler<Handlers["h1"]>;
+
+      const id =
+        extractTextFromChildren(children).toLowerCase().replace(/\s/g, "-") ||
+        null;
+
+      props = { children, id } satisfies ExtractPropsForHandler<Handlers["h1"]>;
       break;
     case "horizontalRule":
       handler = components?.hr ?? defaultHandlers.hr;
