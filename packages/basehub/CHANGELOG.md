@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.5
+
+### Patch Changes
+
+- e21f970: some typing nits
+
 ## 1.2.4
 
 ### Patch Changes
