@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.7
+
+### Patch Changes
+
+- 2806e97: fix nested mark issue
+
 ## 1.2.6
 
 ### Patch Changes
