@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.8
+
+### Patch Changes
+
+- edfb6a2: fix original marks getting mutated non-intentionally
+
 ## 1.2.7
 
 ### Patch Changes
