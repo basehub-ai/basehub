@@ -70,6 +70,10 @@ export type Node =
       content?: Array<Node>;
     }
   | {
+      type: "hardBreak";
+      content?: Array<Node>;
+    }
+  | {
       type: "image";
       attrs: { src: string; alt?: string; width?: number; height?: number };
       marks?: Array<Mark>;
@@ -141,6 +145,7 @@ type Handlers = {
     colspan: number;
     rowspan: number;
   }) => ReactElement;
+  br: () => ReactElement;
 
   // todo etc...
 };
@@ -242,6 +247,7 @@ const defaultHandlers: Handlers = {
       {children}
     </th>
   ),
+  br: () => <br />,
 };
 
 const Node = ({
@@ -354,6 +360,9 @@ const Node = ({
     case "horizontalRule":
       handler = components?.hr ?? defaultHandlers.hr;
       break;
+    case "hardBreak":
+      handler = components?.br ?? defaultHandlers.br;
+      break;
     case "blockquote":
       handler = components?.blockquote ?? defaultHandlers.blockquote;
       props = { children } satisfies ExtractPropsForHandler<
@@ -449,7 +458,8 @@ const Marks = ({
   components?: Partial<Handlers>;
 }) => {
   if (!marks) return <>{children}</>;
-  const mark = marks.pop();
+  const marksClone = [...marks];
+  const mark = marksClone.pop();
 
   if (!mark) return <>{children}</>;
 
@@ -495,7 +505,7 @@ const Marks = ({
   }
 
   return (
-    <Marks marks={marks} components={components}>
+    <Marks marks={marksClone} components={components}>
       {/* @ts-ignore */}
       {handler(props)}
     </Marks>
