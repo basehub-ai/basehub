@@ -7,7 +7,9 @@ import { z } from "zod";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 
-export const getStuffFromEnv = (): {
+export const getStuffFromEnv = (options?: {
+  draft?: boolean;
+}): {
   url: URL;
   headers: Record<string, string>;
 } => {
@@ -62,13 +64,17 @@ export const getStuffFromEnv = (): {
       : undefined) ??
     null;
 
-  const draft =
+  let draft =
     basehubUrl.searchParams.get("draft") ??
     (parsedBasehubDraftEnv.success ? parsedBasehubDraftEnv.data : undefined) ??
     (backwardsCompatURL
       ? backwardsCompatURL.searchParams.get("draft")
       : undefined) ??
     null;
+
+  if (options?.draft) {
+    draft = "true";
+  }
 
   // 2. let's validate the URL
 
@@ -101,7 +107,7 @@ export const getStuffFromEnv = (): {
  * doesn't use Zod nor dotenv-flow (so we don't ship extra stuff to the generated bundle). Assumes the env vars are already loaded.
  */
 export const runtime__getStuffFromEnvString = /**JavaScript */ `
-const getStuffFromEnv = () => {
+const getStuffFromEnv = (options) => {
     const parsedDebugForcedURL = process.env.BASEHUB_DEBUG_FORCED_URL;
     const parsedBackwardsCompatURL = process.env.BASEHUB_URL;
 
@@ -145,13 +151,17 @@ const getStuffFromEnv = () => {
         : undefined) ??
       null;
 
-    const draft =
-      basehubUrl.searchParams.get("draft") ??
+    let draft =
+       basehubUrl.searchParams.get("draft") ??
       (parsedBasehubDraftEnv ? parsedBasehubDraftEnv : undefined) ??
       (backwardsCompatURL
         ? backwardsCompatURL.searchParams.get("draft")
         : undefined) ??
       null;
+
+    if (options?.draft) {
+      draft = "true";
+    }
 
     // 2. let's validate the URL
 

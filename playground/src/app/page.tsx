@@ -4,49 +4,67 @@ import {
   // TweetComponentGenqlSelection,
   // FieldsSelection,
 } from "basehub";
-import { RichText } from "basehub/react";
-import { Tweet } from "react-tweet";
+// import { RichText } from "basehub/react";
+// import { Tweet } from "react-tweet";
 
 export default async function HomePage() {
-  const data = await basehub().raw({
-    query: `{ __typename }`,
+  const data = await basehub({ draft: true }).raw({
+    query: `{ __typename, testBreak {
+      authors {
+        items {
+          _slug
+          _title
+        }
+      }
+    } }`,
   });
 
-  const { blogIndex } = await basehub({ cache: "no-store" }).query({
+  const otherData = await basehub({ cache: "no-store", draft: true }).query({
     // __name: true,
-    blogIndex: {
-      blogIndex: true,
-      featuredPost: {
-        content: {
-          json: {
-            toc: true,
-            content: true,
-            blocks: {
-              __typename: true,
-              on_BoldTextComponent: {
-                _title: true,
-                _sys: {
-                  id: true,
-                },
-              },
-              on_TweetComponent: {
-                _sys: {
-                  id: true,
-                },
-                tweetId: true,
-              },
-            },
-          },
+    _sys: {
+      slug: true,
+    },
+    testBreak: {
+      authors: {
+        items: {
+          _slug: true,
+          _title: true,
         },
       },
     },
+    // blogIndex: {
+    //   blogIndex: true,
+    //   featuredPost: {
+    //     content: {
+    //       json: {
+    //         toc: true,
+    //         content: true,
+    //         blocks: {
+    //           __typename: true,
+    //           on_BoldTextComponent: {
+    //             _title: true,
+    //             _sys: {
+    //               id: true,
+    //             },
+    //           },
+    //           on_TweetComponent: {
+    //             _sys: {
+    //               id: true,
+    //             },
+    //             tweetId: true,
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // },
   });
 
   return (
     <main>
-      <pre>{JSON.stringify({ data, blogIndex }, null, 2)}</pre>
+      <pre>{JSON.stringify({ data, otherData }, null, 2)}</pre>
       <br />
-      <RichText
+      {/* <RichText
         blocks={blogIndex.featuredPost.content?.json.blocks}
         components={{
           p: (props) => <p {...props} />,
@@ -73,7 +91,7 @@ export default async function HomePage() {
         }}
       >
         {blogIndex.featuredPost.content?.json.toc}
-      </RichText>
+      </RichText> */}
     </main>
   );
 }

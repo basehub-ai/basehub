@@ -1,8 +1,8 @@
 import { defineConfig } from "tsup";
 
-export default defineConfig((options) => {
+export default defineConfig((_options) => {
   return {
-    minify: !options.watch,
+    minify: false,
     dts: false,
     entry: {
       bin: "./src/bin/index.ts",

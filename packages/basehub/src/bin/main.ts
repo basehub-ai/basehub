@@ -45,7 +45,7 @@ export const main = async (_args: Args) => {
 
   schemaFileContents = schemaFileContents.replace(
     "return createClientOriginal({",
-    "const { url, headers } = getStuffFromEnv()\n  return createClientOriginal({" // function injected below
+    "const { url, headers } = getStuffFromEnv(options)\n  return createClientOriginal({" // function injected below
   );
 
   const basehubUrlRegex = new RegExp(
@@ -90,7 +90,7 @@ export const main = async (_args: Args) => {
       "generated-client",
       "index.js"
     ),
-    minify: true,
+    minify: false,
     format: "cjs",
   });
 
@@ -102,7 +102,7 @@ const basehubExport = `
 import { createFetcher } from "./runtime";
 
 // we limit options to only the ones we want to expose.
-type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'>
+type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean }
 
 /**
  * Create a basehub client.
@@ -121,7 +121,7 @@ type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 
  *
  */
 export const basehub = (options?: Options) => {
-  const { url, headers } = getStuffFromEnv();
+  const { url, headers } = getStuffFromEnv(options);
 
   return {
     ...createClient(options),
