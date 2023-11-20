@@ -1,5 +1,13 @@
 # basehub
 
+## 1.2.10
+
+### Patch Changes
+
+- 554854e: Fixes error when re-rendering the rich text renderer component in the following marks:
+  - Code
+  - Heading
+
 ## 1.2.9
 
 ### Patch Changes
