@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { type ReactNode, type ReactElement, useMemo } from "react";
+import { type ReactNode, type ReactElement } from "react";
 import { extractTextFromNode, incrementID } from "./util/heading-id";
 
 /**
@@ -181,7 +181,7 @@ export const RichText = <
   props: RichTextProps<CustomBlocks>
 ) => {
   const value = props.children as Node[] | undefined;
-  const generatedIDs: GeneratedIDsRecord = useMemo(() => ({}), []);
+  const generatedIDs: GeneratedIDsRecord = [];
 
   return (
     <>
@@ -288,15 +288,15 @@ const Node = ({
       break;
     case "text":
       const forceCodeMark = parent?.type === "codeBlock";
-      if (forceCodeMark) {
-        node.marks = node.marks ?? [];
-        node.marks.push({
+      const clonedMarks = [...(node.marks ?? [])];
+      if (forceCodeMark && !clonedMarks.some((mark) => mark.type === "code")) {
+        clonedMarks.push({
           type: "code",
           attrs: { isInline: false },
         } satisfies Mark);
       }
       handler = ({ children }: { children?: ReactNode }) => (
-        <Marks marks={node.marks} components={components}>
+        <Marks marks={clonedMarks} components={components}>
           {children}
         </Marks>
       );
