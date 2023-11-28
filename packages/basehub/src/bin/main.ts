@@ -81,6 +81,27 @@ export const main = async (_args: Args) => {
   // 4. write the file back.
   fs.writeFileSync(generatedMainExportPath, schemaFileContents);
 
+  // 5. patch error file
+  const generatedErrorExportPath = path.join(
+    basehubModulePath,
+    "dist",
+    "generated-client",
+    "runtime",
+    "error.ts"
+  );
+
+  const errorFileContents = fs
+    .readFileSync(generatedErrorExportPath, "utf-8")
+    .split("\n");
+  // mutate it
+  errorFileContents.splice(
+    16,
+    0,
+    `        this.stringified = JSON.stringify(this)`
+  );
+  // write it back
+  fs.writeFileSync(generatedErrorExportPath, errorFileContents.join("\n"));
+
   await esbuild.build({
     entryPoints: [generatedMainExportPath],
     bundle: true,
