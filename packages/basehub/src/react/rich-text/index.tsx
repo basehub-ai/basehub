@@ -18,10 +18,13 @@ interface Attrs {
   readonly [attr: string]: any;
 }
 
+const SUFFIX_CUSTOM_MARK = "Mark";
+type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
 type Mark =
   | { type: "bold" | "italic" | "underline" | "strike" }
   | { type: "code"; attrs: { isInline?: boolean } }
-  | { type: "link"; attrs: { href: string; target: string; class: string } };
+  | { type: "link"; attrs: { href: string; target: string; class: string } }
+  | { type: "basehub-inline-block"; attrs: { id: string } };
 
 type Marks = Array<Mark>;
 
@@ -163,11 +166,19 @@ type HandlerMapping<
   ) => ReactElement;
 };
 
+type MarkHandlerMapping<
+  Blocks extends readonly CustomBlockBase[] = readonly any[],
+  > = {
+    [K in Blocks[number]["__typename"] as `${K}${SUFFIX_CUSTOM_BLOCK_MARK}`]: ( // we use this hack to add a type ofr each custom component to create separate handlers for each custom component -> magic 🧙
+      props: Extract<Blocks[number], { __typename: `${K}${SUFFIX_CUSTOM_BLOCK_MARK}` }>
+    ) => ReactElement;
+  }
+
 export type RichTextProps<
   CustomBlocks extends readonly CustomBlockBase[] = readonly any[],
 > = Formats & {
   blocks?: CustomBlocks;
-  components?: Partial<Handlers & HandlerMapping<CustomBlocks>>;
+  components?: Partial<Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>>;
 };
 
 type GeneratedIDsRecord = Record<
@@ -296,7 +307,7 @@ const Node = ({
         } satisfies Mark);
       }
       handler = ({ children }: { children?: ReactNode }) => (
-        <Marks marks={clonedMarks} components={components}>
+        <Marks marks={clonedMarks} components={components} blocks={blocks}>
           {children}
         </Marks>
       );
@@ -452,10 +463,12 @@ const Marks = ({
   marks,
   children,
   components,
+  blocks
 }: {
   marks?: Marks;
   children: ReactNode;
   components?: Partial<Handlers>;
+  blocks?: readonly CustomBlockBase[];
 }) => {
   if (!marks) return <>{children}</>;
   const marksClone = [...marks];
@@ -496,6 +509,27 @@ const Marks = ({
         href: mark.attrs.href,
       } satisfies ExtractPropsForHandler<Handlers["a"]>;
       break;
+    case "basehub-inline-block": {
+      const block = blocks?.find((block: any) => {
+        const id = block?._id ?? block?._sys?.id;
+        if (typeof id !== "string") {
+          throw new Error(
+            `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.`
+          );
+        }
+        return id === mark.attrs.id;
+      });
+      if (!block) {
+        throw new Error(
+          `BaseHub RichText Error: block "${mark.attrs.id}" not found.`
+        );
+      } 
+      // @ts-ignore
+      handler = components?.[block?.__typename + SUFFIX_CUSTOM_MARK] ?? (() => <>{children}</>);
+      // @ts-ignore
+      props = {...block, children};
+      break;
+    }
   }
 
   // @ts-ignore
@@ -505,7 +539,7 @@ const Marks = ({
   }
 
   return (
-    <Marks marks={marksClone} components={components}>
+    <Marks marks={marksClone} components={components} blocks={blocks}>
       {/* @ts-ignore */}
       {handler(props)}
     </Marks>
