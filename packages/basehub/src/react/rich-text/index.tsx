@@ -18,7 +18,7 @@ interface Attrs {
   readonly [attr: string]: any;
 }
 
-const SUFFIX_CUSTOM_MARK = "Mark";
+const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
 type Mark =
   | { type: "bold" | "italic" | "underline" | "strike" }
