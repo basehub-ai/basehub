@@ -20,7 +20,7 @@ export function incrementID(id: string) {
   // if the title already has a "-n" at the end, we'll need to increment it.
   const matches = id.match(/-(\d+)$/); // Fixed regex to match "-n" format
   if (matches?.[1] !== undefined) {
-    const number = parseInt(matches[1]);
+    const number = parseInt(matches[1], 10);
     return id.replace(/-(\d+)$/, `-${number + 1}`);
   }
 

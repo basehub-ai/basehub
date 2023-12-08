@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import { type ReactNode, type ReactElement } from "react";
+import slugify from "slugify";
 import { extractTextFromNode, incrementID } from "./util/heading-id";
 
 /**
@@ -168,17 +169,23 @@ type HandlerMapping<
 
 type MarkHandlerMapping<
   Blocks extends readonly CustomBlockBase[] = readonly any[],
-  > = {
-    [K in Blocks[number]["__typename"] as `${K}${SUFFIX_CUSTOM_BLOCK_MARK}`]: ( // we use this hack to add a type ofr each custom component to create separate handlers for each custom component -> magic 🧙
-      props: Extract<Blocks[number], { __typename: `${K}${SUFFIX_CUSTOM_BLOCK_MARK}` }>
-    ) => ReactElement;
-  }
+> = {
+  [K in Blocks[number]["__typename"] as `${K}${SUFFIX_CUSTOM_BLOCK_MARK}`]: (
+    // we use this hack to add a type ofr each custom component to create separate handlers for each custom component -> magic 🧙
+    props: Extract<
+      Blocks[number],
+      { __typename: `${K}${SUFFIX_CUSTOM_BLOCK_MARK}` }
+    >
+  ) => ReactElement;
+};
 
 export type RichTextProps<
   CustomBlocks extends readonly CustomBlockBase[] = readonly any[],
 > = Formats & {
   blocks?: CustomBlocks;
-  components?: Partial<Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>>;
+  components?: Partial<
+    Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
+  >;
 };
 
 type GeneratedIDsRecord = Record<
@@ -359,7 +366,11 @@ const Node = ({
       }
 
       const id = getUniqueID(
-        extractTextFromNode(node).toLowerCase().replace(/\s/g, "-")
+        slugify(extractTextFromNode(node), {
+          strict: true,
+          lower: true,
+          trim: true,
+        })
       );
 
       if (id) {
@@ -463,7 +474,7 @@ const Marks = ({
   marks,
   children,
   components,
-  blocks
+  blocks,
 }: {
   marks?: Marks;
   children: ReactNode;
@@ -523,11 +534,13 @@ const Marks = ({
         throw new Error(
           `BaseHub RichText Error: block "${mark.attrs.id}" not found.`
         );
-      } 
+      }
+      handler =
+        // @ts-ignore
+        components?.[block?.__typename + SUFFIX_CUSTOM_MARK] ??
+        (() => <>{children}</>);
       // @ts-ignore
-      handler = components?.[block?.__typename + SUFFIX_CUSTOM_MARK] ?? (() => <>{children}</>);
-      // @ts-ignore
-      props = {...block, children};
+      props = { ...block, children };
       break;
     }
   }

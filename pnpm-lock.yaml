@@ -73,6 +73,9 @@ importers:
       esbuild:
         specifier: 0.19.2
         version: 0.19.2
+      slugify:
+        specifier: 1.6.6
+        version: 1.6.6
       zod:
         specifier: 3.22.1
         version: 3.22.1
@@ -4262,6 +4265,11 @@ packages:
     dependencies:
       ansi-styles: 6.2.1
       is-fullwidth-code-point: 4.0.0
+    dev: false
+
+  /slugify@1.6.6:
+    resolution: {integrity: sha512-h+z7HKHYXj6wJU+AnS/+IH8Uh9fdcX1Lrhg1/VMdf9PwoBQXFcXiAdsy2tSK0P6gKwJLXp02r90ahUCqHk9rrw==}
+    engines: {node: '>=8.0.0'}
     dev: false
 
   /smartwrap@1.2.5:
