@@ -1,5 +1,12 @@
 # basehub
 
+## 1.2.12
+
+### Patch Changes
+
+- d6c61b8: type id as string for headings
+- 34b786f: Add support for inline componentes in rich text renderer
+
 ## 1.2.11
 
 ### Patch Changes
