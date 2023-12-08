@@ -115,12 +115,12 @@ type Handlers = {
       children: ReactNode;
     } & ({ isTaskListItem: false } | { isTaskListItem: true; checked: boolean })
   ) => ReactElement;
-  h1: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
-  h2: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
-  h3: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
-  h4: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
-  h5: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
-  h6: (props: { children: ReactNode; id: string | undefined }) => ReactElement;
+  h1: (props: { children: ReactNode; id: string }) => ReactElement;
+  h2: (props: { children: ReactNode; id: string }) => ReactElement;
+  h3: (props: { children: ReactNode; id: string }) => ReactElement;
+  h4: (props: { children: ReactNode; id: string }) => ReactElement;
+  h5: (props: { children: ReactNode; id: string }) => ReactElement;
+  h6: (props: { children: ReactNode; id: string }) => ReactElement;
   hr: () => ReactElement;
   img: (props: {
     src: string;
@@ -347,7 +347,7 @@ const Node = ({
       // initialize the array for this level
       generatedIDs[level] = generatedIDs[level] ?? [];
 
-      function getUniqueID(id: string | undefined) {
+      function getUniqueID(id: string): string {
         // make sure there are no collisions
         if (id) {
           if (generatedIDs[level]?.includes(id)) {
@@ -359,7 +359,7 @@ const Node = ({
       }
 
       const id = getUniqueID(
-        extractTextFromNode(node).toLowerCase().replace(/\s/g, "-") || undefined
+        extractTextFromNode(node).toLowerCase().replace(/\s/g, "-")
       );
 
       if (id) {
