@@ -1,5 +1,11 @@
 # basehub
 
+## 1.2.13
+
+### Patch Changes
+
+- ec8853c: add slugify for more robust heading ids
+
 ## 1.2.12
 
 ### Patch Changes
