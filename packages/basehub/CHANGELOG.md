@@ -1,5 +1,15 @@
 # basehub
 
+## 1.2.14
+
+### Patch Changes
+
+- 374061a: ---
+
+  ## "basehub": patch
+
+  Headings now receive their `id` when using the default handlers for them
+
 ## 1.2.13
 
 ### Patch Changes
