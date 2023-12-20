@@ -17,6 +17,7 @@ function help(code: number) {
     $ basehub
 
   Options
+    --output, -o  Output directory, if you don't want the default behavior.
     --version, -v  Version number.
     --help, -h     Display this message.`);
   process.exit(code);
@@ -24,17 +25,21 @@ function help(code: number) {
 
 // Get CLI arguments
 let [, , cmd] = process.argv;
+console.log("cmd", cmd);
+console.log("process.argv", process.argv);
 
-if (!cmd) {
+if (!cmd || cmd.startsWith("-")) {
   cmd = "generate";
 }
 
 const args = arg(
   {
     // types
+    "--output": String,
     "--version": Boolean,
     "--help": Boolean,
     // aliases
+    "-o": "--output",
     "-v": "--version",
     "-h": "--help",
   },

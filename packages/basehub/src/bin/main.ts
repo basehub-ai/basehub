@@ -7,17 +7,20 @@ import {
   getStuffFromEnv,
   runtime__getStuffFromEnvString,
 } from "./util/get-stuff-from-env";
+import { appendEslintDisableToEachFileInDirectory } from "./util/disable-linters";
 
-export const main = async (_args: Args) => {
+export const main = async (args: Args) => {
   console.log("🪄 Generating...");
 
   const { url, headers } = getStuffFromEnv();
 
-  const basehubModulePath = path.resolve(
-    process.cwd(),
-    "node_modules",
-    "basehub"
-  );
+  console.log("args", args);
+  const pathArgs = args["--output"]
+    ? [args["--output"]]
+    : ["node_modules", "basehub", "dist", "generated-client"]; // default output path
+
+  const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
+  console.log("basehubOutputPath", basehubOutputPath);
 
   await generate({
     endpoint: url.toString(),
@@ -26,16 +29,11 @@ export const main = async (_args: Args) => {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    output: path.join(basehubModulePath, "dist", "generated-client"),
+    output: path.join(basehubOutputPath),
     verbose: false,
   });
 
-  const generatedMainExportPath = path.join(
-    basehubModulePath,
-    "dist",
-    "generated-client",
-    "index.ts"
-  );
+  const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
 
   // We'll patch some things from the generated code.
   let schemaFileContents = fs.readFileSync(generatedMainExportPath, "utf-8");
@@ -83,9 +81,7 @@ export const main = async (_args: Args) => {
 
   // 5. patch error file
   const generatedErrorExportPath = path.join(
-    basehubModulePath,
-    "dist",
-    "generated-client",
+    basehubOutputPath,
     "runtime",
     "error.ts"
   );
@@ -102,17 +98,17 @@ export const main = async (_args: Args) => {
   // write it back
   fs.writeFileSync(generatedErrorExportPath, errorFileContents.join("\n"));
 
+  appendEslintDisableToEachFileInDirectory(basehubOutputPath);
+
   await esbuild.build({
     entryPoints: [generatedMainExportPath],
     bundle: true,
-    outfile: path.join(
-      basehubModulePath,
-      "dist",
-      "generated-client",
-      "index.js"
-    ),
+    outfile: path.join(basehubOutputPath, "index.js"),
     minify: false,
     format: "cjs",
+    banner: {
+      js: "/* eslint-disable */",
+    },
   });
 
   console.log("🪄 Generated `basehub` client");
