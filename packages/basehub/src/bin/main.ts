@@ -14,13 +14,11 @@ export const main = async (args: Args) => {
 
   const { url, headers } = getStuffFromEnv();
 
-  console.log("args", args);
   const pathArgs = args["--output"]
     ? [args["--output"]]
     : ["node_modules", "basehub", "dist", "generated-client"]; // default output path
 
   const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
-  console.log("basehubOutputPath", basehubOutputPath);
 
   await generate({
     endpoint: url.toString(),

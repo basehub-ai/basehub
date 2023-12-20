@@ -25,8 +25,6 @@ function help(code: number) {
 
 // Get CLI arguments
 let [, , cmd] = process.argv;
-console.log("cmd", cmd);
-console.log("process.argv", process.argv);
 
 if (!cmd || cmd.startsWith("-")) {
   cmd = "generate";
