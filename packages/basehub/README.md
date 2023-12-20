@@ -1,4 +1,4 @@
-# basehub 🪄
+# `basehub` 🪄
 
 JavaScript / TypeScript SDK for [BaseHub](https://basehub.com/), the first AI-native content hub.
 
