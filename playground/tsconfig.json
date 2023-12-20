@@ -7,7 +7,11 @@
     "strict": true,
     "alwaysStrict": true,
     "plugins": [{ "name": "next" }],
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "paths": {
+      "@basehub": ["../.basehub"],
+      "~/*": ["*"]
+    }
   },
   "include": ["src", "next-env.d.ts", ".next/types/**/*.ts"]
 }

@@ -1,4 +1,4 @@
-# basehub 🪄
+# `basehub` 🪄
 
 JavaScript / TypeScript SDK for [BaseHub](https://basehub.com/), the first AI-native content hub.
 
@@ -7,7 +7,6 @@ JavaScript / TypeScript SDK for [BaseHub](https://basehub.com/), the first AI-na
 - ✨ Infers types from your BaseHub repository... _meaning IDE autocompletion works great._
 - 🏎️ No dependency on graphql... _meaning your bundle is more lightweight._
 - 🌐 Works everywhere `fetch` is supported... _meaning you can use it anywhere._
-
 
 ## Install
 
@@ -60,6 +59,16 @@ const Page = async () => {
 
 export default Page;
 ```
+
+## Choosing another output directory with `--output`
+
+By default, `basehub` will generate the SDK inside `node_modules/basehub/dist/generated-client`. While this is a good default as it allows you to quickly get started, this approach modifies `node_modules` which, depending on your setup, might result in IDE or build pipeline issues. If this happens, please report the issue!
+
+Additionally, you might want to connect to more than one BaseHub Repository.
+
+To solve this, `basehub` supports an `--output` argument that specifies the directory in which the SDK will be generated. You then can use this directory to import generated stuff. For example: running `basehub --output .basehub` will generate the SDK in a new `.basehub` directory in the root of your project. You can then `import { basehub } from '../<path>/.basehub'` and use the SDK normally.
+
+We recommend including the new `--output` directory to `.gitignore`, as these generated files are not precisely relevant to Git, but that's up to you and shouldn't affect the SDK's behavior.
 
 ## About the SDK
 
