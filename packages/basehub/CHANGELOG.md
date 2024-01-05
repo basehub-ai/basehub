@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.1
+
+### Patch Changes
+
+- 5de4bcf: Update CustomBlocks return type -- Now typescript will accept all ReactNode types as the return type for custom basehub blocks handlers
+
 ## 1.3.0
 
 ### Minor Changes
