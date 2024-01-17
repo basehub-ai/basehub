@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.2
+
+### Patch Changes
+
+- 5b846f9: Add `createRichTextWithDefaultComponents` helper for composing RichText renderers with default handlers.
+
 ## 1.3.1
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # playground
 
+## 0.0.31
+
+### Patch Changes
+
+- 5b846f9: Add `createRichTextWithDefaultComponents` helper for composing RichText renderers with default handlers.
+- Updated dependencies [5b846f9]
+  - basehub@1.3.2
+
 ## 0.0.30
 
 ### Patch Changes
