@@ -1,1 +1,6 @@
-export { RichText, type RichTextProps } from "./rich-text";
+export {
+  RichText,
+  createRichTextWithDefaultComponents,
+  type RichTextProps,
+  type CustomBlocksBase,
+} from "./rich-text";

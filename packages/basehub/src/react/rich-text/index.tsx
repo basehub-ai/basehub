@@ -158,18 +158,15 @@ type ExtractPropsForHandler<Handler extends (props: any) => ReactElement> =
   Parameters<Handler>[0];
 
 type CustomBlockBase = { readonly __typename: string };
+export type CustomBlocksBase = readonly CustomBlockBase[];
 
-type HandlerMapping<
-  Blocks extends readonly CustomBlockBase[] = readonly any[],
-> = {
+type HandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
   [K in Blocks[number]["__typename"]]: (
     props: Extract<Blocks[number], { __typename: K }>
   ) => ReactNode;
 };
 
-type MarkHandlerMapping<
-  Blocks extends readonly CustomBlockBase[] = readonly any[],
-> = {
+type MarkHandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
   [K in Blocks[number]["__typename"] as `${K}${SUFFIX_CUSTOM_BLOCK_MARK}`]: (
     // we use this hack to add a type for each custom component to create separate handlers for each custom component -> magic 🧙
     props: Extract<
@@ -179,13 +176,21 @@ type MarkHandlerMapping<
   ) => ReactNode;
 };
 
+type GetHandlers<CustomBlocks extends CustomBlocksBase> = Partial<
+  Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
+>;
+
 export type RichTextProps<
-  CustomBlocks extends readonly CustomBlockBase[] = readonly any[],
+  CustomBlocks extends CustomBlocksBase,
+  Components extends Partial<
+    Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
+  >,
 > = Formats & {
   blocks?: CustomBlocks;
-  components?: Partial<
-    Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
-  >;
+  components?: Components;
+  // customComponents?: Partial<
+  //   HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
+  // >;
 };
 
 type GeneratedIDsRecord = Record<
@@ -194,9 +199,9 @@ type GeneratedIDsRecord = Record<
 >;
 
 export const RichText = <
-  CustomBlocks extends readonly CustomBlockBase[] = readonly any[],
+  CustomBlocks extends CustomBlocksBase = readonly any[],
 >(
-  props: RichTextProps<CustomBlocks>
+  props: RichTextProps<CustomBlocks, GetHandlers<CustomBlocks>>
 ) => {
   const value = props.children as Node[] | undefined;
   const generatedIDs: GeneratedIDsRecord = [];
@@ -558,3 +563,21 @@ const Marks = ({
     </Marks>
   );
 };
+
+export function createRichTextWithDefaultComponents(
+  defaultComponents: RichTextProps["components"]
+) {
+  return <CustomBlocks extends CustomBlocksBase = readonly any[]>(
+    props: RichTextProps<CustomBlocks>
+  ) => {
+    return (
+      <RichText<CustomBlocks>
+        {...props}
+        components={{
+          ...defaultComponents,
+          ...(props.components as any),
+        }}
+      />
+    );
+  };
+}
