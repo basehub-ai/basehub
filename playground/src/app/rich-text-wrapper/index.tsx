@@ -1,12 +1,11 @@
 import {
   RichText,
-  RichTextProps,
   CustomBlocksBase,
   createRichTextWithDefaultComponents,
 } from "basehub/react";
 
 export const RichTextWrapper = <CustomBlocks extends CustomBlocksBase>(
-  props: RichTextProps<CustomBlocks>
+  props: React.ComponentProps<typeof RichText<CustomBlocks>>
 ) => {
   return (
     <RichText
@@ -15,7 +14,7 @@ export const RichTextWrapper = <CustomBlocks extends CustomBlocksBase>(
         // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
         img: () => <img src="https://via.placeholder.com/150" />,
         blockquote: () => <blockquote>hey</blockquote>,
-        ...props.components,
+        ...(props.components as any),
       }}
     />
   );
@@ -43,13 +42,15 @@ export const RichTextWrapper = <CustomBlocks extends CustomBlocksBase>(
 
 const RichTextRenderer = createRichTextWithDefaultComponents({
   blockquote: () => <blockquote>hey</blockquote>,
+  a: ({ href }) => <a href={href}>asdf</a>,
 });
 
-const BlogRendererV2 = <CustomBlocks extends CustomBlocksBase = readonly any[]>(
+const BlogRendererV2 = <CustomBlocks extends CustomBlocksBase>(
   props: React.ComponentProps<typeof RichTextRenderer<CustomBlocks>>
 ) => {
   return (
     <article>
+      <h1>sa</h1>
       <RichTextRenderer {...props} />
     </article>
   );
@@ -61,16 +62,17 @@ const BlogRendererV2 = <CustomBlocks extends CustomBlocksBase = readonly any[]>(
       <RichTextRenderer
         blocks={[{ __typename: "SomeCustomThing", id: "hey" }] as const}
         components={{
-          a: () => <>Asd</>,
-          SomeCustomThing: ({ id }) => <div>hey</div>,
+          SomeCustomThing: () => <div>hey</div>,
         }}
       >
         sdf
       </RichTextRenderer>
 
       <BlogRendererV2
-        blocks={[{ __typename: "SomeCustomThing", id: "hey" }] as const}
-        components={{}}
+        blocks={[{ __typename: "AnotherThing", id: "hey" }] as const}
+        components={{
+          AnotherThing: () => <div>hey</div>,
+        }}
       >
         sdf
       </BlogRendererV2>

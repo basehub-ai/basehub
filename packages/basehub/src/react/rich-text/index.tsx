@@ -163,34 +163,26 @@ export type CustomBlocksBase = readonly CustomBlockBase[];
 type HandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
   [K in Blocks[number]["__typename"]]: (
     props: Extract<Blocks[number], { __typename: K }>
-  ) => ReactNode;
+  ) => ReactElement;
 };
 
 type MarkHandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
   [K in Blocks[number]["__typename"] as `${K}${SUFFIX_CUSTOM_BLOCK_MARK}`]: (
-    // we use this hack to add a type for each custom component to create separate handlers for each custom component -> magic 🧙
+    // we use this hack to add a type ofr each custom component to create separate handlers for each custom component -> magic 🧙
     props: Extract<
       Blocks[number],
       { __typename: `${K}${SUFFIX_CUSTOM_BLOCK_MARK}` }
     >
-  ) => ReactNode;
+  ) => ReactElement;
 };
 
-type GetHandlers<CustomBlocks extends CustomBlocksBase> = Partial<
-  Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
->;
-
 export type RichTextProps<
-  CustomBlocks extends CustomBlocksBase,
-  Components extends Partial<
-    Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
-  >,
+  CustomBlocks extends CustomBlocksBase = readonly any[],
 > = Formats & {
   blocks?: CustomBlocks;
-  components?: Components;
-  // customComponents?: Partial<
-  //   HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
-  // >;
+  components?: Partial<
+    Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
+  >;
 };
 
 type GeneratedIDsRecord = Record<
@@ -201,7 +193,7 @@ type GeneratedIDsRecord = Record<
 export const RichText = <
   CustomBlocks extends CustomBlocksBase = readonly any[],
 >(
-  props: RichTextProps<CustomBlocks, GetHandlers<CustomBlocks>>
+  props: RichTextProps<CustomBlocks>
 ) => {
   const value = props.children as Node[] | undefined;
   const generatedIDs: GeneratedIDsRecord = [];
