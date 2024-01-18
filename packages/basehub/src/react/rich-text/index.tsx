@@ -15,6 +15,8 @@ import { extractTextFromNode, incrementID } from "./util/heading-id";
 // | { type: "html" | "markdown" | "plain-text"; children: string };
 type Formats = { children: unknown }; // only json supported for now.
 
+const isDev = process.env.NODE_ENV === "development";
+
 interface Attrs {
   readonly [attr: string]: any;
 }
@@ -438,16 +440,22 @@ const Node = ({
       const block = blocks?.find((block: any) => {
         const id = block?._id ?? block?._sys?.id;
         if (typeof id !== "string") {
-          throw new Error(
-            `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.`
-          );
+          if (isDev) {
+            console.warn(
+              `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.`
+            );
+          }
+          return false;
         }
         return id === node.attrs.id;
       });
       if (!block) {
-        throw new Error(
-          `BaseHub RichText Error: block "${node.attrs.id}" not found.`
-        );
+        if (isDev) {
+          console.warn(
+            `BaseHub RichText Error: block "${node.attrs.id}" not found.`
+          );
+        }
+        break;
       }
       // @ts-ignore
       handler = components?.[block?.__typename] ?? (() => <></>);
