@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.3
+
+### Patch Changes
+
+- d56c394: don't throw if basehub-block is not sent through
+
 ## 1.3.2
 
 ### Patch Changes
