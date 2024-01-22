@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.4
+
+### Patch Changes
+
+- 7e96901: Fix type with custom component marks
+
 ## 1.3.3
 
 ### Patch Changes
