@@ -526,16 +526,21 @@ const Marks = ({
       const block = blocks?.find((block: any) => {
         const id = block?._id ?? block?._sys?.id;
         if (typeof id !== "string") {
-          throw new Error(
-            `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.`
-          );
+          if (isDev) {
+            console.warn(
+              `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.`
+            );
+          }
         }
         return id === mark.attrs.id;
       });
       if (!block) {
-        throw new Error(
-          `BaseHub RichText Error: block "${mark.attrs.id}" not found.`
-        );
+        if (isDev) {
+          console.warn(
+            `BaseHub RichText Error: block "${mark.attrs.id}" not found.`
+          );
+        }
+        break;
       }
       handler =
         // @ts-ignore
