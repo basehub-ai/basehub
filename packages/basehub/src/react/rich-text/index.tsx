@@ -171,7 +171,7 @@ type HandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
 type MarkHandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
   [K in Blocks[number]["__typename"] as `${K}${SUFFIX_CUSTOM_BLOCK_MARK}`]: (
     // we use this hack to add a type for each custom component to create separate handlers for each custom component -> magic 🧙
-    props: Extract<Blocks[number], { __typename: K }>
+    props: Extract<Blocks[number], { __typename: K }> & { children: ReactNode }
   ) => ReactNode;
 };
 
