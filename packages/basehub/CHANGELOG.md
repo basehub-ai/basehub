@@ -1,5 +1,12 @@
 # basehub
 
+## 1.3.5
+
+### Patch Changes
+
+- 0eb3565: remove error also from mark
+- 345bdad: add children to inline mark type
+
 ## 1.3.4
 
 ### Patch Changes
