@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { type ReactNode, type ReactElement } from "react";
+import { type ReactNode } from "react";
 import slugify from "slugify";
 import { extractTextFromNode, incrementID } from "./util/heading-id";
 
@@ -105,58 +105,56 @@ export type Node =
     };
 
 type Handlers = {
-  p: (props: { children: ReactNode }) => ReactElement;
-  b: (props: { children: ReactNode }) => ReactElement;
-  em: (props: { children: ReactNode }) => ReactElement;
-  s: (props: { children: ReactNode }) => ReactElement;
-  code: (props: { children: ReactNode; isInline: boolean }) => ReactElement;
-  a: (props: { children: ReactNode; href: string }) => ReactElement;
-  ol: (props: { children: ReactNode }) => ReactElement;
-  ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactElement;
+  p: (props: { children: ReactNode }) => ReactNode;
+  b: (props: { children: ReactNode }) => ReactNode;
+  em: (props: { children: ReactNode }) => ReactNode;
+  s: (props: { children: ReactNode }) => ReactNode;
+  code: (props: { children: ReactNode; isInline: boolean }) => ReactNode;
+  a: (props: { children: ReactNode; href: string }) => ReactNode;
+  ol: (props: { children: ReactNode }) => ReactNode;
+  ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
   li: (
     props: {
       children: ReactNode;
     } & ({ isTaskListItem: false } | { isTaskListItem: true; checked: boolean })
-  ) => ReactElement;
-  h1: (props: { children: ReactNode; id: string }) => ReactElement;
-  h2: (props: { children: ReactNode; id: string }) => ReactElement;
-  h3: (props: { children: ReactNode; id: string }) => ReactElement;
-  h4: (props: { children: ReactNode; id: string }) => ReactElement;
-  h5: (props: { children: ReactNode; id: string }) => ReactElement;
-  h6: (props: { children: ReactNode; id: string }) => ReactElement;
-  hr: () => ReactElement;
+  ) => ReactNode;
+  h1: (props: { children: ReactNode; id: string }) => ReactNode;
+  h2: (props: { children: ReactNode; id: string }) => ReactNode;
+  h3: (props: { children: ReactNode; id: string }) => ReactNode;
+  h4: (props: { children: ReactNode; id: string }) => ReactNode;
+  h5: (props: { children: ReactNode; id: string }) => ReactNode;
+  h6: (props: { children: ReactNode; id: string }) => ReactNode;
+  hr: () => ReactNode;
   img: (props: {
     src: string;
     alt?: string;
     width?: number;
     height?: number;
-  }) => ReactElement;
+  }) => ReactNode;
   video: (props: {
     children: ReactNode;
     src: string;
     width?: number;
     height?: number;
-  }) => ReactElement;
-  blockquote: (props: { children: ReactNode }) => ReactElement;
-  pre: (props: { children: ReactNode }) => ReactElement;
-  table: (props: { children: ReactNode }) => ReactElement;
-  tr: (props: { children: ReactNode }) => ReactElement;
+  }) => ReactNode;
+  blockquote: (props: { children: ReactNode }) => ReactNode;
+  pre: (props: { children: ReactNode }) => ReactNode;
+  table: (props: { children: ReactNode }) => ReactNode;
+  tr: (props: { children: ReactNode }) => ReactNode;
   td: (props: {
     children: ReactNode;
     colspan: number;
     rowspan: number;
-  }) => ReactElement;
+  }) => ReactNode;
   th: (props: {
     children: ReactNode;
     colspan: number;
     rowspan: number;
-  }) => ReactElement;
-  br: () => ReactElement;
-
-  // todo etc...
+  }) => ReactNode;
+  br: () => ReactNode;
 };
 
-type ExtractPropsForHandler<Handler extends (props: any) => ReactElement> =
+type ExtractPropsForHandler<Handler extends (props: any) => ReactNode> =
   Parameters<Handler>[0];
 
 type CustomBlockBase = { readonly __typename: string };

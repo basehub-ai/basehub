@@ -46,7 +46,7 @@ importers:
         version: 9.0.0(eslint@8.52.0)
       eslint-config-turbo:
         specifier: latest
-        version: 1.10.16(eslint@8.52.0)
+        version: 1.11.3(eslint@8.52.0)
       eslint-import-resolver-typescript:
         specifier: ^3.6.1
         version: 3.6.1(@typescript-eslint/parser@6.9.0)(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0)(eslint@8.52.0)
@@ -62,8 +62,8 @@ importers:
   packages/basehub:
     dependencies:
       '@genql/cli':
-        specifier: 6.2.1
-        version: 6.2.1
+        specifier: 6.3.1
+        version: 6.3.1
       arg:
         specifier: 5.0.1
         version: 5.0.1
@@ -633,8 +633,8 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: false
 
-  /@genql/cli@6.2.1:
-    resolution: {integrity: sha512-BXCs7cOzhy6u4TFfD7NSe2IHHdfUfA69i2c0HbXBlnpWJIEVE5OUb0MN5gm7VQAiCdI0al8q+yyb9FSsgnrrkQ==}
+  /@genql/cli@6.3.1:
+    resolution: {integrity: sha512-J7Obx+flmsVaZw7E5/f/qx27hrAkQLjFILfImbEAJiI5QJJ2TIBs2/lKUyuBR2amI+AZsauuJX+a/YWd4kZ6nw==}
     hasBin: true
     dependencies:
       '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.0)
@@ -2217,13 +2217,13 @@ packages:
       eslint: 8.52.0
     dev: false
 
-  /eslint-config-turbo@1.10.16(eslint@8.52.0):
-    resolution: {integrity: sha512-O3NQI72bQHV7FvSC6lWj66EGx8drJJjuT1kuInn6nbMLOHdMBhSUX/8uhTAlHRQdlxZk2j9HtgFCIzSc93w42g==}
+  /eslint-config-turbo@1.11.3(eslint@8.52.0):
+    resolution: {integrity: sha512-v7CHpAHodBKlj+r+R3B2DJlZbCjpZLnK7gO/vCRk/Lc+tlD/f04wM6rmHlerevOlchtmwARilRLBnmzNLffTyQ==}
     peerDependencies:
       eslint: '>6.6.0'
     dependencies:
       eslint: 8.52.0
-      eslint-plugin-turbo: 1.10.16(eslint@8.52.0)
+      eslint-plugin-turbo: 1.11.3(eslint@8.52.0)
     dev: false
 
   /eslint-import-resolver-node@0.3.9:
@@ -2383,8 +2383,8 @@ packages:
       string.prototype.matchall: 4.0.8
     dev: false
 
-  /eslint-plugin-turbo@1.10.16(eslint@8.52.0):
-    resolution: {integrity: sha512-ZjrR88MTN64PNGufSEcM0tf+V1xFYVbeiMeuIqr0aiABGomxFLo4DBkQ7WI4WzkZtWQSIA2sP+yxqSboEfL9MQ==}
+  /eslint-plugin-turbo@1.11.3(eslint@8.52.0):
+    resolution: {integrity: sha512-R5ftTTWQzEYaKzF5g6m/MInCU8pIN+2TLL+S50AYBr1enwUovdZmnZ1HDwFMaxIjJ8x5ah+jvAzql5IJE9VWaA==}
     peerDependencies:
       eslint: '>6.6.0'
     dependencies:
