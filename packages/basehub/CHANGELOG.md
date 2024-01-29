@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.6
+
+### Patch Changes
+
+- 266cb69: Update GenQL and fix a typescript nit
+
 ## 1.3.5
 
 ### Patch Changes
