@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.7
+
+### Patch Changes
+
+- fde7dd2: support more dom elements
+
 ## 1.3.6
 
 ### Patch Changes
