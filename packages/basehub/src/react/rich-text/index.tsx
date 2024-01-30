@@ -151,6 +151,9 @@ type Handlers = {
     colspan: number;
     rowspan: number;
   }) => ReactNode;
+  thead: (props: { children: ReactNode }) => ReactNode;
+  tbody: (props: { children: ReactNode }) => ReactNode;
+  tfoot: (props: { children: ReactNode }) => ReactNode;
   br: () => ReactNode;
 };
 
@@ -259,6 +262,9 @@ const defaultHandlers: Handlers = {
       {children}
     </th>
   ),
+  thead: ({ children }) => <thead>{children}</thead>,
+  tbody: ({ children }) => <tbody>{children}</tbody>,
+  tfoot: ({ children }) => <tfoot>{children}</tfoot>,
   br: () => <br />,
 };
 
