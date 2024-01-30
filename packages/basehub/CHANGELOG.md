@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.8
+
+### Patch Changes
+
+- 57684fc: export type helper to for getting handler props
+
 ## 1.3.7
 
 ### Patch Changes
