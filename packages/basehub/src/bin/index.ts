@@ -18,6 +18,7 @@ function help(code: number) {
 
   Options
     --output, -o  Output directory, if you don't want the default behavior.
+    --ts-only, -t  Output just the TypeScript code, without compiling it to JavaScript.
     --version, -v  Version number.
     --help, -h     Display this message.`);
   process.exit(code);
@@ -34,10 +35,12 @@ const args = arg(
   {
     // types
     "--output": String,
+    "--ts-only": Boolean,
     "--version": Boolean,
     "--help": Boolean,
     // aliases
     "-o": "--output",
+    "-t": "--ts-only",
     "-v": "--version",
     "-h": "--help",
   },

@@ -98,16 +98,19 @@ export const main = async (args: Args) => {
 
   appendEslintDisableToEachFileInDirectory(basehubOutputPath);
 
-  await esbuild.build({
-    entryPoints: [generatedMainExportPath],
-    bundle: true,
-    outfile: path.join(basehubOutputPath, "index.js"),
-    minify: false,
-    format: "cjs",
-    banner: {
-      js: "/* eslint-disable */",
-    },
-  });
+  if (!args["--ts-only"]) {
+    console.log("📦 Compiling to JavaScript...");
+    await esbuild.build({
+      entryPoints: [generatedMainExportPath],
+      bundle: true,
+      outfile: path.join(basehubOutputPath, "index.js"),
+      minify: false,
+      format: "cjs",
+      banner: {
+        js: "/* eslint-disable */",
+      },
+    });
+  }
 
   console.log("🪄 Generated `basehub` client");
   return;
@@ -117,7 +120,7 @@ const basehubExport = `
 import { createFetcher } from "./runtime";
 
 // we limit options to only the ones we want to expose.
-type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean }
+type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean, token?: string }
 
 /**
  * Create a basehub client.

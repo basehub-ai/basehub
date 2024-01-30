@@ -1,3 +1,4 @@
+/* eslint-disable turbo/no-undeclared-env-vars */
 import { dotenvLoad } from "dotenv-mono";
 import { z } from "zod";
 
@@ -9,6 +10,7 @@ export const basehubAPIOrigin = "https://api.basehub.com";
 
 export const getStuffFromEnv = (options?: {
   draft?: boolean;
+  token?: string;
 }): {
   url: URL;
   headers: Record<string, string>;
@@ -42,6 +44,7 @@ export const getStuffFromEnv = (options?: {
   const parsedBasehubDraftEnv = z.string().safeParse(process.env.BASEHUB_DRAFT);
 
   const token =
+    options?.token ??
     basehubUrl.searchParams.get("token") ??
     (parsedBasehubTokenEnv.success ? parsedBasehubTokenEnv.data : undefined) ??
     (backwardsCompatURL
@@ -130,7 +133,7 @@ const getStuffFromEnv = (options) => {
     const parsedBasehubDraftEnv = process.env.BASEHUB_DRAFT;
 
     const token =
-      basehubUrl.searchParams.get("token") ??
+      options?.token ?? basehubUrl.searchParams.get("token") ??
       (parsedBasehubTokenEnv ? parsedBasehubTokenEnv : undefined) ??
       (backwardsCompatURL
         ? backwardsCompatURL.searchParams.get("token")

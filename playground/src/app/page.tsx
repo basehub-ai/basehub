@@ -20,7 +20,10 @@ export default async function HomePage() {
   //   } }`,
   // });
 
-  const otherData = await basehub({ cache: "no-store", draft: true }).query({
+  const otherData = await basehub({
+    cache: "no-store",
+    draft: true,
+  }).query({
     // __name: true,
     // _sys: {
     //   slug: true,
