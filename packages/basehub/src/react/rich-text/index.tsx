@@ -160,6 +160,10 @@ type Handlers = {
 type ExtractPropsForHandler<Handler extends (props: any) => ReactNode> =
   Parameters<Handler>[0];
 
+export type HandlerProps<Key extends keyof Handlers> = ExtractPropsForHandler<
+  Handlers[Key]
+>;
+
 type CustomBlockBase = { readonly __typename: string };
 export type CustomBlocksBase = readonly CustomBlockBase[];
 
