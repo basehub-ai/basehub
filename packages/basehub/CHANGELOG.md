@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.9
+
+### Patch Changes
+
+- b847609: nit
+
 ## 1.3.8
 
 ### Patch Changes
