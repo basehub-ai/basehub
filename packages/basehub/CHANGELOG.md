@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.10
+
+### Patch Changes
+
+- 3ea6b08: expose token as a parameter to basehub, plus add --ts-only option
+
 ## 1.3.9
 
 ### Patch Changes
