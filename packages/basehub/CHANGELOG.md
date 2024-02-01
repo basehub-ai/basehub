@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.11
+
+### Patch Changes
+
+- d5b686f: make rich text return a ReactNode type
+
 ## 1.3.10
 
 ### Patch Changes
