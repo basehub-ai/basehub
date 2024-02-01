@@ -130,6 +130,7 @@ type Handlers = {
     alt?: string;
     width?: number;
     height?: number;
+    caption?: string;
   }) => ReactNode;
   video: (props: {
     children: ReactNode;
@@ -250,7 +251,9 @@ const defaultHandlers: Handlers = {
   h5: ({ children, ...props }) => <h5 {...props}>{children}</h5>,
   h6: ({ children, ...props }) => <h6 {...props}>{children}</h6>,
   hr: () => <hr />,
-  img: (props) => <img {...props} />,
+  img: ({ caption, ...rest }) => (
+    <img {...rest} {...(caption ? { ["data-caption"]: caption } : {})} />
+  ),
   video: (props) => <video {...props} />,
   blockquote: ({ children }) => <blockquote>{children}</blockquote>,
   pre: ({ children }) => <pre>{children}</pre>,
