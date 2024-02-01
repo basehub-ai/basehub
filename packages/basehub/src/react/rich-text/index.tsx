@@ -198,7 +198,7 @@ export const RichText = <
   CustomBlocks extends CustomBlocksBase = readonly any[],
 >(
   props: RichTextProps<CustomBlocks>
-) => {
+): ReactNode => {
   const value = props.children as Node[] | undefined;
   const generatedIDs: GeneratedIDsRecord = [];
 
@@ -579,7 +579,7 @@ export function createRichTextWithDefaultComponents(
 ) {
   return <CustomBlocks extends CustomBlocksBase = readonly any[]>(
     props: RichTextProps<CustomBlocks>
-  ) => {
+  ): ReactNode => {
     return (
       <RichText<CustomBlocks>
         {...props}

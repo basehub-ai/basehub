@@ -22,7 +22,7 @@ export default async function HomePage() {
 
   const otherData = await basehub({
     cache: "no-store",
-    draft: true,
+    // draft: true,
   }).query({
     // __name: true,
     // _sys: {
