@@ -62,8 +62,8 @@ importers:
   packages/basehub:
     dependencies:
       '@genql/cli':
-        specifier: 6.3.1
-        version: 6.3.1
+        specifier: 6.3.2
+        version: 6.3.2
       arg:
         specifier: 5.0.1
         version: 5.0.1
@@ -633,8 +633,8 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: false
 
-  /@genql/cli@6.3.1:
-    resolution: {integrity: sha512-J7Obx+flmsVaZw7E5/f/qx27hrAkQLjFILfImbEAJiI5QJJ2TIBs2/lKUyuBR2amI+AZsauuJX+a/YWd4kZ6nw==}
+  /@genql/cli@6.3.2:
+    resolution: {integrity: sha512-ZvsrKVwxg3Cfmvf4eLcrz431yLCx1f2eB+/f3i860en0z0hWeiBoChcsEjm74j0q+j/ctBpXf1QP2fsGAHgj6w==}
     hasBin: true
     dependencies:
       '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.0)
