@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.12
+
+### Patch Changes
+
+- 67e81df: update genql to fix --turbo
+
 ## 1.3.11
 
 ### Patch Changes
