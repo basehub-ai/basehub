@@ -251,8 +251,12 @@ const defaultHandlers: Handlers = {
   h5: ({ children, ...props }) => <h5 {...props}>{children}</h5>,
   h6: ({ children, ...props }) => <h6 {...props}>{children}</h6>,
   hr: () => <hr />,
-  img: ({ caption, ...rest }) => (
-    <img {...rest} {...(caption ? { ["data-caption"]: caption } : {})} />
+  img: ({ caption, alt, ...rest }) => (
+    <img
+      {...rest}
+      alt={alt ?? caption}
+      {...(caption ? { ["data-caption"]: caption } : {})}
+    />
   ),
   video: (props) => <video {...props} />,
   blockquote: ({ children }) => <blockquote>{children}</blockquote>,
