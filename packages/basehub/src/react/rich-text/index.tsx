@@ -81,7 +81,13 @@ export type Node =
     }
   | {
       type: "image";
-      attrs: { src: string; alt?: string; width?: number; height?: number };
+      attrs: {
+        src: string;
+        alt?: string;
+        width?: number;
+        height?: number;
+        caption?: string;
+      };
       marks?: Array<Mark>;
       content?: Array<Node>;
     }
@@ -437,6 +443,7 @@ const Node = ({
         width: node.attrs.width,
         height: node.attrs.height,
         alt: node.attrs.alt,
+        caption: node.attrs.caption,
       } satisfies ExtractPropsForHandler<Handlers["img"]>;
       break;
     case "video":
