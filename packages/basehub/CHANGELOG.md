@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.13
+
+### Patch Changes
+
+- 2f7ac52: Add caption to image
+
 ## 1.3.12
 
 ### Patch Changes
