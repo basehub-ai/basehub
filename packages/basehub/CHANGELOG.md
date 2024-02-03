@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.14
+
+### Patch Changes
+
+- 53b559d: Actually pass caption
+
 ## 1.3.13
 
 ### Patch Changes
