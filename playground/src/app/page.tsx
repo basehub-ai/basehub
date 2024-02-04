@@ -1,107 +1,83 @@
-// import {
-// basehub,
-// RichTextJson,
-// TweetComponentGenqlSelection,
-// FieldsSelection,
-// } from "basehub";
-// import { RichText } from "basehub/react";
-// import { Tweet } from "react-tweet";
-import { basehub } from "@basehub";
+import { Pump, PumpChildren, PumpQuery, PumpProps } from "basehub/next-pump";
+
+const BlogPumpQuery = {
+  blog: {
+    _slug: true,
+    _id: true,
+  },
+  homepage: {
+    _id: true,
+  },
+} satisfies PumpQuery;
+
+const BlogPump = ({
+  children,
+}: {
+  children: PumpChildren<typeof BlogPumpQuery>;
+}) => {
+  return <Pump query={BlogPumpQuery}>{children}</Pump>;
+};
+
+const PumpWithPredefinedCache = <Q extends PumpQuery>(props: PumpProps<Q>) => {
+  return <Pump {...props} next={{ revalidate: 60 }} />;
+};
 
 export default async function HomePage() {
-  // const data = await basehub({ draft: true }).raw({
-  //   query: `{ __typename, testBreak {
-  //     authors {
-  //       items {
-  //         _slug
-  //         _title
-  //       }
-  //     }
-  //   } }`,
-  // });
-
-  const otherData = await basehub({
-    cache: "no-store",
-    // draft: true,
-  }).query({
-    // __name: true,
-    // _sys: {
-    //   slug: true,
-    // },
-    homepage: {
-      _id: true,
-    },
-    // docsud: {
-    //   _id: true,
-    // },
-    // testBreak: {
-    //   authors: {
-    //     items: {
-    //       _slug: true,
-    //       _title: true,
-    //     },
-    //   },
-    // },
-    // blogIndex: {
-    //   blogIndex: true,
-    //   featuredPost: {
-    //     content: {
-    //       json: {
-    //         toc: true,
-    //         content: true,
-    //         blocks: {
-    //           __typename: true,
-    //           on_BoldTextComponent: {
-    //             _title: true,
-    //             _sys: {
-    //               id: true,
-    //             },
-    //           },
-    //           on_TweetComponent: {
-    //             _sys: {
-    //               id: true,
-    //             },
-    //             tweetId: true,
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
-  });
-
   return (
     <main>
-      <pre>{JSON.stringify({ otherData }, null, 2)}</pre>
-      <br />
-      {/* <RichText
-        blocks={blogIndex.featuredPost.content?.json.blocks}
-        components={{
-          p: (props) => <p {...props} />,
-          code: ({ children, isInline }) => (
-            <code style={{ color: isInline ? "red" : "green" }}>
-              {children}
-            </code>
-          ),
-          TweetComponent: ({ tweetId }) => {
-            return <Tweet id={tweetId} />;
-          },
-          video: ({ src }) => {
-            return <video src={src} autoPlay loop playsInline muted />;
-          },
-        }}
-      >
-        {blogIndex.featuredPost.content?.json.content}
-      </RichText>
+      <BlogPump>
+        {async (data) => {
+          "use server";
 
-      <RichText
-        components={{
-          ol: (props) => <ol {...props} style={{ color: "red !important" }} />,
-          a: (props) => <a {...props} style={{ color: "green !important" }} />,
+          return <div>Hey there friends: {data.homepage._id}</div>;
+        }}
+      </BlogPump>
+      <Pump
+        query={{
+          blog: {
+            _slug: true,
+            _id: true,
+          },
+        }}
+        next={{ revalidate: 30 }}
+      >
+        {async (data) => {
+          "use server";
+
+          return <pre>{JSON.stringify({ data }, null, 2)}</pre>;
+        }}
+      </Pump>
+
+      <br />
+      <br />
+      <h1>Does it work?</h1>
+      <PumpWithPredefinedCache
+        query={{
+          demos: {
+            homepageDemo: {
+              script: {
+                html: true,
+              },
+              video: {
+                url: true,
+              },
+            },
+          },
         }}
       >
-        {blogIndex.featuredPost.content?.json.toc}
-      </RichText> */}
+        {async (data) => {
+          "use server";
+
+          return (
+            <div
+              dangerouslySetInnerHTML={{
+                __html:
+                  data.demos.homepageDemo.script?.html ?? "<div>Empty</div>",
+              }}
+            />
+          );
+        }}
+      </PumpWithPredefinedCache>
     </main>
   );
 }

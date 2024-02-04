@@ -8,7 +8,8 @@
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "basehub --output .basehub --ts-only"
+    "generate": "basehub",
+    "generate-elsewhere": "basehub --output .basehub --ts-only"
   },
   "dependencies": {
     "basehub": "workspace:^",

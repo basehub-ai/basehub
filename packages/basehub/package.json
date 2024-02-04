@@ -16,7 +16,8 @@
     "index.js",
     "index.d.ts",
     "react.js",
-    "react.d.ts"
+    "react.d.ts",
+    "src-next-pump"
   ],
   "sideEffects": false,
   "scripts": {

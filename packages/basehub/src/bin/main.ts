@@ -8,11 +8,18 @@ import {
   runtime__getStuffFromEnvString,
 } from "./util/get-stuff-from-env";
 import { appendEslintDisableToEachFileInDirectory } from "./util/disable-linters";
+import { writeNextPump } from "./util/write-next-pump";
 
 export const main = async (args: Args) => {
   console.log("🪄 Generating...");
 
   const { url, headers } = getStuffFromEnv();
+
+  const basehubModulePath = path.resolve(
+    process.cwd(),
+    "node_modules",
+    "basehub"
+  );
 
   const pathArgs = args["--output"]
     ? [args["--output"]]
@@ -98,12 +105,30 @@ export const main = async (args: Args) => {
 
   appendEslintDisableToEachFileInDirectory(basehubOutputPath);
 
+  /**
+   * Next Pump stuff.
+   */
+  writeNextPump({
+    modulePath: basehubModulePath,
+    outputPath: basehubOutputPath,
+  });
+
   if (!args["--ts-only"]) {
     console.log("📦 Compiling to JavaScript...");
     await esbuild.build({
       entryPoints: [generatedMainExportPath],
       bundle: true,
       outfile: path.join(basehubOutputPath, "index.js"),
+      minify: false,
+      format: "cjs",
+      banner: {
+        js: "/* eslint-disable */",
+      },
+    });
+    await esbuild.build({
+      entryPoints: [path.join(basehubOutputPath, "next-pump", "index.ts")],
+      bundle: true,
+      outfile: path.join(basehubOutputPath, "next-pump", "index.js"),
       minify: false,
       format: "cjs",
       banner: {
