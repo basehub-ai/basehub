@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-// import { ClientPump } from "./client-pump";
+import { lazy, Suspense } from "react";
 import { DataProvider } from "./data-provider";
 import {
   basehub,
@@ -8,6 +8,11 @@ import {
 } from "../index";
 
 export { PumpQuery };
+
+// we use react.lazy to code split client-pump, which is the heavier part of next-pump, and only required when in draft
+const LazyClientPump = lazy(() =>
+  import("./client-pump").then((mod) => ({ default: mod.ClientPump }))
+);
 
 export type Children<Query extends PumpQuery> =
   | React.ReactNode
@@ -19,27 +24,40 @@ export type PumpProps<Query extends PumpQuery> = {
 } & Parameters<typeof basehub>[0];
 
 export const Pump = async <Query extends PumpQuery>({
+  draft,
   children,
   query,
   ...basehubProps
 }: PumpProps<Query>) => {
-  const data = await basehub(basehubProps).query(query);
+  const data = (await basehub(basehubProps).query(
+    query
+  )) satisfies QueryResult<Query>;
 
   const resolvedChildren =
     typeof children === "function" ? await children(data) : children;
 
-  // if (draft) {
-  //   return (
-  //     <ClientPump
-  //       query={query}
-  //       token={token}
-  //       initialData={data}
-  //       initialResolvedChildren={resolvedChildren}
-  //     >
-  //       {children}
-  //     </ClientPump>
-  //   );
-  // }
+  if (draft) {
+    // should probably get the pump token here...
+    return (
+      <Suspense
+        // as a fallback, we return the data provider with the initial data we got here in the server
+        // this _should_ prevent any layout shift
+        fallback={<DataProvider data={data}>{resolvedChildren}</DataProvider>}
+      >
+        <LazyClientPump
+          query={query}
+          token={""}
+          // react.lazy strips generic parameter :(
+          initialData={data as any}
+          initialResolvedChildren={resolvedChildren}
+        >
+          {/* react.lazy strips generic parameter :( */}
+          {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
+          {children as any}
+        </LazyClientPump>
+      </Suspense>
+    );
+  }
 
   return <DataProvider data={data}>{resolvedChildren}</DataProvider>;
 };

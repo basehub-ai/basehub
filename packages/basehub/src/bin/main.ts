@@ -114,27 +114,38 @@ export const main = async (args: Args) => {
   });
 
   if (!args["--ts-only"]) {
+    // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
+    const peerDependencies = ["react", "react-dom", "../index"];
+
     console.log("📦 Compiling to JavaScript...");
-    await esbuild.build({
-      entryPoints: [generatedMainExportPath],
-      bundle: true,
-      outfile: path.join(basehubOutputPath, "index.js"),
-      minify: false,
-      format: "cjs",
-      banner: {
-        js: "/* eslint-disable */",
-      },
-    });
-    await esbuild.build({
-      entryPoints: [path.join(basehubOutputPath, "next-pump", "index.ts")],
-      bundle: true,
-      outfile: path.join(basehubOutputPath, "next-pump", "index.js"),
-      minify: false,
-      format: "cjs",
-      banner: {
-        js: "/* eslint-disable */",
-      },
-    });
+    await Promise.all([
+      esbuild.build({
+        entryPoints: [generatedMainExportPath],
+        bundle: true,
+        outdir: basehubOutputPath,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        external: peerDependencies,
+        banner: {
+          js: "/* eslint-disable */",
+        },
+      }),
+      esbuild.build({
+        entryPoints: [path.join(basehubOutputPath, "next-pump", "index.ts")],
+        bundle: true,
+        outdir: path.join(basehubOutputPath, "next-pump"),
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        external: peerDependencies,
+        banner: {
+          js: "/* eslint-disable */",
+        },
+      }),
+    ]);
   }
 
   console.log("🪄 Generated `basehub` client");

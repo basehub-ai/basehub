@@ -2,33 +2,45 @@
 import * as React from "react";
 import useSWRImmutable from "swr/immutable";
 import Pusher from "pusher-js";
-import { Block, blockBaseOps } from "@basehub/data/replicache";
+// import { Block, blockBaseOps } from "@basehub/data/replicache";
 import { Replicache } from "replicache";
-import { graphqlRequest } from "./client-graphql";
+// import { graphqlRequest } from "./client-graphql";
 import { Children } from "./server-pump";
 import { DataProvider } from "./data-provider";
+
+import {
+  type QueryGenqlSelection as PumpQuery,
+  type QueryResult,
+} from "../index";
+
+type Block = any;
+const blockBaseOps = {
+  list: (_tx: any) => {
+    return "" as any;
+  },
+};
 
 export function pusherReceiver(spaceID: string, onPoke: () => Promise<void>) {
   const pusher = new Pusher("91d723201cad1ff7449b", {
     cluster: "mt1",
   });
 
-  const channel = pusher.subscribe(spaceID.replaceAll("/", ""));
+  const channel = pusher.subscribe(spaceID.replace(/\//g, ""));
   channel.bind("poke", onPoke);
   return channel;
 }
 
-export const ClientPump = ({
+export const ClientPump = <Query extends PumpQuery>({
   children,
   query,
   token,
   initialData,
   initialResolvedChildren,
 }: {
-  children: Children;
-  query: string;
+  children: Children<Query>;
+  query: Query;
   token: string;
-  initialData?: any;
+  initialData?: QueryResult<Query>;
   initialResolvedChildren?: React.ReactNode;
 }) => {
   /**
@@ -129,7 +141,7 @@ export const ClientPump = ({
     if (!pumpData?.replicache) return;
     const replicache = pumpData.replicache;
     const unsub = replicache.subscribe((tx) => blockBaseOps.list(tx), {
-      onData: (data) => {
+      onData: (data: any) => {
         setBlocks(data);
       },
     });
@@ -141,10 +153,11 @@ export const ClientPump = ({
 
   const queryDataQuery = useSWRImmutable(
     blocks ? (["bshb-pump-data", query, blocks] as const) : null,
-    async ([, query, blocks]) => {
-      const res = await graphqlRequest(query, blocks);
-      const { data } = await res.json();
-      return data;
+    async ([, _query, _blocks]) => {
+      return {} as any;
+      // const res = await graphqlRequest(query, blocks);
+      // const { data } = await res.json();
+      // return data;
     },
     { onError: (err) => console.error(err), keepPreviousData: true }
   );
