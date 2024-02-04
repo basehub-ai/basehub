@@ -1,21 +1,31 @@
 import { Pump, PumpChildren, PumpQuery, PumpProps } from "basehub/next-pump";
+import { HeroSection } from "./some-server-comp";
+import { FieldsSelection, Query } from "basehub";
 
-const BlogPumpQuery = {
+const BlogBase = {
   blog: {
     _slug: true,
     _id: true,
   },
   homepage: {
     _id: true,
+    heroTitle: {
+      plainText: true,
+    },
+    heroSubtitle: {
+      plainText: true,
+    },
   },
 } satisfies PumpQuery;
+
+export type BlogBase = FieldsSelection<Query, typeof BlogBase>;
 
 const BlogPump = ({
   children,
 }: {
-  children: PumpChildren<typeof BlogPumpQuery>;
+  children: PumpChildren<typeof BlogBase>;
 }) => {
-  return <Pump query={BlogPumpQuery}>{children}</Pump>;
+  return <Pump query={BlogBase}>{children}</Pump>;
 };
 
 const PumpWithPredefinedCache = <Q extends PumpQuery>(props: PumpProps<Q>) => {
@@ -29,7 +39,17 @@ export default async function HomePage() {
         {async (data) => {
           "use server";
 
-          return <div>Hey there friends: {data.homepage._id}</div>;
+          return (
+            <div>
+              Hey there friends
+              <br />
+              <HeroSection
+                title={data.homepage.heroTitle?.plainText ?? ""}
+                subtitle={data.homepage.heroSubtitle?.plainText ?? ""}
+                raw={data}
+              />
+            </div>
+          );
         }}
       </BlogPump>
       <Pump
