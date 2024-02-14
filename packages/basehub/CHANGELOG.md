@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.17
+
+### Patch Changes
+
+- e489ff6: pass code as a string param
+
 ## 1.3.16
 
 ### Patch Changes
