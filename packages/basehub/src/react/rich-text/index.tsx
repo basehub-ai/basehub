@@ -54,6 +54,15 @@ export type Node =
       content?: Array<Node>;
     }
   | {
+      type: "codeBlock";
+      attrs: {
+        language?: string;
+      };
+      text: string;
+      marks?: Array<Mark>;
+      content?: Array<Node>;
+    }
+  | {
       type: "orderedList";
       attrs?: { start: number };
       marks?: Array<Mark>;
@@ -145,7 +154,7 @@ type Handlers = {
     height?: number;
   }) => ReactNode;
   blockquote: (props: { children: ReactNode }) => ReactNode;
-  pre: (props: { children: ReactNode }) => ReactNode;
+  pre: (props: { children: ReactNode; language: string }) => ReactNode;
   table: (props: { children: ReactNode }) => ReactNode;
   tr: (props: { children: ReactNode }) => ReactNode;
   td: (props: {
@@ -266,7 +275,11 @@ const defaultHandlers: Handlers = {
   ),
   video: (props) => <video {...props} />,
   blockquote: ({ children }) => <blockquote>{children}</blockquote>,
-  pre: ({ children }) => <pre>{children}</pre>,
+  pre: ({ children, language }) => (
+    <pre data-language={language} className={`language-${language}`}>
+      {children}
+    </pre>
+  ),
   table: ({ children }) => <table>{children}</table>,
   tr: ({ children }) => <tr>{children}</tr>,
   td: ({ children, colspan, rowspan }) => (
@@ -410,7 +423,10 @@ const Node = ({
       break;
     case "codeBlock":
       handler = components?.pre ?? defaultHandlers.pre;
-      props = { children } satisfies ExtractPropsForHandler<Handlers["pre"]>;
+      props = {
+        children,
+        language: node.attrs?.language ?? "text",
+      } satisfies ExtractPropsForHandler<Handlers["pre"]>;
       break;
     case "table":
       handler = components?.table ?? defaultHandlers.table;
