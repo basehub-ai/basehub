@@ -2,9 +2,8 @@
 import * as React from "react";
 import useSWRImmutable from "swr/immutable";
 import Pusher from "pusher-js";
-// import { Block, blockBaseOps } from "@basehub/data/replicache";
 import { Replicache } from "replicache";
-// import { graphqlRequest } from "./client-graphql";
+import { createYoga } from "graphql-yoga";
 import { Children } from "./server-pump";
 import { DataProvider } from "./data-provider";
 
@@ -12,13 +11,9 @@ import {
   type QueryGenqlSelection as PumpQuery,
   type QueryResult,
 } from "../index";
+import { generateSchema, blockBaseOps } from "@basehub/api-pump";
 
 type Block = any;
-const blockBaseOps = {
-  list: (_tx: any) => {
-    return "" as any;
-  },
-};
 
 export function pusherReceiver(spaceID: string, onPoke: () => Promise<void>) {
   const pusher = new Pusher("91d723201cad1ff7449b", {
@@ -32,13 +27,14 @@ export function pusherReceiver(spaceID: string, onPoke: () => Promise<void>) {
 
 export const ClientPump = <Query extends PumpQuery>({
   children,
-  query,
+  rawQueryOp,
   token,
   initialData,
   initialResolvedChildren,
 }: {
   children: Children<Query>;
   query: Query;
+  rawQueryOp: { query: string; variables?: any };
   token: string;
   initialData?: QueryResult<Query>;
   initialResolvedChildren?: React.ReactNode;
@@ -141,7 +137,7 @@ export const ClientPump = <Query extends PumpQuery>({
     if (!pumpData?.replicache) return;
     const replicache = pumpData.replicache;
     const unsub = replicache.subscribe((tx) => blockBaseOps.list(tx), {
-      onData: (data: any) => {
+      onData: (data: Block[]) => {
         setBlocks(data);
       },
     });
@@ -151,13 +147,55 @@ export const ClientPump = <Query extends PumpQuery>({
     };
   }, [pumpData?.replicache]);
 
+  const schemaQuery = useSWRImmutable(
+    blocks && pumpLoginData?.spaceId
+      ? (["bshb-pump-schema", blocks, pumpLoginData.spaceId] as const)
+      : null,
+    async ([, blocks, spaceID]) => {
+      const blocksByHashMap = new Map<string, Block>();
+
+      for (const block of blocks) {
+        blocksByHashMap.set(block.hash, block);
+      }
+
+      return generateSchema({
+        blocks,
+        repoSpaceID: spaceID,
+        type: "prefetched-blocks",
+        getRepo: async () => {
+          return {};
+        },
+        draft: false,
+        blockCacheMethods: {
+          getter: (hash) => blocksByHashMap.get(hash),
+          fallbackGetter: ({ hash }) => blocksByHashMap.get(hash),
+          setter: async () => undefined,
+        },
+      });
+    },
+    { keepPreviousData: true }
+  );
+
   const queryDataQuery = useSWRImmutable(
-    blocks ? (["bshb-pump-data", query, blocks] as const) : null,
-    async ([, _query, _blocks]) => {
-      return {} as any;
-      // const res = await graphqlRequest(query, blocks);
-      // const { data } = await res.json();
-      // return data;
+    schemaQuery.data
+      ? (["bshb-pump-data", rawQueryOp, schemaQuery.data] as const)
+      : null,
+    async ([, rawQueryOp, schema]) => {
+      // Create a Yoga instance with a GraphQL schema.
+      const yoga = createYoga({ schema });
+
+      // Execute a GraphQL query
+      const request = new Request("/graphql", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(rawQueryOp),
+      });
+
+      const result = await yoga(request);
+      const { data } = await result.json();
+      return data;
     },
     { onError: (err) => console.error(err), keepPreviousData: true }
   );
@@ -167,8 +205,8 @@ export const ClientPump = <Query extends PumpQuery>({
     : queryDataQuery.data;
 
   const childrenQuery = useSWRImmutable(
-    ["bshb-pump-children", query, dataWithFallback],
-    ([, , data]) => {
+    ["bshb-pump-children", dataWithFallback],
+    ([, data]) => {
       if (typeof children === "function") {
         return children(data);
       } else {

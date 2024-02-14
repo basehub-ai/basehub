@@ -5,6 +5,7 @@ import {
   basehub,
   type QueryGenqlSelection as PumpQuery,
   type QueryResult,
+  generateQueryOp,
 } from "../index";
 
 export { PumpQuery };
@@ -38,6 +39,7 @@ export const Pump = async <Query extends PumpQuery>({
 
   if (draft) {
     // should probably get the pump token here...
+    const rawQueryOp = generateQueryOp(query);
     return (
       <Suspense
         // as a fallback, we return the data provider with the initial data we got here in the server
@@ -46,6 +48,7 @@ export const Pump = async <Query extends PumpQuery>({
       >
         <LazyClientPump
           query={query}
+          rawQueryOp={rawQueryOp}
           token={""}
           // react.lazy strips generic parameter :(
           initialData={data as any}
