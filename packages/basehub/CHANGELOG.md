@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.16
+
+### Patch Changes
+
+- 706a871: Pass language to code handler
+
 ## 1.3.15
 
 ### Patch Changes
