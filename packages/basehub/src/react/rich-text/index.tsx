@@ -25,7 +25,7 @@ const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
 type Mark =
   | { type: "bold" | "italic" | "underline" | "strike" }
-  | { type: "code"; attrs: { isInline?: boolean } }
+  | { type: "code"; attrs: { isInline?: boolean; language: string } }
   | { type: "link"; attrs: { href: string; target: string; class: string } }
   | { type: "basehub-inline-block"; attrs: { id: string } };
 
@@ -124,7 +124,11 @@ type Handlers = {
   b: (props: { children: ReactNode }) => ReactNode;
   em: (props: { children: ReactNode }) => ReactNode;
   s: (props: { children: ReactNode }) => ReactNode;
-  code: (props: { children: ReactNode; isInline: boolean }) => ReactNode;
+  code: (props: {
+    children: ReactNode;
+    isInline: boolean;
+    language: string;
+  }) => ReactNode;
   a: (props: { children: ReactNode; href: string }) => ReactNode;
   ol: (props: { children: ReactNode }) => ReactNode;
   ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
@@ -242,7 +246,17 @@ const defaultHandlers: Handlers = {
   b: ({ children }) => <b>{children}</b>,
   em: ({ children }) => <em>{children}</em>,
   s: ({ children }) => <s>{children}</s>,
-  code: ({ children }) => <code>{children}</code>,
+  code: ({ children, isInline, language }) => {
+    return (
+      <code
+        {...(isInline === false
+          ? { "data-language": language, className: `language-${language}` }
+          : {})}
+      >
+        {children}
+      </code>
+    );
+  },
   ol: ({ children }) => <ol>{children}</ol>,
   ul: ({ children }) => <ul>{children}</ul>,
   li: ({ children, ...rest }) => {
@@ -338,9 +352,10 @@ const Node = ({
       const forceCodeMark = parent?.type === "codeBlock";
       const clonedMarks = [...(node.marks ?? [])];
       if (forceCodeMark && !clonedMarks.some((mark) => mark.type === "code")) {
+        const language = parent?.attrs?.language ?? "text";
         clonedMarks.push({
           type: "code",
-          attrs: { isInline: false },
+          attrs: { isInline: false, language },
         } satisfies Mark);
       }
       handler = ({ children }: { children?: ReactNode }) => (
@@ -547,6 +562,7 @@ const Marks = ({
       props = {
         children,
         isInline: mark.attrs.isInline ?? true,
+        language: mark.attrs.language ?? "text",
       } satisfies ExtractPropsForHandler<Handlers["code"]>;
       break;
     case "underline":
