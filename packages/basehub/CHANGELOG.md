@@ -1,5 +1,11 @@
 # basehub
 
+## 1.3.15
+
+### Patch Changes
+
+- 89d6004: expose language on pre
+
 ## 1.3.14
 
 ### Patch Changes
