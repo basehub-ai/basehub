@@ -92,7 +92,7 @@ export type Node =
     }
   | {
       type: "image";
-      attrs: {
+      attrs?: {
         src: string;
         alt?: string;
         width?: number;
@@ -104,7 +104,7 @@ export type Node =
     }
   | {
       type: "video";
-      attrs: { src: string; width?: number; height?: number };
+      attrs?: { src: string; width?: number; height?: number };
       marks?: Array<Mark>;
       content?: Array<Node>;
     }
@@ -479,6 +479,9 @@ const Node = ({
       break;
     case "image":
       handler = components?.img ?? defaultHandlers.img;
+      if (!node.attrs?.src) {
+        throw new Error("Image node is missing src attribute");
+      }
       props = {
         src: node.attrs.src,
         width: node.attrs.width,
@@ -489,6 +492,9 @@ const Node = ({
       break;
     case "video":
       handler = components?.video ?? defaultHandlers.video;
+      if (!node.attrs?.src) {
+        throw new Error(`Video node is missing src attribute`);
+      }
       props = {
         children,
         src: node.attrs.src,
