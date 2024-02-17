@@ -25,7 +25,10 @@ const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
 type Mark =
   | { type: "bold" | "italic" | "underline" | "strike" }
-  | { type: "code"; attrs: { isInline?: boolean } }
+  | {
+      type: "code";
+      attrs: { isInline?: boolean; language: string; code: string };
+    }
   | { type: "link"; attrs: { href: string; target: string; class: string } }
   | { type: "basehub-inline-block"; attrs: { id: string } };
 
@@ -39,7 +42,6 @@ export type Node =
         | "listItem"
         | "taskList"
         | "blockquote"
-        | "codeBlock"
         | "table"
         | "tableRow";
       attrs?: Attrs;
@@ -52,6 +54,15 @@ export type Node =
       attrs?: Attrs;
       marks?: Array<Mark>;
       content?: Array<Node>;
+    }
+  | {
+      type: "codeBlock";
+      attrs: {
+        language?: string;
+      };
+      text: string;
+      marks?: Array<Mark>;
+      content?: [{ type: "text"; text: string }];
     }
   | {
       type: "orderedList";
@@ -115,7 +126,12 @@ type Handlers = {
   b: (props: { children: ReactNode }) => ReactNode;
   em: (props: { children: ReactNode }) => ReactNode;
   s: (props: { children: ReactNode }) => ReactNode;
-  code: (props: { children: ReactNode; isInline: boolean }) => ReactNode;
+  code: (props: {
+    children: ReactNode;
+    isInline: boolean;
+    language: string;
+    code: string;
+  }) => ReactNode;
   a: (props: { children: ReactNode; href: string }) => ReactNode;
   ol: (props: { children: ReactNode }) => ReactNode;
   ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
@@ -145,7 +161,11 @@ type Handlers = {
     height?: number;
   }) => ReactNode;
   blockquote: (props: { children: ReactNode }) => ReactNode;
-  pre: (props: { children: ReactNode }) => ReactNode;
+  pre: (props: {
+    children: ReactNode;
+    language: string;
+    code: string;
+  }) => ReactNode;
   table: (props: { children: ReactNode }) => ReactNode;
   tr: (props: { children: ReactNode }) => ReactNode;
   td: (props: {
@@ -233,7 +253,17 @@ const defaultHandlers: Handlers = {
   b: ({ children }) => <b>{children}</b>,
   em: ({ children }) => <em>{children}</em>,
   s: ({ children }) => <s>{children}</s>,
-  code: ({ children }) => <code>{children}</code>,
+  code: ({ children, isInline, language }) => {
+    return (
+      <code
+        {...(isInline === false
+          ? { "data-language": language, className: `language-${language}` }
+          : {})}
+      >
+        {children}
+      </code>
+    );
+  },
   ol: ({ children }) => <ol>{children}</ol>,
   ul: ({ children }) => <ul>{children}</ul>,
   li: ({ children, ...rest }) => {
@@ -266,7 +296,11 @@ const defaultHandlers: Handlers = {
   ),
   video: (props) => <video {...props} />,
   blockquote: ({ children }) => <blockquote>{children}</blockquote>,
-  pre: ({ children }) => <pre>{children}</pre>,
+  pre: ({ children, language }) => (
+    <pre data-language={language} className={`language-${language}`}>
+      {children}
+    </pre>
+  ),
   table: ({ children }) => <table>{children}</table>,
   tr: ({ children }) => <tr>{children}</tr>,
   td: ({ children, colspan, rowspan }) => (
@@ -325,9 +359,11 @@ const Node = ({
       const forceCodeMark = parent?.type === "codeBlock";
       const clonedMarks = [...(node.marks ?? [])];
       if (forceCodeMark && !clonedMarks.some((mark) => mark.type === "code")) {
+        const language = parent?.attrs?.language ?? "text";
+        const code = parent.content?.[0].text ?? "";
         clonedMarks.push({
           type: "code",
-          attrs: { isInline: false },
+          attrs: { isInline: false, language, code },
         } satisfies Mark);
       }
       handler = ({ children }: { children?: ReactNode }) => (
@@ -410,7 +446,12 @@ const Node = ({
       break;
     case "codeBlock":
       handler = components?.pre ?? defaultHandlers.pre;
-      props = { children } satisfies ExtractPropsForHandler<Handlers["pre"]>;
+      const code = node.content?.[0].text ?? "";
+      props = {
+        children,
+        language: node.attrs?.language ?? "text",
+        code,
+      } satisfies ExtractPropsForHandler<Handlers["pre"]>;
       break;
     case "table":
       handler = components?.table ?? defaultHandlers.table;
@@ -531,6 +572,8 @@ const Marks = ({
       props = {
         children,
         isInline: mark.attrs.isInline ?? true,
+        language: mark.attrs.language ?? "text",
+        code: mark.attrs.code ?? "",
       } satisfies ExtractPropsForHandler<Handlers["code"]>;
       break;
     case "underline":

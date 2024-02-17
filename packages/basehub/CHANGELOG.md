@@ -1,5 +1,23 @@
 # basehub
 
+## 1.3.17
+
+### Patch Changes
+
+- e489ff6: pass code as a string param
+
+## 1.3.16
+
+### Patch Changes
+
+- 706a871: Pass language to code handler
+
+## 1.3.15
+
+### Patch Changes
+
+- 89d6004: expose language on pre
+
 ## 1.3.14
 
 ### Patch Changes
