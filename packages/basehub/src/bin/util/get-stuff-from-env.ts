@@ -110,7 +110,7 @@ export const getStuffFromEnv = (options?: {
  * doesn't use Zod nor dotenv-flow (so we don't ship extra stuff to the generated bundle). Assumes the env vars are already loaded.
  */
 export const runtime__getStuffFromEnvString = /**JavaScript */ `
-const getStuffFromEnv = (options) => {
+export const getStuffFromEnv = (options) => {
     const parsedDebugForcedURL = process.env.BASEHUB_DEBUG_FORCED_URL;
     const parsedBackwardsCompatURL = process.env.BASEHUB_URL;
 

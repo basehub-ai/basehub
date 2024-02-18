@@ -151,15 +151,17 @@ export const ClientPump = <Query extends PumpQuery>({
    * Resolve dynamic children
    */
   useEffect(() => {
-    if (!result) return;
+    if (!result?.data) return;
     if (typeof children === "function") {
       children(result.data).then(setResolvedChildren);
     } else {
       setResolvedChildren(children);
     }
-  }, [children, result]);
+  }, [children, result?.data]);
 
   return (
-    <DataProvider data={result?.data ?? null}>{resolvedChildren}</DataProvider>
+    <DataProvider data={result?.data ?? initialData ?? null}>
+      {resolvedChildren ?? initialResolvedChildren}
+    </DataProvider>
   );
 };

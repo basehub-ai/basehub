@@ -10,6 +10,8 @@ import {
   type QueryResult,
   // @ts-ignore
   generateQueryOp,
+  // @ts-ignore
+  getStuffFromEnv,
 } from "../index";
 
 export { PumpQuery };
@@ -38,6 +40,9 @@ export const Pump = async <Query extends PumpQuery>({
     query
   )) satisfies QueryResult<Query>;
 
+  const { headers } = getStuffFromEnv(basehubProps);
+  const token = headers["x-basehub-token"];
+
   const resolvedChildren =
     typeof children === "function" ? await children(data) : children;
 
@@ -53,7 +58,7 @@ export const Pump = async <Query extends PumpQuery>({
         <LazyClientPump
           query={query}
           rawQueryOp={rawQueryOp}
-          token={basehubProps.token ?? ""}
+          token={token}
           // react.lazy strips generic parameter :(
           initialData={data as any}
           initialResolvedChildren={resolvedChildren}
@@ -68,3 +73,23 @@ export const Pump = async <Query extends PumpQuery>({
 
   return <DataProvider data={data}>{resolvedChildren}</DataProvider>;
 };
+
+/**
+ * Create a Pump with a bound query. Accepts either a query object or a function that returns a query object.
+ * Useful for reusing the same query across multiple components.
+ */
+export const createPump =
+  <Query extends PumpQuery, Params = any>(
+    query: Query | ((params: Params) => Query)
+  ) =>
+  (
+    props: Omit<PumpProps<Query>, "query"> &
+      (Params extends void ? unknown : { params?: Params })
+  ) => {
+    // Dynamically call query function based on whether query is a function and params are provided
+    const queryResult =
+      typeof query === "function" ? query((props as any).params) : query;
+
+    // @ts-expect-error rsc
+    return <Pump {...props} query={queryResult} />;
+  };

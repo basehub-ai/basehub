@@ -1,4 +1,4 @@
-export { Pump } from "./server-pump";
+export { Pump, createPump } from "./server-pump";
 export type {
   PumpProps,
   Children as PumpChildren,
