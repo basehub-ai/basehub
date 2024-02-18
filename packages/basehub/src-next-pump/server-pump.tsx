@@ -23,7 +23,7 @@ const LazyClientPump = lazy(() =>
 
 export type Children<Query extends PumpQuery> =
   | React.ReactNode
-  | ((data: QueryResult<Query>) => Promise<React.ReactNode>);
+  | ((data: QueryResult<Query>) => React.ReactNode | Promise<React.ReactNode>);
 
 export type PumpProps<Query extends PumpQuery> = {
   children: Children<Query>;
@@ -49,6 +49,19 @@ export const Pump = async <Query extends PumpQuery>({
   if (draft) {
     // should probably get the pump token here...
     const rawQueryOp = generateQueryOp(query);
+
+    // wouldn't it be great if this worked?
+    // // for client components, the `children` function needs to be passed as a Server Action
+    // // we'll create that here.
+    // const childrenOrServerAction =
+    //   typeof children === "function"
+    //     ? async function (data: QueryResult<Query>) {
+    //         "use server";
+    //         console.log("acá?");
+    //         return await children(data);
+    //       }
+    //     : children;
+
     return (
       <Suspense
         // as a fallback, we return the data provider with the initial data we got here in the server

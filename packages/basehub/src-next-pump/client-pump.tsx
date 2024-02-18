@@ -153,7 +153,12 @@ export const ClientPump = <Query extends PumpQuery>({
   useEffect(() => {
     if (!result?.data) return;
     if (typeof children === "function") {
-      children(result.data).then(setResolvedChildren);
+      const res = children(result.data);
+      if (res instanceof Promise) {
+        res.then(setResolvedChildren);
+      } else {
+        setResolvedChildren(res);
+      }
     } else {
       setResolvedChildren(children);
     }
