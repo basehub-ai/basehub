@@ -1,29 +1,19 @@
 "use client";
-import * as React from "react";
+import { type ReactNode, useRef, useEffect, useState } from "react";
 import useSWRImmutable from "swr/immutable";
-import Pusher from "pusher-js";
-import { Replicache } from "replicache";
-import { createYoga } from "graphql-yoga";
 import { Children } from "./server-pump";
 import { DataProvider } from "./data-provider";
 
 import {
+  // @ts-ignore
   type QueryGenqlSelection as PumpQuery,
+  // @ts-ignore
   type QueryResult,
-} from "../index";
-import { generateSchema, blockBaseOps } from "@basehub/api-pump";
+} from "./index";
+import type Pusher from "pusher-js/types/src/core/pusher";
 
-type Block = any;
-
-export function pusherReceiver(spaceID: string, onPoke: () => Promise<void>) {
-  const pusher = new Pusher("91d723201cad1ff7449b", {
-    cluster: "mt1",
-  });
-
-  const channel = pusher.subscribe(spaceID.replace(/\//g, ""));
-  channel.bind("poke", onPoke);
-  return channel;
-}
+const appOrigin =
+  "https://basehub-git-jb-pump-explorations-new-draft-api-basehub.vercel.app";
 
 export const ClientPump = <Query extends PumpQuery>({
   children,
@@ -37,175 +27,93 @@ export const ClientPump = <Query extends PumpQuery>({
   rawQueryOp: { query: string; variables?: any };
   token: string;
   initialData?: QueryResult<Query>;
-  initialResolvedChildren?: React.ReactNode;
+  initialResolvedChildren?: ReactNode;
 }) => {
-  /**
-   * We'll login to basehub with the token.
-   * We'll get a JWT back, and the stuff Replicache needs to boot up.
-   */
-  const { data: pumpLoginData } = useSWRImmutable<{
-    token: string;
-    spaceId: string;
-    replicacheLicenseKey: string;
-    replicacheSchemaVersion: string;
-  }>(
+  const optimisticPumpQuery = useSWRImmutable<string | null>(
     ["pump-login", token] as const,
-    async ([, readToken]) => {
+    ([, readToken]) => {
       // First check if we already have this in localStorage. If we do and it hasn't expired, we can skip the login step.
-      const cached = localStorage.getItem(`bshb-pump-${readToken}`);
+      const cached = localStorage.getItem(`bshb-pump-token-${readToken}`);
       if (cached) {
-        const result = JSON.parse(cached) as null | {
-          token: string;
-          spaceId: string;
-          replicacheLicenseKey: string;
-          replicacheSchemaVersion: string;
-          expires: number;
-        };
-        if (result && result.expires > Date.now()) {
-          return {
-            token: result.token,
-            spaceId: result.spaceId,
-            replicacheLicenseKey: result.replicacheLicenseKey,
-            replicacheSchemaVersion: result.replicacheSchemaVersion,
-          };
-        }
+        return cached;
       }
-
-      const res = await fetch(`/api/replicache/pump-login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${readToken}`,
-        },
-        cache: "no-store",
-      });
-
-      if (res.status !== 200) throw new Error("could not login to basehub");
-
-      const { token, spaceId, replicacheLicenseKey, replicacheSchemaVersion } =
-        (await res.json()) as {
-          token: string;
-          spaceId: string;
-          replicacheLicenseKey: string;
-          replicacheSchemaVersion: string;
-        };
-
-      // Cache the token for 24 hours in localStorage.
-      localStorage.setItem(
-        `bshb-pump-${readToken}`,
-        JSON.stringify({
-          token,
-          spaceId,
-          replicacheLicenseKey,
-          replicacheSchemaVersion,
-          expires: Date.now() + 1000 * 60 * 60 * 24,
-        })
-      );
-
-      return { token, spaceId, replicacheLicenseKey, replicacheSchemaVersion };
-    },
-    {
-      refreshInterval: 0,
-      refreshWhenOffline: false,
-      revalidateOnFocus: false,
+      return null;
     }
   );
 
-  const { data: pumpData } = useSWRImmutable(
-    pumpLoginData ? ["pump", pumpLoginData.token] : null,
-    async () => {
-      if (!pumpLoginData) return null;
-      const replicache = new Replicache({
-        licenseKey: pumpLoginData.replicacheLicenseKey,
-        mutators: {},
-        pullURL: `/api/replicache/pull?pump-token=${pumpLoginData.token}&spaceID=${pumpLoginData.spaceId}`,
-        name: pumpLoginData.spaceId,
-        schemaVersion: pumpLoginData.replicacheSchemaVersion,
-      });
+  const pumpTokenRef = useRef<string | null | undefined>(null);
+  pumpTokenRef.current = optimisticPumpQuery.data;
 
-      const pokeChannel = pusherReceiver(pumpLoginData.spaceId, async () => {
-        replicache.pull();
-      });
-
-      return { replicache, pokeChannel };
-    }
-  );
-
-  const [blocks, setBlocks] = React.useState<null | Array<Block>>(null);
-
-  React.useEffect(() => {
-    if (!pumpData?.replicache) return;
-    const replicache = pumpData.replicache;
-    const unsub = replicache.subscribe((tx) => blockBaseOps.list(tx), {
-      onData: (data: Block[]) => {
-        setBlocks(data);
-      },
-    });
-
-    return () => {
-      unsub();
-    };
-  }, [pumpData?.replicache]);
-
-  const schemaQuery = useSWRImmutable(
-    blocks && pumpLoginData?.spaceId
-      ? (["bshb-pump-schema", blocks, pumpLoginData.spaceId] as const)
-      : null,
-    async ([, blocks, spaceID]) => {
-      const blocksByHashMap = new Map<string, Block>();
-
-      for (const block of blocks) {
-        blocksByHashMap.set(block.hash, block);
-      }
-
-      return generateSchema({
-        blocks,
-        repoSpaceID: spaceID,
-        type: "prefetched-blocks",
-        getRepo: async () => {
-          return {};
-        },
-        draft: false,
-        blockCacheMethods: {
-          getter: (hash) => blocksByHashMap.get(hash),
-          fallbackGetter: ({ hash }) => blocksByHashMap.get(hash),
-          setter: async () => undefined,
-        },
-      });
-    },
-    { keepPreviousData: true }
-  );
-
-  const queryDataQuery = useSWRImmutable(
-    schemaQuery.data
-      ? (["bshb-pump-data", rawQueryOp, schemaQuery.data] as const)
-      : null,
-    async ([, rawQueryOp, schema]) => {
-      // Create a Yoga instance with a GraphQL schema.
-      const yoga = createYoga({ schema });
-
-      // Execute a GraphQL query
-      const request = new Request("/graphql", {
+  const apiQuery = useSWRImmutable(
+    pumpTokenRef.current === undefined
+      ? null
+      : (["bshb-pump-data", rawQueryOp, token, pumpTokenRef.current] as const),
+    async ([, rawQueryOp, readToken, pumpToken]) => {
+      const response = await fetch(`${appOrigin}/api/pump`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
+          "x-basehub-token": readToken,
+          ...(pumpToken ? { "x-basehub-pump-token": pumpToken } : {}),
         },
         body: JSON.stringify(rawQueryOp),
       });
 
-      const result = await yoga(request);
-      const { data } = await result.json();
-      return data;
+      const { data, newPumpToken, spaceID } = await response.json();
+      if (newPumpToken) {
+        localStorage.setItem(`bshb-pump-token-${readToken}`, newPumpToken);
+        pumpTokenRef.current = newPumpToken;
+      }
+      return { data, spaceID };
     },
     { onError: (err) => console.error(err), keepPreviousData: true }
   );
 
-  const dataWithFallback = queryDataQuery.isLoading
-    ? queryDataQuery.data ?? initialData
-    : queryDataQuery.data;
+  const spaceID = apiQuery.data?.spaceID;
+  const apiQueryDataRef = useRef(apiQuery.data);
+  apiQueryDataRef.current = apiQuery.data;
+  const apiQueryMutateFnRef = useRef(apiQuery.mutate);
+  apiQueryMutateFnRef.current = apiQuery.mutate;
+
+  const [pusher, setPusher] = useState<Pusher | null>(null);
+
+  useEffect(() => {
+    import("pusher-js")
+      .then((mod) => {
+        setPusher(
+          new mod.default("91d723201cad1ff7449b", {
+            cluster: "mt1",
+          })
+        );
+      })
+      .catch((err) => {
+        console.log("error importing pusher");
+        console.error(err);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!spaceID) return;
+    if (!pusher) return;
+
+    const channel = pusher.subscribe(spaceID.replace(/\//g, ""));
+    channel.bind("poke", () => {
+      apiQueryMutateFnRef.current(apiQueryDataRef.current, {
+        revalidate: true,
+      });
+    });
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [spaceID, pusher]);
+
+  const dataWithFallback = apiQuery.isLoading
+    ? apiQuery.data?.data ?? initialData
+    : apiQuery.data?.data;
 
   const childrenQuery = useSWRImmutable(
-    ["bshb-pump-children", dataWithFallback],
+    ["bshb-pump-children", dataWithFallback, children],
     ([, data]) => {
       if (typeof children === "function") {
         return children(data);

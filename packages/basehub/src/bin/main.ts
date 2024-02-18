@@ -105,19 +105,20 @@ export const main = async (args: Args) => {
 
   appendEslintDisableToEachFileInDirectory(basehubOutputPath);
 
-  /**
-   * Next Pump stuff.
-   */
-  writeNextPump({
-    modulePath: basehubModulePath,
-    outputPath: basehubOutputPath,
-  });
-
   if (!args["--ts-only"]) {
+    /**
+     * Next Pump stuff.
+     */
+    writeNextPump({
+      modulePath: basehubModulePath,
+      outputPath: basehubOutputPath,
+    });
+
     // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
-    const peerDependencies = ["react", "react-dom", "../index"];
+    const peerDependencies = ["react", "react-dom", "../index", "swr"];
 
     console.log("📦 Compiling to JavaScript...");
+    const nextPumpOutDir = path.join(basehubOutputPath, "next-pump");
     await Promise.all([
       esbuild.build({
         entryPoints: [generatedMainExportPath],
@@ -133,17 +134,41 @@ export const main = async (args: Args) => {
         },
       }),
       esbuild.build({
-        entryPoints: [path.join(basehubOutputPath, "next-pump", "index.ts")],
+        entryPoints: [
+          path.join(basehubModulePath, "src-next-pump", "index.ts"),
+        ],
         bundle: true,
-        outdir: path.join(basehubOutputPath, "next-pump"),
+        outdir: nextPumpOutDir,
         minify: false,
         treeShaking: true,
         splitting: true,
         format: "esm",
+        target: ["es2020", "node18"],
         external: peerDependencies,
         banner: {
           js: "/* eslint-disable */",
         },
+        plugins: [
+          {
+            name: "use-client-for-client-components",
+            setup(build) {
+              build.onEnd(() => {
+                const rxp = /['"]use client['"]\s?;/i;
+                const outputFilePaths = fs.readdirSync(nextPumpOutDir);
+                outputFilePaths
+                  ?.filter((fileName) => !fileName.endsWith(".map"))
+                  .forEach((fileName) => {
+                    // if the file contains "use client" we'll make sure it's on the top.
+                    const filePath = path.join(nextPumpOutDir, fileName);
+                    const fileContents = fs.readFileSync(filePath, "utf-8");
+                    if (!rxp.test(fileContents)) return;
+                    const newContents = fileContents.replace(rxp, "");
+                    fs.writeFileSync(filePath, `"use client";\n${newContents}`);
+                  });
+              });
+            },
+          },
+        ],
       }),
     ]);
   }

@@ -4,7 +4,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**"],
-      "env": ["NEXT_PUBLIC_SITE_URL", "NODE_ENV"]
+      "env": ["NEXT_PUBLIC_SITE_URL", "NODE_ENV", "BASEHUB_TOKEN"]
     },
     "lint": {
       "outputs": []

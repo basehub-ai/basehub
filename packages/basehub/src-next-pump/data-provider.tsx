@@ -1,16 +1,16 @@
-"use client";
-import * as React from "react";
+import { type ReactNode, createContext, useContext } from "react";
 
 export type Children =
-  | React.ReactNode
-  | ((data: any) => React.ReactNode | Promise<React.ReactNode>);
+  | ReactNode
+  | ((data: any) => ReactNode | Promise<ReactNode>);
 
-const ClientQueryContext = React.createContext<
+const ClientQueryContext = createContext<
   undefined | null | { __thisIsData?: unknown }
 >(undefined);
 
 export const usePumpData = () => {
-  const ctx = React.useContext(ClientQueryContext);
+  "use client";
+  const ctx = useContext(ClientQueryContext);
   if (ctx === undefined) throw new Error("no pump data");
   return ctx;
 };
@@ -19,7 +19,7 @@ export const DataProvider = ({
   children,
   data,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   data: any;
 }) => {
   return (

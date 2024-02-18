@@ -2,9 +2,13 @@
 import { lazy, Suspense } from "react";
 import { DataProvider } from "./data-provider";
 import {
+  // @ts-ignore
   basehub,
+  // @ts-ignore
   type QueryGenqlSelection as PumpQuery,
+  // @ts-ignore
   type QueryResult,
+  // @ts-ignore
   generateQueryOp,
 } from "../index";
 
@@ -49,7 +53,7 @@ export const Pump = async <Query extends PumpQuery>({
         <LazyClientPump
           query={query}
           rawQueryOp={rawQueryOp}
-          token={""}
+          token={basehubProps.token ?? ""}
           // react.lazy strips generic parameter :(
           initialData={data as any}
           initialResolvedChildren={resolvedChildren}

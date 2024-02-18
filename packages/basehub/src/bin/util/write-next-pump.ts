@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import { appendEslintDisableToEachFileInDirectory } from "./disable-linters";
 
 export function writeNextPump({
   modulePath,
@@ -11,20 +12,30 @@ export function writeNextPump({
   const nextPumpSrcPath = path.resolve(modulePath, "src-next-pump");
   const nextPumpOutputPath = path.resolve(outputPath, "next-pump");
 
-  /**
-   * Create next-pump directory if it doesn't exist
-   */
-  if (!fs.existsSync(nextPumpOutputPath)) {
-    fs.mkdirSync(nextPumpOutputPath);
+  copyDirSync(nextPumpSrcPath, nextPumpOutputPath);
+
+  appendEslintDisableToEachFileInDirectory(nextPumpOutputPath);
+}
+
+function copyDirSync(src: string, dest: string) {
+  // Create the destination directory if it doesn't exist
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
   }
 
-  /**
-   * Copy every file from src-next-pump to dist/generated-client/next-pump
-   */
-  const files = fs.readdirSync(nextPumpSrcPath);
-  for (const file of files) {
-    const src = path.join(nextPumpSrcPath, file);
-    const dest = path.join(nextPumpOutputPath, file);
-    fs.copyFileSync(src, dest);
+  // Get the files and directories in the source directory
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+
+  // Loop through all entries (files and directories)
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+
+    // Recursively copy directories, or directly copy files
+    if (entry.isDirectory()) {
+      copyDirSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
   }
 }
