@@ -1,6 +1,12 @@
 "use client";
-import { type ReactNode, useRef, useEffect, useState } from "react";
-import useSWRImmutable from "swr/immutable";
+import {
+  type ReactNode,
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { Children } from "./server-pump";
 import { DataProvider } from "./data-provider";
 
@@ -29,60 +35,85 @@ export const ClientPump = <Query extends PumpQuery>({
   initialData?: QueryResult<Query>;
   initialResolvedChildren?: ReactNode;
 }) => {
-  const optimisticPumpQuery = useSWRImmutable<string | null>(
-    ["pump-login", token] as const,
-    ([, readToken]) => {
-      // First check if we already have this in localStorage. If we do and it hasn't expired, we can skip the login step.
-      const cached = localStorage.getItem(`bshb-pump-token-${readToken}`);
-      if (cached) {
-        return cached;
-      }
-      return null;
+  const pumpTokenLocalStorageManager = useMemo(() => {
+    return {
+      get: (readToken: string) => {
+        return localStorage.getItem(`bshb-pump-token-${readToken}`);
+      },
+      set: (readToken: string, pumpToken: string) => {
+        localStorage.setItem(`bshb-pump-token-${readToken}`, pumpToken);
+      },
+    };
+  }, []);
+
+  const [pumpToken, setPumpToken] = useState<string | null>();
+
+  /**
+   * Get cached pump token from localStorage.
+   */
+  useEffect(() => {
+    if (!token) return;
+    // First check if we already have this in localStorage. If we do and it hasn't expired, we can skip the login step.
+    const cached = pumpTokenLocalStorageManager.get(token);
+    setPumpToken(cached);
+  }, [pumpTokenLocalStorageManager, token]);
+
+  const [result, setResult] = useState<{
+    data: QueryResult<Query>;
+    spaceID: string;
+    pusherData: {
+      app_key: string;
+      cluster: string;
+    };
+  } | null>(initialData);
+
+  /**
+   * Query the Draft API.
+   */
+  const refetch = useCallback(async () => {
+    const response = await fetch(`${appOrigin}/api/pump`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-basehub-token": token,
+        ...(pumpToken ? { "x-basehub-pump-token": pumpToken } : {}),
+      },
+      body: JSON.stringify(rawQueryOp),
+    });
+
+    const { data, newPumpToken, spaceID, pusherData } = await response.json();
+    if (newPumpToken) {
+      pumpTokenLocalStorageManager.set(token, newPumpToken);
+      setPumpToken(newPumpToken);
     }
-  );
 
-  const pumpTokenRef = useRef<string | null | undefined>(null);
-  pumpTokenRef.current = optimisticPumpQuery.data;
+    setResult({ data, spaceID, pusherData });
+  }, [pumpToken, pumpTokenLocalStorageManager, rawQueryOp, token]);
 
-  const apiQuery = useSWRImmutable(
-    pumpTokenRef.current === undefined
-      ? null
-      : (["bshb-pump-data", rawQueryOp, token, pumpTokenRef.current] as const),
-    async ([, rawQueryOp, readToken, pumpToken]) => {
-      const response = await fetch(`${appOrigin}/api/pump`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-basehub-token": readToken,
-          ...(pumpToken ? { "x-basehub-pump-token": pumpToken } : {}),
-        },
-        body: JSON.stringify(rawQueryOp),
-      });
+  /**
+   * First query.
+   */
+  useEffect(() => {
+    if (!token || pumpToken === undefined) return;
+    refetch();
+  }, [pumpToken, refetch, token]);
 
-      const { data, newPumpToken, spaceID } = await response.json();
-      if (newPumpToken) {
-        localStorage.setItem(`bshb-pump-token-${readToken}`, newPumpToken);
-        pumpTokenRef.current = newPumpToken;
-      }
-      return { data, spaceID };
-    },
-    { onError: (err) => console.error(err), keepPreviousData: true }
-  );
-
-  const spaceID = apiQuery.data?.spaceID;
-  const apiQueryDataRef = useRef(apiQuery.data);
-  apiQueryDataRef.current = apiQuery.data;
-  const apiQueryMutateFnRef = useRef(apiQuery.mutate);
-  apiQueryMutateFnRef.current = apiQuery.mutate;
+  const spaceID = result?.spaceID;
+  const apiQueryDataRef = useRef(result);
+  apiQueryDataRef.current = result;
 
   const [pusher, setPusher] = useState<Pusher | null>(null);
 
+  /**
+   * Dynamic pusher import!
+   */
   useEffect(() => {
+    if (!result?.pusherData) return;
     import("pusher-js")
       .then((mod) => {
         setPusher(
-          new mod.default("91d723201cad1ff7449b", {
-            cluster: "mt1",
+          new mod.default(result.pusherData.app_key, {
+            cluster: result.pusherData.cluster,
           })
         );
       })
@@ -90,47 +121,45 @@ export const ClientPump = <Query extends PumpQuery>({
         console.log("error importing pusher");
         console.error(err);
       });
-  }, []);
+  }, [result?.pusherData]);
 
+  /**
+   * Subscribe to Pusher channel and query.
+   */
   useEffect(() => {
     if (!spaceID) return;
     if (!pusher) return;
 
     const channel = pusher.subscribe(spaceID.replace(/\//g, ""));
     channel.bind("poke", () => {
-      apiQueryMutateFnRef.current(apiQueryDataRef.current, {
-        revalidate: true,
-      });
+      refetch();
     });
 
     return () => {
       channel.unsubscribe();
     };
-  }, [spaceID, pusher]);
+  }, [pusher, refetch, spaceID]);
 
-  const dataWithFallback = apiQuery.isLoading
-    ? apiQuery.data?.data ?? initialData
-    : apiQuery.data?.data;
-
-  const childrenQuery = useSWRImmutable(
-    ["bshb-pump-children", dataWithFallback, children],
-    ([, data]) => {
-      if (typeof children === "function") {
-        return children(data);
-      } else {
-        return children;
-      }
-    },
-    { keepPreviousData: true }
+  const [resolvedChildren, setResolvedChildren] = useState<ReactNode>(
+    typeof children === "function"
+      ? // if function, we'll resolve in useEffect
+        initialResolvedChildren
+      : children
   );
 
-  const resolvedChildrenWithFallback = childrenQuery.isLoading
-    ? childrenQuery.data ?? initialResolvedChildren
-    : childrenQuery.data;
+  /**
+   * Resolve dynamic children
+   */
+  useEffect(() => {
+    if (!result) return;
+    if (typeof children === "function") {
+      children(result.data).then(setResolvedChildren);
+    } else {
+      setResolvedChildren(children);
+    }
+  }, [children, result]);
 
   return (
-    <DataProvider data={dataWithFallback ?? null}>
-      {resolvedChildrenWithFallback}
-    </DataProvider>
+    <DataProvider data={result?.data ?? null}>{resolvedChildren}</DataProvider>
   );
 };

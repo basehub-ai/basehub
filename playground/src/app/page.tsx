@@ -13,6 +13,7 @@ export default async function HomePage() {
           },
           doc: {
             heroTitle: true,
+            _title: true,
           },
         }}
       >
@@ -20,7 +21,7 @@ export default async function HomePage() {
           "use server";
 
           if (!data) return null;
-          return <h1>{data.doc.heroTitle}</h1>;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
         }}
       </Pump>
     </main>

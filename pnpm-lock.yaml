@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  graphql: 16.8.1
-
 importers:
 
   .:
@@ -70,6 +67,9 @@ importers:
       '@genql/cli':
         specifier: 6.3.2
         version: 6.3.2
+      '@tanstack/react-query':
+        specifier: ^5.21.7
+        version: 5.21.7(react@18.2.0)
       '@types/node':
         specifier: 18.13.0
         version: 18.13.0
@@ -138,7 +138,7 @@ importers:
         specifier: workspace:*
         version: link:../internal/eslint-config-custom
       graphql:
-        specifier: 16.8.1
+        specifier: ^16.8.1
         version: 16.8.1
       next:
         specifier: ^13.5.3
@@ -1079,10 +1079,23 @@ packages:
       tslib: 2.6.1
     dev: false
 
+  /@tanstack/query-core@5.21.7:
+    resolution: {integrity: sha512-z0NSWFsM75esVmkxeuDWeyo9Wv4CZ/WsLMZgu1Zz164S6Oc/57NMia88dTu/d51wdVowMTAcDMQgRmiWmyPMxQ==}
+    dev: false
+
+  /@tanstack/react-query@5.21.7(react@18.2.0):
+    resolution: {integrity: sha512-Op9nVL/L0Lg+aSPFSGbrymu6d3tzUoZ+FZ+rRIZpu5HkGasflqzhsXkL26Sa+MEwLyox7Q1erSFwNIRO3TYjXQ==}
+    peerDependencies:
+      react: ^18.0.0
+    dependencies:
+      '@tanstack/query-core': 5.21.7
+      react: 18.2.0
+    dev: false
+
   /@types/graphql-iso-date@3.4.0:
     resolution: {integrity: sha512-V3jITHTsoI2E8TGt9+/HPDz6LWt3z9/HYnPJYWI6WwiLRexsngg7KzaQlCgQkA4jkEbGPROUD0hJFc9F02W9WA==}
     dependencies:
-      graphql: 16.8.1
+      graphql: 15.8.0
     dev: false
 
   /@types/is-ci@3.0.0:
@@ -3021,6 +3034,11 @@ packages:
       graphql: 16.8.1
       lru-cache: 10.2.0
       tslib: 2.6.1
+    dev: false
+
+  /graphql@15.8.0:
+    resolution: {integrity: sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==}
+    engines: {node: '>= 10.x'}
     dev: false
 
   /graphql@16.8.1:
