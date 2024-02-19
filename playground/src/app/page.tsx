@@ -8,9 +8,181 @@ export default async function HomePage() {
         draft
         token={process.env.BASEHUB_TOKEN!}
         query={{
-          _sys: {
-            id: true,
+          doc: {
+            heroTitle: true,
+            _title: true,
           },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+            _id: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return (
+            <h1>
+              different return data even...{data.doc.heroTitle} {data.doc._id}
+            </h1>
+          );
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
+          doc: {
+            heroTitle: true,
+            _title: true,
+          },
+        }}
+      >
+        {async (data) => {
+          "use server";
+
+          if (!data) return null;
+          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+        }}
+      </Pump>
+      <Pump
+        draft
+        token={process.env.BASEHUB_TOKEN!}
+        query={{
           doc: {
             heroTitle: true,
             _title: true,

@@ -18,6 +18,19 @@ import {
 } from "./index";
 import type Pusher from "pusher-js/types/src/core/pusher";
 
+let pusherMounted = false;
+const subscribers = new Set<() => void>(); // we'll call these when pusher tells us to poke
+
+const clientCache = new Map<
+  string, // a query string (with the variables included)
+  {
+    start: number; // the time the query was started
+    data: Promise<QueryResult<any>>; // the promise that resolves to the data
+  }
+>();
+
+const DEDUPE_TIME_MS = 500;
+
 const appOrigin =
   "https://basehub-git-jb-pump-explorations-new-draft-api-basehub.vercel.app";
 
@@ -35,6 +48,8 @@ export const ClientPump = <Query extends PumpQuery>({
   initialData?: QueryResult<Query>;
   initialResolvedChildren?: ReactNode;
 }) => {
+  const cacheKey = JSON.stringify(rawQueryOp);
+
   const pumpTokenLocalStorageManager = useMemo(() => {
     return {
       get: (readToken: string) => {
@@ -62,6 +77,7 @@ export const ClientPump = <Query extends PumpQuery>({
     data: QueryResult<Query>;
     spaceID: string;
     pusherData: {
+      channel_key: string;
       app_key: string;
       cluster: string;
     };
@@ -71,7 +87,21 @@ export const ClientPump = <Query extends PumpQuery>({
    * Query the Draft API.
    */
   const refetch = useCallback(async () => {
-    const response = await fetch(`${appOrigin}/api/pump`, {
+    if (clientCache.has(cacheKey)) {
+      const cached = clientCache.get(cacheKey)!;
+      if (Date.now() - cached.start < DEDUPE_TIME_MS) {
+        cached.data.then((result) => {
+          if (result.newPumpToken) {
+            pumpTokenLocalStorageManager.set(token, result.newPumpToken);
+            setPumpToken(result.newPumpToken);
+          }
+          setResult(result);
+        });
+        return;
+      }
+    }
+
+    const dataPromise = fetch(`${appOrigin}/api/pump`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -79,26 +109,38 @@ export const ClientPump = <Query extends PumpQuery>({
         ...(pumpToken ? { "x-basehub-pump-token": pumpToken } : {}),
       },
       body: JSON.stringify(rawQueryOp),
+    }).then(async (response) => {
+      const { data, newPumpToken, spaceID, pusherData } = await response.json();
+      if (newPumpToken) {
+        pumpTokenLocalStorageManager.set(token, newPumpToken);
+        setPumpToken(newPumpToken);
+      }
+
+      setResult({ data, spaceID, pusherData });
+      return { data, spaceID, pusherData };
     });
 
-    const { data, newPumpToken, spaceID, pusherData } = await response.json();
-    if (newPumpToken) {
-      pumpTokenLocalStorageManager.set(token, newPumpToken);
-      setPumpToken(newPumpToken);
-    }
-
-    setResult({ data, spaceID, pusherData });
-  }, [pumpToken, pumpTokenLocalStorageManager, rawQueryOp, token]);
+    clientCache.set(cacheKey, { start: Date.now(), data: dataPromise });
+  }, [cacheKey, pumpToken, pumpTokenLocalStorageManager, rawQueryOp, token]);
 
   /**
-   * First query.
+   * First query plus subscribe to pusher pokes.
    */
   useEffect(() => {
     if (!token || pumpToken === undefined) return;
-    refetch();
-  }, [pumpToken, refetch, token]);
 
-  const spaceID = result?.spaceID;
+    function boundRefetch() {
+      refetch();
+    }
+
+    boundRefetch(); // initial fetch
+    subscribers.add(boundRefetch);
+    return () => {
+      subscribers.delete(boundRefetch);
+    };
+  }, [cacheKey, pumpToken, refetch, token]);
+
+  const pusherChannelKey = result?.pusherData?.channel_key;
   const apiQueryDataRef = useRef(result);
   apiQueryDataRef.current = result;
 
@@ -108,7 +150,11 @@ export const ClientPump = <Query extends PumpQuery>({
    * Dynamic pusher import!
    */
   useEffect(() => {
+    if (pusherMounted) return; // dedupe across multiple pumps
     if (!result?.pusherData) return;
+
+    pusherMounted = true;
+
     import("pusher-js")
       .then((mod) => {
         setPusher(
@@ -121,24 +167,28 @@ export const ClientPump = <Query extends PumpQuery>({
         console.log("error importing pusher");
         console.error(err);
       });
+
+    return () => {
+      pusherMounted = false;
+    };
   }, [result?.pusherData]);
 
   /**
    * Subscribe to Pusher channel and query.
    */
   useEffect(() => {
-    if (!spaceID) return;
+    if (!pusherChannelKey) return;
     if (!pusher) return;
 
-    const channel = pusher.subscribe(spaceID.replace(/\//g, ""));
+    const channel = pusher.subscribe(pusherChannelKey);
     channel.bind("poke", () => {
-      refetch();
+      subscribers.forEach((sub) => sub());
     });
 
     return () => {
       channel.unsubscribe();
     };
-  }, [pusher, refetch, spaceID]);
+  }, [pusher, refetch, pusherChannelKey]);
 
   const [resolvedChildren, setResolvedChildren] = useState<ReactNode>(
     typeof children === "function"

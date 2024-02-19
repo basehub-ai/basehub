@@ -21,6 +21,16 @@ const LazyClientPump = lazy(() =>
   import("./client-pump").then((mod) => ({ default: mod.ClientPump }))
 );
 
+const cache = new Map<
+  string, // a query string (with the variables included)
+  {
+    start: number; // the time the query was started
+    data: Promise<QueryResult<any>>; // the promise that resolves to the data
+  }
+>();
+
+const DEDUPE_TIME_MS = 500;
+
 export type Children<Query extends PumpQuery> =
   | React.ReactNode
   | ((data: QueryResult<Query>) => React.ReactNode | Promise<React.ReactNode>);
@@ -36,9 +46,29 @@ export const Pump = async <Query extends PumpQuery>({
   query,
   ...basehubProps
 }: PumpProps<Query>) => {
-  const data = (await basehub(basehubProps).query(
-    query
-  )) satisfies QueryResult<Query>;
+  const rawQueryOp = generateQueryOp(query);
+  const cacheKey = JSON.stringify(rawQueryOp);
+
+  let data: QueryResult<Query> | undefined = undefined;
+
+  if (cache.has(cacheKey)) {
+    const cached = cache.get(cacheKey)!;
+    if (Date.now() - cached.start < DEDUPE_TIME_MS) {
+      data = (await cached.data) as any;
+    }
+  }
+
+  if (!data) {
+    const dataPromise = basehub(basehubProps).query(query) satisfies Promise<
+      QueryResult<Query>
+    >;
+    // quickly set cache to avoid dedup further requests
+    cache.set(cacheKey, {
+      start: Date.now(),
+      data: dataPromise,
+    });
+    data = await dataPromise;
+  }
 
   const { headers } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
