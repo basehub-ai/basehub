@@ -1,5 +1,33 @@
 # playground
 
+## 0.0.47-next.3
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.3
+
+## 0.0.47-next.2
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.2
+
+## 0.0.47-next.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.1
+
+## 0.0.47-next.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.0
+
 ## 0.0.46
 
 ### Patch Changes

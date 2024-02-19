@@ -1,5 +1,29 @@
 # basehub
 
+## 1.4.0-next.3
+
+### Patch Changes
+
+- react types bug
+
+## 1.4.0-next.2
+
+### Patch Changes
+
+- tweak react import
+
+## 1.4.0-next.1
+
+### Patch Changes
+
+- Expose next pump in files
+
+## 1.4.0-next.0
+
+### Minor Changes
+
+- Add next pump
+
 ## 1.3.17
 
 ### Patch Changes

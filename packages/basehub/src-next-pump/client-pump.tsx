@@ -1,12 +1,5 @@
 "use client";
-import {
-  type ReactNode,
-  useRef,
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-} from "react";
+import * as React from "react";
 import { Children } from "./server-pump";
 import { DataProvider } from "./data-provider";
 
@@ -46,11 +39,11 @@ export const ClientPump = <Query extends PumpQuery>({
   rawQueryOp: { query: string; variables?: any };
   token: string;
   initialData?: QueryResult<Query>;
-  initialResolvedChildren?: ReactNode;
+  initialResolvedChildren?: React.ReactNode;
 }) => {
   const cacheKey = JSON.stringify(rawQueryOp);
 
-  const pumpTokenLocalStorageManager = useMemo(() => {
+  const pumpTokenLocalStorageManager = React.useMemo(() => {
     return {
       get: (readToken: string) => {
         return localStorage.getItem(`bshb-pump-token-${readToken}`);
@@ -61,19 +54,19 @@ export const ClientPump = <Query extends PumpQuery>({
     };
   }, []);
 
-  const [pumpToken, setPumpToken] = useState<string | null>();
+  const [pumpToken, setPumpToken] = React.useState<string | null>();
 
   /**
    * Get cached pump token from localStorage.
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (!token) return;
     // First check if we already have this in localStorage. If we do and it hasn't expired, we can skip the login step.
     const cached = pumpTokenLocalStorageManager.get(token);
     setPumpToken(cached);
   }, [pumpTokenLocalStorageManager, token]);
 
-  const [result, setResult] = useState<{
+  const [result, setResult] = React.useState<{
     data: QueryResult<Query>;
     spaceID: string;
     pusherData: {
@@ -86,7 +79,7 @@ export const ClientPump = <Query extends PumpQuery>({
   /**
    * Query the Draft API.
    */
-  const refetch = useCallback(async () => {
+  const refetch = React.useCallback(async () => {
     if (clientCache.has(cacheKey)) {
       const cached = clientCache.get(cacheKey)!;
       if (Date.now() - cached.start < DEDUPE_TIME_MS) {
@@ -126,7 +119,7 @@ export const ClientPump = <Query extends PumpQuery>({
   /**
    * First query plus subscribe to pusher pokes.
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (!token || pumpToken === undefined) return;
 
     function boundRefetch() {
@@ -141,15 +134,13 @@ export const ClientPump = <Query extends PumpQuery>({
   }, [cacheKey, pumpToken, refetch, token]);
 
   const pusherChannelKey = result?.pusherData?.channel_key;
-  const apiQueryDataRef = useRef(result);
-  apiQueryDataRef.current = result;
 
-  const [pusher, setPusher] = useState<Pusher | null>(null);
+  const [pusher, setPusher] = React.useState<Pusher | null>(null);
 
   /**
    * Dynamic pusher import!
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (pusherMounted) return; // dedupe across multiple pumps
     if (!result?.pusherData) return;
 
@@ -176,7 +167,7 @@ export const ClientPump = <Query extends PumpQuery>({
   /**
    * Subscribe to Pusher channel and query.
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (!pusherChannelKey) return;
     if (!pusher) return;
 
@@ -190,17 +181,18 @@ export const ClientPump = <Query extends PumpQuery>({
     };
   }, [pusher, refetch, pusherChannelKey]);
 
-  const [resolvedChildren, setResolvedChildren] = useState<ReactNode>(
-    typeof children === "function"
-      ? // if function, we'll resolve in useEffect
-        initialResolvedChildren
-      : children
-  );
+  const [resolvedChildren, setResolvedChildren] =
+    React.useState<React.ReactNode>(
+      typeof children === "function"
+        ? // if function, we'll resolve in React.useEffect
+          initialResolvedChildren
+        : children
+    );
 
   /**
    * Resolve dynamic children
    */
-  useEffect(() => {
+  React.useEffect(() => {
     if (!result?.data) return;
     if (typeof children === "function") {
       const res = children(result.data);
