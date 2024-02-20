@@ -69,7 +69,7 @@ export const Pump = async <Query extends PumpQuery>({
     data = await dataPromise;
   }
 
-  const { headers } = getStuffFromEnv(basehubProps);
+  const { headers, url } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
 
   const resolvedChildren =
@@ -91,6 +91,8 @@ export const Pump = async <Query extends PumpQuery>({
     //       }
     //     : children;
 
+    const appOrigin = url.origin.replace("api.", ""); // compatible with https://api.basehub.com and https://api.bshb.dev
+
     return (
       <React.Suspense
         // as a fallback, we return the data provider with the initial data we got here in the server
@@ -104,6 +106,7 @@ export const Pump = async <Query extends PumpQuery>({
           // react.lazy strips generic parameter :(
           initialData={data as any}
           initialResolvedChildren={resolvedChildren}
+          appOrigin={appOrigin}
         >
           {/* react.lazy strips generic parameter :( */}
           {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}

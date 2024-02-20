@@ -24,13 +24,11 @@ const clientCache = new Map<
 
 const DEDUPE_TIME_MS = 500;
 
-const appOrigin =
-  "https://basehub-git-jb-pump-explorations-new-draft-api-basehub.vercel.app";
-
 export const ClientPump = <Query extends PumpQuery>({
   children,
   rawQueryOp,
   token,
+  appOrigin,
   initialData,
   initialResolvedChildren,
 }: {
@@ -38,6 +36,7 @@ export const ClientPump = <Query extends PumpQuery>({
   query: Query;
   rawQueryOp: { query: string; variables?: any };
   token: string;
+  appOrigin: string;
   initialData?: QueryResult<Query>;
   initialResolvedChildren?: React.ReactNode;
 }) => {

@@ -1,5 +1,11 @@
 # basehub
 
+## 1.4.0-next.4
+
+### Patch Changes
+
+- Infer app origin
+
 ## 1.4.0-next.3
 
 ### Patch Changes
