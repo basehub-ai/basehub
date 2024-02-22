@@ -1,6 +1,5 @@
 import path from "path";
 import fs from "fs";
-import { appendEslintDisableToEachFileInDirectory } from "./disable-linters";
 
 export function writeNextPump({
   modulePath,
@@ -13,8 +12,6 @@ export function writeNextPump({
   const nextPumpOutputPath = path.resolve(outputPath, "next-pump");
 
   copyDirSync(nextPumpSrcPath, nextPumpOutputPath);
-
-  appendEslintDisableToEachFileInDirectory(nextPumpOutputPath);
 }
 
 function copyDirSync(src: string, dest: string) {

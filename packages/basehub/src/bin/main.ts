@@ -171,6 +171,8 @@ export const main = async (args: Args) => {
         ],
       }),
     ]);
+
+    appendEslintDisableToEachFileInDirectory(nextPumpOutDir);
   }
 
   console.log("🪄 Generated `basehub` client");
