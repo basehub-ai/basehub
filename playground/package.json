@@ -1,7 +1,7 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.47-next.4",
+  "version": "0.0.47-next.5",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

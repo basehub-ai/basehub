@@ -1,5 +1,11 @@
 # basehub
 
+## 1.4.0-next.5
+
+### Patch Changes
+
+- support multiple paralel queries
+
 ## 1.4.0-next.4
 
 ### Patch Changes
