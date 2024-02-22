@@ -1,5 +1,11 @@
 # basehub
 
+## 1.4.0-next.6
+
+### Patch Changes
+
+- fixes
+
 ## 1.4.0-next.5
 
 ### Patch Changes
