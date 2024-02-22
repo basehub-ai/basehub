@@ -1,47 +1,53 @@
 "use client";
 import * as React from "react";
-import { Children } from "./server-pump";
+import { PumpProps, QueryResults } from "./server-pump";
 import { DataProvider } from "./data-provider";
 
 import {
   // @ts-ignore
   type QueryGenqlSelection as PumpQuery,
-  // @ts-ignore
-  type QueryResult,
 } from "./index";
 import type Pusher from "pusher-js/types/src/core/pusher";
 
 let pusherMounted = false;
 const subscribers = new Set<() => void>(); // we'll call these when pusher tells us to poke
 
+type ResponseCache = {
+  data: QueryResults<any>[number];
+  spaceID: string;
+  pusherData: {
+    channel_key: string;
+    app_key: string;
+    cluster: string;
+  };
+  newPumpToken: string;
+};
+
 const clientCache = new Map<
   string, // a query string (with the variables included)
   {
     start: number; // the time the query was started
-    data: Promise<QueryResult<any>>; // the promise that resolves to the data
+    response: Promise<ResponseCache>; // the promise that resolves to the data
   }
 >();
 
 const DEDUPE_TIME_MS = 500;
 
-export const ClientPump = <Query extends PumpQuery>({
+export const ClientPump = <Queries extends PumpQuery[]>({
   children,
-  rawQueryOp,
+  rawQueries,
   token,
   appOrigin,
   initialData,
   initialResolvedChildren,
 }: {
-  children: Children<Query>;
-  query: Query;
-  rawQueryOp: { query: string; variables?: any };
+  children: PumpProps<Queries>["children"];
+  rawQueries: Array<{ query: string; variables?: any }>;
   token: string;
   appOrigin: string;
-  initialData?: QueryResult<Query>;
+  initialData?: QueryResults<Queries>;
   initialResolvedChildren?: React.ReactNode;
 }) => {
-  const cacheKey = JSON.stringify(rawQueryOp);
-
   const pumpTokenLocalStorageManager = React.useMemo(() => {
     return {
       get: (readToken: string) => {
@@ -66,54 +72,91 @@ export const ClientPump = <Query extends PumpQuery>({
   }, [pumpTokenLocalStorageManager, token]);
 
   const [result, setResult] = React.useState<{
-    data: QueryResult<Query>;
+    data: QueryResults<Queries>;
     spaceID: string;
     pusherData: {
       channel_key: string;
       app_key: string;
       cluster: string;
     };
-  } | null>(initialData);
+  } | null>();
+
+  type Result = NonNullable<typeof result>;
 
   /**
    * Query the Draft API.
    */
   const refetch = React.useCallback(async () => {
-    if (clientCache.has(cacheKey)) {
-      const cached = clientCache.get(cacheKey)!;
-      if (Date.now() - cached.start < DEDUPE_TIME_MS) {
-        cached.data.then((result) => {
-          if (result.newPumpToken) {
-            pumpTokenLocalStorageManager.set(token, result.newPumpToken);
-            setPumpToken(result.newPumpToken);
+    let newPumpToken: string | undefined;
+    let pusherData: Result["pusherData"] | undefined = undefined;
+    let spaceID: Result["spaceID"] | undefined = undefined;
+    const responses = await Promise.all(
+      rawQueries.map(async (rawQueryOp) => {
+        const cacheKey = JSON.stringify(rawQueryOp);
+
+        if (clientCache.has(cacheKey)) {
+          const cached = clientCache.get(cacheKey)!;
+          if (Date.now() - cached.start < DEDUPE_TIME_MS) {
+            const response = await cached.response;
+            if (response.newPumpToken) {
+              newPumpToken = response.newPumpToken;
+            }
+            pusherData = response.pusherData;
+            spaceID = response.spaceID;
+            return response;
           }
-          setResult(result);
+        }
+
+        const responsePromise = fetch(`${appOrigin}/api/pump`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-basehub-token": token,
+            ...(pumpToken ? { "x-basehub-pump-token": pumpToken } : {}),
+          },
+          body: JSON.stringify(rawQueryOp),
+        }).then(async (response) => {
+          const { data, newPumpToken, spaceID, pusherData } =
+            await response.json();
+
+          return {
+            data,
+            spaceID,
+            pusherData,
+            newPumpToken,
+          } as ResponseCache;
         });
-        return;
-      }
-    }
 
-    const dataPromise = fetch(`${appOrigin}/api/pump`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-basehub-token": token,
-        ...(pumpToken ? { "x-basehub-pump-token": pumpToken } : {}),
-      },
-      body: JSON.stringify(rawQueryOp),
-    }).then(async (response) => {
-      const { data, newPumpToken, spaceID, pusherData } = await response.json();
-      if (newPumpToken) {
-        pumpTokenLocalStorageManager.set(token, newPumpToken);
-        setPumpToken(newPumpToken);
-      }
+        // we quickly set the cache (without awaiting)
+        clientCache.set(cacheKey, {
+          start: Date.now(),
+          response: responsePromise,
+        });
 
-      setResult({ data, spaceID, pusherData });
-      return { data, spaceID, pusherData };
+        // then await and set local state
+        const response = await responsePromise;
+        if (response.newPumpToken) {
+          newPumpToken = response.newPumpToken;
+        }
+        pusherData = response.pusherData;
+        spaceID = response.spaceID;
+        return response;
+      })
+    );
+
+    if (!pusherData || !spaceID) return;
+
+    setResult({
+      data: responses.map((r) => r.data) as any,
+      pusherData,
+      spaceID,
     });
 
-    clientCache.set(cacheKey, { start: Date.now(), data: dataPromise });
-  }, [cacheKey, pumpToken, pumpTokenLocalStorageManager, rawQueryOp, token]);
+    if (newPumpToken) {
+      pumpTokenLocalStorageManager.set(token, newPumpToken);
+      setPumpToken(newPumpToken);
+    }
+  }, [appOrigin, pumpToken, pumpTokenLocalStorageManager, rawQueries, token]);
 
   /**
    * First query plus subscribe to pusher pokes.
@@ -130,7 +173,7 @@ export const ClientPump = <Query extends PumpQuery>({
     return () => {
       subscribers.delete(boundRefetch);
     };
-  }, [cacheKey, pumpToken, refetch, token]);
+  }, [pumpToken, refetch, token]);
 
   const pusherChannelKey = result?.pusherData?.channel_key;
 

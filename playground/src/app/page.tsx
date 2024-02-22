@@ -7,14 +7,16 @@ export default async function HomePage() {
       <Pump
         draft
         token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
+        queries={[
+          {
+            doc: {
+              heroTitle: true,
+              _title: true,
+            },
           },
-        }}
+        ]}
       >
-        {async (data) => {
+        {async ([data]) => {
           "use server";
 
           if (!data) return null;
@@ -24,176 +26,30 @@ export default async function HomePage() {
       <Pump
         draft
         token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-            _id: true,
+        queries={[
+          {
+            doc: {
+              heroTitle: true,
+              _title: true,
+            },
           },
-        }}
+          {
+            _sys: {
+              hash: true,
+            },
+          },
+        ]}
       >
-        {async (data) => {
+        {async ([data, data2]) => {
           "use server";
 
           if (!data) return null;
           return (
             <h1>
-              different return data even...{data.doc.heroTitle} {data.doc._id}
+              different return data even...{data.doc.heroTitle}{" "}
+              {data2._sys.hash}
             </h1>
           );
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
-        }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        query={{
-          doc: {
-            heroTitle: true,
-            _title: true,
-          },
-        }}
-      >
-        {async (data) => {
-          "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
         }}
       </Pump>
     </main>
