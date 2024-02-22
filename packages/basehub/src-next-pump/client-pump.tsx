@@ -33,6 +33,15 @@ const clientCache = new Map<
 
 const DEDUPE_TIME_MS = 500;
 
+const pumpTokenLocalStorageManager = {
+  get: (readToken: string) => {
+    return localStorage.getItem(`bshb-pump-token-${readToken}`);
+  },
+  set: (readToken: string, pumpToken: string) => {
+    localStorage.setItem(`bshb-pump-token-${readToken}`, pumpToken);
+  },
+};
+
 export const ClientPump = <Queries extends PumpQuery[]>({
   children,
   rawQueries,
@@ -48,17 +57,6 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   initialData?: QueryResults<Queries>;
   initialResolvedChildren?: React.ReactNode;
 }) => {
-  const pumpTokenLocalStorageManager = React.useMemo(() => {
-    return {
-      get: (readToken: string) => {
-        return localStorage.getItem(`bshb-pump-token-${readToken}`);
-      },
-      set: (readToken: string, pumpToken: string) => {
-        localStorage.setItem(`bshb-pump-token-${readToken}`, pumpToken);
-      },
-    };
-  }, []);
-
   const [pumpToken, setPumpToken] = React.useState<string | null>();
 
   /**
@@ -69,7 +67,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     // First check if we already have this in localStorage. If we do and it hasn't expired, we can skip the login step.
     const cached = pumpTokenLocalStorageManager.get(token);
     setPumpToken(cached);
-  }, [pumpTokenLocalStorageManager, token]);
+  }, [token]);
 
   const [result, setResult] = React.useState<{
     data: QueryResults<Queries>;
@@ -156,7 +154,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
       pumpTokenLocalStorageManager.set(token, newPumpToken);
       setPumpToken(newPumpToken);
     }
-  }, [appOrigin, pumpToken, pumpTokenLocalStorageManager, rawQueries, token]);
+  }, [appOrigin, pumpToken, rawQueries, token]);
 
   /**
    * First query plus subscribe to pusher pokes.
@@ -223,10 +221,12 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     };
   }, [pusher, refetch, pusherChannelKey]);
 
+  const resolvedData = result?.data ?? initialData ?? null;
+
   const [resolvedChildren, setResolvedChildren] =
     React.useState<React.ReactNode>(
       typeof children === "function"
-        ? // if function, we'll resolve in React.useEffect
+        ? // if function, we'll resolve in React.useEffect below
           initialResolvedChildren
         : children
     );
@@ -235,9 +235,9 @@ export const ClientPump = <Queries extends PumpQuery[]>({
    * Resolve dynamic children
    */
   React.useEffect(() => {
-    if (!result?.data) return;
+    if (!resolvedData) return;
     if (typeof children === "function") {
-      const res = children(result.data);
+      const res = children(resolvedData);
       if (res instanceof Promise) {
         res.then(setResolvedChildren);
       } else {
@@ -246,10 +246,10 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     } else {
       setResolvedChildren(children);
     }
-  }, [children, result?.data]);
+  }, [children, resolvedData]);
 
   return (
-    <DataProvider data={result?.data ?? initialData ?? null}>
+    <DataProvider data={resolvedData}>
       {resolvedChildren ?? initialResolvedChildren}
     </DataProvider>
   );

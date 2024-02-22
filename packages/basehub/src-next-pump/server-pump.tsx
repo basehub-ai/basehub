@@ -43,7 +43,6 @@ export type QueryResults<Queries extends Array<PumpQuery>> = {
 };
 
 export const Pump = async <Queries extends Array<PumpQuery>>({
-  draft,
   children,
   queries,
   ...basehubProps
@@ -86,7 +85,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       ? await children(results.map((r) => r.data) as any)
       : children;
 
-  if (draft) {
+  if (basehubProps.draft) {
     // should probably get the pump token here?
 
     // wouldn't it be great if this worked?
