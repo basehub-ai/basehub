@@ -1,5 +1,11 @@
 # basehub
 
+## 1.4.0-next.7
+
+### Patch Changes
+
+- append ts-nocheck for generated ts files
+
 ## 1.4.0-next.6
 
 ### Patch Changes
