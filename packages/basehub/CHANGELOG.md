@@ -1,5 +1,11 @@
 # basehub
 
+## 2.0.0
+
+### Major Changes
+
+- b3ff244: Add next-pump: fast refresh for your content. And also go full ESM.
+
 ## 1.4.0
 
 ### Minor Changes
