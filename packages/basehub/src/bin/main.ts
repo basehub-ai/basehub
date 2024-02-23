@@ -8,11 +8,18 @@ import {
   runtime__getStuffFromEnvString,
 } from "./util/get-stuff-from-env";
 import { appendEslintDisableToEachFileInDirectory } from "./util/disable-linters";
+import { writeNextPump } from "./util/write-next-pump";
 
 export const main = async (args: Args) => {
   console.log("🪄 Generating...");
 
   const { url, headers } = getStuffFromEnv();
+
+  const basehubModulePath = path.resolve(
+    process.cwd(),
+    "node_modules",
+    "basehub"
+  );
 
   const pathArgs = args["--output"]
     ? [args["--output"]]
@@ -99,17 +106,73 @@ export const main = async (args: Args) => {
   appendEslintDisableToEachFileInDirectory(basehubOutputPath);
 
   if (!args["--ts-only"]) {
-    console.log("📦 Compiling to JavaScript...");
-    await esbuild.build({
-      entryPoints: [generatedMainExportPath],
-      bundle: true,
-      outfile: path.join(basehubOutputPath, "index.js"),
-      minify: false,
-      format: "cjs",
-      banner: {
-        js: "/* eslint-disable */",
-      },
+    /**
+     * Next Pump stuff.
+     */
+    writeNextPump({
+      modulePath: basehubModulePath,
+      outputPath: basehubOutputPath,
     });
+
+    // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
+    const peerDependencies = ["react", "react-dom", "../index", "swr"];
+
+    console.log("📦 Compiling to JavaScript...");
+    const nextPumpOutDir = path.join(basehubOutputPath, "next-pump");
+    await Promise.all([
+      esbuild.build({
+        entryPoints: [generatedMainExportPath],
+        bundle: true,
+        outdir: basehubOutputPath,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        external: peerDependencies,
+        banner: {
+          js: "/* eslint-disable */",
+        },
+      }),
+      esbuild.build({
+        entryPoints: [
+          path.join(basehubModulePath, "src-next-pump", "index.ts"),
+        ],
+        bundle: true,
+        outdir: nextPumpOutDir,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        target: ["es2020", "node18"],
+        external: peerDependencies,
+        banner: {
+          js: "/* eslint-disable */",
+        },
+        plugins: [
+          {
+            name: "use-client-for-client-components",
+            setup(build) {
+              build.onEnd(() => {
+                const rxp = /['"]use client['"]\s?;/i;
+                const outputFilePaths = fs.readdirSync(nextPumpOutDir);
+                outputFilePaths
+                  ?.filter((fileName) => !fileName.endsWith(".map"))
+                  .forEach((fileName) => {
+                    // if the file contains "use client" we'll make sure it's on the top.
+                    const filePath = path.join(nextPumpOutDir, fileName);
+                    const fileContents = fs.readFileSync(filePath, "utf-8");
+                    if (!rxp.test(fileContents)) return;
+                    const newContents = fileContents.replace(rxp, "");
+                    fs.writeFileSync(filePath, `"use client";\n${newContents}`);
+                  });
+              });
+            },
+          },
+        ],
+      }),
+    ]);
+
+    appendEslintDisableToEachFileInDirectory(nextPumpOutDir);
   }
 
   console.log("🪄 Generated `basehub` client");

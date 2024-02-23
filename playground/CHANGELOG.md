@@ -1,5 +1,75 @@
 # playground
 
+## 0.0.47
+
+### Patch Changes
+
+- Updated dependencies [bc3492b]
+- Updated dependencies [b05f553]
+- Updated dependencies [bc3492b]
+- Updated dependencies [9d50ff5]
+- Updated dependencies [a39bb9f]
+- Updated dependencies [bc3492b]
+- Updated dependencies [bc3492b]
+- Updated dependencies [3529057]
+  - basehub@1.4.0
+
+## 0.0.47-next.7
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.7
+
+## 0.0.47-next.6
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.6
+
+## 0.0.47-next.5
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.5
+
+## 0.0.47-next.4
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.4
+
+## 0.0.47-next.3
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.3
+
+## 0.0.47-next.2
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.2
+
+## 0.0.47-next.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.1
+
+## 0.0.47-next.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@1.4.0-next.0
+
 ## 0.0.46
 
 ### Patch Changes

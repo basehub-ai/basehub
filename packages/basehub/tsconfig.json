@@ -2,7 +2,10 @@
   "extends": "tsconfig/react-library.json",
   "include": ["."],
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "paths": {
+      "basehub": ["./dist/generated-client"]
+    }
   },
   "exclude": ["dist", "build", "node_modules"]
 }

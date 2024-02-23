@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "1.3.17",
+  "version": "1.4.0",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -15,8 +15,11 @@
     "scripts",
     "index.js",
     "index.d.ts",
+    "next-pump.js",
+    "next-pump.d.ts",
     "react.js",
-    "react.d.ts"
+    "react.d.ts",
+    "src-next-pump"
   ],
   "sideEffects": false,
   "scripts": {
@@ -34,17 +37,18 @@
     "arg": "5.0.1",
     "dotenv-mono": "1.3.10",
     "esbuild": "0.19.2",
+    "pusher-js": "8.3.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "slugify": "1.6.6",
+    "tsup": "6.2.3",
     "zod": "3.22.1"
   },
   "devDependencies": {
     "@types/node": "18.13.0",
     "@types/react": "18.2.20",
     "@types/react-dom": "18.2.7",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
     "tsconfig": "workspace:*",
-    "tsup": "6.2.3",
     "type-fest": "3.0.0"
   }
 }

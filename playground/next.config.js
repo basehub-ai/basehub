@@ -4,10 +4,10 @@ const withBundleAnalyzer = require("@next/bundle-analyzer");
 const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
-  experimental: { appDir: true },
+  experimental: { appDir: true, serverActions: true },
   images: {
     domains: ["lab.basement.studio"],
-  }
+  },
 };
 
 module.exports = (_phase, { defaultConfig: _ }) => {

@@ -1,5 +1,69 @@
 # basehub
 
+## 1.4.0
+
+### Minor Changes
+
+- bc3492b: Add next pump
+
+### Patch Changes
+
+- bc3492b: Expose next pump in files
+- b05f553: Infer app origin
+- bc3492b: tweak react import
+- 9d50ff5: fixes
+- a39bb9f: append ts-nocheck for generated ts files
+- bc3492b: react types bug
+- 3529057: support multiple paralel queries
+
+## 1.4.0-next.7
+
+### Patch Changes
+
+- append ts-nocheck for generated ts files
+
+## 1.4.0-next.6
+
+### Patch Changes
+
+- fixes
+
+## 1.4.0-next.5
+
+### Patch Changes
+
+- support multiple paralel queries
+
+## 1.4.0-next.4
+
+### Patch Changes
+
+- Infer app origin
+
+## 1.4.0-next.3
+
+### Patch Changes
+
+- react types bug
+
+## 1.4.0-next.2
+
+### Patch Changes
+
+- tweak react import
+
+## 1.4.0-next.1
+
+### Patch Changes
+
+- Expose next pump in files
+
+## 1.4.0-next.0
+
+### Minor Changes
+
+- Add next pump
+
 ## 1.3.17
 
 ### Patch Changes

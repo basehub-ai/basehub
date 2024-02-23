@@ -1,19 +1,20 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.46",
+  "version": "0.0.47",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "basehub --output .basehub --ts-only"
+    "generate": "basehub --output .basehub"
   },
   "dependencies": {
     "basehub": "workspace:^",
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
+    "graphql": "^16.8.1",
     "next": "^13.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
