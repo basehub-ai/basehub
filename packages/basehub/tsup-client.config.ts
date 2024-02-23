@@ -7,6 +7,6 @@ export default defineConfig((_options: Options) => {
     entry: {
       react: "./src/react/index.ts",
     },
-    format: ["cjs"],
+    format: ["esm"],
   };
 });
