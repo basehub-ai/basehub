@@ -16,9 +16,7 @@ export default async function HomePage() {
           },
         ]}
       >
-        {async ([data]) => {
-          "use server";
-
+        {([data]) => {
           if (!data) return null;
           return <h1>{JSON.stringify(data, null, 2)}</h1>;
         }}

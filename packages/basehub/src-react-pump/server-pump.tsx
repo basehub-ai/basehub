@@ -85,6 +85,14 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       ? await children(results.map((r) => r.data) as any)
       : children;
 
+  let childrenOrServerAction = children;
+  if (typeof children === "function") {
+    childrenOrServerAction = async function (data: QueryResults<Queries>) {
+      "use server";
+      return await children(data);
+    };
+  }
+
   if (basehubProps.draft) {
     // should probably get the pump token here?
 
@@ -122,7 +130,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
         >
           {/* react.lazy strips generic parameter :( */}
           {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
-          {children as any}
+          {childrenOrServerAction as any}
         </LazyClientPump>
       </React.Suspense>
     );
@@ -158,14 +166,14 @@ export const createPump = <
   };
 };
 
-const Res = createPump([{ _sys: { hash: true } }]);
+// const Res = createPump([{ _sys: { hash: true } }]);
 
-const h = () => {
-  return (
-    <Res>
-      {([{}]) => {
-        return <h1></h1>;
-      }}
-    </Res>
-  );
-};
+// const h = () => {
+//   return (
+//     <Res>
+//       {([{}]) => {
+//         return <h1></h1>;
+//       }}
+//     </Res>
+//   );
+// };
