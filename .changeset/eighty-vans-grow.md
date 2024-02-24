@@ -19,6 +19,8 @@ const Page = () => {
       {async ([data]) => {
         "use server";
 
+        // `data` is typesafe, of course!
+
         return (
           <pre>
             <code>{JSON.stringify(data, null, 2)}</code>
