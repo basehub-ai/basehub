@@ -173,26 +173,24 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     };
   }, [pumpToken, refetch, token]);
 
-  const pusherChannelKey = result?.pusherData?.channel_key;
-
   const [pusher, setPusher] = React.useState<Pusher | null>(null);
+  // be specific so that useEffect doesn't re-execute on every new `result` object created
+  const pusherChannelKey = result?.pusherData?.channel_key;
+  const pusherAppKey = result?.pusherData.app_key;
+  const pusherCluster = result?.pusherData.cluster;
 
   /**
    * Dynamic pusher import!
    */
   React.useEffect(() => {
     if (pusherMounted) return; // dedupe across multiple pumps
-    if (!result?.pusherData) return;
+    if (!pusherAppKey || !pusherCluster) return;
 
     pusherMounted = true;
 
     import("pusher-js")
       .then((mod) => {
-        setPusher(
-          new mod.default(result.pusherData.app_key, {
-            cluster: result.pusherData.cluster,
-          })
-        );
+        setPusher(new mod.default(pusherAppKey, { cluster: pusherCluster }));
       })
       .catch((err) => {
         console.log("error importing pusher");
@@ -202,7 +200,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     return () => {
       pusherMounted = false;
     };
-  }, [result?.pusherData]);
+  }, [pusherAppKey, pusherCluster]);
 
   /**
    * Subscribe to Pusher channel and query.
@@ -219,7 +217,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     return () => {
       channel.unsubscribe();
     };
-  }, [pusher, refetch, pusherChannelKey]);
+  }, [pusher, pusherChannelKey]);
 
   const resolvedData = result?.data ?? initialData ?? null;
 
