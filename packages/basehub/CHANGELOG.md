@@ -1,5 +1,11 @@
 # basehub
 
+## 2.0.1
+
+### Patch Changes
+
+- d4c0021: fix multiple pusher connections being created
+
 ## 2.0.0
 
 ### Major Changes
