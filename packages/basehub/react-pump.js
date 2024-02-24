@@ -1,8 +1,8 @@
 try {
-  module.exports = require("./dist/generated-client/next-pump");
+  module.exports = require("./dist/generated-client/react-pump");
 } catch (error) {
   throw new Error(
-    `\`basehub\` SDK not found. Make sure to run \`npx basehub\` in order to generate it.
+    `\`react-pump\` not found. Make sure to run \`npx basehub\` in order to generate it.
   
   If you're using a custom \`--output\`, you'll need to import the SDK from that same output directory.
   

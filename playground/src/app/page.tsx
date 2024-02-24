@@ -1,4 +1,4 @@
-import { Pump } from "../../.basehub/next-pump";
+import { Pump } from "../../.basehub/react-pump";
 
 export default async function HomePage() {
   return (
@@ -46,7 +46,7 @@ export default async function HomePage() {
           if (!data) return null;
           return (
             <h1>
-              different return data even...{data.doc.heroTitle}{" "}
+              different return data even... {data.doc.heroTitle}{" "}
               {data2._sys.hash}
             </h1>
           );

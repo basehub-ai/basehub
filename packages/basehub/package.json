@@ -15,11 +15,11 @@
     "scripts",
     "index.js",
     "index.d.ts",
-    "next-pump.js",
-    "next-pump.d.ts",
-    "react.js",
-    "react.d.ts",
-    "src-next-pump"
+    "react-pump.js",
+    "react-pump.d.ts",
+    "react-rich-text.js",
+    "react-rich-text.d.ts",
+    "src-react-pump"
   ],
   "sideEffects": false,
   "scripts": {

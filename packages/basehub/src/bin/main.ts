@@ -8,7 +8,7 @@ import {
   runtime__getStuffFromEnvString,
 } from "./util/get-stuff-from-env";
 import { appendEslintDisableToEachFileInDirectory } from "./util/disable-linters";
-import { writeNextPump } from "./util/write-next-pump";
+import { writeReactPump } from "./util/write-react-pump";
 
 export const main = async (args: Args) => {
   console.log("🪄 Generating...");
@@ -109,7 +109,7 @@ export const main = async (args: Args) => {
     /**
      * Next Pump stuff.
      */
-    writeNextPump({
+    writeReactPump({
       modulePath: basehubModulePath,
       outputPath: basehubOutputPath,
     });
@@ -118,7 +118,7 @@ export const main = async (args: Args) => {
     const peerDependencies = ["react", "react-dom", "../index", "swr"];
 
     console.log("📦 Compiling to JavaScript...");
-    const nextPumpOutDir = path.join(basehubOutputPath, "next-pump");
+    const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
     await Promise.all([
       esbuild.build({
         entryPoints: [generatedMainExportPath],
@@ -135,10 +135,10 @@ export const main = async (args: Args) => {
       }),
       esbuild.build({
         entryPoints: [
-          path.join(basehubModulePath, "src-next-pump", "index.ts"),
+          path.join(basehubModulePath, "src-react-pump", "index.ts"),
         ],
         bundle: true,
-        outdir: nextPumpOutDir,
+        outdir: reactPumpOutDir,
         minify: false,
         treeShaking: true,
         splitting: true,
@@ -154,12 +154,12 @@ export const main = async (args: Args) => {
             setup(build) {
               build.onEnd(() => {
                 const rxp = /['"]use client['"]\s?;/i;
-                const outputFilePaths = fs.readdirSync(nextPumpOutDir);
+                const outputFilePaths = fs.readdirSync(reactPumpOutDir);
                 outputFilePaths
                   ?.filter((fileName) => !fileName.endsWith(".map"))
                   .forEach((fileName) => {
                     // if the file contains "use client" we'll make sure it's on the top.
-                    const filePath = path.join(nextPumpOutDir, fileName);
+                    const filePath = path.join(reactPumpOutDir, fileName);
                     const fileContents = fs.readFileSync(filePath, "utf-8");
                     if (!rxp.test(fileContents)) return;
                     const newContents = fileContents.replace(rxp, "");
@@ -172,7 +172,7 @@ export const main = async (args: Args) => {
       }),
     ]);
 
-    appendEslintDisableToEachFileInDirectory(nextPumpOutDir);
+    appendEslintDisableToEachFileInDirectory(reactPumpOutDir);
   }
 
   console.log("🪄 Generated `basehub` client");
