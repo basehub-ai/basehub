@@ -1,5 +1,11 @@
 # basehub
 
+## 3.0.1
+
+### Patch Changes
+
+- update @basehub/mutation-api-helpers
+
 ## 3.0.0
 
 ### Major Changes
