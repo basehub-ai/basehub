@@ -13,7 +13,7 @@ This is a short example of how to use it:
 import { Pump } from "basehub/react-pump";
 
 const Page = () => {
-  const yourLogicForDraftMode = true // in Next.js, you'd use draftMode()
+  const yourLogicForDraftMode = true; // in Next.js, you'd use draftMode()
   return (
     <Pump queries={[{ _sys: { id: true } }]} draft={yourLogicForDraftMode}>
       {async ([data]) => {
@@ -46,5 +46,53 @@ The `basehub/react` namespace has been removed in favour of having more specific
 - import { RichText } from 'basehub/react'
 + import { RichText } from 'basehub/react-rich-text'
 ```
+
+## Mutations API Helpers
+
+With the introduction of the Mutation API, we've added some helper TypeScript types that will allow you to send mutations in a typesafe manner. For example:
+
+```tsx
+import { basehub } from "basehub";
+import { Transaction } from "basehub/api-transaction";
+
+export function Example() {
+  return (
+    <div>
+      <form
+        action={async () => {
+          "use server";
+          return await basehub({ cache: "no-cache" }).mutation({
+            transaction: {
+              __args: {
+                data: JSON.stringify([
+                  {
+                    type: "create",
+                    data: {
+                      type: "document",
+                      title: "A Document from our API",
+                      value: [
+                        {
+                          type: "text",
+                          title: "hero title",
+                          value: "Hello World!",
+                          isRequired: true,
+                        },
+                      ],
+                    },
+                  },
+                ] satisfies Transaction),
+              },
+            },
+          });
+        }}
+      >
+        <button>Submit</button>
+      </form>
+    </div>
+  );
+}
+```
+
+---
 
 Enjoy, and go write!
