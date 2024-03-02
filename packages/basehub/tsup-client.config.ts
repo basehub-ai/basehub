@@ -5,7 +5,8 @@ export default defineConfig((_options: Options) => {
     minify: false,
     dts: true,
     entry: {
-      react: "./src/react/index.ts",
+      "react-rich-text": "./src/react/rich-text/index.ts",
+      "api-transaction": "./src/api-transaction.ts",
     },
     format: ["esm"],
   };

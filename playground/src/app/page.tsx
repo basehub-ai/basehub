@@ -1,57 +1,39 @@
-import { Pump } from "../../.basehub/next-pump";
+import { basehub } from "../../.basehub";
+import { Transaction } from "basehub/api-transaction";
 
 export default async function HomePage() {
   return (
     <main>
-      <h1>Does it work?</h1>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        queries={[
-          {
-            doc: {
-              heroTitle: true,
-              _title: true,
-            },
-          },
-        ]}
-      >
-        {async ([data]) => {
+      <form
+        action={async () => {
           "use server";
-
-          if (!data) return null;
-          return <h1>{JSON.stringify(data, null, 2)}</h1>;
+          return await basehub({ cache: "no-cache" }).mutation({
+            transaction: {
+              __args: {
+                data: JSON.stringify([
+                  {
+                    type: "create",
+                    data: {
+                      type: "document",
+                      title: "my api first",
+                      value: [
+                        {
+                          type: "text",
+                          title: "hero title",
+                          value: "ohuuuuu!",
+                        },
+                      ],
+                    },
+                  },
+                ] satisfies Transaction),
+              },
+            },
+          });
         }}
-      </Pump>
-      <Pump
-        draft
-        token={process.env.BASEHUB_TOKEN!}
-        queries={[
-          {
-            doc: {
-              heroTitle: true,
-              _title: true,
-            },
-          },
-          {
-            _sys: {
-              hash: true,
-            },
-          },
-        ]}
       >
-        {async ([data, data2]) => {
-          "use server";
-
-          if (!data) return null;
-          return (
-            <h1>
-              different return data even...{data.doc.heroTitle}{" "}
-              {data2._sys.hash}
-            </h1>
-          );
-        }}
-      </Pump>
+        <h1>Does it work?</h1>
+        <button>Lego!</button>
+      </form>
     </main>
   );
 }

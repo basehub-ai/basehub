@@ -4,4 +4,4 @@ export {
   type RichTextProps,
   type CustomBlocksBase,
   type HandlerProps,
-} from "./rich-text";
+} from "./rich-text/primitive";

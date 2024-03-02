@@ -1,15 +1,15 @@
 import path from "path";
 import fs from "fs";
 
-export function writeNextPump({
+export function writeReactPump({
   modulePath,
   outputPath,
 }: {
   modulePath: string;
   outputPath: string;
 }) {
-  const nextPumpSrcPath = path.resolve(modulePath, "src-next-pump");
-  const nextPumpOutputPath = path.resolve(outputPath, "next-pump");
+  const nextPumpSrcPath = path.resolve(modulePath, "src-react-pump");
+  const nextPumpOutputPath = path.resolve(outputPath, "react-pump");
 
   copyDirSync(nextPumpSrcPath, nextPumpOutputPath);
 }

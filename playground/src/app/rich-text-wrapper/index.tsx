@@ -2,7 +2,7 @@ import {
   RichText,
   CustomBlocksBase,
   createRichTextWithDefaultComponents,
-} from "basehub/react";
+} from "basehub/react-rich-text";
 
 export const RichTextWrapper = <CustomBlocks extends CustomBlocksBase>(
   props: React.ComponentProps<typeof RichText<CustomBlocks>>

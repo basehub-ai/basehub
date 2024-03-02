@@ -1,4 +1,4 @@
-import { Node } from "..";
+import { Node } from "../primitive";
 
 export function extractTextFromNode(node?: Node) {
   let textContent = "";
@@ -7,7 +7,7 @@ export function extractTextFromNode(node?: Node) {
     if (child.type === "text") {
       textContent += child.text;
     }
-    if (child.content) {
+    if ("content" in child && child.content) {
       extractTextFromNode(child);
     }
   });

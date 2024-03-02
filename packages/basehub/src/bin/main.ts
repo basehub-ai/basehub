@@ -8,7 +8,7 @@ import {
   runtime__getStuffFromEnvString,
 } from "./util/get-stuff-from-env";
 import { appendEslintDisableToEachFileInDirectory } from "./util/disable-linters";
-import { writeNextPump } from "./util/write-next-pump";
+import { writeReactPump } from "./util/write-react-pump";
 
 export const main = async (args: Args) => {
   console.log("🪄 Generating...");
@@ -36,6 +36,7 @@ export const main = async (args: Args) => {
     },
     output: path.join(basehubOutputPath),
     verbose: false,
+    sortProperties: true,
   });
 
   const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
@@ -109,16 +110,22 @@ export const main = async (args: Args) => {
     /**
      * Next Pump stuff.
      */
-    writeNextPump({
+    writeReactPump({
       modulePath: basehubModulePath,
       outputPath: basehubOutputPath,
     });
 
     // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
-    const peerDependencies = ["react", "react-dom", "../index", "swr"];
+    const peerDependencies = [
+      "react",
+      "react-dom",
+      "../index",
+      "swr",
+      "@basehub/mutation-api-helpers",
+    ];
 
     console.log("📦 Compiling to JavaScript...");
-    const nextPumpOutDir = path.join(basehubOutputPath, "next-pump");
+    const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
     await Promise.all([
       esbuild.build({
         entryPoints: [generatedMainExportPath],
@@ -135,10 +142,10 @@ export const main = async (args: Args) => {
       }),
       esbuild.build({
         entryPoints: [
-          path.join(basehubModulePath, "src-next-pump", "index.ts"),
+          path.join(basehubModulePath, "src-react-pump", "index.ts"),
         ],
         bundle: true,
-        outdir: nextPumpOutDir,
+        outdir: reactPumpOutDir,
         minify: false,
         treeShaking: true,
         splitting: true,
@@ -154,12 +161,12 @@ export const main = async (args: Args) => {
             setup(build) {
               build.onEnd(() => {
                 const rxp = /['"]use client['"]\s?;/i;
-                const outputFilePaths = fs.readdirSync(nextPumpOutDir);
+                const outputFilePaths = fs.readdirSync(reactPumpOutDir);
                 outputFilePaths
                   ?.filter((fileName) => !fileName.endsWith(".map"))
                   .forEach((fileName) => {
                     // if the file contains "use client" we'll make sure it's on the top.
-                    const filePath = path.join(nextPumpOutDir, fileName);
+                    const filePath = path.join(reactPumpOutDir, fileName);
                     const fileContents = fs.readFileSync(filePath, "utf-8");
                     if (!rxp.test(fileContents)) return;
                     const newContents = fileContents.replace(rxp, "");
@@ -172,7 +179,7 @@ export const main = async (args: Args) => {
       }),
     ]);
 
-    appendEslintDisableToEachFileInDirectory(nextPumpOutDir);
+    appendEslintDisableToEachFileInDirectory(reactPumpOutDir);
   }
 
   console.log("🪄 Generated `basehub` client");
@@ -180,6 +187,7 @@ export const main = async (args: Args) => {
 };
 
 const basehubExport = `
+export * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
 
 // we limit options to only the ones we want to expose.

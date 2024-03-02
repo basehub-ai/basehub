@@ -140,13 +140,13 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
  * Useful for reusing the same query across multiple components.
  */
 export const createPump = <
-  Queries extends Array<PumpQuery>,
+  Query extends PumpQuery[],
   Params extends Record<string, unknown> | void,
 >(
-  queries: [...Queries] | ((params: Params) => [...Queries])
+  queries: Query | ((params: Params) => Query)
 ) => {
   return (
-    props: Omit<PumpProps<Queries>, "queries"> &
+    props: Omit<PumpProps<Query>, "queries"> &
       (Params extends void ? unknown : { params: Params })
   ) => {
     // Dynamically call query function based on whether query is a function and params are provided
@@ -156,4 +156,16 @@ export const createPump = <
     // @ts-expect-error rsc
     return <Pump {...props} queries={queryResult} />;
   };
+};
+
+const Res = createPump([{ _sys: { hash: true } }]);
+
+const h = () => {
+  return (
+    <Res>
+      {([{}]) => {
+        return <h1></h1>;
+      }}
+    </Res>
+  );
 };
