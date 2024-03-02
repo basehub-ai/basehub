@@ -61,6 +61,9 @@ importers:
 
   packages/basehub:
     dependencies:
+      '@basehub/mutation-api-helpers':
+        specifier: ^0.0.2
+        version: 0.0.2
       '@genql/cli':
         specifier: 6.3.2
         version: 6.3.2
@@ -191,6 +194,12 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
+
+  /@basehub/mutation-api-helpers@0.0.2:
+    resolution: {integrity: sha512-0/XUTXxYORF21o5gYyWFZZkq+8rdQ71CgHaS8krZAWGxL/SZpjgqNH4kiXfMH/x0d9g9QXhF+6XeSUdGcmuClw==}
+    dependencies:
+      type-fest: 3.7.1
+    dev: false
 
   /@changesets/apply-release-plan@6.1.4:
     resolution: {integrity: sha512-FMpKF1fRlJyCZVYHr3CbinpZZ+6MwvOtWUuO8uo+svcATEoc1zRDcj23pAurJ2TZ/uVz1wFHH6K3NlACy0PLew==}
@@ -4651,6 +4660,11 @@ packages:
     resolution: {integrity: sha512-MINvUN5ug9u+0hJDzSZNSnuKXI8M4F5Yvb6SQZ2CYqe7SgKXKOosEcU5R7tRgo85I6eAVBbkVF7TCvB4AUK2xQ==}
     engines: {node: '>=14.16'}
     dev: true
+
+  /type-fest@3.7.1:
+    resolution: {integrity: sha512-8LZNdvuztgxCF4eYpEmPYUPS0lbbByM2qHcp2oMxHZhWLIQB9QE36EeQ1PKwsUIDZXEP8HCBEmkBbT1//kLU4Q==}
+    engines: {node: '>=14.16'}
+    dev: false
 
   /typed-array-buffer@1.0.0:
     resolution: {integrity: sha512-Y8KTSIglk9OZEr8zywiIHG/kmQ7KWyjseXs1CbSo8vC42w7hg2HgYTxSWwP0+is7bWDc1H+Fo026CpHFwm8tkw==}

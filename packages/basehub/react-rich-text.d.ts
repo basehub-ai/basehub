@@ -1,1 +1,1 @@
-export * from "./dist/react-rich-text";
+export * from "./dist/react-rich-text.mjs";

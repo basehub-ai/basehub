@@ -36,6 +36,7 @@ export const main = async (args: Args) => {
     },
     output: path.join(basehubOutputPath),
     verbose: false,
+    sortProperties: true,
   });
 
   const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
@@ -115,7 +116,13 @@ export const main = async (args: Args) => {
     });
 
     // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
-    const peerDependencies = ["react", "react-dom", "../index", "swr"];
+    const peerDependencies = [
+      "react",
+      "react-dom",
+      "../index",
+      "swr",
+      "@basehub/mutation-api-helpers",
+    ];
 
     console.log("📦 Compiling to JavaScript...");
     const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
@@ -180,6 +187,7 @@ export const main = async (args: Args) => {
 };
 
 const basehubExport = `
+export * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
 
 // we limit options to only the ones we want to expose.
