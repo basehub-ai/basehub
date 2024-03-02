@@ -62,8 +62,8 @@ importers:
   packages/basehub:
     dependencies:
       '@basehub/mutation-api-helpers':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^0.0.4
+        version: 0.0.4
       '@genql/cli':
         specifier: 6.3.2
         version: 6.3.2
@@ -195,8 +195,8 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.0
 
-  /@basehub/mutation-api-helpers@0.0.3:
-    resolution: {integrity: sha512-1oLovfD3hDye+zwQss7ZEfSvo6fl0P1zd/b1MqPsxMI3jAzHxbajG6K72u5YKBo7HbucK9ccb3Ry86MaCKFHIQ==}
+  /@basehub/mutation-api-helpers@0.0.4:
+    resolution: {integrity: sha512-DfKqW7ltPvnuFFQYghr/FVTC310GHFQ5B4e2yuGz6y/xb1A5+LDEFnr6cu+EjWn0NXStg16miFEMkYHg+5UtTQ==}
     dependencies:
       type-fest: 3.7.1
     dev: false
