@@ -1,39 +1,15 @@
-import { basehub } from "../../.basehub";
-import { Transaction } from "basehub/api-transaction";
+import { Pump } from "../../.basehub/react-pump";
 
 export default async function HomePage() {
   return (
     <main>
-      <form
-        action={async () => {
+      <Pump draft queries={[{ homepage: { heroTitle: true } }]}>
+        {async ([{ homepage }]) => {
           "use server";
-          return await basehub({ cache: "no-cache" }).mutation({
-            transaction: {
-              __args: {
-                data: JSON.stringify([
-                  {
-                    type: "create",
-                    data: {
-                      type: "document",
-                      title: "my api first",
-                      value: [
-                        {
-                          type: "text",
-                          title: "hero title",
-                          value: "ohuuuuu!",
-                        },
-                      ],
-                    },
-                  },
-                ] satisfies Transaction),
-              },
-            },
-          });
+
+          return <div>{JSON.stringify(homepage, null, 2)}</div>;
         }}
-      >
-        <h1>Does it work?</h1>
-        <button>Lego!</button>
-      </form>
+      </Pump>
     </main>
   );
 }
