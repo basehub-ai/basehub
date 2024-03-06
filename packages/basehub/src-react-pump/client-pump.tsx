@@ -8,6 +8,7 @@ import {
   type QueryGenqlSelection as PumpQuery,
 } from "./index";
 import type Pusher from "pusher-js/types/src/core/pusher";
+import { toast, Toaster } from "sonner";
 
 let pusherMounted = false;
 const subscribers = new Set<() => void>(); // we'll call these when pusher tells us to poke
@@ -27,7 +28,7 @@ const clientCache = new Map<
   string, // a query string (with the variables included)
   {
     start: number; // the time the query was started
-    response: Promise<ResponseCache>; // the promise that resolves to the data
+    response: Promise<void | ResponseCache>; // the promise that resolves to the data
   }
 >();
 
@@ -88,6 +89,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     let newPumpToken: string | undefined;
     let pusherData: Result["pusherData"] | undefined = undefined;
     let spaceID: Result["spaceID"] | undefined = undefined;
+
     const responses = await Promise.all(
       rawQueries.map(async (rawQueryOp) => {
         const cacheKey = JSON.stringify(rawQueryOp);
@@ -96,6 +98,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           const cached = clientCache.get(cacheKey)!;
           if (Date.now() - cached.start < DEDUPE_TIME_MS) {
             const response = await cached.response;
+            if (!response) return null;
             if (response.newPumpToken) {
               newPumpToken = response.newPumpToken;
             }
@@ -113,17 +116,38 @@ export const ClientPump = <Queries extends PumpQuery[]>({
             ...(pumpToken ? { "x-basehub-pump-token": pumpToken } : {}),
           },
           body: JSON.stringify(rawQueryOp),
-        }).then(async (response) => {
-          const { data, newPumpToken, spaceID, pusherData } =
-            await response.json();
+        })
+          .then(async (response) => {
+            const { data, errors, newPumpToken, spaceID, pusherData } =
+              await response.json();
 
-          return {
-            data,
-            spaceID,
-            pusherData,
-            newPumpToken,
-          } as ResponseCache;
-        });
+            if (!data && errors) {
+              throw new GraphQLError(errors);
+            }
+
+            return {
+              data,
+              spaceID,
+              pusherData,
+              newPumpToken,
+            } as ResponseCache;
+          })
+          .catch((err: unknown) => {
+            if (err instanceof GraphQLError) {
+              // toast errors
+              const mainError = err.errors[0];
+              if (!mainError) return;
+              toast.error(
+                <>
+                  Error fetching data from the BaseHub Draft API: {'"'}
+                  {mainError.message}
+                  {'"'} at {mainError.path.join(".")}
+                </>
+              );
+            } else {
+              toast.error("Error fetching data from the BaseHub Draft API");
+            }
+          });
 
         // we quickly set the cache (without awaiting)
         clientCache.set(cacheKey, {
@@ -133,6 +157,8 @@ export const ClientPump = <Queries extends PumpQuery[]>({
 
         // then await and set local state
         const response = await responsePromise;
+        if (!response) return null;
+
         if (response.newPumpToken) {
           newPumpToken = response.newPumpToken;
         }
@@ -145,7 +171,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     if (!pusherData || !spaceID) return;
 
     setResult({
-      data: responses.map((r) => r.data) as any,
+      data: responses.map((r) => r?.data ?? null) as any,
       pusherData,
       spaceID,
     });
@@ -249,6 +275,16 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   return (
     <DataProvider data={resolvedData}>
       {resolvedChildren ?? initialResolvedChildren}
+      <Toaster />
     </DataProvider>
   );
 };
+
+class GraphQLError extends Error {
+  errors: { message: string; path: string[] }[];
+
+  constructor(errors: { message: string; path: string[] }[]) {
+    super(errors[0]?.message);
+    this.errors = errors;
+  }
+}
