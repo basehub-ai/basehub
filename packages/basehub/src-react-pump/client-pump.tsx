@@ -14,7 +14,7 @@ let pusherMounted = false;
 const subscribers = new Set<() => void>(); // we'll call these when pusher tells us to poke
 
 type ResponseCache = {
-  data: QueryResults<any>[number];
+  data: QueryResults<unknown[]>[number] | null;
   spaceID: string;
   pusherData: {
     channel_key: string;
@@ -22,6 +22,7 @@ type ResponseCache = {
     cluster: string;
   };
   newPumpToken: string;
+  errors: { message: string; path: string[] }[] | null;
 };
 
 const clientCache = new Map<
@@ -71,7 +72,8 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   }, [token]);
 
   const [result, setResult] = React.useState<{
-    data: QueryResults<Queries>;
+    data: QueryResults<Queries> | null[];
+    errors: Array<ResponseCache["errors"]>;
     spaceID: string;
     pusherData: {
       channel_key: string;
@@ -118,35 +120,27 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           body: JSON.stringify(rawQueryOp),
         })
           .then(async (response) => {
-            const { data, errors, newPumpToken, spaceID, pusherData } =
-              await response.json();
-
-            if (!data && errors) {
-              throw new GraphQLError(errors);
-            }
+            const {
+              data = null,
+              errors = null,
+              newPumpToken,
+              spaceID,
+              pusherData,
+            } = await response.json();
 
             return {
               data,
               spaceID,
               pusherData,
               newPumpToken,
+              errors,
             } as ResponseCache;
           })
           .catch((err: unknown) => {
-            if (err instanceof GraphQLError) {
-              // toast errors
-              const mainError = err.errors[0];
-              if (!mainError) return;
-              toast.error(
-                <>
-                  Error fetching data from the BaseHub Draft API: {'"'}
-                  {mainError.message}
-                  {'"'} at {mainError.path.join(".")}
-                </>
-              );
-            } else {
-              toast.error("Error fetching data from the BaseHub Draft API");
-            }
+            console.error(err);
+            toast.error(
+              "Error fetching data from the BaseHub Draft API. Check the console for more information, or contact support@basehub.com for help."
+            );
           });
 
         // we quickly set the cache (without awaiting)
@@ -171,7 +165,8 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     if (!pusherData || !spaceID) return;
 
     setResult({
-      data: responses.map((r) => r?.data ?? null) as any,
+      data: responses.map((r) => r?.data ?? null),
+      errors: responses.map((r) => r?.errors ?? null),
       pusherData,
       spaceID,
     });
@@ -181,6 +176,46 @@ export const ClientPump = <Queries extends PumpQuery[]>({
       setPumpToken(newPumpToken);
     }
   }, [appOrigin, pumpToken, rawQueries, token]);
+
+  const currentToastRef = React.useRef<string | number | null>(null);
+
+  /**
+   * Surface errors.
+   */
+  React.useEffect(() => {
+    if (currentToastRef.current) {
+      // first, dismiss current.
+      toast.dismiss(currentToastRef.current);
+    }
+
+    if (!result?.errors) return;
+    const mainError = result.errors[0]?.[0];
+    if (!mainError) return;
+
+    currentToastRef.current = toast.error(
+      <div style={{ lineHeight: 1.3 }}>
+        Error fetching data from the BaseHub Draft API: {'"'}
+        {mainError.message}
+        {'"'} at <ToastInlineCode>{mainError.path.join(".")}</ToastInlineCode>
+        <p
+          style={{
+            opacity: 0.7,
+            fontSize: "0.85em",
+            margin: 0,
+            marginTop: "0.25em",
+          }}
+        >
+          {/* eslint-disable-next-line react/no-unescaped-entities */}
+          This is generally due to a block that has an "is required" constraint,
+          but is empty.
+        </p>
+      </div>,
+      {
+        dismissible: true,
+        duration: Infinity,
+      }
+    );
+  }, [result?.errors]);
 
   /**
    * First query plus subscribe to pusher pokes.
@@ -245,7 +280,13 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     };
   }, [pusher, pusherChannelKey]);
 
-  const resolvedData = result?.data ?? initialData ?? null;
+  const resolvedData = React.useMemo(() => {
+    return (
+      result?.data?.map((r, i) => r ?? initialData?.[i] ?? null) ??
+      initialData ??
+      null
+    );
+  }, [initialData, result?.data]);
 
   const [resolvedChildren, setResolvedChildren] =
     React.useState<React.ReactNode>(
@@ -275,16 +316,23 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   return (
     <DataProvider data={resolvedData}>
       {resolvedChildren ?? initialResolvedChildren}
-      <Toaster />
+      <Toaster closeButton />
     </DataProvider>
   );
 };
 
-class GraphQLError extends Error {
-  errors: { message: string; path: string[] }[];
-
-  constructor(errors: { message: string; path: string[] }[]) {
-    super(errors[0]?.message);
-    this.errors = errors;
-  }
-}
+const ToastInlineCode = (props: { children: React.ReactNode }) => {
+  return (
+    <code
+      style={{
+        background: "#dddddd",
+        color: "red",
+        padding: "0.1em 0.3em",
+        border: "1px solid #c2c2c2",
+        borderRadius: "4px",
+      }}
+    >
+      {props.children}
+    </code>
+  );
+};
