@@ -65,7 +65,15 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       }
 
       if (!data) {
-        const dataPromise = basehub(basehubProps).query(singleQuery);
+        const dataPromise = basehub(basehubProps)
+          .query(singleQuery)
+          .catch((err: unknown) => {
+            if (basehubProps.draft) {
+              // we assume this is an error with a null constraint from the draft API, so we fall back to production API
+              const prodBasehubProps = { ...basehubProps, draft: false };
+              return basehub(prodBasehubProps).query(singleQuery);
+            } else throw err;
+          });
         cache.set(cacheKey, {
           start: Date.now(),
           data: dataPromise,
@@ -95,7 +103,6 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     //   typeof children === "function"
     //     ? async function (data: QueryResult<Query>) {
     //         "use server";
-    //         console.log("acá?");
     //         return await children(data);
     //       }
     //     : children;
