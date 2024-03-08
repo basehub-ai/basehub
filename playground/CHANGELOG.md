@@ -1,5 +1,14 @@
 # playground
 
+## 0.0.53
+
+### Patch Changes
+
+- a743356: add toasts by the amazing sonner
+- Updated dependencies [f5c1b63]
+- Updated dependencies [a743356]
+  - basehub@3.0.3
+
 ## 0.0.52
 
 ### Patch Changes

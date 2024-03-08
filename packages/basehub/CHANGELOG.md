@@ -1,5 +1,12 @@
 # basehub
 
+## 3.0.3
+
+### Patch Changes
+
+- f5c1b63: Improved `null` error handling for API responses. The toast now renders more relevant content, and your app shouldn't break on initial load.
+- a743356: add toasts by the amazing sonner
+
 ## 3.0.2
 
 ### Patch Changes
