@@ -1,5 +1,11 @@
 # basehub
 
+## 3.0.4
+
+### Patch Changes
+
+- add support for custom --token arg
+
 ## 3.0.3
 
 ### Patch Changes
