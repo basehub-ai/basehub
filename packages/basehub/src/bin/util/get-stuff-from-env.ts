@@ -43,8 +43,19 @@ export const getStuffFromEnv = (options?: {
   const parsedBasehubRefEnv = z.string().safeParse(process.env.BASEHUB_REF);
   const parsedBasehubDraftEnv = z.string().safeParse(process.env.BASEHUB_DRAFT);
 
+  const resolveTokenParam = (token: string | null) => {
+    if (!token) return null;
+    const isRaw = token.startsWith("bshb_");
+    if (isRaw) return token;
+    const fromEnv = z.string().safeParse(process.env[token]);
+    if (fromEnv.success) return fromEnv.data;
+    return ""; // empty string to prevent fallback
+  };
+
+  const resolvedToken = resolveTokenParam(options?.token ?? null);
+
   const token =
-    options?.token ??
+    resolvedToken ??
     basehubUrl.searchParams.get("token") ??
     (parsedBasehubTokenEnv.success ? parsedBasehubTokenEnv.data : undefined) ??
     (backwardsCompatURL
@@ -54,7 +65,9 @@ export const getStuffFromEnv = (options?: {
 
   if (!token) {
     console.log(
-      "Token not found. Make sure to include the BASEHUB_TOKEN env var."
+      `Token not found. Make sure to include the ${
+        resolvedToken === "" ? options?.token : "BASEHUB_TOKEN"
+      } env var.`
     );
     process.exit(1);
   }
@@ -109,7 +122,9 @@ export const getStuffFromEnv = (options?: {
  * Will inject to generated code, so we keep the same logic and don't hardcode the URL in the generated output.
  * doesn't use Zod nor dotenv-flow (so we don't ship extra stuff to the generated bundle). Assumes the env vars are already loaded.
  */
-export const runtime__getStuffFromEnvString = /**JavaScript */ `
+export const runtime__getStuffFromEnvString = (
+  tokenArg: string | null
+) => /**JavaScript */ `
 export const getStuffFromEnv = (options) => {
     const parsedDebugForcedURL = process.env.BASEHUB_DEBUG_FORCED_URL;
     const parsedBackwardsCompatURL = process.env.BASEHUB_URL;
@@ -128,12 +143,25 @@ export const getStuffFromEnv = (options) => {
     // These params can either come disambiguated, or in the URL.
     // Params that come from the URL take precedence.
 
-    const parsedBasehubTokenEnv = process.env.BASEHUB_TOKEN;
+    const envVarName = "${
+      tokenArg && !tokenArg.startsWith("bshb_") ? tokenArg : "BASEHUB_TOKEN"
+    }";
+
+    const parsedBasehubTokenEnv = process.env[envVarName];
     const parsedBasehubRefEnv = process.env.BASEHUB_REF;
     const parsedBasehubDraftEnv = process.env.BASEHUB_DRAFT;
 
+    const resolveTokenParam = (token) => {
+      if (!token) return null;
+      const isRaw = token.startsWith("bshb_");
+      if (isRaw) return token;
+      return process.env[token] ?? ''; // empty string to prevent fallback
+    };
+
+    const resolvedToken = resolveTokenParam(options?.token ?? null);
+
     const token =
-      options?.token ?? basehubUrl.searchParams.get("token") ??
+      resolvedToken ?? basehubUrl.searchParams.get("token") ??
       (parsedBasehubTokenEnv ? parsedBasehubTokenEnv : undefined) ??
       (backwardsCompatURL
         ? backwardsCompatURL.searchParams.get("token")
@@ -142,7 +170,9 @@ export const getStuffFromEnv = (options) => {
 
     if (!token) {
       throw new Error(
-        "Token not found. Make sure to include the BASEHUB_TOKEN env var."
+        \`Token not found. Make sure to include the \${
+          resolvedToken === "" ? options?.token : envVarName
+        } env var.\`
       );
     }
 

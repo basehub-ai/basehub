@@ -13,7 +13,7 @@ import { writeReactPump } from "./util/write-react-pump";
 export const main = async (args: Args) => {
   console.log("🪄 Generating...");
 
-  const { url, headers } = getStuffFromEnv();
+  const { url, headers } = getStuffFromEnv({ token: args["--token"] });
 
   const basehubModulePath = path.resolve(
     process.cwd(),
@@ -76,7 +76,7 @@ export const main = async (args: Args) => {
 
   // this should go at the end so that it doesn't suffer any modifications.
   schemaFileContents = schemaFileContents.concat(
-    `\n${runtime__getStuffFromEnvString}`
+    `\n${runtime__getStuffFromEnvString(args["--token"] ?? null)}`
   );
 
   // 3. append our basehub function to the end of the file.
@@ -106,81 +106,77 @@ export const main = async (args: Args) => {
 
   appendEslintDisableToEachFileInDirectory(basehubOutputPath);
 
-  if (!args["--ts-only"]) {
-    /**
-     * Next Pump stuff.
-     */
-    writeReactPump({
-      modulePath: basehubModulePath,
-      outputPath: basehubOutputPath,
-    });
+  /**
+   * Next Pump stuff.
+   */
+  writeReactPump({
+    modulePath: basehubModulePath,
+    outputPath: basehubOutputPath,
+  });
 
-    // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
-    const peerDependencies = [
-      "react",
-      "react-dom",
-      "../index",
-      "swr",
-      "@basehub/mutation-api-helpers",
-    ];
+  // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
+  const peerDependencies = [
+    "react",
+    "react-dom",
+    "../index",
+    "swr",
+    "@basehub/mutation-api-helpers",
+  ];
 
-    console.log("📦 Compiling to JavaScript...");
-    const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
-    await Promise.all([
-      esbuild.build({
-        entryPoints: [generatedMainExportPath],
-        bundle: true,
-        outdir: basehubOutputPath,
-        minify: false,
-        treeShaking: true,
-        splitting: true,
-        format: "esm",
-        external: peerDependencies,
-        banner: {
-          js: "/* eslint-disable */",
-        },
-      }),
-      esbuild.build({
-        entryPoints: [
-          path.join(basehubModulePath, "src-react-pump", "index.ts"),
-        ],
-        bundle: true,
-        outdir: reactPumpOutDir,
-        minify: false,
-        treeShaking: true,
-        splitting: true,
-        format: "esm",
-        target: ["es2020", "node18"],
-        external: peerDependencies,
-        banner: {
-          js: "/* eslint-disable */",
-        },
-        plugins: [
-          {
-            name: "use-client-for-client-components",
-            setup(build) {
-              build.onEnd(() => {
-                const rxp = /['"]use client['"]\s?;/i;
-                const outputFilePaths = fs.readdirSync(reactPumpOutDir);
-                outputFilePaths
-                  ?.filter((fileName) => !fileName.endsWith(".map"))
-                  .forEach((fileName) => {
-                    // if the file contains "use client" we'll make sure it's on the top.
-                    const filePath = path.join(reactPumpOutDir, fileName);
-                    const fileContents = fs.readFileSync(filePath, "utf-8");
-                    if (!rxp.test(fileContents)) return;
-                    const newContents = fileContents.replace(rxp, "");
-                    fs.writeFileSync(filePath, `"use client";\n${newContents}`);
-                  });
-              });
-            },
+  console.log("📦 Compiling to JavaScript...");
+  const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
+  await Promise.all([
+    esbuild.build({
+      entryPoints: [generatedMainExportPath],
+      bundle: true,
+      outdir: basehubOutputPath,
+      minify: false,
+      treeShaking: true,
+      splitting: true,
+      format: "esm",
+      external: peerDependencies,
+      banner: {
+        js: "/* eslint-disable */",
+      },
+    }),
+    esbuild.build({
+      entryPoints: [path.join(basehubModulePath, "src-react-pump", "index.ts")],
+      bundle: true,
+      outdir: reactPumpOutDir,
+      minify: false,
+      treeShaking: true,
+      splitting: true,
+      format: "esm",
+      target: ["es2020", "node18"],
+      external: peerDependencies,
+      banner: {
+        js: "/* eslint-disable */",
+      },
+      plugins: [
+        {
+          name: "use-client-for-client-components",
+          setup(build) {
+            build.onEnd(() => {
+              const rxp = /['"]use client['"]\s?;/i;
+              const outputFilePaths = fs.readdirSync(reactPumpOutDir);
+              outputFilePaths
+                ?.filter((fileName) => !fileName.endsWith(".map"))
+                .forEach((fileName) => {
+                  // if the file contains "use client" we'll make sure it's on the top.
+                  const filePath = path.join(reactPumpOutDir, fileName);
+                  const fileContents = fs.readFileSync(filePath, "utf-8");
+                  if (!rxp.test(fileContents)) return;
+                  const newContents = fileContents.replace(rxp, "");
+                  fs.writeFileSync(filePath, `"use client";\n${newContents}`);
+                });
+            });
           },
-        ],
-      }),
-    ]);
+        },
+      ],
+    }),
+  ]);
 
-    appendEslintDisableToEachFileInDirectory(reactPumpOutDir);
-  }
+  appendEslintDisableToEachFileInDirectory(reactPumpOutDir);
 
   console.log("🪄 Generated `basehub` client");
   return;

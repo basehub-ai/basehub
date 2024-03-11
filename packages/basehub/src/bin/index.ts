@@ -35,12 +35,14 @@ const args = arg(
   {
     // types
     "--output": String,
-    "--ts-only": Boolean,
+    "--token": String,
+    // "--ts-only": Boolean,
     "--version": Boolean,
     "--help": Boolean,
     // aliases
     "-o": "--output",
-    "-t": "--ts-only",
+    "-t": "--token",
+    // "-t": "--ts-only",
     "-v": "--version",
     "-h": "--help",
   },
