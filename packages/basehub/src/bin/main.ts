@@ -1,4 +1,5 @@
 import { generate } from "@genql/cli";
+import resolvePkg from "resolve-pkg";
 import path from "path";
 import { Args } from ".";
 import fs from "fs";
@@ -15,11 +16,13 @@ export const main = async (args: Args) => {
 
   const { url, headers } = getStuffFromEnv({ token: args["--token"] });
 
-  const basehubModulePath = path.resolve(
-    process.cwd(),
-    "node_modules",
-    "basehub"
-  );
+  const basehubModulePath = resolvePkg("basehub");
+
+  if (!basehubModulePath) {
+    throw new Error(
+      "basehub package not found in node_modules. If this issue persists, please raise an issue on the `basehub-ai/basehub` repository."
+    );
+  }
 
   const pathArgs = args["--output"]
     ? [args["--output"]]
