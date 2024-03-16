@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "3.0.4",
+  "version": "3.0.5-next.1",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -42,6 +42,7 @@
     "pusher-js": "8.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "resolve-pkg": "^2.0.0",
     "slugify": "1.6.6",
     "sonner": "^1.4.3",
     "zod": "3.22.1"

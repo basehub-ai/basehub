@@ -1,5 +1,17 @@
 # basehub
 
+## 3.0.5-next.1
+
+### Patch Changes
+
+- Cleanup
+
+## 3.0.5-next.0
+
+### Patch Changes
+
+- Resolve basehub with resolve-pkg for better monorepo support.
+
 ## 3.0.4
 
 ### Patch Changes
