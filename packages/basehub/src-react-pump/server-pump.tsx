@@ -1,5 +1,6 @@
 import * as React from "react";
 import { DataProvider } from "./data-provider";
+import type { ResponseCache } from "./types";
 import {
   // @ts-ignore
   basehub,
@@ -47,6 +48,16 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   queries,
   ...basehubProps
 }: PumpProps<Queries>) => {
+  let pumpToken: string | null = null;
+  let spaceID: string | null = null;
+  let pusherData: ResponseCache["pusherData"] | null = null;
+  // passed to the client to toast
+  const errors: Array<ResponseCache["errors"]> = [];
+
+  const { headers, url } = getStuffFromEnv(basehubProps);
+  const token = headers["x-basehub-token"];
+  const pumpEndpoint = url.origin.replace("api.", "") + "/api/pump"; // compatible with https://api.basehub.com and https://api.bshb.dev
+
   const results: Array<{
     data: QueryResults<Queries>[number];
     rawQueryOp: { query: string; variables?: any };
@@ -65,15 +76,31 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       }
 
       if (!data) {
-        const dataPromise = basehub(basehubProps)
-          .query(singleQuery)
-          .catch((err: unknown) => {
-            if (basehubProps.draft) {
-              // we assume this is an error with a null constraint from the draft API, so we fall back to production API
-              const prodBasehubProps = { ...basehubProps, draft: false };
-              return basehub(prodBasehubProps).query(singleQuery);
-            } else throw err;
-          });
+        const dataPromise = basehubProps.draft
+          ? fetch(pumpEndpoint, {
+              cache: "no-store",
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+                "x-basehub-token": token,
+              },
+              body: JSON.stringify(rawQueryOp),
+            }).then(async (response) => {
+              const {
+                data = null,
+                newPumpToken,
+                errors: _errors = null,
+                spaceID: _spaceID,
+                pusherData: _pusherData,
+              } = await response.json();
+              pumpToken = newPumpToken;
+              pusherData = _pusherData;
+              spaceID = _spaceID;
+              errors.push(_errors);
+
+              return data;
+            })
+          : basehub(basehubProps).query(singleQuery);
         cache.set(cacheKey, {
           start: Date.now(),
           data: dataPromise,
@@ -85,16 +112,20 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     })
   );
 
-  const { headers, url } = getStuffFromEnv(basehubProps);
-  const token = headers["x-basehub-token"];
-
   const resolvedChildren =
     typeof children === "function"
-      ? await children(results.map((r) => r.data) as any)
+      ? await children(results.map((r) => r.data)).catch((e: unknown) => {
+          if (basehubProps.draft) {
+            // when in draft, we ignore the error server side, as we prefer to pass it down to the client via the toast
+            console.error("Error in Pump children function", e);
+          } else throw e;
+        })
       : children;
 
   if (basehubProps.draft) {
-    // should probably get the pump token here?
+    if (!pumpToken || !spaceID || !pusherData) {
+      throw new Error("Pump did not return the necessary data");
+    }
 
     // wouldn't it be great if this worked?
     // // for client components, the `children` function needs to be passed as a Server Action
@@ -106,8 +137,6 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     //         return await children(data);
     //       }
     //     : children;
-
-    const appOrigin = url.origin.replace("api.", ""); // compatible with https://api.basehub.com and https://api.bshb.dev
 
     return (
       <React.Suspense
@@ -121,15 +150,18 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       >
         <LazyClientPump
           rawQueries={results.map((r) => r.rawQueryOp)}
-          token={token}
-          // react.lazy strips generic parameter :(
-          initialData={results.map((r) => r.data)}
+          initialState={{
+            data: results.map((r) => r.data ?? null),
+            errors,
+            pusherData: pusherData,
+            spaceID: spaceID,
+          }}
+          pumpEndpoint={pumpEndpoint}
+          pumpToken={pumpToken}
           initialResolvedChildren={resolvedChildren}
-          appOrigin={appOrigin}
         >
-          {/* react.lazy strips generic parameter :( */}
           {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
-          {children as any}
+          {children}
         </LazyClientPump>
       </React.Suspense>
     );
@@ -163,16 +195,4 @@ export const createPump = <
     // @ts-expect-error rsc
     return <Pump {...props} queries={queryResult} />;
   };
-};
-
-const Res = createPump([{ _sys: { hash: true } }]);
-
-const h = () => {
-  return (
-    <Res>
-      {([{}]) => {
-        return <h1></h1>;
-      }}
-    </Res>
-  );
 };

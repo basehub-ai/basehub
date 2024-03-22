@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { PumpProps, QueryResults } from "./server-pump";
+import { PumpProps } from "./server-pump";
 import { DataProvider } from "./data-provider";
 
 import {
@@ -9,21 +9,10 @@ import {
 } from "./index";
 import type Pusher from "pusher-js/types/src/core/pusher";
 import { toast, Toaster } from "sonner";
+import type { ResponseCache, PumpState } from "./types";
 
 let pusherMounted = false;
 const subscribers = new Set<() => void>(); // we'll call these when pusher tells us to poke
-
-type ResponseCache = {
-  data: QueryResults<unknown[]>[number] | null;
-  spaceID: string;
-  pusherData: {
-    channel_key: string;
-    app_key: string;
-    cluster: string;
-  };
-  newPumpToken: string;
-  errors: { message: string; path: string[] }[] | null;
-};
 
 const clientCache = new Map<
   string, // a query string (with the variables included)
@@ -35,52 +24,24 @@ const clientCache = new Map<
 
 const DEDUPE_TIME_MS = 500;
 
-const pumpTokenLocalStorageManager = {
-  get: (readToken: string) => {
-    return localStorage.getItem(`bshb-pump-token-${readToken}`);
-  },
-  set: (readToken: string, pumpToken: string) => {
-    localStorage.setItem(`bshb-pump-token-${readToken}`, pumpToken);
-  },
-};
-
 export const ClientPump = <Queries extends PumpQuery[]>({
   children,
   rawQueries,
-  token,
-  appOrigin,
-  initialData,
+  pumpEndpoint,
+  pumpToken: initialPumpToken,
+  initialState,
   initialResolvedChildren,
 }: {
   children: PumpProps<Queries>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
-  token: string;
-  appOrigin: string;
-  initialData?: QueryResults<Queries>;
+  pumpEndpoint: string;
+  pumpToken: string;
+  initialState: PumpState;
   initialResolvedChildren?: React.ReactNode;
 }) => {
-  const [pumpToken, setPumpToken] = React.useState<string | null>();
+  const [pumpToken, setPumpToken] = React.useState<string>(initialPumpToken);
 
-  /**
-   * Get cached pump token from localStorage.
-   */
-  React.useEffect(() => {
-    if (!token) return;
-    // First check if we already have this in localStorage. If we do and it hasn't expired, we can skip the login step.
-    const cached = pumpTokenLocalStorageManager.get(token);
-    setPumpToken(cached);
-  }, [token]);
-
-  const [result, setResult] = React.useState<{
-    data: QueryResults<Queries> | null[];
-    errors: Array<ResponseCache["errors"]>;
-    spaceID: string;
-    pusherData: {
-      channel_key: string;
-      app_key: string;
-      cluster: string;
-    };
-  } | null>();
+  const [result, setResult] = React.useState<PumpState>(initialState);
 
   type Result = NonNullable<typeof result>;
 
@@ -110,12 +71,12 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           }
         }
 
-        const responsePromise = fetch(`${appOrigin}/api/pump`, {
+        const responsePromise = fetch(pumpEndpoint, {
+          cache: "no-store",
           method: "POST",
           headers: {
             "content-type": "application/json",
-            "x-basehub-token": token,
-            ...(pumpToken ? { "x-basehub-pump-token": pumpToken } : {}),
+            "x-basehub-pump-token": pumpToken,
           },
           body: JSON.stringify(rawQueryOp),
         })
@@ -172,10 +133,9 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     });
 
     if (newPumpToken) {
-      pumpTokenLocalStorageManager.set(token, newPumpToken);
       setPumpToken(newPumpToken);
     }
-  }, [appOrigin, pumpToken, rawQueries, token]);
+  }, [pumpEndpoint, pumpToken, rawQueries]);
 
   const currentToastRef = React.useRef<string | number | null>(null);
 
@@ -188,7 +148,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
       toast.dismiss(currentToastRef.current);
     }
 
-    if (!result?.errors) return;
+    if (!result.errors) return;
     const mainError = result.errors[0]?.[0];
     if (!mainError) return;
 
@@ -215,14 +175,12 @@ export const ClientPump = <Queries extends PumpQuery[]>({
         duration: Infinity,
       }
     );
-  }, [result?.errors]);
+  }, [result.errors]);
 
   /**
    * First query plus subscribe to pusher pokes.
    */
   React.useEffect(() => {
-    if (!token || pumpToken === undefined) return;
-
     function boundRefetch() {
       refetch();
     }
@@ -232,13 +190,13 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     return () => {
       subscribers.delete(boundRefetch);
     };
-  }, [pumpToken, refetch, token]);
+  }, [refetch]);
 
   const [pusher, setPusher] = React.useState<Pusher | null>(null);
   // be specific so that useEffect doesn't re-execute on every new `result` object created
-  const pusherChannelKey = result?.pusherData?.channel_key;
-  const pusherAppKey = result?.pusherData.app_key;
-  const pusherCluster = result?.pusherData.cluster;
+  const pusherChannelKey = result.pusherData?.channel_key;
+  const pusherAppKey = result.pusherData.app_key;
+  const pusherCluster = result.pusherData.cluster;
 
   /**
    * Dynamic pusher import!
@@ -281,12 +239,8 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   }, [pusher, pusherChannelKey]);
 
   const resolvedData = React.useMemo(() => {
-    return (
-      result?.data?.map((r, i) => r ?? initialData?.[i] ?? null) ??
-      initialData ??
-      null
-    );
-  }, [initialData, result?.data]);
+    return result.data.map((r, i) => r ?? initialState.data?.[i] ?? null);
+  }, [initialState.data, result.data]);
 
   const [resolvedChildren, setResolvedChildren] =
     React.useState<React.ReactNode>(
