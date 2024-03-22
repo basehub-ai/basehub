@@ -1,5 +1,11 @@
 # basehub
 
+## 3.0.6
+
+### Patch Changes
+
+- bea7eb6: Keep the read token always in the server, plus hit pump directly to improve performance.
+
 ## 3.0.5
 
 ### Patch Changes
