@@ -39,8 +39,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   initialState: PumpState;
   initialResolvedChildren?: React.ReactNode;
 }) => {
-  const [pumpToken, setPumpToken] = React.useState<string>(initialPumpToken);
-
+  const pumpTokenRef = React.useRef<string>(initialPumpToken);
   const [result, setResult] = React.useState<PumpState>(initialState);
 
   type Result = NonNullable<typeof result>;
@@ -76,7 +75,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           method: "POST",
           headers: {
             "content-type": "application/json",
-            "x-basehub-pump-token": pumpToken,
+            "x-basehub-pump-token": pumpTokenRef.current,
           },
           body: JSON.stringify(rawQueryOp),
         })
@@ -133,9 +132,9 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     });
 
     if (newPumpToken) {
-      setPumpToken(newPumpToken);
+      pumpTokenRef.current = newPumpToken;
     }
-  }, [pumpEndpoint, pumpToken, rawQueries]);
+  }, [pumpEndpoint, rawQueries]);
 
   const currentToastRef = React.useRef<string | number | null>(null);
 
