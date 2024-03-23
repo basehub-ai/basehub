@@ -18,7 +18,8 @@ function help(code: number) {
 
   Options
     --output, -o  Output directory, if you don't want the default behavior.
-    --ts-only, -t  Output just the TypeScript code, without compiling it to JavaScript.
+    --token, -t  Pass a token or an environment variable name. Defaults to BASEHUB_TOKEN.
+    --banner, -b  Add code at the top of each generated file.
     --version, -v  Version number.
     --help, -h     Display this message.`);
   process.exit(code);
@@ -36,13 +37,13 @@ const args = arg(
     // types
     "--output": String,
     "--token": String,
-    // "--ts-only": Boolean,
+    "--banner": String,
     "--version": Boolean,
     "--help": Boolean,
     // aliases
     "-o": "--output",
     "-t": "--token",
-    // "-t": "--ts-only",
+    "-b": "--banner",
     "-v": "--version",
     "-h": "--help",
   },

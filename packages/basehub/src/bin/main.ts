@@ -8,7 +8,7 @@ import {
   getStuffFromEnv,
   runtime__getStuffFromEnvString,
 } from "./util/get-stuff-from-env";
-import { appendEslintDisableToEachFileInDirectory } from "./util/disable-linters";
+import { appendGeneratedCodeBanner } from "./util/disable-linters";
 import { writeReactPump } from "./util/write-react-pump";
 
 export const main = async (args: Args) => {
@@ -88,27 +88,6 @@ export const main = async (args: Args) => {
   // 4. write the file back.
   fs.writeFileSync(generatedMainExportPath, schemaFileContents);
 
-  // 5. patch error file
-  const generatedErrorExportPath = path.join(
-    basehubOutputPath,
-    "runtime",
-    "error.ts"
-  );
-
-  const errorFileContents = fs
-    .readFileSync(generatedErrorExportPath, "utf-8")
-    .split("\n");
-  // mutate it
-  errorFileContents.splice(
-    16,
-    0,
-    `        this.stringified = JSON.stringify(this)`
-  );
-  // write it back
-  fs.writeFileSync(generatedErrorExportPath, errorFileContents.join("\n"));
-
-  appendEslintDisableToEachFileInDirectory(basehubOutputPath);
-
   /**
    * Next Pump stuff.
    */
@@ -138,9 +117,6 @@ export const main = async (args: Args) => {
       splitting: true,
       format: "esm",
       external: peerDependencies,
-      banner: {
-        js: "/* eslint-disable */",
-      },
     }),
     esbuild.build({
       entryPoints: [path.join(basehubModulePath, "src-react-pump", "index.ts")],
@@ -152,9 +128,6 @@ export const main = async (args: Args) => {
       format: "esm",
       target: ["es2020", "node18"],
       external: peerDependencies,
-      banner: {
-        js: "/* eslint-disable */",
-      },
       plugins: [
         {
           name: "use-client-for-client-components",
@@ -179,7 +152,7 @@ export const main = async (args: Args) => {
     }),
   ]);
 
-  appendEslintDisableToEachFileInDirectory(reactPumpOutDir);
+  appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
 
   console.log("🪄 Generated `basehub` client");
   return;
