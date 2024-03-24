@@ -1,5 +1,0 @@
----
-"basehub": patch
----
-
-Support `--banner`.
