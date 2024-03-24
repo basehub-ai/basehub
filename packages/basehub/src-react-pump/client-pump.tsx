@@ -1,7 +1,6 @@
 "use client";
 import * as React from "react";
 import { PumpProps } from "./server-pump";
-import { DataProvider } from "./data-provider";
 
 import {
   // @ts-ignore
@@ -267,10 +266,10 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   }, [children, resolvedData]);
 
   return (
-    <DataProvider data={resolvedData}>
+    <>
       {resolvedChildren ?? initialResolvedChildren}
       <Toaster closeButton />
-    </DataProvider>
+    </>
   );
 };
 

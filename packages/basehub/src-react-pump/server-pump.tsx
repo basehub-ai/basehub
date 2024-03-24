@@ -1,5 +1,4 @@
 import * as React from "react";
-import { DataProvider } from "./data-provider";
 import type { ResponseCache } from "./types";
 import {
   // @ts-ignore
@@ -142,11 +141,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       <React.Suspense
         // as a fallback, we return the data provider with the initial data we got here in the server
         // this _should_ prevent any layout shift
-        fallback={
-          <DataProvider data={results.map((r) => r.data)}>
-            {resolvedChildren}
-          </DataProvider>
-        }
+        fallback={<>{resolvedChildren}</>}
       >
         <LazyClientPump
           rawQueries={results.map((r) => r.rawQueryOp)}
@@ -167,11 +162,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     );
   }
 
-  return (
-    <DataProvider data={results.map((r) => r.data)}>
-      {resolvedChildren}
-    </DataProvider>
-  );
+  return <>{resolvedChildren}</>;
 };
 
 /**
