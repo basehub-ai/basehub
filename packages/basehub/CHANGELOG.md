@@ -1,5 +1,11 @@
 # basehub
 
+## 3.0.8
+
+### Patch Changes
+
+- 1fa4021: Support `--banner`.
+
 ## 3.0.7
 
 ### Patch Changes
