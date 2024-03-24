@@ -8,7 +8,7 @@
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "basehub --output .basehub --banner \"// Somethinglonghere \n hola\""
+    "generate": "basehub --output .basehub"
   },
   "dependencies": {
     "basehub": "workspace:^",
