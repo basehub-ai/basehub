@@ -1,11 +1,24 @@
 import { Pump } from "../../.basehub/react-pump";
+import { CodeBlockTests } from "./code-block-tests";
 
 export default async function HomePage() {
   return (
     <main>
+      <CodeBlockTests />
+
+      <br />
+      <br />
+      <br />
+
       <Pump
         draft
-        queries={[{ homepage: { heroTitle: true } }]}
+        queries={[
+          {
+            homepage: {
+              _id: true,
+            },
+          },
+        ]}
         cache="no-store"
       >
         {async ([{ homepage }]) => {

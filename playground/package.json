@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.0.58",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "pnpm generate && next dev",
+    "build": "pnpm generate && next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",

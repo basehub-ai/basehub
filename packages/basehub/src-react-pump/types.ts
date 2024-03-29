@@ -9,7 +9,7 @@ export type ResponseCache = {
     cluster: string;
   };
   newPumpToken: string;
-  errors: { message: string; path: string[] }[] | null;
+  errors: { message: string; path?: string[] }[] | null;
 };
 
 export type PumpState = {
