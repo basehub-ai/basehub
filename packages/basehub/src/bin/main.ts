@@ -7,6 +7,7 @@ import * as esbuild from "esbuild";
 import {
   getStuffFromEnv,
   runtime__getStuffFromEnvString,
+  Options,
 } from "./util/get-stuff-from-env";
 import { appendGeneratedCodeBanner } from "./util/disable-linters";
 import { writeReactPump } from "./util/write-react-pump";
@@ -14,7 +15,18 @@ import { writeReactPump } from "./util/write-react-pump";
 export const main = async (args: Args) => {
   console.log("🪄 Generating...");
 
-  const { url, headers } = getStuffFromEnv({ token: args["--token"] });
+  const options: Options = {
+    token: args["--token"],
+    prefix: args["--env-prefix"],
+  };
+
+  const { url, headers, draft } = getStuffFromEnv(options);
+
+  logInsideBox([
+    `🔗 Endpoint: ${url.toString()}`,
+    `🔑 Token: bshb_pk_******`,
+    `🔵 Draft: ${draft ? "enabled" : "disabled"}`,
+  ]);
 
   const basehubModulePath = resolvePkg("basehub");
 
@@ -79,7 +91,7 @@ export const main = async (args: Args) => {
 
   // this should go at the end so that it doesn't suffer any modifications.
   schemaFileContents = schemaFileContents.concat(
-    `\n${runtime__getStuffFromEnvString(args["--token"] ?? null)}`
+    `\n${runtime__getStuffFromEnvString({ ...options, draft })}}`
   );
 
   // 3. append our basehub function to the end of the file.
@@ -192,3 +204,23 @@ export const basehub = (options?: Options) => {
   };
 };
 `;
+
+function logInsideBox(lines: string[]) {
+  // Determine the longest line to set the padding
+  const longestLine = lines.reduce(
+    (max, line) => Math.max(max, line.length),
+    0
+  );
+  const padLength = longestLine;
+
+  // Top border of the box
+  console.log(`┌─${"─".repeat(padLength)}─┐`);
+
+  // Log each line, padded to fit the box
+  lines.forEach((line) => {
+    console.log(`│ ${line.padEnd(padLength)} │`);
+  });
+
+  // Bottom border of the box
+  console.log(`└─${"─".repeat(padLength)}─┘`);
+}

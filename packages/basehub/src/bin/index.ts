@@ -37,12 +37,14 @@ const args = arg(
     // types
     "--output": String,
     "--token": String,
+    "--env-prefix": String,
     "--banner": String,
     "--version": Boolean,
     "--help": Boolean,
     // aliases
     "-o": "--output",
     "-t": "--token",
+    "-ep": "--env-prefix",
     "-b": "--banner",
     "-v": "--version",
     "-h": "--help",
