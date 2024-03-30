@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.1
+
+### Patch Changes
+
+- use draft from .env if available
+
 ## 3.1.0
 
 ### Minor Changes
