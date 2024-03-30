@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.2
+
+### Patch Changes
+
+- Better errror logging
+
 ## 3.1.1
 
 ### Patch Changes
