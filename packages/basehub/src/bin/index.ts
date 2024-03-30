@@ -18,7 +18,7 @@ function help(code: number) {
 
   Options
     --output, -o  Output directory, if you don't want the default behavior.
-    --token, -t  Pass a token or an environment variable name. Defaults to BASEHUB_TOKEN.
+    --env-prefix, -ep  Prefix for environment variables.
     --banner, -b  Add code at the top of each generated file.
     --version, -v  Version number.
     --help, -h     Display this message.`);

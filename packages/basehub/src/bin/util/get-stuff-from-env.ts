@@ -10,6 +10,7 @@ const defaultEnvVarPrefix = "BASEHUB";
 
 export type Options = {
   draft?: boolean;
+  output: string | undefined;
   prefix: string | undefined;
   /**
    * @deprecated
@@ -20,13 +21,20 @@ export type Options = {
 export const getStuffFromEnv = (
   options: Options
 ): {
+  output: string | null;
   draft: boolean;
   url: URL;
   headers: Record<string, string>;
 } => {
   dotenvLoad();
 
-  type EnvVarName = "TOKEN" | "REF" | "DRAFT" | "DEBUG_FORCED_URL" | "URL";
+  type EnvVarName =
+    | "TOKEN"
+    | "REF"
+    | "DRAFT"
+    | "DEBUG_FORCED_URL"
+    | "URL"
+    | "OUTPUT";
 
   const buildEnvVarName = (name: EnvVarName) => {
     let prefix = defaultEnvVarPrefix;
@@ -145,6 +153,7 @@ export const getStuffFromEnv = (
 
   return {
     draft,
+    output: getEnvVar("OUTPUT") ?? options.output ?? null,
     url: basehubUrl,
     headers: {
       "x-basehub-token": token,
