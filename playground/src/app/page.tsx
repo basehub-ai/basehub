@@ -4,8 +4,15 @@ export default async function HomePage() {
   return (
     <main>
       <Pump
-        draft
-        queries={[{ homepage: { heroTitle: true } }]}
+        queries={[
+          {
+            homepage: {
+              somethingSomething: {
+                _title: true,
+              },
+            },
+          },
+        ]}
         cache="no-store"
       >
         {async ([{ homepage }]) => {

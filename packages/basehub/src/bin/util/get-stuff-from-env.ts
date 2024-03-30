@@ -1,54 +1,87 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 import { dotenvLoad } from "dotenv-mono";
-import { z } from "zod";
 
 /**
  * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
  */
 
 export const basehubAPIOrigin = "https://api.basehub.com";
+const defaultEnvVarPrefix = "BASEHUB";
 
-export const getStuffFromEnv = (options?: {
+export type Options = {
   draft?: boolean;
-  token?: string;
-}): {
+  prefix: string | undefined;
+  /**
+   * @deprecated
+   */
+  token: string | undefined;
+};
+
+export const getStuffFromEnv = (
+  options: Options
+): {
+  draft: boolean;
   url: URL;
   headers: Record<string, string>;
 } => {
   dotenvLoad();
 
-  const parsedDebugForcedURL = z
-    .string()
-    .safeParse(process.env.BASEHUB_DEBUG_FORCED_URL);
+  type EnvVarName = "TOKEN" | "REF" | "DRAFT" | "DEBUG_FORCED_URL" | "URL";
 
-  const parsedBackwardsCompatURL = z
-    .string()
-    .safeParse(process.env.BASEHUB_URL);
+  const buildEnvVarName = (name: EnvVarName) => {
+    let prefix = defaultEnvVarPrefix;
+    if (options.prefix) {
+      if (options.prefix.endsWith("_")) {
+        options.prefix = options.prefix.slice(0, -1); // we remove the trailing _
+      }
 
-  const backwardsCompatURL = parsedBackwardsCompatURL.success
-    ? new URL(parsedBackwardsCompatURL.data)
+      if (options.prefix.endsWith(name)) {
+        // remove the name from the prefix
+        options.prefix = options.prefix.slice(0, -name.length);
+      }
+
+      // the user may include BASEHUB in their prefix...
+      if (options.prefix.endsWith(defaultEnvVarPrefix)) {
+        prefix = options.prefix;
+      } else {
+        // ... if they don't, we'll add it ourselves.
+        prefix = `${options.prefix}_${defaultEnvVarPrefix}`;
+      }
+    }
+    // this should result in something like <prefix>_BASEHUB_{TOKEN,REF,DRAFT} or BASEHUB_{TOKEN,REF,DRAFT}
+    return `${prefix}_${name}`;
+  };
+
+  const getEnvVar = (name: EnvVarName) => process.env[buildEnvVarName(name)];
+
+  const parsedDebugForcedURL = getEnvVar("DEBUG_FORCED_URL");
+
+  const parsedBackwardsCompatURL = getEnvVar("URL");
+
+  const backwardsCompatURL = parsedBackwardsCompatURL
+    ? new URL(parsedBackwardsCompatURL)
     : undefined;
 
   // 1. let's first form the base URL
 
   const basehubUrl = new URL(
-    parsedDebugForcedURL.success
-      ? parsedDebugForcedURL.data
-      : `${basehubAPIOrigin}/graphql`
+    parsedDebugForcedURL ? parsedDebugForcedURL : `${basehubAPIOrigin}/graphql`
   );
-
-  // These params can either come disambiguated, or in the URL.
-  // Params that come from the URL take precedence.
-  const parsedBasehubTokenEnv = z.string().safeParse(process.env.BASEHUB_TOKEN);
-  const parsedBasehubRefEnv = z.string().safeParse(process.env.BASEHUB_REF);
-  const parsedBasehubDraftEnv = z.string().safeParse(process.env.BASEHUB_DRAFT);
 
   const resolveTokenParam = (token: string | null) => {
     if (!token) return null;
+    console.warn(
+      `🚧 Warning! The --token parameter will be deprecated in the next major version. You should use --env-prefix instead.`
+    );
     const isRaw = token.startsWith("bshb_");
-    if (isRaw) return token;
-    const fromEnv = z.string().safeParse(process.env[token]);
-    if (fromEnv.success) return fromEnv.data;
+    if (isRaw) {
+      console.warn(
+        `🚧 Warning! You're using a raw token. This will be deprecated in the next major version. You should use an environment variable.`
+      );
+      return token;
+    }
+    const fromEnv = process.env[token];
+    if (fromEnv) return fromEnv;
     return ""; // empty string to prevent fallback
   };
 
@@ -57,7 +90,7 @@ export const getStuffFromEnv = (options?: {
   const token =
     resolvedToken ??
     basehubUrl.searchParams.get("token") ??
-    (parsedBasehubTokenEnv.success ? parsedBasehubTokenEnv.data : undefined) ??
+    getEnvVar("TOKEN") ??
     (backwardsCompatURL
       ? backwardsCompatURL.searchParams.get("token")
       : undefined) ??
@@ -65,16 +98,16 @@ export const getStuffFromEnv = (options?: {
 
   if (!token) {
     console.log(
-      `Token not found. Make sure to include the ${
-        resolvedToken === "" ? options?.token : "BASEHUB_TOKEN"
-      } env var.`
+      `🔴 Token not found. Make sure to include the ${buildEnvVarName(
+        "TOKEN"
+      )} env var.`
     );
     process.exit(1);
   }
 
   const ref =
     basehubUrl.searchParams.get("ref") ??
-    (parsedBasehubRefEnv.success ? parsedBasehubRefEnv.data : undefined) ??
+    getEnvVar("REF") ??
     (backwardsCompatURL
       ? backwardsCompatURL.searchParams.get("ref")
       : undefined) ??
@@ -82,21 +115,21 @@ export const getStuffFromEnv = (options?: {
 
   let draft =
     basehubUrl.searchParams.get("draft") ??
-    (parsedBasehubDraftEnv.success ? parsedBasehubDraftEnv.data : undefined) ??
+    getEnvVar("DRAFT") ??
     (backwardsCompatURL
       ? backwardsCompatURL.searchParams.get("draft")
       : undefined) ??
-    null;
+    false;
 
   if (options?.draft) {
-    draft = "true";
+    draft = true;
   }
 
   // 2. let's validate the URL
 
   if (basehubUrl.pathname.split("/")[1] !== "graphql") {
     console.log(
-      `Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql`
+      `🔴 Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql.`
     );
     process.exit(1);
   }
@@ -108,12 +141,15 @@ export const getStuffFromEnv = (options?: {
 
   // 3. done.
 
+  draft = !!draft;
+
   return {
+    draft,
     url: basehubUrl,
     headers: {
       "x-basehub-token": token,
       ...(ref ? { "x-basehub-ref": ref } : {}),
-      ...(draft ? { "x-basehub-draft": draft } : {}),
+      ...(draft ? { "x-basehub-draft": "true" } : {}),
     },
   };
 };
@@ -123,11 +159,54 @@ export const getStuffFromEnv = (options?: {
  * doesn't use Zod nor dotenv-flow (so we don't ship extra stuff to the generated bundle). Assumes the env vars are already loaded.
  */
 export const runtime__getStuffFromEnvString = (
-  tokenArg: string | null
+  options: Options
 ) => /**JavaScript */ `
 export const getStuffFromEnv = (options) => {
-    const parsedDebugForcedURL = process.env.BASEHUB_DEBUG_FORCED_URL;
-    const parsedBackwardsCompatURL = process.env.BASEHUB_URL;
+    const defaultEnvVarPrefix = "${defaultEnvVarPrefix}";
+
+    options = options || {};
+    if (options.token === undefined) {
+      options.token = ${
+        options.token ? `"${options.token}"` : undefined
+      } || null;
+    }
+    if (options.prefix === undefined) {
+      options.prefix = ${
+        options.prefix ? `"${options.prefix}"` : undefined
+      } || null;
+    }
+    if (options.draft === undefined) {
+      options.draft = ${options.draft ? "true" : "false"};
+    }
+
+    const buildEnvVarName = (name) => {
+      let prefix = defaultEnvVarPrefix;
+      if (options.prefix) {
+        if (options.prefix.endsWith("_")) {
+          options.prefix = options.prefix.slice(0, -1); // we remove the trailing _
+        }
+  
+        if (options.prefix.endsWith(name)) {
+          // remove the name from the prefix
+          options.prefix = options.prefix.slice(0, -name.length);
+        }
+  
+        // the user may include BASEHUB in their prefix...
+        if (options.prefix.endsWith(defaultEnvVarPrefix)) {
+          prefix = options.prefix;
+        } else {
+          // ... if they don't, we'll add it ourselves.
+          prefix = \`\${options.prefix}_\${defaultEnvVarPrefix}\`;
+        }
+      }
+      // this should result in something like <prefix>_BASEHUB_{TOKEN,REF,DRAFT} or BASEHUB_{TOKEN,REF,DRAFT}
+      return \`\${prefix}_\${name}\`;
+    };
+
+    const getEnvVar = (name: EnvVarName) => process.env[buildEnvVarName(name)];
+
+    const parsedDebugForcedURL = getEnvVar("DEBUG_FORCED_URL");
+    const parsedBackwardsCompatURL = getEnvVar("URL");
 
     const backwardsCompatURL = parsedBackwardsCompatURL
       ? new URL(parsedBackwardsCompatURL)
@@ -143,13 +222,9 @@ export const getStuffFromEnv = (options) => {
     // These params can either come disambiguated, or in the URL.
     // Params that come from the URL take precedence.
 
-    const envVarName = "${
-      tokenArg && !tokenArg.startsWith("bshb_") ? tokenArg : "BASEHUB_TOKEN"
-    }";
-
-    const parsedBasehubTokenEnv = process.env[envVarName];
-    const parsedBasehubRefEnv = process.env.BASEHUB_REF;
-    const parsedBasehubDraftEnv = process.env.BASEHUB_DRAFT;
+    const parsedBasehubTokenEnv = getEnvVar("TOKEN");
+    const parsedBasehubRefEnv = getEnvVar("REF");
+    const parsedBasehubDraftEnv = getEnvVar("DRAFT");
 
     const resolveTokenParam = (token) => {
       if (!token) return null;
@@ -162,7 +237,7 @@ export const getStuffFromEnv = (options) => {
 
     const token =
       resolvedToken ?? basehubUrl.searchParams.get("token") ??
-      (parsedBasehubTokenEnv ? parsedBasehubTokenEnv : undefined) ??
+      parsedBasehubTokenEnv ??
       (backwardsCompatURL
         ? backwardsCompatURL.searchParams.get("token")
         : undefined) ??
@@ -170,15 +245,15 @@ export const getStuffFromEnv = (options) => {
 
     if (!token) {
       throw new Error(
-        \`Token not found. Make sure to include the \${
-          resolvedToken === "" ? options?.token : envVarName
+        \`🔴 Token not found. Make sure to include the \${
+          buildEnvVarName("TOKEN")
         } env var.\`
       );
     }
 
     const ref =
       basehubUrl.searchParams.get("ref") ??
-      (parsedBasehubRefEnv ? parsedBasehubRefEnv : undefined) ??
+      parsedBasehubRefEnv ??
       (backwardsCompatURL
         ? backwardsCompatURL.searchParams.get("ref")
         : undefined) ??
@@ -186,20 +261,20 @@ export const getStuffFromEnv = (options) => {
 
     let draft =
        basehubUrl.searchParams.get("draft") ??
-      (parsedBasehubDraftEnv ? parsedBasehubDraftEnv : undefined) ??
+      parsedBasehubDraftEnv ??
       (backwardsCompatURL
         ? backwardsCompatURL.searchParams.get("draft")
         : undefined) ??
-      null;
+      false;
 
-    if (options?.draft) {
-      draft = "true";
+    if (options?.draft !== undefined) {
+      draft = options.draft;
     }
 
     // 2. let's validate the URL
 
     if (basehubUrl.pathname.split("/")[1] !== "graphql") {
-        throw new Error(\`Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql\`);
+        throw new Error(\`🔴 Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql.\`);
     }
 
     // we'll pass these via headers
@@ -210,12 +285,12 @@ export const getStuffFromEnv = (options) => {
     // 3. done.
 
     return {
+      draft,
       url: basehubUrl,
       headers: {
         "x-basehub-token": token,
         ...(ref ? { "x-basehub-ref": ref } : {}),
-        ...(draft ? { "x-basehub-draft": draft } : {}),
+        ...(draft ? { "x-basehub-draft": "draft" } : {}),
       },
     };
-};
 `;

@@ -154,7 +154,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
       <div style={{ lineHeight: 1.3 }}>
         Error fetching data from the BaseHub Draft API: {'"'}
         {mainError.message}
-        {'"'} at <ToastInlineCode>{mainError.path.join(".")}</ToastInlineCode>
+        {'"'} at <ToastInlineCode>{mainError.path?.join(".")}</ToastInlineCode>
         <p
           style={{
             opacity: 0.7,
@@ -254,6 +254,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   React.useEffect(() => {
     if (!resolvedData) return;
     if (typeof children === "function") {
+      // @ts-ignore
       const res = children(resolvedData);
       if (res instanceof Promise) {
         res.then(setResolvedChildren);
