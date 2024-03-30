@@ -1,5 +1,29 @@
 # basehub
 
+## 3.1.3
+
+### Patch Changes
+
+- Hoist pump data to prevent deduping errors
+
+## 3.1.2
+
+### Patch Changes
+
+- Better errror logging
+
+## 3.1.1
+
+### Patch Changes
+
+- use draft from .env if available
+
+## 3.1.0
+
+### Minor Changes
+
+- efee77d: accept --env-prefix argument, and some other generator fixes
+
 ## 3.0.8
 
 ### Patch Changes

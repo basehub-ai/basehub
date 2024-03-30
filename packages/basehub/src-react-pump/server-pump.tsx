@@ -28,6 +28,10 @@ const cache = new Map<
   }
 >();
 
+let pumpToken: string | null = null;
+let spaceID: string | null = null;
+let pusherData: ResponseCache["pusherData"] | null = null;
+
 const DEDUPE_TIME_MS = 500;
 
 let logDone = false;
@@ -49,9 +53,6 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   queries,
   ...basehubProps
 }: PumpProps<Queries>) => {
-  let pumpToken: string | null = null;
-  let spaceID: string | null = null;
-  let pusherData: ResponseCache["pusherData"] | null = null;
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
 
@@ -130,6 +131,18 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       : children;
 
   if (draft) {
+    if (!pumpToken || !spaceID || !pusherData) {
+      console.log("Results (length):", results?.length);
+      console.log("Errors:", JSON.stringify(errors, null, 2));
+      console.log("Pump Endpoint:", pumpEndpoint);
+      console.log("Pump Token:", pumpToken);
+      console.log("Space ID:", spaceID);
+      console.log("Pusher Data:", pusherData);
+      throw new Error(
+        "Pump did not return the necessary data. Look at the logs to see what's missing."
+      );
+    }
+
     try {
       if (!logDone && process.env.NODE_ENV === "development") {
         logDone = true;
@@ -137,13 +150,6 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       }
     } catch (error) {
       // won't throw because of a stupid log
-    }
-
-    if (!pumpToken || !spaceID || !pusherData) {
-      console.log("Pump Token:", pumpToken);
-      console.log("Space ID:", spaceID);
-      console.log("Pusher Data:", pusherData);
-      throw new Error("Pump did not return the necessary data");
     }
 
     // wouldn't it be great if this worked?

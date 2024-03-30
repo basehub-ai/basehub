@@ -175,8 +175,9 @@ export const getStuffFromEnv = (options) => {
         options.prefix ? `"${options.prefix}"` : undefined
       } || null;
     }
-    if (options.draft === undefined) {
-      options.draft = ${options.draft ? "true" : "false"};
+    // we'll use the draft from .env if available
+    if (!options.draft && ${options.draft}) {
+      options.draft = true;
     }
 
     const buildEnvVarName = (name) => {
