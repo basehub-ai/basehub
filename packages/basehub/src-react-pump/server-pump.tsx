@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { ResponseCache } from "./types";
+import type { PumpState, ResponseCache } from "./types";
 import {
   // @ts-ignore
   basehub,
@@ -59,11 +59,16 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   const token = headers["x-basehub-token"];
   const pumpEndpoint = url.origin.replace("api.", "") + "/api/pump"; // compatible with https://api.basehub.com and https://api.bshb.dev
 
+  const noQueries = queries.length === 0;
+
+  const queriesWithFallback =
+    draft && noQueries ? [{ _sys: { id: true } }] : queries;
+
   const results: Array<{
     data: QueryResults<Queries>[number] | undefined;
     rawQueryOp: { query: string; variables?: any };
   }> = await Promise.all(
-    queries.map(async (singleQuery) => {
+    queriesWithFallback.map(async (singleQuery) => {
       const rawQueryOp = generateQueryOp(singleQuery);
       const cacheKey = JSON.stringify(rawQueryOp);
 
@@ -162,13 +167,13 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
           rawQueries={results.map((r) => r.rawQueryOp)}
           initialState={{
             // @ts-ignore
-            data: results.map((r) => r.data ?? null),
+            data: noQueries ? results.map((r) => r.data ?? null) : [],
             errors,
             pusherData: pusherData,
             spaceID: spaceID,
           }}
           pumpEndpoint={pumpEndpoint}
-          pumpToken={pumpToken}
+          pumpToken={pumpToken ?? undefined}
           initialResolvedChildren={resolvedChildren}
         >
           {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}

@@ -1,3 +1,4 @@
+import "./global.css";
 import type { Metadata } from "next";
 import { siteOrigin } from "../lib/constants";
 

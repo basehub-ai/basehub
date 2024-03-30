@@ -34,12 +34,14 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   children: PumpProps<Queries>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
   pumpEndpoint: string;
-  pumpToken: string;
-  initialState: PumpState;
+  pumpToken: string | undefined;
+  initialState: PumpState | undefined;
   initialResolvedChildren?: React.ReactNode;
 }) => {
-  const pumpTokenRef = React.useRef<string>(initialPumpToken);
-  const [result, setResult] = React.useState<PumpState>(initialState);
+  const pumpTokenRef = React.useRef<string | undefined>(initialPumpToken);
+  const [result, setResult] = React.useState<PumpState | undefined>(
+    initialState
+  );
 
   type Result = NonNullable<typeof result>;
 
@@ -53,6 +55,11 @@ export const ClientPump = <Queries extends PumpQuery[]>({
 
     const responses = await Promise.all(
       rawQueries.map(async (rawQueryOp) => {
+        if (!pumpTokenRef.current) {
+          console.warn("No pump token found. Skipping query.");
+          return null;
+        }
+
         const cacheKey = JSON.stringify(rawQueryOp);
 
         if (clientCache.has(cacheKey)) {
@@ -146,7 +153,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
       toast.dismiss(currentToastRef.current);
     }
 
-    if (!result.errors) return;
+    if (!result?.errors) return;
     const mainError = result.errors[0]?.[0];
     if (!mainError) return;
 
@@ -173,7 +180,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
         duration: Infinity,
       }
     );
-  }, [result.errors]);
+  }, [result?.errors]);
 
   /**
    * First query plus subscribe to pusher pokes.
@@ -192,9 +199,9 @@ export const ClientPump = <Queries extends PumpQuery[]>({
 
   const [pusher, setPusher] = React.useState<Pusher | null>(null);
   // be specific so that useEffect doesn't re-execute on every new `result` object created
-  const pusherChannelKey = result.pusherData?.channel_key;
-  const pusherAppKey = result.pusherData.app_key;
-  const pusherCluster = result.pusherData.cluster;
+  const pusherChannelKey = result?.pusherData?.channel_key;
+  const pusherAppKey = result?.pusherData.app_key;
+  const pusherCluster = result?.pusherData.cluster;
 
   /**
    * Dynamic pusher import!
@@ -237,8 +244,8 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   }, [pusher, pusherChannelKey]);
 
   const resolvedData = React.useMemo(() => {
-    return result.data.map((r, i) => r ?? initialState.data?.[i] ?? null);
-  }, [initialState.data, result.data]);
+    return result?.data.map((r, i) => r ?? initialState?.data?.[i] ?? null);
+  }, [initialState?.data, result?.data]);
 
   const [resolvedChildren, setResolvedChildren] =
     React.useState<React.ReactNode>(

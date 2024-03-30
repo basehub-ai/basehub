@@ -8,7 +8,7 @@
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "basehub --env-prefix SARASA --output .basehub"
+    "generate": "basehub --output .basehub --watch"
   },
   "dependencies": {
     "basehub": "workspace:^",

@@ -41,6 +41,7 @@ const args = arg(
     "--banner": String,
     "--version": Boolean,
     "--help": Boolean,
+    "--watch": Boolean,
     // aliases
     "-o": "--output",
     "-t": "--token",
@@ -48,6 +49,7 @@ const args = arg(
     "-b": "--banner",
     "-v": "--version",
     "-h": "--help",
+    "-w": "--watch",
   },
   { permissive: true }
 );

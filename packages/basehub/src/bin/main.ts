@@ -11,163 +11,194 @@ import {
 } from "./util/get-stuff-from-env";
 import { appendGeneratedCodeBanner } from "./util/disable-linters";
 import { writeReactPump } from "./util/write-react-pump";
+import crypto from "crypto";
 
 export const main = async (args: Args) => {
-  console.log("🪄 Generating...");
+  async function generateSDK(silent?: boolean) {
+    logIfNotSilent(silent, "🪄 Generating...");
 
-  const options: Options = {
-    token: args["--token"],
-    prefix: args["--env-prefix"],
-  };
+    const options: Options = {
+      token: args["--token"],
+      prefix: args["--env-prefix"],
+    };
 
-  const { url, headers, draft } = getStuffFromEnv(options);
+    const { url, headers, draft } = getStuffFromEnv(options);
 
-  logInsideBox([
-    `🔗 Endpoint: ${url.toString()}`,
-    `🔑 Token: bshb_pk_******`,
-    `🔵 Draft: ${draft ? "enabled" : "disabled"}`,
-  ]);
+    logInsideBox([
+      `🔗 Endpoint: ${url.toString()}`,
+      `🔑 Token: bshb_pk_******`,
+      `🔵 Draft: ${draft ? "enabled" : "disabled"}`,
+    ]);
 
-  const basehubModulePath = resolvePkg("basehub");
+    const basehubModulePath = resolvePkg("basehub");
 
-  if (!basehubModulePath) {
-    throw new Error(
-      "basehub package not found in node_modules. If this issue persists, please raise an issue on the `basehub-ai/basehub` repository."
+    if (!basehubModulePath) {
+      throw new Error(
+        "basehub package not found in node_modules. If this issue persists, please raise an issue on the `basehub-ai/basehub` repository."
+      );
+    }
+
+    const pathArgs = args["--output"]
+      ? [args["--output"]]
+      : ["node_modules", "basehub", "dist", "generated-client"]; // default output path
+
+    const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
+
+    await generate({
+      endpoint: url.toString(),
+      headers: {
+        ...headers,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      output: path.join(basehubOutputPath),
+      verbose: false,
+      sortProperties: true,
+    });
+
+    const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
+
+    // We'll patch some things from the generated code.
+    let schemaFileContents = fs.readFileSync(generatedMainExportPath, "utf-8");
+
+    // 1. remove hardcoded URL and replace with our function that infers it from .env
+    // on all ocurrances.
+
+    schemaFileContents = schemaFileContents.replace(
+      "return createClientOriginal({",
+      "const { url, headers } = getStuffFromEnv(options)\n  return createClientOriginal({" // function injected below
     );
+
+    const basehubUrlRegex = new RegExp(
+      // match ", or ', or ` (as the start/end of a string)
+      // match basehubUrl but escape the ? of the query param with a \. Escape the \ with another \ so prettier doesn't remove it.
+      `['"\`]${url.toString().replace("?", "\\?")}['"\`]`,
+      "g"
+    );
+    schemaFileContents = schemaFileContents.replace(
+      basehubUrlRegex,
+      "url.toString()"
+    );
+
+    schemaFileContents = schemaFileContents.replace(
+      "...options",
+      "...options,\n    headers: { ...options?.headers, ...headers }"
+    );
+
+    // 2. remove export for `createClient`, as it holds options that we don't want to expose.
+    schemaFileContents = schemaFileContents.replace(
+      "export const createClient = ",
+      "const createClient = "
+    );
+
+    // this should go at the end so that it doesn't suffer any modifications.
+    schemaFileContents = schemaFileContents.concat(
+      `\n${runtime__getStuffFromEnvString({ ...options, draft })}}`
+    );
+
+    // 3. append our basehub function to the end of the file.
+    schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
+
+    // 4. write the file back.
+    fs.writeFileSync(generatedMainExportPath, schemaFileContents);
+
+    /**
+     * Next Pump stuff.
+     */
+    writeReactPump({
+      modulePath: basehubModulePath,
+      outputPath: basehubOutputPath,
+    });
+
+    // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
+    const peerDependencies = [
+      "react",
+      "react-dom",
+      "../index",
+      "swr",
+      "@basehub/mutation-api-helpers",
+    ];
+
+    logIfNotSilent(silent, "📦 Compiling to JavaScript...");
+    const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
+    await Promise.all([
+      esbuild.build({
+        entryPoints: [generatedMainExportPath],
+        bundle: true,
+        outdir: basehubOutputPath,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        external: peerDependencies,
+      }),
+      esbuild.build({
+        entryPoints: [
+          path.join(basehubModulePath, "src-react-pump", "index.ts"),
+        ],
+        bundle: true,
+        outdir: reactPumpOutDir,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        target: ["es2020", "node18"],
+        external: peerDependencies,
+        plugins: [
+          {
+            name: "use-client-for-client-components",
+            setup(build) {
+              build.onEnd(() => {
+                const rxp = /['"]use client['"]\s?;/i;
+                const outputFilePaths = fs.readdirSync(reactPumpOutDir);
+                outputFilePaths
+                  ?.filter((fileName) => !fileName.endsWith(".map"))
+                  .forEach((fileName) => {
+                    // if the file contains "use client" we'll make sure it's on the top.
+                    const filePath = path.join(reactPumpOutDir, fileName);
+                    const fileContents = fs.readFileSync(filePath, "utf-8");
+                    if (!rxp.test(fileContents)) return;
+                    const newContents = fileContents.replace(rxp, "");
+                    fs.writeFileSync(filePath, `"use client";\n${newContents}`);
+                  });
+              });
+            },
+          },
+        ],
+      }),
+    ]);
+
+    appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
+
+    const outputHash = crypto
+      .createHash("md5")
+      .update(schemaFileContents)
+      .digest("hex");
+
+    logIfNotSilent(silent, "🪄 Generated `basehub` client");
+    return { outputHash };
   }
 
-  const pathArgs = args["--output"]
-    ? [args["--output"]]
-    : ["node_modules", "basehub", "dist", "generated-client"]; // default output path
+  if (args["--watch"]) {
+    console.log(" ");
+    logInsideBox([
+      "👀 Experimental watch mode. Tell us about our bugs: https://basehub.com/support",
+    ]);
+    console.log(" ");
 
-  const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
-
-  await generate({
-    endpoint: url.toString(),
-    headers: {
-      ...headers,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    output: path.join(basehubOutputPath),
-    verbose: false,
-    sortProperties: true,
-  });
-
-  const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
-
-  // We'll patch some things from the generated code.
-  let schemaFileContents = fs.readFileSync(generatedMainExportPath, "utf-8");
-
-  // 1. remove hardcoded URL and replace with our function that infers it from .env
-  // on all ocurrances.
-
-  schemaFileContents = schemaFileContents.replace(
-    "return createClientOriginal({",
-    "const { url, headers } = getStuffFromEnv(options)\n  return createClientOriginal({" // function injected below
-  );
-
-  const basehubUrlRegex = new RegExp(
-    // match ", or ', or ` (as the start/end of a string)
-    // match basehubUrl but escape the ? of the query param with a \. Escape the \ with another \ so prettier doesn't remove it.
-    `['"\`]${url.toString().replace("?", "\\?")}['"\`]`,
-    "g"
-  );
-  schemaFileContents = schemaFileContents.replace(
-    basehubUrlRegex,
-    "url.toString()"
-  );
-
-  schemaFileContents = schemaFileContents.replace(
-    "...options",
-    "...options,\n    headers: { ...options?.headers, ...headers }"
-  );
-
-  // 2. remove export for `createClient`, as it holds options that we don't want to expose.
-  schemaFileContents = schemaFileContents.replace(
-    "export const createClient = ",
-    "const createClient = "
-  );
-
-  // this should go at the end so that it doesn't suffer any modifications.
-  schemaFileContents = schemaFileContents.concat(
-    `\n${runtime__getStuffFromEnvString({ ...options, draft })}}`
-  );
-
-  // 3. append our basehub function to the end of the file.
-  schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
-
-  // 4. write the file back.
-  fs.writeFileSync(generatedMainExportPath, schemaFileContents);
-
-  /**
-   * Next Pump stuff.
-   */
-  writeReactPump({
-    modulePath: basehubModulePath,
-    outputPath: basehubOutputPath,
-  });
-
-  // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
-  const peerDependencies = [
-    "react",
-    "react-dom",
-    "../index",
-    "swr",
-    "@basehub/mutation-api-helpers",
-  ];
-
-  console.log("📦 Compiling to JavaScript...");
-  const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
-  await Promise.all([
-    esbuild.build({
-      entryPoints: [generatedMainExportPath],
-      bundle: true,
-      outdir: basehubOutputPath,
-      minify: false,
-      treeShaking: true,
-      splitting: true,
-      format: "esm",
-      external: peerDependencies,
-    }),
-    esbuild.build({
-      entryPoints: [path.join(basehubModulePath, "src-react-pump", "index.ts")],
-      bundle: true,
-      outdir: reactPumpOutDir,
-      minify: false,
-      treeShaking: true,
-      splitting: true,
-      format: "esm",
-      target: ["es2020", "node18"],
-      external: peerDependencies,
-      plugins: [
-        {
-          name: "use-client-for-client-components",
-          setup(build) {
-            build.onEnd(() => {
-              const rxp = /['"]use client['"]\s?;/i;
-              const outputFilePaths = fs.readdirSync(reactPumpOutDir);
-              outputFilePaths
-                ?.filter((fileName) => !fileName.endsWith(".map"))
-                .forEach((fileName) => {
-                  // if the file contains "use client" we'll make sure it's on the top.
-                  const filePath = path.join(reactPumpOutDir, fileName);
-                  const fileContents = fs.readFileSync(filePath, "utf-8");
-                  if (!rxp.test(fileContents)) return;
-                  const newContents = fileContents.replace(rxp, "");
-                  fs.writeFileSync(filePath, `"use client";\n${newContents}`);
-                });
-            });
-          },
-        },
-      ],
-    }),
-  ]);
-
-  appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
-
-  console.log("🪄 Generated `basehub` client");
-  return;
+    let isFirst = true;
+    let previousHash = "";
+    await scheduleNonOverlappingWork(async () => {
+      const result = await generateSDK(!isFirst);
+      if (!isFirst && previousHash !== result.outputHash) {
+        console.log("🔄 Regenerated `basehub` client");
+      }
+      previousHash = result.outputHash;
+      isFirst = false;
+    }, 3000);
+  } else {
+    await generateSDK();
+  }
 };
 
 const basehubExport = `
@@ -224,3 +255,23 @@ function logInsideBox(lines: string[]) {
   // Bottom border of the box
   console.log(`└─${"─".repeat(padLength)}─┘`);
 }
+
+function logIfNotSilent(silent: boolean | undefined, message: string) {
+  if (!silent) {
+    console.log(message);
+  }
+}
+
+const scheduleNonOverlappingWork = async (
+  callback: () => Promise<void>,
+  t: number
+) => {
+  await callback();
+
+  await new Promise((resolve) =>
+    // Re-schedule after operation completes (recursive!)
+    setTimeout(() => {
+      scheduleNonOverlappingWork(callback, t).then(resolve);
+    }, t)
+  );
+};
