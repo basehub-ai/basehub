@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.4
+
+### Patch Changes
+
+- Receive output from vars optionally
+
 ## 3.1.3
 
 ### Patch Changes

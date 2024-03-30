@@ -18,15 +18,10 @@ export const main = async (args: Args) => {
   const options: Options = {
     token: args["--token"],
     prefix: args["--env-prefix"],
+    output: args["--output"],
   };
 
-  const { url, headers, draft } = getStuffFromEnv(options);
-
-  logInsideBox([
-    `🔗 Endpoint: ${url.toString()}`,
-    `🔑 Token: bshb_pk_******`,
-    `🔵 Draft: ${draft ? "enabled" : "disabled"}`,
-  ]);
+  const { url, headers, draft, output } = getStuffFromEnv(options);
 
   const basehubModulePath = resolvePkg("basehub");
 
@@ -36,11 +31,18 @@ export const main = async (args: Args) => {
     );
   }
 
-  const pathArgs = args["--output"]
-    ? [args["--output"]]
+  const pathArgs = output
+    ? [output]
     : ["node_modules", "basehub", "dist", "generated-client"]; // default output path
 
   const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
+
+  logInsideBox([
+    `🔗 Endpoint: ${url.toString()}`,
+    `🔑 Token: bshb_pk_******`,
+    `🔵 Draft: ${draft ? "enabled" : "disabled"}`,
+    `📦 Output: ${basehubOutputPath}`,
+  ]);
 
   await generate({
     endpoint: url.toString(),
