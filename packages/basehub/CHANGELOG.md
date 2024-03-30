@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.0
+
+### Minor Changes
+
+- efee77d: accept --env-prefix argument, and some other generator fixes
+
 ## 3.0.8
 
 ### Patch Changes

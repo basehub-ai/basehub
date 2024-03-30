@@ -1,5 +1,13 @@
 # playground
 
+## 0.0.59
+
+### Patch Changes
+
+- efee77d: accept --env-prefix argument, and some other generator fixes
+- Updated dependencies [efee77d]
+  - basehub@3.1.0
+
 ## 0.0.58
 
 ### Patch Changes
