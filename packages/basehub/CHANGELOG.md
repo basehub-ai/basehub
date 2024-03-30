@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.3
+
+### Patch Changes
+
+- Hoist pump data to prevent deduping errors
+
 ## 3.1.2
 
 ### Patch Changes
