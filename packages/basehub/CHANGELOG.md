@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.6
+
+### Patch Changes
+
+- Manage error for not async pump children
+
 ## 3.1.5
 
 ### Patch Changes
