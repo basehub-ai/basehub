@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.5
+
+### Patch Changes
+
+- Better pump url management
+
 ## 3.1.4
 
 ### Patch Changes

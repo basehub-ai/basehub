@@ -58,7 +58,17 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
 
   const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
-  const pumpEndpoint = url.origin.replace("api.", "") + "/api/pump"; // compatible with https://api.basehub.com and https://api.bshb.dev
+  let pumpEndpoint: string;
+  switch(true) {
+    case url.origin.includes("api.basehub.com"):
+      pumpEndpoint = "https://basehub.com/api/pump";
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      pumpEndpoint = "https://basehub.dev/api/pump";
+      break;
+    default:
+      pumpEndpoint = url
+  }
 
   const results: Array<{
     data: QueryResults<Queries>[number] | undefined;
