@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.8
+
+### Patch Changes
+
+- Accept "\_target" in rich text links and add it to default handler
+
 ## 3.1.7
 
 ### Patch Changes
