@@ -300,7 +300,7 @@ export const getStuffFromEnv = (options) => {
       headers: {
         "x-basehub-token": token,
         ...(ref ? { "x-basehub-ref": ref } : {}),
-        ...(draft ? { "x-basehub-draft": "draft" } : {}),
+        ...(draft ? { "x-basehub-draft": "true" } : {}),
       },
     };
 `;

@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.7
+
+### Patch Changes
+
+- Fix bug with automatic draft mode
+
 ## 3.1.6
 
 ### Patch Changes
