@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { PumpState, ResponseCache } from "./types";
+import type { ResponseCache } from "./types";
 import {
   // @ts-ignore
   basehub,
