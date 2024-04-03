@@ -1,5 +1,11 @@
 # basehub
 
+## 3.1.9
+
+### Patch Changes
+
+- Add support custom rel to anchor in target \_blank
+
 ## 3.1.8
 
 ### Patch Changes
