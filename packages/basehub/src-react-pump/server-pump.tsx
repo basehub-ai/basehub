@@ -34,8 +34,6 @@ let pusherData: ResponseCache["pusherData"] | null = null;
 
 const DEDUPE_TIME_MS = 500;
 
-let logDone = false;
-
 export type PumpProps<Queries extends Array<PumpQuery>> = {
   children: (
     data: QueryResults<Queries>
@@ -155,15 +153,6 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       throw new Error(
         "Pump did not return the necessary data. Look at the logs to see what's missing."
       );
-    }
-
-    try {
-      if (!logDone && process.env.NODE_ENV === "development") {
-        logDone = true;
-        console.log(`\n  ⛽ You're Super Pumped\n`);
-      }
-    } catch (error) {
-      // won't throw because of a stupid log
     }
 
     // wouldn't it be great if this worked?

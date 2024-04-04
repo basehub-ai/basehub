@@ -159,9 +159,16 @@ export const ClientPump = <Queries extends PumpQuery[]>({
 
     currentToastRef.current = toast.error(
       <div style={{ lineHeight: 1.3 }}>
-        Error fetching data from the BaseHub Draft API: {'"'}
+        Error fetching data from the BaseHub Draft API:
         {mainError.message}
-        {'"'} at <ToastInlineCode>{mainError.path?.join(".")}</ToastInlineCode>
+        {mainError.path ? (
+          <>
+            {" "}
+            at <ToastInlineCode>{mainError.path?.join(".")}</ToastInlineCode>
+          </>
+        ) : (
+          ""
+        )}
         <p
           style={{
             opacity: 0.7,
@@ -170,9 +177,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
             marginTop: "0.25em",
           }}
         >
-          {/* eslint-disable-next-line react/no-unescaped-entities */}
-          This is generally due to a block that has an "is required" constraint,
-          but is empty.
+          Check if that block is defined in your BaseHub Repo.
         </p>
       </div>,
       {
@@ -261,7 +266,6 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   React.useEffect(() => {
     if (!resolvedData) return;
     if (typeof children === "function") {
-      console.log("calling children with resolvedData", resolvedData);
       // @ts-ignore
       const res = children(resolvedData);
       if (res instanceof Promise) {
