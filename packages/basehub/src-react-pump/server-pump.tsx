@@ -58,7 +58,17 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
 
   const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
-  const pumpEndpoint = url.origin.replace("api.", "") + "/api/pump"; // compatible with https://api.basehub.com and https://api.bshb.dev
+  let pumpEndpoint: string;
+  switch(true) {
+    case url.origin.includes("api.basehub.com"):
+      pumpEndpoint = "https://basehub.com/api/pump";
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      pumpEndpoint = "https://basehub.dev/api/pump";
+      break;
+    default:
+      pumpEndpoint = url.toString()
+  }
 
   const noQueries = queries.length === 0;
 
@@ -119,16 +129,21 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     })
   );
 
-  const resolvedChildren =
-    typeof children === "function"
-      ? // @ts-ignore
-        await children(results.map((r) => r.data))?.catch((e: unknown) => {
-          if (draft) {
-            // when in draft, we ignore the error server side, as we prefer to pass it down to the client via the toast
-            console.error("Error in Pump children function", e);
-          } else throw e;
-        })
-      : children;
+  let resolvedChildren;
+    //@ts-ignore
+    const childrenPromise = children(results.map((r) => r.data));
+    if(childrenPromise instanceof Promise){
+      resolvedChildren = await childrenPromise?.catch((e: unknown) => {
+        if (draft) {
+          // when in draft, we ignore the error server side, as we prefer to pass it down to the client via the toast
+          console.error("Error in Pump children function", e);
+          return null;
+        } else throw e;
+      });
+    } else {
+      resolvedChildren = childrenPromise;
+    }
+ 
 
   if (draft) {
     if (!pumpToken || !spaceID || !pusherData) {

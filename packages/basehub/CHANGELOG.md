@@ -1,5 +1,41 @@
 # basehub
 
+## 3.1.10
+
+### Patch Changes
+
+- update @basehub/mutation-api-helpers
+
+## 3.1.9
+
+### Patch Changes
+
+- Add support custom rel to anchor in target \_blank
+
+## 3.1.8
+
+### Patch Changes
+
+- Accept "\_target" in rich text links and add it to default handler
+
+## 3.1.7
+
+### Patch Changes
+
+- Fix bug with automatic draft mode
+
+## 3.1.6
+
+### Patch Changes
+
+- Manage error for not async pump children
+
+## 3.1.5
+
+### Patch Changes
+
+- Better pump url management
+
 ## 3.1.4
 
 ### Patch Changes

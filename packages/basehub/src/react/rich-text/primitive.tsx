@@ -132,7 +132,12 @@ type Handlers = {
     language: string;
     code: string;
   }) => ReactNode;
-  a: (props: { children: ReactNode; href: string }) => ReactNode;
+  a: (props: {
+    children: ReactNode;
+    href: string;
+    target?: string;
+    rel?: string;
+  }) => ReactNode;
   ol: (props: { children: ReactNode }) => ReactNode;
   ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
   li: (
@@ -248,7 +253,14 @@ export const RichText = <
 };
 
 const defaultHandlers: Handlers = {
-  a: ({ children, href }) => <a href={href}>{children}</a>,
+  a: ({ children, href, ...rest }) => (
+    <a
+      href={href}
+      {...rest}
+    >
+      {children}
+    </a>
+  ),
   p: ({ children }) => <p>{children}</p>,
   b: ({ children }) => <b>{children}</b>,
   em: ({ children }) => <em>{children}</em>,
@@ -585,6 +597,8 @@ const Marks = ({
       props = {
         children,
         href: mark.attrs.href,
+        target: mark.attrs.target,
+        rel: mark.attrs.target?.toLowerCase() === "_blank" ? "noopener noreferer" : undefined,
       } satisfies ExtractPropsForHandler<Handlers["a"]>;
       break;
     case "basehub-inline-block": {
