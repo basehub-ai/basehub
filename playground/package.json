@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.68",
   "scripts": {
-    "dev": "next dev",
+    "dev": "basehub dev & next dev",
     "build": "next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",

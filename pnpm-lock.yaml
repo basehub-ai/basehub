@@ -61,12 +61,12 @@ importers:
 
   packages/basehub:
     dependencies:
+      '@basehub/genql':
+        specifier: 6.3.5
+        version: 6.3.5
       '@basehub/mutation-api-helpers':
         specifier: 1.0.0
         version: 1.0.0
-      '@genql/cli':
-        specifier: 6.3.2
-        version: 6.3.2
       arg:
         specifier: 5.0.1
         version: 5.0.1
@@ -200,6 +200,27 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
+
+  /@basehub/genql@6.3.5:
+    resolution: {integrity: sha512-gQb4BoKwEJpdUq+8/dZ10usqMLORbrptGnk059FAuoQHzq1fc5IIfAOzgNG/nFx8o1q/RYdxxgmvhEbILYgU0g==}
+    dependencies:
+      '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.1)
+      '@graphql-tools/load': 7.8.14(graphql@16.8.1)
+      fs-extra: 10.1.0
+      graphql: 16.8.1
+      kleur: 4.1.5
+      listr2: 6.6.1
+      lodash: 4.17.21
+      mkdirp: 0.5.6
+      native-fetch: 4.0.2(undici@5.23.0)
+      prettier: 2.8.8
+      qs: 6.11.2
+      rimraf: 2.7.1
+      undici: 5.23.0
+      yargs: 15.4.1
+    transitivePeerDependencies:
+      - enquirer
+    dev: false
 
   /@basehub/mutation-api-helpers@1.0.0:
     resolution: {integrity: sha512-0PyL0dTq6h8p/kQj4zdaO4KVD9LtnxVjsuYDDctNYTbnYxM/qV2Gn9fHqQgM5dv5deKYlt33ratS3DGRLtglQQ==}
@@ -612,28 +633,6 @@ packages:
   /@eslint/js@8.52.0:
     resolution: {integrity: sha512-mjZVbpaeMZludF2fsWLD0Z9gCref1Tk4i9+wddjRvpUNqqcndPkBD09N/Mapey0b3jaXbLm2kICwFv2E64QinA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    dev: false
-
-  /@genql/cli@6.3.2:
-    resolution: {integrity: sha512-ZvsrKVwxg3Cfmvf4eLcrz431yLCx1f2eB+/f3i860en0z0hWeiBoChcsEjm74j0q+j/ctBpXf1QP2fsGAHgj6w==}
-    hasBin: true
-    dependencies:
-      '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.1)
-      '@graphql-tools/load': 7.8.14(graphql@16.8.1)
-      fs-extra: 10.1.0
-      graphql: 16.8.1
-      kleur: 4.1.5
-      listr2: 6.6.1
-      lodash: 4.17.21
-      mkdirp: 0.5.6
-      native-fetch: 4.0.2(undici@5.23.0)
-      prettier: 2.8.8
-      qs: 6.11.2
-      rimraf: 2.7.1
-      undici: 5.23.0
-      yargs: 15.4.1
-    transitivePeerDependencies:
-      - enquirer
     dev: false
 
   /@graphql-tools/graphql-file-loader@7.5.17(graphql@16.8.1):

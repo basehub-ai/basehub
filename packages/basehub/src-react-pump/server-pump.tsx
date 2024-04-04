@@ -59,7 +59,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
   let pumpEndpoint: string;
-  switch(true) {
+  switch (true) {
     case url.origin.includes("api.basehub.com"):
       pumpEndpoint = "https://basehub.com/api/pump";
       break;
@@ -67,7 +67,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       pumpEndpoint = "https://basehub.dev/api/pump";
       break;
     default:
-      pumpEndpoint = url.toString()
+      pumpEndpoint = url.toString();
   }
 
   const noQueries = queries.length === 0;
@@ -130,20 +130,19 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   );
 
   let resolvedChildren;
-    //@ts-ignore
-    const childrenPromise = children(results.map((r) => r.data));
-    if(childrenPromise instanceof Promise){
-      resolvedChildren = await childrenPromise?.catch((e: unknown) => {
-        if (draft) {
-          // when in draft, we ignore the error server side, as we prefer to pass it down to the client via the toast
-          console.error("Error in Pump children function", e);
-          return null;
-        } else throw e;
-      });
-    } else {
-      resolvedChildren = childrenPromise;
-    }
- 
+  //@ts-ignore
+  const childrenPromise = children(results.map((r) => r.data));
+  if (childrenPromise instanceof Promise) {
+    resolvedChildren = await childrenPromise?.catch((e: unknown) => {
+      if (draft) {
+        // when in draft, we ignore the error server side, as we prefer to pass it down to the client via the toast
+        console.error("Error in Pump children function", e);
+        return null;
+      } else throw e;
+    });
+  } else {
+    resolvedChildren = childrenPromise;
+  }
 
   if (draft) {
     if (!pumpToken || !spaceID || !pusherData) {
@@ -188,7 +187,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
           rawQueries={results.map((r) => r.rawQueryOp)}
           initialState={{
             // @ts-ignore
-            data: noQueries ? results.map((r) => r.data ?? null) : [],
+            data: !noQueries ? results.map((r) => r.data ?? null) : [],
             errors,
             pusherData: pusherData,
             spaceID: spaceID,

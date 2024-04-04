@@ -261,6 +261,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   React.useEffect(() => {
     if (!resolvedData) return;
     if (typeof children === "function") {
+      console.log("calling children with resolvedData", resolvedData);
       // @ts-ignore
       const res = children(resolvedData);
       if (res instanceof Promise) {

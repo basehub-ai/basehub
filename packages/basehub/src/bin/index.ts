@@ -15,6 +15,7 @@ function help(code: number) {
   console.log(`
   Usage
     $ basehub
+    $ basehub dev
 
   Options
     --output, -o  Output directory, if you don't want the default behavior.
@@ -62,6 +63,9 @@ if (args["--version"] || args["-v"]) {
 // CLI commands
 const cmds: { [key: string]: (args: Args) => Promise<void> } = {
   generate: main,
+  dev: async () => {
+    return await main({ ...args, "--watch": true }, { forceDraft: true });
+  },
   help: async () => help(0),
 };
 

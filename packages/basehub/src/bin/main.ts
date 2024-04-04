@@ -1,4 +1,4 @@
-import { generate } from "@genql/cli";
+import { generate } from "@basehub/genql";
 import resolvePkg from "resolve-pkg";
 import path from "path";
 import { Args } from ".";
@@ -11,16 +11,16 @@ import {
 } from "./util/get-stuff-from-env";
 import { appendGeneratedCodeBanner } from "./util/disable-linters";
 import { writeReactPump } from "./util/write-react-pump";
-import crypto from "crypto";
 
-export const main = async (args: Args) => {
-  async function generateSDK(silent?: boolean) {
+export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
+  async function generateSDK(silent: boolean, previousSchemaHash: string) {
     logIfNotSilent(silent, "🪄 Generating...");
 
     const options: Options = {
       token: args["--token"],
       prefix: args["--env-prefix"],
       output: args["--output"],
+      ...(opts?.forceDraft && { draft: true }),
     };
 
     const { url, headers, draft, output } = getStuffFromEnv(options);
@@ -39,14 +39,16 @@ export const main = async (args: Args) => {
 
     const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
 
-    logInsideBox([
-      `🔗 Endpoint: ${url.toString()}`,
-      `🔑 Token: bshb_pk_******`,
-      `🔵 Draft: ${draft ? "enabled" : "disabled"}`,
-      `📦 Output: ${basehubOutputPath}`,
-    ]);
+    if (!silent) {
+      logInsideBox([
+        `🔗 Endpoint: ${url.toString()}`,
+        `🔑 Token: bshb_pk_******`,
+        `🔵 Draft: ${draft ? "enabled" : "disabled"}`,
+        `📦 Output: ${basehubOutputPath}`,
+      ]);
+    }
 
-    await generate({
+    const { preventedClientGeneration, schemaHash } = await generate({
       endpoint: url.toString(),
       headers: {
         ...headers,
@@ -56,7 +58,14 @@ export const main = async (args: Args) => {
       output: path.join(basehubOutputPath),
       verbose: false,
       sortProperties: true,
+      silent,
+      previousSchemaHash,
     });
+
+    if (preventedClientGeneration) {
+      // done
+      return { preventedClientGeneration, schemaHash };
+    }
 
     const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
 
@@ -99,7 +108,9 @@ export const main = async (args: Args) => {
     );
 
     // 3. append our basehub function to the end of the file.
-    schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
+    if (!schemaFileContents.includes(basehubExport)) {
+      schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
+    }
 
     // 4. write the file back.
     fs.writeFileSync(generatedMainExportPath, schemaFileContents);
@@ -172,34 +183,30 @@ export const main = async (args: Args) => {
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
 
-    const outputHash = crypto
-      .createHash("md5")
-      .update(schemaFileContents)
-      .digest("hex");
-
     logIfNotSilent(silent, "🪄 Generated `basehub` client");
-    return { outputHash };
+    return { preventedClientGeneration, schemaHash };
   }
 
   if (args["--watch"]) {
-    console.log(" ");
-    logInsideBox([
-      "👀 Experimental watch mode. Tell us about our bugs: https://basehub.com/support",
-    ]);
-    console.log(" ");
-
     let isFirst = true;
     let previousHash = "";
     await scheduleNonOverlappingWork(async () => {
-      const result = await generateSDK(!isFirst);
-      if (!isFirst && previousHash !== result.outputHash) {
-        console.log("🔄 Regenerated `basehub` client");
+      const result = await generateSDK(!isFirst, previousHash);
+      if (isFirst) {
+        console.log(" ");
+        logInsideBox([
+          "👀 `basehub` experimental --watch mode. Tell us about our bugs: https://basehub.com/support",
+        ]);
+        console.log(" ");
+      } else if (!result.preventedClientGeneration) {
+        console.log("🔄 Detected changes, updating `basehub`...");
       }
-      previousHash = result.outputHash;
+
+      previousHash = result.schemaHash;
       isFirst = false;
     }, 3000);
   } else {
-    await generateSDK();
+    await generateSDK(false, "");
   }
 };
 
