@@ -1,5 +1,11 @@
 # basehub
 
+## 3.2.0
+
+### Minor Changes
+
+- 8491d89: Introduce --watch mode, plus a new `basehub dev` command to help you get up and running faster in your local environment.
+
 ## 3.2.0-next.0
 
 ### Minor Changes
