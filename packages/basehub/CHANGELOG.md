@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.3
+
+### Patch Changes
+
+- fix some lil bugs
+
 ## 4.0.2
 
 ### Patch Changes
