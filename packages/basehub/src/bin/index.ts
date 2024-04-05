@@ -15,12 +15,14 @@ function help(code: number) {
   console.log(`
   Usage
     $ basehub
-    $ basehub dev
+    $ basehub dev  # turns on draft and watch mode automatically.
 
   Options
     --output, -o  Output directory, if you don't want the default behavior.
     --env-prefix, -ep  Prefix for environment variables.
     --banner, -b  Add code at the top of each generated file.
+    --watch, -v  Watch for changes and regenerate.
+    --draft, -v  Generate with draft mode enabled.
     --version, -v  Version number.
     --help, -h     Display this message.`);
   process.exit(code);
@@ -41,6 +43,7 @@ const args = arg(
     "--env-prefix": String,
     "--banner": String,
     "--version": Boolean,
+    "--draft": Boolean,
     "--help": Boolean,
     "--watch": Boolean,
     // aliases
@@ -49,6 +52,7 @@ const args = arg(
     "-ep": "--env-prefix",
     "-b": "--banner",
     "-v": "--version",
+    "-d": "--draft",
     "-h": "--help",
     "-w": "--watch",
   },

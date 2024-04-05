@@ -20,6 +20,7 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
       token: args["--token"],
       prefix: args["--env-prefix"],
       output: args["--output"],
+      draft: args["--draft"],
       ...(opts?.forceDraft && { draft: true }),
     };
 
@@ -36,6 +37,7 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
     const pathArgs = output
       ? [output]
       : ["node_modules", "basehub", "dist", "generated-client"]; // default output path
+    const isCustomOutput = !!output;
 
     const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
 
@@ -182,6 +184,21 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
     ]);
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
+
+    if (isCustomOutput) {
+      // alias react-rich-text and other packages to the generated client for better import experience
+      ["react-rich-text", "api-transaction"].map((pathsToAlias) => {
+        // create a file in the output directory that aliases the package to the generated client
+        fs.writeFileSync(
+          path.join(basehubOutputPath, `${pathsToAlias}.d.ts`),
+          `export * from "basehub/${pathsToAlias}";`
+        );
+        fs.writeFileSync(
+          path.join(basehubOutputPath, `${pathsToAlias}.js`),
+          `module.exports = require("basehub/${pathsToAlias}");`
+        );
+      });
+    }
 
     logIfNotSilent(silent, "🪄 Generated `basehub` client");
     return { preventedClientGeneration, schemaHash };

@@ -1,4 +1,24 @@
 import { Pump } from "../../.basehub/react-pump";
+import { fragmentOn } from "../../.basehub";
+
+const HomepageFragment = fragmentOn("Homepage", {
+  heroTitle: true,
+  heroSubtitle: true,
+  idkAnImage: {
+    url: true,
+  },
+  cta: {
+    label: true,
+    href: true,
+  },
+  coll: {
+    items: {
+      _id: true,
+      _title: true,
+      someTextHere: true,
+    },
+  },
+});
 
 export default async function HomePage() {
   return (
@@ -6,24 +26,7 @@ export default async function HomePage() {
       <Pump
         queries={[
           {
-            homepage: {
-              heroTitle: true,
-              heroSubtitle: true,
-              idkAnImage: {
-                url: true,
-              },
-              cta: {
-                label: true,
-                href: true,
-              },
-              coll: {
-                items: {
-                  _id: true,
-                  _title: true,
-                  someTextHere: true,
-                },
-              },
-            },
+            homepage: HomepageFragment,
           },
         ]}
         cache="no-store"
@@ -38,7 +41,7 @@ export default async function HomePage() {
               <p>{homepage.heroSubtitle}</p>
               <a href={homepage.cta.href}>{homepage.cta.label}</a>
               <img
-                src={homepage.idkAnImage.url}
+                src={homepage.idkAnImage?.url}
                 alt="something"
                 width={200}
                 height={200}
@@ -48,7 +51,6 @@ export default async function HomePage() {
                 return (
                   <div key={item._id}>
                     <h2>{item._title}</h2>
-                    <p>{item.someTextHere}</p>
                   </div>
                 );
               })}
