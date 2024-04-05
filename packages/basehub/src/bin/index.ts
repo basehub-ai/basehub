@@ -4,11 +4,20 @@ import arg from "arg";
 import { main } from "./main";
 import { formatError } from "./util/format-error";
 import fs from "fs";
+import resolvePkg from "resolve-pkg";
 
-// Get package.json
-const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
-// Get version from package.json
-const version = packageJson.version;
+function getVersion() {
+  const basehubModulePath = resolvePkg("basehub");
+
+  // Get package.json
+  const packageJson = JSON.parse(
+    fs.readFileSync(`${basehubModulePath}/package.json`, "utf-8")
+  );
+  // Get version from package.json
+  const version = packageJson.version;
+
+  return version;
+}
 
 // Show usage and exit with code
 function help(code: number) {
@@ -31,7 +40,9 @@ function help(code: number) {
 // Get CLI arguments
 let [, , cmd] = process.argv;
 
-if (!cmd || cmd.startsWith("-")) {
+const systemArgs = ["-h", "--help", "-v", "--version"];
+
+if (!cmd || (cmd.startsWith("-") && systemArgs.includes(cmd) === false)) {
   cmd = "generate";
 }
 
@@ -60,7 +71,7 @@ const args = arg(
 );
 
 if (args["--version"] || args["-v"]) {
-  console.log(`basehub v${version}`);
+  console.log(`basehub v${getVersion()}`);
   process.exit(0);
 }
 

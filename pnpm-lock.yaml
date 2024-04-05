@@ -62,8 +62,8 @@ importers:
   packages/basehub:
     dependencies:
       '@basehub/genql':
-        specifier: 7.0.3
-        version: 7.0.3
+        specifier: 7.0.4
+        version: 7.0.4
       '@basehub/mutation-api-helpers':
         specifier: 1.0.0
         version: 1.0.0
@@ -201,8 +201,8 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.0
 
-  /@basehub/genql@7.0.3:
-    resolution: {integrity: sha512-Rfzijr4IPcbqy0FfUBOLgbK9d03ZnqgyoFfM13ravVOiANeITibA6qaatk29kPpRCCbRFEZ8L9Pzafw5dJsh2Q==}
+  /@basehub/genql@7.0.4:
+    resolution: {integrity: sha512-DdwlkwAdpJz1F8dXeraKIacE87ZA2IzK4fhREm2KlXfRJBf8ohxaTKg5H6FK/TwYTfAkDy+BSZYUSNezDlVgGg==}
     dependencies:
       '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.1)
       '@graphql-tools/load': 7.8.14(graphql@16.8.1)
