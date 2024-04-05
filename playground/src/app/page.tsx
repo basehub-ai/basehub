@@ -4,9 +4,6 @@ import { fragmentOn } from "../../.basehub";
 const HomepageFragment = fragmentOn("Homepage", {
   heroTitle: true,
   heroSubtitle: true,
-  idkAnImage: {
-    url: true,
-  },
   cta: {
     label: true,
     href: true,
