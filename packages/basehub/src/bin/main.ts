@@ -216,7 +216,7 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
         ]);
         console.log(" ");
       } else if (!result.preventedClientGeneration) {
-        console.log("🔄 Detected changes, updating `basehub`...");
+        console.log("🔄 Detected changes, `basehub` re-generated");
       }
 
       previousHash = result.schemaHash;
