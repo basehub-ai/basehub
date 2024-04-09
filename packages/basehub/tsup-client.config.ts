@@ -6,8 +6,12 @@ export default defineConfig((_options: Options) => {
     dts: true,
     entry: {
       "react-rich-text": "./src/react/rich-text/index.ts",
+      "react-code-block": "./src/react/code-block/index.ts",
       "api-transaction": "./src/api-transaction.ts",
     },
+    external: ["react", "react-dom"],
     format: ["esm"],
+    splitting: true,
+    clean: true,
   };
 });

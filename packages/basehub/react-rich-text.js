@@ -1,1 +1,1 @@
-module.exports = require("./dist/react-rich-text.mjs");
+module.exports = require("./dist/react-rich-text");

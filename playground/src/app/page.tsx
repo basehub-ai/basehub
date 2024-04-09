@@ -20,6 +20,12 @@ const HomepageFragment = fragmentOn("Homepage", {
 export default async function HomePage() {
   return (
     <main>
+      <CodeBlockTests />
+
+      <br />
+      <br />
+      <br />
+
       <Pump
         queries={[
           {
