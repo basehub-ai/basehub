@@ -167,29 +167,23 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     //     : children;
 
     return (
-      <React.Suspense
-        // as a fallback, we return the data provider with the initial data we got here in the server
-        // this _should_ prevent any layout shift
-        fallback={<>{resolvedChildren}</>}
+      <LazyClientPump
+        rawQueries={results.map((r) => r.rawQueryOp)}
+        initialState={{
+          // @ts-ignore
+          data: !noQueries ? results.map((r) => r.data ?? null) : [],
+          errors,
+          pusherData: pusherData,
+          spaceID: spaceID,
+        }}
+        pumpEndpoint={pumpEndpoint}
+        pumpToken={pumpToken ?? undefined}
+        initialResolvedChildren={resolvedChildren}
       >
-        <LazyClientPump
-          rawQueries={results.map((r) => r.rawQueryOp)}
-          initialState={{
-            // @ts-ignore
-            data: !noQueries ? results.map((r) => r.data ?? null) : [],
-            errors,
-            pusherData: pusherData,
-            spaceID: spaceID,
-          }}
-          pumpEndpoint={pumpEndpoint}
-          pumpToken={pumpToken ?? undefined}
-          initialResolvedChildren={resolvedChildren}
-        >
-          {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
-          {/* @ts-ignore */}
-          {children}
-        </LazyClientPump>
-      </React.Suspense>
+        {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
+        {/* @ts-ignore */}
+        {children}
+      </LazyClientPump>
     );
   }
 
