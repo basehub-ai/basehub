@@ -1,5 +1,12 @@
 # basehub
 
+## 4.0.4
+
+### Patch Changes
+
+- 715b7d8: update genql
+- b0d2975: cache no store in draft mode
+
 ## 4.0.3
 
 ### Patch Changes
