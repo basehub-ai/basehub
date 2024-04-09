@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.6
+
+### Patch Changes
+
+- Fix an issue with nested pumps
+
 ## 4.0.5
 
 ### Patch Changes
