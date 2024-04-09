@@ -76,6 +76,9 @@ importers:
       esbuild:
         specifier: 0.19.2
         version: 0.19.2
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
       pusher-js:
         specifier: 8.3.0
         version: 8.3.0
@@ -2580,6 +2583,10 @@ packages:
 
   /github-from-package@0.0.0:
     resolution: {integrity: sha512-SyHy3T1v2NUXn29OsWdxmK6RwHD+vkj3v8en8AOBZ1wBQ/hCAQ5bAQTD02kW4W9tUp/3Qh6J8r9EvntiyCmOOw==}
+    dev: false
+
+  /github-slugger@2.0.0:
+    resolution: {integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==}
     dev: false
 
   /glob-parent@5.1.2:
