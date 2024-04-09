@@ -110,6 +110,7 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
     );
 
     // 3. append our basehub function to the end of the file.
+    const basehubExport = getBaseHubExport(draft);
     if (!schemaFileContents.includes(basehubExport)) {
       schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
     }
@@ -227,7 +228,7 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
   }
 };
 
-const basehubExport = `
+const getBaseHubExport = (noStore: boolean) => `
 export * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
 
@@ -254,7 +255,9 @@ export const basehub = (options?: Options) => {
   const { url, headers } = getStuffFromEnv(options);
 
   return {
-    ...createClient(options),
+    ...createClient(${
+      noStore ? "{ ...options, cache: 'no-store' }" : "options"
+    }),
     raw: createFetcher({ ...options, url, headers }) as <Cast = unknown>(
       gql: GraphqlOperation
     ) => Promise<Cast>,
