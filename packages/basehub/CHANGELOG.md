@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.5
+
+### Patch Changes
+
+- 8cee68d: React RichText component now implements GithubSlugger to generate the headings IDs
+
 ## 4.0.4
 
 ### Patch Changes
