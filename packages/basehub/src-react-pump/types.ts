@@ -1,7 +1,7 @@
 import type { QueryResults } from "./server-pump";
 
 export type ResponseCache = {
-  data: QueryResults<unknown[]>[number] | null;
+  data: QueryResults<[]>[number] | null;
   spaceID: string;
   pusherData: {
     channel_key: string;

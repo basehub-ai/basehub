@@ -1,5 +1,21 @@
 import { Pump } from "../../.basehub/react-pump";
-import { CodeBlockTests } from "./code-block-tests";
+import { fragmentOn } from "../../.basehub";
+
+const HomepageFragment = fragmentOn("Homepage", {
+  heroTitle: true,
+  heroSubtitle: true,
+  cta: {
+    label: true,
+    href: true,
+  },
+  coll: {
+    items: {
+      _id: true,
+      _title: true,
+      someTextHere: true,
+    },
+  },
+});
 
 export default async function HomePage() {
   return (
@@ -11,20 +27,38 @@ export default async function HomePage() {
       <br />
 
       <Pump
-        draft
         queries={[
           {
-            homepage: {
-              _id: true,
-            },
+            homepage: HomepageFragment,
           },
         ]}
         cache="no-store"
       >
-        {async ([{ homepage }]) => {
+        {async ([d]) => {
           "use server";
-
-          return <div>{JSON.stringify(homepage, null, 2)}</div>;
+          const homepage = d?.homepage;
+          console.log("homepage", JSON.stringify(homepage));
+          return (
+            <div>
+              <h1>{homepage.heroTitle}</h1>
+              <p>{homepage.heroSubtitle}</p>
+              <a href={homepage.cta.href}>{homepage.cta.label}</a>
+              <img
+                src={homepage.idkAnImage?.url}
+                alt="something"
+                width={200}
+                height={200}
+                style={{ display: "block" }}
+              />
+              {homepage.coll.items.map((item) => {
+                return (
+                  <div key={item._id}>
+                    <h2>{item._title}</h2>
+                  </div>
+                );
+              })}
+            </div>
+          );
         }}
       </Pump>
     </main>

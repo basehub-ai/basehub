@@ -1,14 +1,14 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.58",
+  "version": "0.0.75",
   "scripts": {
-    "dev": "pnpm generate && next dev",
-    "build": "pnpm generate && next build",
+    "dev": "basehub dev & next dev",
+    "build": "next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "basehub --output .basehub"
+    "generate": "basehub"
   },
   "dependencies": {
     "basehub": "workspace:^",

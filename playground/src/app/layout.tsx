@@ -1,3 +1,4 @@
+import "./global.css";
 import type { Metadata } from "next";
 import { siteOrigin } from "../lib/constants";
 
@@ -10,8 +11,8 @@ export const metadata: Metadata = {
     width: "device-width",
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/next.svg",
+    shortcut: "/next.svg",
   },
   manifest: "/manifest.webmanifest",
   twitter: {

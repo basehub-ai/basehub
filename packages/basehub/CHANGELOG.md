@@ -1,5 +1,166 @@
 # basehub
 
+## 4.0.5
+
+### Patch Changes
+
+- 8cee68d: React RichText component now implements GithubSlugger to generate the headings IDs
+
+## 4.0.4
+
+### Patch Changes
+
+- 715b7d8: update genql
+- b0d2975: cache no store in draft mode
+
+## 4.0.3
+
+### Patch Changes
+
+- fix some lil bugs
+
+## 4.0.2
+
+### Patch Changes
+
+- update genql
+
+## 4.0.1
+
+### Patch Changes
+
+- Fix exports issue
+
+## 4.0.0
+
+### Major Changes
+
+- 7a85095: # New `fragmentOn` helper to extract fragments
+
+  In this new major version, we're introducing `fragmentOn`, a simpler way to create fragments in the `basehub` SDK.
+
+  Previously, in order to reuse a fragment, you'd do something like this:
+
+  ```ts
+  // old way 👎
+  import {
+    LinkComponentGenqlSelection,
+    LinkComponent,
+    FieldsSelection,
+  } from "basehub";
+
+  const LinkFragment = {
+    href: true,
+    label: true,
+  } satisfies LinkComponentGenqlSelection;
+
+  // extract the type
+  type LinkFragment = FieldsSelection<LinkComponent, typeof LinkFragment>;
+  ```
+
+  Looks simple, but it's a bit hard to understand. You need to know that we're exposing a `LinkComponentGenqlSelection`, and that you should use the `satisfies` so the object's type is constrained but also can be more specific. Then, to extract the type, you'd get `FieldsSelection`, and finally, `LinkComponent`. A lot of types!
+
+  Moreover, if you needed to create another fragment, it'd be this same process, over and over again.
+
+  This is how it's done in the new version:
+
+  ```ts
+  // new way 👍
+  import { fragmentOn } from "basehub";
+
+  const LinkFragment = fragmentOn("LinkComponent", {
+    href: true,
+    label: true,
+  });
+
+  // extract the type
+  type LinkFragment = fragmentOn.infer<typeof LinkFragment>;
+  ```
+
+  Much simpler!
+
+  ## Why is this a breaking change
+
+  Before this version, we exposed a lot of the internal types from `'basehub'`. We now don't. Some applications might depend on this, and that's why this is a breaking change. If you need those types for some reason that wasn't discussed in this document, feel free to raise an issue and we can see to bring them back.
+
+## 3.2.0
+
+### Minor Changes
+
+- 8491d89: Introduce --watch mode, plus a new `basehub dev` command to help you get up and running faster in your local environment.
+
+## 3.2.0-next.0
+
+### Minor Changes
+
+- Introduce --watch mode, plus a new `basehub dev` command to help you get up and running faster in your local environment.
+
+## 3.1.10
+
+### Patch Changes
+
+- update @basehub/mutation-api-helpers
+
+## 3.1.9
+
+### Patch Changes
+
+- Add support custom rel to anchor in target \_blank
+
+## 3.1.8
+
+### Patch Changes
+
+- Accept "\_target" in rich text links and add it to default handler
+
+## 3.1.7
+
+### Patch Changes
+
+- Fix bug with automatic draft mode
+
+## 3.1.6
+
+### Patch Changes
+
+- Manage error for not async pump children
+
+## 3.1.5
+
+### Patch Changes
+
+- Better pump url management
+
+## 3.1.4
+
+### Patch Changes
+
+- Receive output from vars optionally
+
+## 3.1.3
+
+### Patch Changes
+
+- Hoist pump data to prevent deduping errors
+
+## 3.1.2
+
+### Patch Changes
+
+- Better errror logging
+
+## 3.1.1
+
+### Patch Changes
+
+- use draft from .env if available
+
+## 3.1.0
+
+### Minor Changes
+
+- efee77d: accept --env-prefix argument, and some other generator fixes
+
 ## 3.0.8
 
 ### Patch Changes

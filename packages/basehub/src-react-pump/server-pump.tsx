@@ -28,6 +28,10 @@ const cache = new Map<
   }
 >();
 
+let pumpToken: string | null = null;
+let spaceID: string | null = null;
+let pusherData: ResponseCache["pusherData"] | null = null;
+
 const DEDUPE_TIME_MS = 500;
 
 export type PumpProps<Queries extends Array<PumpQuery>> = {
@@ -47,21 +51,33 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   queries,
   ...basehubProps
 }: PumpProps<Queries>) => {
-  let pumpToken: string | null = null;
-  let spaceID: string | null = null;
-  let pusherData: ResponseCache["pusherData"] | null = null;
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
 
-  const { headers, url } = getStuffFromEnv(basehubProps);
+  const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
-  const pumpEndpoint = url.origin.replace("api.", "") + "/api/pump"; // compatible with https://api.basehub.com and https://api.bshb.dev
+  let pumpEndpoint: string;
+  switch (true) {
+    case url.origin.includes("api.basehub.com"):
+      pumpEndpoint = "https://basehub.com/api/pump";
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      pumpEndpoint = "https://basehub.dev/api/pump";
+      break;
+    default:
+      pumpEndpoint = url.toString();
+  }
+
+  const noQueries = queries.length === 0;
+
+  const queriesWithFallback =
+    draft && noQueries ? [{ _sys: { id: true } }] : queries;
 
   const results: Array<{
-    data: QueryResults<Queries>[number];
+    data: QueryResults<Queries>[number] | undefined;
     rawQueryOp: { query: string; variables?: any };
   }> = await Promise.all(
-    queries.map(async (singleQuery) => {
+    queriesWithFallback.map(async (singleQuery) => {
       const rawQueryOp = generateQueryOp(singleQuery);
       const cacheKey = JSON.stringify(rawQueryOp);
 
@@ -75,7 +91,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       }
 
       if (!data) {
-        const dataPromise = basehubProps.draft
+        const dataPromise = draft
           ? fetch(pumpEndpoint, {
               cache: "no-store",
               method: "POST",
@@ -111,19 +127,32 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     })
   );
 
-  const resolvedChildren =
-    typeof children === "function"
-      ? await children(results.map((r) => r.data)).catch((e: unknown) => {
-          if (basehubProps.draft) {
-            // when in draft, we ignore the error server side, as we prefer to pass it down to the client via the toast
-            console.error("Error in Pump children function", e);
-          } else throw e;
-        })
-      : children;
+  let resolvedChildren;
+  //@ts-ignore
+  const childrenPromise = children(results.map((r) => r.data));
+  if (childrenPromise instanceof Promise) {
+    resolvedChildren = await childrenPromise?.catch((e: unknown) => {
+      if (draft) {
+        // when in draft, we ignore the error server side, as we prefer to pass it down to the client via the toast
+        console.error("Error in Pump children function", e);
+        return null;
+      } else throw e;
+    });
+  } else {
+    resolvedChildren = childrenPromise;
+  }
 
-  if (basehubProps.draft) {
+  if (draft) {
     if (!pumpToken || !spaceID || !pusherData) {
-      throw new Error("Pump did not return the necessary data");
+      console.log("Results (length):", results?.length);
+      console.log("Errors:", JSON.stringify(errors, null, 2));
+      console.log("Pump Endpoint:", pumpEndpoint);
+      console.log("Pump Token:", pumpToken);
+      console.log("Space ID:", spaceID);
+      console.log("Pusher Data:", pusherData);
+      throw new Error(
+        "Pump did not return the necessary data. Look at the logs to see what's missing."
+      );
     }
 
     // wouldn't it be great if this worked?
@@ -146,16 +175,18 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
         <LazyClientPump
           rawQueries={results.map((r) => r.rawQueryOp)}
           initialState={{
-            data: results.map((r) => r.data ?? null),
+            // @ts-ignore
+            data: !noQueries ? results.map((r) => r.data ?? null) : [],
             errors,
             pusherData: pusherData,
             spaceID: spaceID,
           }}
           pumpEndpoint={pumpEndpoint}
-          pumpToken={pumpToken}
+          pumpToken={pumpToken ?? undefined}
           initialResolvedChildren={resolvedChildren}
         >
           {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
+          {/* @ts-ignore */}
           {children}
         </LazyClientPump>
       </React.Suspense>

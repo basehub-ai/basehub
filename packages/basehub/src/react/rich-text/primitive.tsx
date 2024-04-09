@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import { type ReactNode } from "react";
-import slugify from "slugify";
-import { extractTextFromNode, incrementID } from "./util/heading-id";
+import GithubSlugger from 'github-slugger'
+import { extractTextFromNode } from "./util/heading-id";
 
 /**
  * TODOs
@@ -132,7 +132,12 @@ type Handlers = {
     language: string;
     code: string;
   }) => ReactNode;
-  a: (props: { children: ReactNode; href: string }) => ReactNode;
+  a: (props: {
+    children: ReactNode;
+    href: string;
+    target?: string;
+    rel?: string;
+  }) => ReactNode;
   ol: (props: { children: ReactNode }) => ReactNode;
   ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
   li: (
@@ -216,18 +221,13 @@ export type RichTextProps<
   >;
 };
 
-type GeneratedIDsRecord = Record<
-  number, // level
-  Array<string>
->;
-
 export const RichText = <
   CustomBlocks extends CustomBlocksBase = readonly any[],
 >(
   props: RichTextProps<CustomBlocks>
 ): ReactNode => {
   const value = props.children as Node[] | undefined;
-  const generatedIDs: GeneratedIDsRecord = [];
+  const slugger = new GithubSlugger()
 
   return (
     <>
@@ -239,7 +239,7 @@ export const RichText = <
             components={props.components}
             blocks={props.blocks}
             level={0}
-            generatedIDs={generatedIDs}
+            slugger={slugger}
           />
         );
       })}
@@ -248,7 +248,14 @@ export const RichText = <
 };
 
 const defaultHandlers: Handlers = {
-  a: ({ children, href }) => <a href={href}>{children}</a>,
+  a: ({ children, href, ...rest }) => (
+    <a
+      href={href}
+      {...rest}
+    >
+      {children}
+    </a>
+  ),
   p: ({ children }) => <p>{children}</p>,
   b: ({ children }) => <b>{children}</b>,
   em: ({ children }) => <em>{children}</em>,
@@ -325,14 +332,14 @@ const Node = ({
   blocks,
   parent,
   level,
-  generatedIDs,
+  slugger,
 }: {
   node: Node;
   components?: Partial<Handlers>;
   blocks?: readonly CustomBlockBase[];
   parent?: Node;
   level: number;
-  generatedIDs: GeneratedIDsRecord;
+  slugger: GithubSlugger;
 }) => {
   const children = node.content?.map((childNode, index) => {
     return (
@@ -343,7 +350,7 @@ const Node = ({
         components={components}
         blocks={blocks}
         level={level + 1}
-        generatedIDs={generatedIDs}
+        slugger={slugger}
       />
     );
   });
@@ -403,32 +410,7 @@ const Node = ({
     case "heading":
       const handlerTag = `h${node.attrs.level}` as keyof Handlers;
       handler = components?.[handlerTag] ?? defaultHandlers[handlerTag];
-
-      // initialize the array for this level
-      generatedIDs[level] = generatedIDs[level] ?? [];
-
-      function getUniqueID(id: string): string {
-        // make sure there are no collisions
-        if (id) {
-          if (generatedIDs[level]?.includes(id)) {
-            return getUniqueID(incrementID(id));
-          }
-        }
-
-        return id;
-      }
-
-      const id = getUniqueID(
-        slugify(extractTextFromNode(node), {
-          strict: true,
-          lower: true,
-          trim: true,
-        })
-      );
-
-      if (id) {
-        generatedIDs[level]?.push(id);
-      }
+      const id = slugger.slug(extractTextFromNode(node))
 
       props = { children, id } satisfies ExtractPropsForHandler<Handlers["h1"]>;
       break;
@@ -585,6 +567,8 @@ const Marks = ({
       props = {
         children,
         href: mark.attrs.href,
+        target: mark.attrs.target,
+        rel: mark.attrs.target?.toLowerCase() === "_blank" ? "noopener noreferer" : undefined,
       } satisfies ExtractPropsForHandler<Handlers["a"]>;
       break;
     case "basehub-inline-block": {
