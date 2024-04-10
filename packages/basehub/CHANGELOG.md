@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.7
+
+### Patch Changes
+
+- support caption for videos
+
 ## 4.0.6
 
 ### Patch Changes
