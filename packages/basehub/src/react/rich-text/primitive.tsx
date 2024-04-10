@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import { type ReactNode } from "react";
-import GithubSlugger from 'github-slugger'
+import GithubSlugger from "github-slugger";
 import { extractTextFromNode } from "./util/heading-id";
 
 /**
@@ -104,7 +104,7 @@ export type Node =
     }
   | {
       type: "video";
-      attrs: { src: string; width?: number; height?: number };
+      attrs: { src: string; width?: number; height?: number; caption?: string };
       marks?: Array<Mark>;
       content?: Array<Node>;
     }
@@ -164,6 +164,7 @@ type Handlers = {
     src: string;
     width?: number;
     height?: number;
+    caption?: string;
   }) => ReactNode;
   blockquote: (props: { children: ReactNode }) => ReactNode;
   pre: (props: {
@@ -227,7 +228,7 @@ export const RichText = <
   props: RichTextProps<CustomBlocks>
 ): ReactNode => {
   const value = props.children as Node[] | undefined;
-  const slugger = new GithubSlugger()
+  const slugger = new GithubSlugger();
 
   return (
     <>
@@ -249,10 +250,7 @@ export const RichText = <
 
 const defaultHandlers: Handlers = {
   a: ({ children, href, ...rest }) => (
-    <a
-      href={href}
-      {...rest}
-    >
+    <a href={href} {...rest}>
       {children}
     </a>
   ),
@@ -301,7 +299,9 @@ const defaultHandlers: Handlers = {
       {...(caption ? { ["data-caption"]: caption } : {})}
     />
   ),
-  video: (props) => <video {...props} />,
+  video: ({ caption, ...rest }) => (
+    <video {...rest} {...(caption ? { ["data-caption"]: caption } : {})} />
+  ),
   blockquote: ({ children }) => <blockquote>{children}</blockquote>,
   pre: ({ children, language }) => (
     <pre data-language={language} className={`language-${language}`}>
@@ -410,7 +410,7 @@ const Node = ({
     case "heading":
       const handlerTag = `h${node.attrs.level}` as keyof Handlers;
       handler = components?.[handlerTag] ?? defaultHandlers[handlerTag];
-      const id = slugger.slug(extractTextFromNode(node))
+      const id = slugger.slug(extractTextFromNode(node));
 
       props = { children, id } satisfies ExtractPropsForHandler<Handlers["h1"]>;
       break;
@@ -476,6 +476,7 @@ const Node = ({
         src: node.attrs.src,
         width: node.attrs.width,
         height: node.attrs.height,
+        caption: node.attrs.caption,
       } satisfies ExtractPropsForHandler<Handlers["video"]>;
       break;
     case "basehub-block": {
@@ -568,7 +569,10 @@ const Marks = ({
         children,
         href: mark.attrs.href,
         target: mark.attrs.target,
-        rel: mark.attrs.target?.toLowerCase() === "_blank" ? "noopener noreferer" : undefined,
+        rel:
+          mark.attrs.target?.toLowerCase() === "_blank"
+            ? "noopener noreferer"
+            : undefined,
       } satisfies ExtractPropsForHandler<Handlers["a"]>;
       break;
     case "basehub-inline-block": {
