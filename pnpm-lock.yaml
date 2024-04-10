@@ -65,8 +65,8 @@ importers:
         specifier: 7.0.6
         version: 7.0.6
       '@basehub/mutation-api-helpers':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 1.0.1
+        version: 1.0.1
       arg:
         specifier: 5.0.1
         version: 5.0.1
@@ -222,8 +222,8 @@ packages:
       - enquirer
     dev: false
 
-  /@basehub/mutation-api-helpers@1.0.0:
-    resolution: {integrity: sha512-0PyL0dTq6h8p/kQj4zdaO4KVD9LtnxVjsuYDDctNYTbnYxM/qV2Gn9fHqQgM5dv5deKYlt33ratS3DGRLtglQQ==}
+  /@basehub/mutation-api-helpers@1.0.1:
+    resolution: {integrity: sha512-D4ZVbkzE9WdanTqP/Mf3chR+ffv4V4XsHlmS2MoBZ0t83oWDRwSFsGdWGTeVw9TdoHVmeDHLm0t5iOei7INTNg==}
     dependencies:
       type-fest: 3.7.1
     dev: false
