@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.8
+
+### Patch Changes
+
+- f7fabb2: Update dependencies, add support for date and color blocks via the mutation API
+
 ## 4.0.7
 
 ### Patch Changes
