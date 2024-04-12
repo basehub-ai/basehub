@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.10
+
+### Patch Changes
+
+- remove a remaining log
+
 ## 4.0.9
 
 ### Patch Changes
