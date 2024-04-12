@@ -537,7 +537,7 @@ const Node = ({
 
   // @ts-ignore
   if (!handler) {
-    console.warn(`No handler found for node type ${node.type}`);
+    // console.warn(`No handler found for node type ${node.type}`);
     return <></>;
   }
 
@@ -641,7 +641,7 @@ const Marks = ({
 
   // @ts-ignore
   if (!handler) {
-    console.warn(`No handler found for mark ${mark}`);
+    // console.warn(`No handler found for mark ${mark}`);
     return <></>;
   }
 
