@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.9
+
+### Patch Changes
+
+- Logging improvements
+
 ## 4.0.8
 
 ### Patch Changes
