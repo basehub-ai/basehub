@@ -43,7 +43,8 @@ export type Node =
         | "taskList"
         | "blockquote"
         | "table"
-        | "tableRow";
+        | "tableRow"
+        | "tableBody";
       attrs?: Attrs;
       marks?: Array<Mark>;
       content?: Array<Node>;
@@ -239,7 +240,6 @@ export const RichText = <
             key={index}
             components={props.components}
             blocks={props.blocks}
-            level={0}
             slugger={slugger}
           />
         );
@@ -331,14 +331,12 @@ const Node = ({
   components,
   blocks,
   parent,
-  level,
   slugger,
 }: {
   node: Node;
   components?: Partial<Handlers>;
   blocks?: readonly CustomBlockBase[];
   parent?: Node;
-  level: number;
   slugger: GithubSlugger;
 }) => {
   const children = node.content?.map((childNode, index) => {
@@ -349,7 +347,6 @@ const Node = ({
         key={index}
         components={components}
         blocks={blocks}
-        level={level + 1}
         slugger={slugger}
       />
     );
@@ -437,7 +434,23 @@ const Node = ({
       break;
     case "table":
       handler = components?.table ?? defaultHandlers.table;
-      props = { children } satisfies ExtractPropsForHandler<Handlers["table"]>;
+
+      /**
+       * In the case of table, we add a tableBody node that wraps its children, as it seems to be missing in the response.
+       */
+      const overridenChildren = (
+        <Node
+          node={{ type: "tableBody", content: node.content }}
+          parent={node}
+          components={components}
+          blocks={blocks}
+          slugger={slugger}
+        />
+      );
+
+      props = { children: overridenChildren } satisfies ExtractPropsForHandler<
+        Handlers["table"]
+      >;
       break;
     case "tableRow":
       handler = components?.tr ?? defaultHandlers.tr;
@@ -458,6 +471,14 @@ const Node = ({
         colspan: node.attrs.colspan,
         rowspan: node.attrs.rowspan,
       } satisfies ExtractPropsForHandler<Handlers["th"]>;
+      break;
+    case "tableFooter":
+      handler = components?.tfoot ?? defaultHandlers.tfoot;
+      props = { children } satisfies ExtractPropsForHandler<Handlers["tfoot"]>;
+      break;
+    case "tableBody":
+      handler = components?.tbody ?? defaultHandlers.tbody;
+      props = { children } satisfies ExtractPropsForHandler<Handlers["tbody"]>;
       break;
     case "image":
       handler = components?.img ?? defaultHandlers.img;
@@ -481,11 +502,17 @@ const Node = ({
       break;
     case "basehub-block": {
       const block = blocks?.find((block: any) => {
+        const typename = block?.__typename as string | undefined;
+        const keysLength = Object.keys(block).length;
         const id = block?._id ?? block?._sys?.id;
-        if (typeof id !== "string") {
+        if (typeof id !== "string" && (!typename || keysLength > 1)) {
           if (isDev) {
             console.warn(
-              `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.`
+              `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.\nReceived ${JSON.stringify(
+                block,
+                null,
+                2
+              )}.`
             );
           }
           return false;
@@ -493,11 +520,11 @@ const Node = ({
         return id === node.attrs.id;
       });
       if (!block) {
-        if (isDev) {
-          console.warn(
-            `BaseHub RichText Error: block "${node.attrs.id}" not found.`
-          );
-        }
+        // if (isDev) {
+        //   console.warn(
+        //     `BaseHub RichText Error: block "${node.attrs.id}" not found.`
+        //   );
+        // }
         break;
       }
       // @ts-ignore
@@ -577,22 +604,29 @@ const Marks = ({
       break;
     case "basehub-inline-block": {
       const block = blocks?.find((block: any) => {
+        const typename = block?.__typename as string | undefined;
+        const keysLength = Object.keys(block).length;
         const id = block?._id ?? block?._sys?.id;
-        if (typeof id !== "string") {
+        if (typeof id !== "string" && (!typename || keysLength > 1)) {
           if (isDev) {
             console.warn(
-              `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.`
+              `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.\nReceived ${JSON.stringify(
+                block,
+                null,
+                2
+              )}.`
             );
           }
+          return false;
         }
         return id === mark.attrs.id;
       });
       if (!block) {
-        if (isDev) {
-          console.warn(
-            `BaseHub RichText Error: block "${mark.attrs.id}" not found.`
-          );
-        }
+        // if (isDev) {
+        //   console.warn(
+        //     `BaseHub RichText Error: block "${mark.attrs.id}" not found.`
+        //   );
+        // }
         break;
       }
       handler =
