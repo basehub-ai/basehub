@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.11
+
+### Patch Changes
+
+- prevent commenting on .graphql file
+
 ## 4.0.10
 
 ### Patch Changes
