@@ -20,7 +20,7 @@ function getVersion() {
 }
 
 // Show usage and exit with code
-function help(code: number) {
+async function help(code: number) {
   console.log(`
   Usage
     $ basehub
@@ -70,18 +70,18 @@ const args = arg(
   { permissive: true }
 );
 
+const version = getVersion();
+
 if (args["--version"] || args["-v"]) {
-  console.log(`basehub v${getVersion()}`);
+  console.log(`basehub v${version}`);
   process.exit(0);
 }
 
 // CLI commands
 const cmds: { [key: string]: (args: Args) => Promise<void> } = {
-  generate: main,
-  dev: async () => {
-    return await main({ ...args, "--watch": true }, { forceDraft: true });
-  },
-  help: async () => help(0),
+  generate: () => main(args, { version }),
+  dev: () => main({ ...args, "--watch": true }, { forceDraft: true, version }),
+  help: () => help(0),
 };
 
 // Run CLI

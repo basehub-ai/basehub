@@ -34,7 +34,7 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
-    "@basehub/genql": "7.0.6",
+    "@basehub/genql": "7.0.7",
     "@basehub/mutation-api-helpers": "1.0.1",
     "arg": "5.0.1",
     "dotenv-mono": "1.3.10",

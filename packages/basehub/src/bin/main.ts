@@ -12,7 +12,10 @@ import {
 import { appendGeneratedCodeBanner } from "./util/disable-linters";
 import { writeReactPump } from "./util/write-react-pump";
 
-export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
+export const main = async (
+  args: Args,
+  opts: { forceDraft?: boolean; version: string }
+) => {
   async function generateSDK(silent: boolean, previousSchemaHash: string) {
     logIfNotSilent(silent, "🪄 Generating...");
 
@@ -43,9 +46,9 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
 
     if (!silent) {
       logInsideBox([
+        `🎫 SDK Version: ${opts.version}`,
         `🔗 Endpoint: ${url.toString()}`,
-        `🔑 Token: bshb_pk_******`,
-        `🔵 Draft: ${draft ? "enabled" : "disabled"}`,
+        `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,
       ]);
     }
