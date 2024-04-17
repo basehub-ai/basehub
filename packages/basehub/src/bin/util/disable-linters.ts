@@ -52,6 +52,8 @@ export function appendGeneratedCodeBanner(
     const isJs =
       fileOrDirName.endsWith(".js") || fileOrDirName.endsWith(".jsx");
 
+    if (!isTs && !isJs) return;
+
     const filePath = path.join(directoryPath, fileOrDirName);
     const fileContent = fs.readFileSync(filePath, "utf-8");
 
@@ -61,7 +63,7 @@ export function appendGeneratedCodeBanner(
       toAppend += `${extraBanner}\n`;
     }
     // check if first line of file already has eslint disable
-    if ((isTs || isJs) && !fileContent.startsWith("/* eslint-disable */")) {
+    if (!fileContent.startsWith("/* eslint-disable */")) {
       toAppend += `${LINTERS}\n`;
     }
     if (

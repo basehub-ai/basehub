@@ -131,7 +131,6 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
       "react",
       "react-dom",
       "../index",
-      "swr",
       "@basehub/mutation-api-helpers",
     ];
 
@@ -229,7 +228,7 @@ export const main = async (args: Args, opts?: { forceDraft?: boolean }) => {
 };
 
 const getBaseHubExport = (noStore: boolean) => `
-export * from "@basehub/mutation-api-helpers";
+export type * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
 
 // we limit options to only the ones we want to expose.
