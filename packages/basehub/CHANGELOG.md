@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.13
+
+### Patch Changes
+
+- 2fe5b05: Update @basehub/mutation-api-helpers dependency to latest version
+
 ## 4.0.12
 
 ### Patch Changes
