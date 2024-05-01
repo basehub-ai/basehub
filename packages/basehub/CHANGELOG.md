@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.15
+
+### Patch Changes
+
+- e0d9ebf: Update mutation-api-helpers
+
 ## 4.0.14
 
 ### Patch Changes
