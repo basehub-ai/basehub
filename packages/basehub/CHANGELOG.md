@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.14
+
+### Patch Changes
+
+- 9ed4d10: Update Deps
+
 ## 4.0.13
 
 ### Patch Changes
