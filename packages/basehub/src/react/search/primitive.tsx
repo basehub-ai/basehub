@@ -142,7 +142,7 @@ export type SearchResult<Doc extends { _id: string }> = {
   searchTimeMs: number;
   hits: Array<{
     document: Doc;
-    mainHighlight: Highlight | undefined;
+    highlight: Record<string, Highlight> | undefined;
     highlights: Array<Highlight>;
     curated: boolean;
   }>;
@@ -202,11 +202,12 @@ export const useSearch = <Document extends { _id: string }>({
         hits:
           rawResult.hits?.map((hit) => {
             const document = deFlatten(hit.document) as Document;
+            const highlightRecord = {} as Record<string, Highlight>;
             const highlights =
               hit.highlights?.map((highlight) => {
                 const fieldPath = highlight.field as string;
 
-                return {
+                const cast: Highlight = {
                   fieldPath,
                   fieldValue: get(document, fieldPath) as unknown,
                   indices: highlight.indices ?? [],
@@ -215,11 +216,16 @@ export const useSearch = <Document extends { _id: string }>({
                   snippets: highlight.snippets ?? [],
                   value: highlight.value,
                 };
+
+                highlightRecord[highlight.field as string] = cast;
+
+                return cast;
               }) ?? [];
+
             return {
               curated: hit.curated ?? false,
               document,
-              mainHighlight: highlights[0],
+              highlight: highlightRecord,
               highlights,
             };
           }) ?? [],
