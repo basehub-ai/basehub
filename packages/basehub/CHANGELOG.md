@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.1
+
+### Patch Changes
+
+- expose search files in package.json
+
 ## 4.0.16-canary.0
 
 ### Patch Changes

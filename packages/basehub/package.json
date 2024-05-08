@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "4.0.16-canary.0",
+  "version": "4.0.16-canary.1",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -19,6 +19,8 @@
     "react-pump.d.ts",
     "react-rich-text.js",
     "react-rich-text.d.ts",
+    "react-search.js",
+    "react-search.d.ts",
     "src-react-pump",
     "api-transaction.d.ts"
   ],
