@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.0
+
+### Patch Changes
+
+- Introduce `useSearch` (alpha)
+
 ## 4.0.15
 
 ### Patch Changes
