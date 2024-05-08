@@ -129,7 +129,7 @@ type Highlight = {
   fieldValue: unknown;
   indices: number[];
   matchedTokens: string[] | string[][];
-  mainSnippet: string | undefined;
+  snippet: string | undefined;
   snippets: string[];
   value: string | undefined;
 };
@@ -145,6 +145,7 @@ export type SearchResult<Doc extends { _id: string }> = {
     highlight: Record<string, Highlight> | undefined;
     highlights: Array<Highlight>;
     curated: boolean;
+    _getField: (fieldPath: string) => unknown;
   }>;
 };
 
@@ -212,7 +213,7 @@ export const useSearch = <Document extends { _id: string }>({
                   fieldValue: get(document, fieldPath) as unknown,
                   indices: highlight.indices ?? [],
                   matchedTokens: highlight.matched_tokens,
-                  mainSnippet: highlight.snippet,
+                  snippet: highlight.snippet,
                   snippets: highlight.snippets ?? [],
                   value: highlight.value,
                 };
@@ -227,6 +228,9 @@ export const useSearch = <Document extends { _id: string }>({
               document,
               highlight: highlightRecord,
               highlights,
+              _getField: (fieldPath: string) => {
+                return get(document, fieldPath) as unknown;
+              },
             };
           }) ?? [],
       };
