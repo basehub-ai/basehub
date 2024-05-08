@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.13-next.0
+
+### Patch Changes
+
+- c32f4aa: Introduce `useSearch` (alpha)
+
 ## 4.0.12
 
 ### Patch Changes
