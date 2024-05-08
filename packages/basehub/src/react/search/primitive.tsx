@@ -9,17 +9,19 @@ import type {
  * Utils
  * -----------------------------------------------------------------------------------------------*/
 
-const decodeKey = (key: string) => {
-  const [domain, apiKey, collectionName] = key.split(":");
+const decodeKey = (_searchKey: string) => {
+  const [domain, apiKey, collectionName] = _searchKey.split(":");
 
   if (typeof domain !== "string") {
-    throw new Error(`Couldn't get domain from key: ${key}`);
+    throw new Error(`Couldn't get domain from _searchKey: ${_searchKey}`);
   }
   if (typeof apiKey !== "string") {
-    throw new Error(`Couldn't get apiKey from key: ${key}`);
+    throw new Error(`Couldn't get apiKey from _searchKey: ${_searchKey}`);
   }
   if (typeof collectionName !== "string") {
-    throw new Error(`Couldn't get collectionName from key: ${key}`);
+    throw new Error(
+      `Couldn't get collectionName from _searchKey: ${_searchKey}`
+    );
   }
 
   return { domain, apiKey, collectionName };
@@ -36,9 +38,9 @@ export const getSearchClient = (
   /**
    * The _searchKey taken from a collection of our GraphQL API.
    */
-  key: string
+  _searchKey: string
 ) => {
-  const { domain, apiKey } = decodeKey(key);
+  const { domain, apiKey } = decodeKey(_searchKey);
 
   return new Client({
     apiKey,
@@ -88,18 +90,18 @@ export const useSearch = <Document extends { _id: string }>(
   /**
    * The _searchKey taken from a collection of our GraphQL API.
    */
-  key: string,
+  _searchKey: string,
   /**
    * See https://typesense.org/docs/26.0/api/search.html#search-parameters
    * for more information about search options.
    */
   defaultSearchOptions?: SearchOptions
 ) => {
-  const { collectionName } = decodeKey(key);
+  const { collectionName } = decodeKey(_searchKey);
 
   const client = React.useMemo(() => {
-    return getSearchClient(key);
-  }, [key]);
+    return getSearchClient(_searchKey);
+  }, [_searchKey]);
 
   type Result = SearchResponse<Document>;
 
