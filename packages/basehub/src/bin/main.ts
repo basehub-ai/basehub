@@ -190,17 +190,19 @@ export const main = async (
 
     if (isCustomOutput) {
       // alias react-rich-text and other packages to the generated client for better import experience
-      ["react-rich-text", "api-transaction"].map((pathsToAlias) => {
-        // create a file in the output directory that aliases the package to the generated client
-        fs.writeFileSync(
-          path.join(basehubOutputPath, `${pathsToAlias}.d.ts`),
-          `export * from "basehub/${pathsToAlias}";`
-        );
-        fs.writeFileSync(
-          path.join(basehubOutputPath, `${pathsToAlias}.js`),
-          `module.exports = require("basehub/${pathsToAlias}");`
-        );
-      });
+      ["react-rich-text", "api-transaction", "react-search"].map(
+        (pathsToAlias) => {
+          // create a file in the output directory that aliases the package to the generated client
+          fs.writeFileSync(
+            path.join(basehubOutputPath, `${pathsToAlias}.d.ts`),
+            `export * from "basehub/${pathsToAlias}";`
+          );
+          fs.writeFileSync(
+            path.join(basehubOutputPath, `${pathsToAlias}.js`),
+            `module.exports = require("basehub/${pathsToAlias}");`
+          );
+        }
+      );
     }
 
     logIfNotSilent(silent, "🪄 Generated `basehub` client");

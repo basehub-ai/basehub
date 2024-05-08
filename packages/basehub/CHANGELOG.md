@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.2
+
+### Patch Changes
+
+- changes
+
 ## 4.0.16-canary.1
 
 ### Patch Changes
