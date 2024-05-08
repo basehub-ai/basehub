@@ -6,6 +6,7 @@ export default defineConfig((_options: Options) => {
     dts: true,
     entry: {
       "react-rich-text": "./src/react/rich-text/index.ts",
+      "react-search": "./src/react/search/index.ts",
       "api-transaction": "./src/api-transaction.ts",
     },
     format: ["esm"],

@@ -45,6 +45,7 @@
     "react-dom": "18.2.0",
     "resolve-pkg": "2.0.0",
     "sonner": "1.4.3",
+    "typesense": "1.8.2",
     "zod": "3.22.1"
   },
   "devDependencies": {

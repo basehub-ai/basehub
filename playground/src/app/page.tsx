@@ -19,7 +19,7 @@ const HomepageFragment = fragmentOn("Homepage", {
 
 export default async function HomePage() {
   return (
-    <main>
+    <main className="">
       <Pump
         queries={[
           {
