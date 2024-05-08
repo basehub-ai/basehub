@@ -1,10 +1,22 @@
 # basehub
 
-## 4.0.13-next.0
+## 4.0.15
 
 ### Patch Changes
 
-- c32f4aa: Introduce `useSearch` (alpha)
+- e0d9ebf: Update mutation-api-helpers
+
+## 4.0.14
+
+### Patch Changes
+
+- 9ed4d10: Update Deps
+
+## 4.0.13
+
+### Patch Changes
+
+- 2fe5b05: Update @basehub/mutation-api-helpers dependency to latest version
 
 ## 4.0.12
 
