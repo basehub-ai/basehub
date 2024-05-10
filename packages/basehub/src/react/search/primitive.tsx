@@ -2,7 +2,7 @@ import * as React from "react";
 import { Client } from "typesense";
 import type { SearchParams } from "typesense/lib/Typesense/Documents";
 import get from "lodash.get";
-// import { Slot } from "@radix-ui/react-slot";
+import { Slot } from "@radix-ui/react-slot";
 
 /* -------------------------------------------------------------------------------------------------
  * Utils
@@ -124,6 +124,14 @@ export type SearchOptions = {
   queryByWeights?: SearchParams["query_by_weights"];
 };
 
+type BaseDoc = {
+  _id: string;
+  _idPath: string;
+  _title?: string;
+  _slug?: string;
+  _slugPath?: string;
+};
+
 type Highlight = {
   fieldPath: string;
   fieldValue: unknown;
@@ -134,40 +142,49 @@ type Highlight = {
   value: string | undefined;
 };
 
-export type SearchResult<Doc extends { _id: string }> = {
+type Hit<Doc extends BaseDoc> = {
+  _key: string;
+  document: Doc;
+  highlight: Record<string, Highlight> | undefined;
+  highlights: Array<Highlight>;
+  curated: boolean;
+  _getField: (fieldPath: string) => unknown;
+};
+
+export type SearchResult<Doc extends BaseDoc> = {
   empty: boolean;
   found: number;
   outOf: number;
   page: number;
   searchTimeMs: number;
-  hits: Array<{
-    document: Doc;
-    highlight: Record<string, Highlight> | undefined;
-    highlights: Array<Highlight>;
-    curated: boolean;
-    _getField: (fieldPath: string) => unknown;
-  }>;
+  hits: Array<Hit<Doc>>;
 };
 
+/**
+ * See https://typesense.org/docs/26.0/api/search.html#search-parameters
+ * for more information about available search options.
+ */
 export type UseSearchParams = {
   /**
    * The _searchKey taken from a collection of our GraphQL API.
    */
   _searchKey: string;
-  /**
-   * See https://typesense.org/docs/26.0/api/search.html#search-parameters
-   * for more information about search options.
-   */
-  searchOptions: SearchOptions;
-};
+  saveRecentSearches?: {
+    key: string;
+    getStorage: () => Storage;
+  };
+} & SearchOptions;
 
 /**
  * Everything you need to create an instant-search experience.
  */
-export const useSearch = <Document extends { _id: string }>({
+export const useSearch = <Document extends Record<string, unknown>>({
   _searchKey,
-  searchOptions,
+  saveRecentSearches,
+  ...searchOptions
 }: UseSearchParams) => {
+  type FullDoc = Document & BaseDoc;
+
   const { collectionName } = decodeKey(_searchKey);
 
   const client = React.useMemo(() => {
@@ -175,10 +192,15 @@ export const useSearch = <Document extends { _id: string }>({
   }, [_searchKey]);
 
   const [query, setQuery] = React.useState("");
-  const [result, setResult] = React.useState<SearchResult<Document>>();
+  const [result, setResult] = React.useState<SearchResult<FullDoc>>();
 
   const searchOptionsRef = React.useRef(searchOptions);
   searchOptionsRef.current = searchOptions;
+
+  const getRecentSearchesStorageRef = React.useRef(
+    saveRecentSearches?.getStorage
+  );
+  getRecentSearchesStorageRef.current = saveRecentSearches?.getStorage;
 
   const search = React.useCallback(
     async (q: string, opts?: SearchOptions): Promise<typeof result> => {
@@ -202,7 +224,7 @@ export const useSearch = <Document extends { _id: string }>({
         searchTimeMs: rawResult.search_time_ms,
         hits:
           rawResult.hits?.map((hit) => {
-            const document = deFlatten(hit.document) as Document;
+            const document = deFlatten(hit.document) as FullDoc;
             const highlightRecord = {} as Record<string, Highlight>;
             const highlights =
               hit.highlights?.map((highlight) => {
@@ -224,6 +246,7 @@ export const useSearch = <Document extends { _id: string }>({
               }) ?? [];
 
             return {
+              _key: document._id,
               curated: hit.curated ?? false,
               document,
               highlight: highlightRecord,
@@ -243,111 +266,501 @@ export const useSearch = <Document extends { _id: string }>({
   const onQueryChange = React.useCallback(
     async (q: string) => {
       setQuery(q);
-      const r = await search(q);
-      setResult(r);
+      if (!q) {
+        setResult(undefined);
+      } else {
+        const r = await search(q);
+        setResult(r);
+      }
     },
     [search]
   );
 
-  return { result, query, onQueryChange };
+  const [recentSearchesHits, setRecentSearchesHits] =
+    React.useState<Hit<FullDoc>[]>();
+  // load recent searches
+  React.useEffect(() => {
+    if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+      return;
+    }
+
+    const storage = getRecentSearchesStorageRef.current();
+    const raw = storage.getItem(saveRecentSearches.key);
+    if (!raw) return;
+
+    const parsed = JSON.parse(raw);
+    setRecentSearchesHits(
+      parsed.map((hit: Hit<FullDoc>) => {
+        return {
+          ...hit,
+          _getField: (fieldPath: string) => {
+            return get(hit.document, fieldPath) as unknown;
+          },
+        };
+      })
+    );
+  }, [saveRecentSearches?.key]);
+
+  const recentSearches = React.useMemo(() => {
+    return {
+      hits: recentSearchesHits,
+      add: (hit: Hit<FullDoc>) => {
+        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+          return;
+        }
+        const storage = getRecentSearchesStorageRef.current();
+
+        setRecentSearchesHits((prev) => {
+          const next = prev ? [hit, ...prev] : [hit];
+          storage.setItem(saveRecentSearches.key, JSON.stringify(next));
+          return next;
+        });
+      },
+      remove: (_key: string) => {
+        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+          return;
+        }
+        const storage = getRecentSearchesStorageRef.current();
+
+        setRecentSearchesHits((prev) => {
+          const next = prev?.filter((hit) => hit._key !== _key);
+          storage.setItem(saveRecentSearches.key, JSON.stringify(next));
+          return next;
+        });
+      },
+      clear: () => {
+        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+          return;
+        }
+        const storage = getRecentSearchesStorageRef.current();
+
+        setRecentSearchesHits(undefined);
+        storage.removeItem(saveRecentSearches.key);
+      },
+    };
+  }, [recentSearchesHits, saveRecentSearches?.key]);
+
+  return React.useMemo(
+    () => ({
+      result,
+      query,
+      onQueryChange,
+      recentSearches,
+    }),
+    [onQueryChange, query, result, recentSearches]
+  );
 };
 
 export type UseSearchResult = ReturnType<typeof useSearch>;
 
 /* -------------------------------------------------------------------------------------------------
- * Combobox
+ * Search Box
  * -----------------------------------------------------------------------------------------------*/
 
-// const Context = React.createContext<UseSearchResult | undefined>(undefined);
+export type SearchBoxContext = UseSearchResult & {
+  id: string;
+  selectedIndex: number;
+  onIndexChange: (
+    op: { scrollIntoView?: boolean } & (
+      | { type: "incr" | "decr" }
+      | { type: "set"; value: number }
+    )
+  ) => void;
+};
 
-// const useContext = () => {
-//   const ctx = React.useContext(Context);
-//   if (ctx === undefined) {
-//     throw new Error(
-//       "Context not found. Make sure you're rendering Search.Root on top of other Search.* components."
-//     );
-//   }
-//   return ctx;
-// };
+const Context = React.createContext<SearchBoxContext | undefined>(undefined);
 
-// const Root = ({
-//   children,
-//   _searchKey,
-//   searchOptions,
-// }: { children?: React.ReactNode } & UseSearchParams) => {
-//   const useSearchResult = useSearch({ _searchKey, searchOptions });
+const useContext = () => {
+  const ctx = React.useContext(Context);
+  if (ctx === undefined) {
+    throw new Error(
+      "Context not found. Make sure you're rendering Search.Root on top of other Search.* components."
+    );
+  }
+  return ctx;
+};
 
-//   return (
-//     <Context.Provider value={useSearchResult}>{children}</Context.Provider>
-//   );
-// };
+/* -------------------------------------------------------------------------------------------------
+ * Root
+ * -----------------------------------------------------------------------------------------------*/
 
-// const Input = React.forwardRef<
-//   HTMLInputElement,
-//   Omit<JSX.IntrinsicElements["input"] & { asChild?: boolean }, "ref">
-// >(({ asChild, ...props }, ref) => {
-//   const { query, onQueryChange } = useContext();
-//   const Comp = asChild ? Slot : "input";
+const Root = ({
+  children,
+  search,
+}: {
+  children?: React.ReactNode;
+  search: UseSearchResult;
+}) => {
+  const id = React.useId();
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
 
-//   return (
-//     <Comp
-//       {...props}
-//       value={query}
-//       onChange={(e) => {
-//         if (e.target instanceof HTMLInputElement) {
-//           onQueryChange(e.target.value);
-//         }
-//       }}
-//       ref={ref}
-//     />
-//   );
-// });
+  const handleSelectedNodeDOMMutationsOnIndexChange = React.useCallback(
+    (opts: {
+      orderedNodes: HTMLElement[] | undefined;
+      selectedIndex: number;
+      scrollIntoView?: boolean;
+    }): boolean => {
+      const orderedNodes =
+        opts.orderedNodes ||
+        Array.from(
+          document.querySelectorAll<HTMLElement>(
+            `[data-basehub-hit-for="${id}"]`
+          )
+        );
 
-// const Empty = React.forwardRef<
-//   HTMLDivElement,
-//   Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
-// >(({ asChild, ...props }, ref) => {
-//   const { result } = useContext();
-//   const Comp = asChild ? Slot : "div";
+      const selectedNode = orderedNodes[opts.selectedIndex];
+      if (!selectedNode) return false;
 
-//   if (result?.empty === true) {
-//     return <Comp {...props} ref={ref} />;
-//   } else {
-//     return null;
-//   }
-// });
+      orderedNodes.forEach((node, i) => {
+        node.dataset.selected = i === opts.selectedIndex ? "true" : "false";
+      });
 
-// const ResultsList = React.forwardRef<
-//   HTMLDivElement,
-//   Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
-// >(({ asChild, ...props }, ref) => {
-//   const { result } = useContext();
-//   const Comp = asChild ? Slot : "div";
+      if (opts.scrollIntoView) {
+        selectedNode.scrollIntoView({ block: "nearest" });
+      }
 
-//   if (result?.empty === true) {
-//     return <Comp {...props} ref={ref} />;
-//   } else {
-//     return null;
-//   }
-// });
+      return true;
+    },
+    [id]
+  );
 
-// const Hit = React.forwardRef<
-//   HTMLDivElement,
-//   Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
-// >(({ asChild, ...props }, ref) => {
-//   const { result } = useContext();
-//   const Comp = asChild ? Slot : "div";
+  const onIndexChange: SearchBoxContext["onIndexChange"] = React.useCallback(
+    (op) => {
+      const orderedNodes = Array.from(
+        document.querySelectorAll<HTMLElement>(`[data-basehub-hit-for="${id}"]`)
+      );
 
-//   if (result?.empty === true) {
-//     return <Comp {...props} ref={ref} />;
-//   } else {
-//     return null;
-//   }
-// });
+      setSelectedIndex((prev) => {
+        let next = prev;
+        switch (op.type) {
+          case "set":
+            next = op.value;
+            break;
+          case "incr":
+            next = prev + 1;
+            break;
+          case "decr":
+            next = prev - 1;
+            break;
+          default:
+            break;
+        }
 
-// export const Search = {
-//   Root,
-//   Input,
-//   Empty,
-//   useContext,
-// };
+        const found = handleSelectedNodeDOMMutationsOnIndexChange({
+          orderedNodes,
+          selectedIndex: next,
+          scrollIntoView: op.scrollIntoView,
+        });
+
+        if (!found) return prev;
+
+        return next;
+      });
+    },
+    [handleSelectedNodeDOMMutationsOnIndexChange, id]
+  );
+
+  React.useEffect(() => {
+    setSelectedIndex(0);
+    handleSelectedNodeDOMMutationsOnIndexChange({
+      orderedNodes: undefined,
+      selectedIndex: 0,
+      scrollIntoView: true,
+    });
+  }, [handleSelectedNodeDOMMutationsOnIndexChange, search.result?.hits]);
+
+  return (
+    <Context.Provider value={{ ...search, id, selectedIndex, onIndexChange }}>
+      {children}
+    </Context.Provider>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Input
+ * -----------------------------------------------------------------------------------------------*/
+
+const Input = React.forwardRef<
+  HTMLInputElement,
+  Omit<JSX.IntrinsicElements["input"] & { asChild?: boolean }, "ref">
+>(({ asChild, onChange, onKeyDown, ...props }, ref) => {
+  const { id, query, onQueryChange, onIndexChange, recentSearches, result } =
+    useContext();
+  const Comp = asChild ? Slot : "input";
+
+  return (
+    <Comp
+      {...props}
+      value={query}
+      onChange={(e) => {
+        onChange?.(e as React.ChangeEvent<HTMLInputElement>);
+        if (e.target instanceof HTMLInputElement) {
+          onQueryChange(e.target.value);
+        }
+      }}
+      onKeyDown={(e) => {
+        onKeyDown?.(e as React.KeyboardEvent<HTMLInputElement>);
+        // handle arrow keys and enter
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          onIndexChange({ type: "incr", scrollIntoView: true });
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          onIndexChange({ type: "decr", scrollIntoView: true });
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          const selectedNode = document.querySelector<HTMLElement>(
+            `[data-basehub-hit-for="${id}"], [data-selected="true"]`
+          );
+          if (selectedNode) {
+            const href = selectedNode.getAttribute("href");
+            if (href) {
+              if (e.metaKey) {
+                window.open(href, "_blank");
+              } else {
+                window.location.href = href;
+              }
+              if (recentSearches) {
+                const hit = result?.hits.find(
+                  (h) => h._key === selectedNode.dataset.basehubHitKey
+                );
+                if (hit) {
+                  recentSearches.add(hit);
+                }
+              }
+            }
+          }
+        }
+      }}
+      ref={ref}
+    />
+  );
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * Placeholder
+ * -----------------------------------------------------------------------------------------------*/
+
+const Placeholder = React.forwardRef<
+  HTMLDivElement,
+  Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
+>(({ asChild, ...props }, ref) => {
+  const { result } = useContext();
+  const Comp = asChild ? Slot : "div";
+
+  if (result !== undefined) return null;
+  return <Comp {...props} ref={ref} />;
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * Empty
+ * -----------------------------------------------------------------------------------------------*/
+
+const Empty = React.forwardRef<
+  HTMLDivElement,
+  Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
+>(({ asChild, ...props }, ref) => {
+  const { result } = useContext();
+  const Comp = asChild ? Slot : "div";
+
+  if (result?.empty !== true) return null;
+  return <Comp {...props} ref={ref} />;
+});
+
+/* -------------------------------------------------------------------------------------------------
+ * Results
+ * -----------------------------------------------------------------------------------------------*/
+
+const HitsList = React.forwardRef<
+  HTMLDivElement,
+  Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
+>(({ asChild, onMouseMove, ...props }, ref) => {
+  const { id, onIndexChange } = useContext();
+  const Comp = asChild ? Slot : "div";
+
+  return (
+    <Comp
+      {...props}
+      ref={ref}
+      onMouseMove={(e) => {
+        onMouseMove?.(e as React.MouseEvent<HTMLDivElement, MouseEvent>);
+        // focus hits
+        if (e.target instanceof HTMLElement) {
+          const hitEl =
+            e.target.dataset.basehubSearchHit === id
+              ? e.target
+              : e.target.closest<HTMLElement>(`[data-basehub-hit-for="${id}"]`);
+          if (!hitEl) return;
+          const orderedNodes = Array.from(
+            document.querySelectorAll<HTMLElement>(
+              `[data-basehub-hit-for="${id}"]`
+            )
+          );
+          const index = orderedNodes.indexOf(hitEl);
+          if (index === -1) return;
+          onIndexChange({ type: "set", value: index });
+        }
+      }}
+    />
+  );
+});
+
+const HitContext = React.createContext<
+  { hit: SearchResult<BaseDoc>["hits"][number] } | undefined
+>(undefined);
+
+const useHitContext = () => {
+  const ctx = React.useContext(HitContext);
+  if (ctx === undefined) {
+    throw new Error(
+      "Context not found. Make sure you're rendering Search.Hit on top of other Search.* components."
+    );
+  }
+  return ctx;
+};
+
+const HitItem = React.forwardRef<
+  HTMLAnchorElement,
+  Omit<
+    JSX.IntrinsicElements["a"] & {
+      asChild?: boolean;
+      hit: Hit<BaseDoc>;
+      href: string;
+    },
+    "ref"
+  >
+>(({ asChild, hit, onClick, ...props }, ref) => {
+  const { id, recentSearches } = useContext();
+  const Comp = asChild ? Slot : "a";
+
+  return (
+    <HitContext.Provider value={{ hit }}>
+      <Comp
+        {...props}
+        data-basehub-hit-for={id}
+        data-basehub-hit-key={hit._key}
+        ref={ref}
+        onClick={(e) => {
+          onClick?.(e as React.MouseEvent<HTMLAnchorElement, MouseEvent>);
+          if (recentSearches) {
+            recentSearches.add(hit);
+          }
+        }}
+      />
+    </HitContext.Provider>
+  );
+});
+
+const HitSnippet = ({
+  fieldPath,
+  components,
+}: {
+  fieldPath: string;
+  components?: {
+    container?: ({
+      children,
+    }: {
+      children: React.ReactNode;
+    }) => React.ReactNode;
+    mark?: ({ children }: { children: string }) => React.ReactNode;
+    text?: ({ children }: { children: string }) => React.ReactNode;
+  };
+}) => {
+  const { hit } = useHitContext();
+  const field = hit._getField(fieldPath);
+  if (!field) return null;
+
+  const isRichText =
+    Array.isArray(field) && field[0]?._type === "rich-text-section";
+
+  let snippetByExactMatch: string | undefined = undefined;
+  let snippetByPrefix: string | undefined = undefined;
+
+  const prefix = fieldPath.endsWith(".") ? fieldPath : fieldPath + ".";
+
+  hit.highlights.forEach((highlight) => {
+    if (!snippetByExactMatch && highlight.fieldPath === fieldPath) {
+      snippetByExactMatch = highlight.snippet;
+    }
+    if (!snippetByPrefix && highlight.fieldPath.startsWith(prefix)) {
+      snippetByPrefix = highlight.snippet;
+    }
+  });
+
+  // get first piece of text we find under `field`
+  function getFallbackString(
+    current: unknown,
+    opts: {
+      isRichText: boolean;
+    }
+  ): string | undefined {
+    if (typeof current === "string") return current;
+
+    if (current === null || current === undefined) return undefined;
+
+    if (Array.isArray(current)) {
+      const found = current
+        .map((c) => getFallbackString(c, opts))
+        .find((v) => v);
+      return found;
+    } else if (typeof current === "object") {
+      const found = Object.entries(current)
+        .map(([key, value]) => {
+          if (opts.isRichText && key !== "_content") return undefined;
+          return getFallbackString(value, opts);
+        })
+        .find((v) => v);
+      return found;
+    }
+  }
+
+  const snippet =
+    snippetByExactMatch ||
+    snippetByPrefix ||
+    getFallbackString(field, { isRichText }) ||
+    "";
+
+  const matches = [
+    ...snippet.matchAll(/(.*?)<mark>(.*?)<\/mark>(.*?)(?=(?:<mark>|$))/gm),
+  ];
+
+  const Container = components?.container ?? "div";
+  const Text = components?.text ?? "span";
+  const Mark = components?.mark ?? "mark";
+
+  return (
+    <Container>
+      {matches.length > 0 ? (
+        matches.map((match, i) => {
+          const data = {
+            beforeMark: match[1] ?? "",
+            insideMark: match[2] ?? "",
+            afterMark: match[3] ?? "",
+          };
+
+          return (
+            <React.Fragment key={i}>
+              <Text>{data.beforeMark}</Text>
+              <Mark data-highlight>{data.insideMark}</Mark>
+              <Text>{data.afterMark}</Text>
+            </React.Fragment>
+          );
+        })
+      ) : (
+        <Text>{snippet}</Text>
+      )}
+    </Container>
+  );
+};
+
+export const SearchBox = {
+  Root,
+  Input,
+  Placeholder,
+  Empty,
+  HitsList,
+  HitItem,
+  HitSnippet,
+  useContext,
+  useHitContext,
+};

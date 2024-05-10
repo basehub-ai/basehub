@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.5
+
+### Patch Changes
+
+- Implement SearchBox
+
 ## 4.0.16-canary.4
 
 ### Patch Changes
