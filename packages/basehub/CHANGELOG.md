@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.6
+
+### Patch Changes
+
+- improve types
+
 ## 4.0.16-canary.5
 
 ### Patch Changes
