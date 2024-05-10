@@ -1,0 +1,10 @@
+.hit {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.hit[data-selected="true"] {
+  background-color: #f0f0f0;
+}
