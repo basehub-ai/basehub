@@ -6,9 +6,8 @@ import s from "./search.module.css";
 export const Search = () => {
   const [count, setCount] = useState(0);
 
-  const search = useSearch({
-    _searchKey:
-      "k19b3p50ue6irgvnp-1.a1.typesense.net:YjY3bk8zVDFOY05mbTlCczk4U1dpU2Nqa2FTTHJKNXBxRHJPSWlHcTVRRT1WRnRteyJmaWx0ZXJfYnkiOiJfY29sbGVjdGlvbklkOnFmZDVva2FnaTA0eHc0ZmNmZjV6d3UyYSJ9:dbjFgtnqgk7aCqonrqA8Z__tm8owg2lnuah5n62mm56qqc7__zhzxbpr40ied562l74zvrdwg",
+  const search = useSearch<{ some: "thing" }>({
+    _searchKey: "somet",
     queryBy: ["_title", "content"],
     saveRecentSearches: {
       getStorage: () => window.localStorage,
@@ -32,7 +31,7 @@ export const Search = () => {
           <SearchBox.HitsList asChild>
             <ul>
               <h3>Recent Searches</h3>
-              {search.recentSearches.hits?.map((hit) => {
+              {search.recentSearches?.hits?.map((hit) => {
                 return (
                   <li key={hit._key}>
                     <SearchBox.HitItem
@@ -46,7 +45,7 @@ export const Search = () => {
 
                     <button
                       onClick={() => {
-                        search.recentSearches.remove(hit._key);
+                        search.recentSearches?.remove(hit._key);
                       }}
                     >
                       X

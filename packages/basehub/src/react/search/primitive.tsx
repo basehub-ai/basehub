@@ -8,7 +8,10 @@ import { Slot } from "@radix-ui/react-slot";
  * Utils
  * -----------------------------------------------------------------------------------------------*/
 
-const decodeKey = (_searchKey: string) => {
+const decodeKey = (_searchKey: string | null) => {
+  if (_searchKey === null) {
+    return { valid: false } as const;
+  }
   const [domain, apiKey, collectionName] = _searchKey.split(":");
 
   if (typeof domain !== "string") {
@@ -23,7 +26,7 @@ const decodeKey = (_searchKey: string) => {
     );
   }
 
-  return { domain, apiKey, collectionName };
+  return { domain, apiKey, collectionName, valid: true } as const;
 };
 
 const camelToSnake = (str: string) =>
@@ -83,10 +86,11 @@ export const getSearchClient = (
   /**
    * The _searchKey taken from a collection of our GraphQL API.
    */
-  _searchKey: string
+  _searchKey: string | null
 ) => {
-  const { domain, apiKey } = decodeKey(_searchKey);
+  const { domain, apiKey, valid } = decodeKey(_searchKey);
 
+  if (!valid) return;
   return new Client({
     apiKey,
     nodes: [{ host: domain, port: 443, protocol: "https" }],
@@ -164,28 +168,45 @@ export type SearchResult<Doc extends BaseDoc> = {
  * See https://typesense.org/docs/26.0/api/search.html#search-parameters
  * for more information about available search options.
  */
-export type UseSearchParams = {
+type UseSearchParams<SearchKey = string | null> = {
   /**
    * The _searchKey taken from a collection of our GraphQL API.
    */
-  _searchKey: string;
+  _searchKey: SearchKey;
   saveRecentSearches?: {
     key: string;
     getStorage: () => Storage;
   };
 } & SearchOptions;
 
+type UseSearchResult<Document = Record<string, unknown>> = {
+  result: SearchResult<Document & BaseDoc> | undefined;
+  query: string;
+  onQueryChange: (q: string) => Promise<void>;
+  recentSearches?: {
+    hits: Hit<Document & BaseDoc>[] | undefined;
+    add: (hit: Hit<Document & BaseDoc>) => void;
+    remove: (_key: string) => void;
+    clear: () => void;
+  };
+};
+
 /**
  * Everything you need to create an instant-search experience.
  */
-export const useSearch = <Document extends Record<string, unknown>>({
+export const useSearch = <
+  Document extends Record<string, unknown>,
+  SearchKey extends string | null = string | null,
+>({
   _searchKey,
   saveRecentSearches,
   ...searchOptions
-}: UseSearchParams) => {
+}: UseSearchParams<SearchKey>): SearchKey extends null
+  ? { valid: false } & Partial<UseSearchResult<Document>>
+  : { valid: true } & UseSearchResult<Document> => {
   type FullDoc = Document & BaseDoc;
 
-  const { collectionName } = decodeKey(_searchKey);
+  const { collectionName, valid } = decodeKey(_searchKey);
 
   const client = React.useMemo(() => {
     return getSearchClient(_searchKey);
@@ -193,6 +214,8 @@ export const useSearch = <Document extends Record<string, unknown>>({
 
   const [query, setQuery] = React.useState("");
   const [result, setResult] = React.useState<SearchResult<FullDoc>>();
+  const [recentSearchesHits, setRecentSearchesHits] =
+    React.useState<Hit<FullDoc>[]>();
 
   const searchOptionsRef = React.useRef(searchOptions);
   searchOptionsRef.current = searchOptions;
@@ -204,6 +227,8 @@ export const useSearch = <Document extends Record<string, unknown>>({
 
   const search = React.useCallback(
     async (q: string, opts?: SearchOptions): Promise<typeof result> => {
+      if (!client || !valid) throw new Error("Not enabled");
+
       const options: Record<string, unknown> = { q };
       Object.entries({ ...searchOptionsRef.current, ...opts }).forEach(
         ([key, value]) => {
@@ -260,11 +285,13 @@ export const useSearch = <Document extends Record<string, unknown>>({
 
       return newResult;
     },
-    [client, collectionName]
+    [client, collectionName, valid]
   );
 
   const onQueryChange = React.useCallback(
     async (q: string) => {
+      if (!valid) throw new Error("Not enabled");
+
       setQuery(q);
       if (!q) {
         setResult(undefined);
@@ -273,13 +300,12 @@ export const useSearch = <Document extends Record<string, unknown>>({
         setResult(r);
       }
     },
-    [search]
+    [search, valid]
   );
 
-  const [recentSearchesHits, setRecentSearchesHits] =
-    React.useState<Hit<FullDoc>[]>();
   // load recent searches
   React.useEffect(() => {
+    if (!valid) return;
     if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
       return;
     }
@@ -299,7 +325,7 @@ export const useSearch = <Document extends Record<string, unknown>>({
         };
       })
     );
-  }, [saveRecentSearches?.key]);
+  }, [valid, saveRecentSearches?.key]);
 
   const recentSearches = React.useMemo(() => {
     return {
@@ -340,24 +366,31 @@ export const useSearch = <Document extends Record<string, unknown>>({
     };
   }, [recentSearchesHits, saveRecentSearches?.key]);
 
-  return React.useMemo(
-    () => ({
+  const memoResult = React.useMemo(() => {
+    if (!valid) {
+      return { valid: false } satisfies { valid: false } & Partial<
+        UseSearchResult<Document>
+      >;
+    }
+    return {
+      valid: true,
       result,
       query,
       onQueryChange,
       recentSearches,
-    }),
-    [onQueryChange, query, result, recentSearches]
-  );
-};
+    } satisfies { valid: true } & UseSearchResult<Document>;
+  }, [valid, onQueryChange, query, result, recentSearches]);
 
-export type UseSearchResult = ReturnType<typeof useSearch>;
+  return memoResult as SearchKey extends null
+    ? { valid: false } & Partial<UseSearchResult<Document>>
+    : { valid: true } & UseSearchResult<Document>;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Search Box
  * -----------------------------------------------------------------------------------------------*/
 
-export type SearchBoxContext = UseSearchResult & {
+export type SearchBoxContext<Document = BaseDoc> = UseSearchResult<Document> & {
   id: string;
   selectedIndex: number;
   onIndexChange: (
@@ -384,12 +417,14 @@ const useContext = () => {
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
-const Root = ({
+const Root = <
+  Document extends Record<string, unknown> = Record<string, unknown>,
+>({
   children,
   search,
 }: {
   children?: React.ReactNode;
-  search: UseSearchResult;
+  search: ReturnType<typeof useSearch<Document>>;
 }) => {
   const id = React.useId();
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -460,6 +495,8 @@ const Root = ({
     [handleSelectedNodeDOMMutationsOnIndexChange, id]
   );
 
+  const hits = search.valid ? search.result?.hits : undefined;
+
   React.useEffect(() => {
     setSelectedIndex(0);
     handleSelectedNodeDOMMutationsOnIndexChange({
@@ -467,10 +504,13 @@ const Root = ({
       selectedIndex: 0,
       scrollIntoView: true,
     });
-  }, [handleSelectedNodeDOMMutationsOnIndexChange, search.result?.hits]);
+  }, [handleSelectedNodeDOMMutationsOnIndexChange, hits]);
 
+  if (search.valid === false) return null;
   return (
-    <Context.Provider value={{ ...search, id, selectedIndex, onIndexChange }}>
+    <Context.Provider
+      value={{ ...(search as any), id, selectedIndex, onIndexChange }}
+    >
       {children}
     </Context.Provider>
   );
