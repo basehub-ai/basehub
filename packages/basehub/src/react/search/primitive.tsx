@@ -142,20 +142,22 @@ type Highlight = {
   value: string | undefined;
 };
 
+type Hit<Doc extends BaseDoc> = {
+  _key: string;
+  document: Doc;
+  highlight: Record<string, Highlight> | undefined;
+  highlights: Array<Highlight>;
+  curated: boolean;
+  _getField: (fieldPath: string) => unknown;
+};
+
 export type SearchResult<Doc extends BaseDoc> = {
   empty: boolean;
   found: number;
   outOf: number;
   page: number;
   searchTimeMs: number;
-  hits: Array<{
-    _key: string;
-    document: Doc;
-    highlight: Record<string, Highlight> | undefined;
-    highlights: Array<Highlight>;
-    curated: boolean;
-    _getField: (fieldPath: string) => unknown;
-  }>;
+  hits: Array<Hit<Doc>>;
 };
 
 /**
@@ -167,6 +169,10 @@ export type UseSearchParams = {
    * The _searchKey taken from a collection of our GraphQL API.
    */
   _searchKey: string;
+  saveRecentSearches?: {
+    key: string;
+    getStorage: () => Storage;
+  };
 } & SearchOptions;
 
 /**
@@ -174,6 +180,7 @@ export type UseSearchParams = {
  */
 export const useSearch = <Document extends Record<string, unknown>>({
   _searchKey,
+  saveRecentSearches,
   ...searchOptions
 }: UseSearchParams) => {
   type FullDoc = Document & BaseDoc;
@@ -189,6 +196,11 @@ export const useSearch = <Document extends Record<string, unknown>>({
 
   const searchOptionsRef = React.useRef(searchOptions);
   searchOptionsRef.current = searchOptions;
+
+  const getRecentSearchesStorageRef = React.useRef(
+    saveRecentSearches?.getStorage
+  );
+  getRecentSearchesStorageRef.current = saveRecentSearches?.getStorage;
 
   const search = React.useCallback(
     async (q: string, opts?: SearchOptions): Promise<typeof result> => {
@@ -264,16 +276,85 @@ export const useSearch = <Document extends Record<string, unknown>>({
     [search]
   );
 
+  const [recentSearchesHits, setRecentSearchesHits] =
+    React.useState<Hit<FullDoc>[]>();
+  // load recent searches
+  React.useEffect(() => {
+    if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+      return;
+    }
+
+    const storage = getRecentSearchesStorageRef.current();
+    const raw = storage.getItem(saveRecentSearches.key);
+    if (!raw) return;
+
+    const parsed = JSON.parse(raw);
+    setRecentSearchesHits(
+      parsed.map((hit: Hit<FullDoc>) => {
+        return {
+          ...hit,
+          _getField: (fieldPath: string) => {
+            return get(hit.document, fieldPath) as unknown;
+          },
+        };
+      })
+    );
+  }, [saveRecentSearches?.key]);
+
+  const recentSearches = React.useMemo(() => {
+    return {
+      hits: recentSearchesHits,
+      add: (hit: Hit<FullDoc>) => {
+        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+          return;
+        }
+        const storage = getRecentSearchesStorageRef.current();
+
+        setRecentSearchesHits((prev) => {
+          const next = prev ? [hit, ...prev] : [hit];
+          storage.setItem(saveRecentSearches.key, JSON.stringify(next));
+          return next;
+        });
+      },
+      remove: (_key: string) => {
+        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+          return;
+        }
+        const storage = getRecentSearchesStorageRef.current();
+
+        setRecentSearchesHits((prev) => {
+          const next = prev?.filter((hit) => hit._key !== _key);
+          storage.setItem(saveRecentSearches.key, JSON.stringify(next));
+          return next;
+        });
+      },
+      clear: () => {
+        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+          return;
+        }
+        const storage = getRecentSearchesStorageRef.current();
+
+        setRecentSearchesHits(undefined);
+        storage.removeItem(saveRecentSearches.key);
+      },
+    };
+  }, [recentSearchesHits, saveRecentSearches?.key]);
+
   return React.useMemo(
-    () => ({ result, query, onQueryChange }),
-    [onQueryChange, query, result]
+    () => ({
+      result,
+      query,
+      onQueryChange,
+      recentSearches,
+    }),
+    [onQueryChange, query, result, recentSearches]
   );
 };
 
 export type UseSearchResult = ReturnType<typeof useSearch>;
 
 /* -------------------------------------------------------------------------------------------------
- * Search Component
+ * Search Box
  * -----------------------------------------------------------------------------------------------*/
 
 export type SearchBoxContext = UseSearchResult & {
@@ -299,6 +380,10 @@ const useContext = () => {
   return ctx;
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Root
+ * -----------------------------------------------------------------------------------------------*/
+
 const Root = ({
   children,
   search,
@@ -314,17 +399,17 @@ const Root = ({
       orderedNodes: HTMLElement[] | undefined;
       selectedIndex: number;
       scrollIntoView?: boolean;
-    }) => {
+    }): boolean => {
       const orderedNodes =
         opts.orderedNodes ||
         Array.from(
           document.querySelectorAll<HTMLElement>(
-            `[data-basehub-search-hit="${id}"]`
+            `[data-basehub-hit-for="${id}"]`
           )
         );
 
       const selectedNode = orderedNodes[opts.selectedIndex];
-      if (!selectedNode) return;
+      if (!selectedNode) return false;
 
       orderedNodes.forEach((node, i) => {
         node.dataset.selected = i === opts.selectedIndex ? "true" : "false";
@@ -333,6 +418,8 @@ const Root = ({
       if (opts.scrollIntoView) {
         selectedNode.scrollIntoView({ block: "nearest" });
       }
+
+      return true;
     },
     [id]
   );
@@ -340,9 +427,7 @@ const Root = ({
   const onIndexChange: SearchBoxContext["onIndexChange"] = React.useCallback(
     (op) => {
       const orderedNodes = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          `[data-basehub-search-hit="${id}"]`
-        )
+        document.querySelectorAll<HTMLElement>(`[data-basehub-hit-for="${id}"]`)
       );
 
       setSelectedIndex((prev) => {
@@ -361,11 +446,13 @@ const Root = ({
             break;
         }
 
-        handleSelectedNodeDOMMutationsOnIndexChange({
+        const found = handleSelectedNodeDOMMutationsOnIndexChange({
           orderedNodes,
           selectedIndex: next,
           scrollIntoView: op.scrollIntoView,
         });
+
+        if (!found) return prev;
 
         return next;
       });
@@ -389,11 +476,16 @@ const Root = ({
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Input
+ * -----------------------------------------------------------------------------------------------*/
+
 const Input = React.forwardRef<
   HTMLInputElement,
   Omit<JSX.IntrinsicElements["input"] & { asChild?: boolean }, "ref">
->(({ asChild, ...props }, ref) => {
-  const { id, query, onQueryChange, onIndexChange } = useContext();
+>(({ asChild, onChange, onKeyDown, ...props }, ref) => {
+  const { id, query, onQueryChange, onIndexChange, recentSearches, result } =
+    useContext();
   const Comp = asChild ? Slot : "input";
 
   return (
@@ -401,11 +493,13 @@ const Input = React.forwardRef<
       {...props}
       value={query}
       onChange={(e) => {
+        onChange?.(e as React.ChangeEvent<HTMLInputElement>);
         if (e.target instanceof HTMLInputElement) {
           onQueryChange(e.target.value);
         }
       }}
       onKeyDown={(e) => {
+        onKeyDown?.(e as React.KeyboardEvent<HTMLInputElement>);
         // handle arrow keys and enter
         if (e.key === "ArrowDown") {
           e.preventDefault();
@@ -416,7 +510,7 @@ const Input = React.forwardRef<
         } else if (e.key === "Enter") {
           e.preventDefault();
           const selectedNode = document.querySelector<HTMLElement>(
-            `[data-basehub-search-hit="${id}"], [data-selected="true"]`
+            `[data-basehub-hit-for="${id}"], [data-selected="true"]`
           );
           if (selectedNode) {
             const href = selectedNode.getAttribute("href");
@@ -426,6 +520,14 @@ const Input = React.forwardRef<
               } else {
                 window.location.href = href;
               }
+              if (recentSearches) {
+                const hit = result?.hits.find(
+                  (h) => h._key === selectedNode.dataset.basehubHitKey
+                );
+                if (hit) {
+                  recentSearches.add(hit);
+                }
+              }
             }
           }
         }
@@ -434,6 +536,10 @@ const Input = React.forwardRef<
     />
   );
 });
+
+/* -------------------------------------------------------------------------------------------------
+ * Placeholder
+ * -----------------------------------------------------------------------------------------------*/
 
 const Placeholder = React.forwardRef<
   HTMLDivElement,
@@ -446,6 +552,10 @@ const Placeholder = React.forwardRef<
   return <Comp {...props} ref={ref} />;
 });
 
+/* -------------------------------------------------------------------------------------------------
+ * Empty
+ * -----------------------------------------------------------------------------------------------*/
+
 const Empty = React.forwardRef<
   HTMLDivElement,
   Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
@@ -457,31 +567,33 @@ const Empty = React.forwardRef<
   return <Comp {...props} ref={ref} />;
 });
 
-const Results = React.forwardRef<
+/* -------------------------------------------------------------------------------------------------
+ * Results
+ * -----------------------------------------------------------------------------------------------*/
+
+const HitsList = React.forwardRef<
   HTMLDivElement,
   Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
->(({ asChild, ...props }, ref) => {
-  const { result, id, onIndexChange } = useContext();
+>(({ asChild, onMouseMove, ...props }, ref) => {
+  const { id, onIndexChange } = useContext();
   const Comp = asChild ? Slot : "div";
 
-  if (result?.empty !== false) return null;
   return (
     <Comp
       {...props}
       ref={ref}
       onMouseMove={(e) => {
+        onMouseMove?.(e as React.MouseEvent<HTMLDivElement, MouseEvent>);
         // focus hits
         if (e.target instanceof HTMLElement) {
           const hitEl =
             e.target.dataset.basehubSearchHit === id
               ? e.target
-              : e.target.closest<HTMLElement>(
-                  `[data-basehub-search-hit="${id}"]`
-                );
+              : e.target.closest<HTMLElement>(`[data-basehub-hit-for="${id}"]`);
           if (!hitEl) return;
           const orderedNodes = Array.from(
             document.querySelectorAll<HTMLElement>(
-              `[data-basehub-search-hit="${id}"]`
+              `[data-basehub-hit-for="${id}"]`
             )
           );
           const index = orderedNodes.indexOf(hitEl);
@@ -507,23 +619,34 @@ const useHitContext = () => {
   return ctx;
 };
 
-const Hit = React.forwardRef<
+const HitItem = React.forwardRef<
   HTMLAnchorElement,
   Omit<
     JSX.IntrinsicElements["a"] & {
       asChild?: boolean;
-      hit: SearchResult<BaseDoc>["hits"][number];
+      hit: Hit<BaseDoc>;
       href: string;
     },
     "ref"
   >
->(({ asChild, hit, ...props }, ref) => {
-  const { id } = useContext();
+>(({ asChild, hit, onClick, ...props }, ref) => {
+  const { id, recentSearches } = useContext();
   const Comp = asChild ? Slot : "a";
 
   return (
     <HitContext.Provider value={{ hit }}>
-      <Comp {...props} data-basehub-search-hit={id} ref={ref} />
+      <Comp
+        {...props}
+        data-basehub-hit-for={id}
+        data-basehub-hit-key={hit._key}
+        ref={ref}
+        onClick={(e) => {
+          onClick?.(e as React.MouseEvent<HTMLAnchorElement, MouseEvent>);
+          if (recentSearches) {
+            recentSearches.add(hit);
+          }
+        }}
+      />
     </HitContext.Provider>
   );
 });
@@ -635,8 +758,8 @@ export const SearchBox = {
   Input,
   Placeholder,
   Empty,
-  Results,
-  Hit,
+  HitsList,
+  HitItem,
   HitSnippet,
   useContext,
   useHitContext,

@@ -10,6 +10,10 @@ export const Search = () => {
     _searchKey:
       "k19b3p50ue6irgvnp-1.a1.typesense.net:YjY3bk8zVDFOY05mbTlCczk4U1dpU2Nqa2FTTHJKNXBxRHJPSWlHcTVRRT1WRnRteyJmaWx0ZXJfYnkiOiJfY29sbGVjdGlvbklkOnFmZDVva2FnaTA0eHc0ZmNmZjV6d3UyYSJ9:dbjFgtnqgk7aCqonrqA8Z__tm8owg2lnuah5n62mm56qqc7__zhzxbpr40ied562l74zvrdwg",
     queryBy: ["_title", "content"],
+    saveRecentSearches: {
+      getStorage: () => window.localStorage,
+      key: "recent-searches",
+    },
   });
 
   return (
@@ -24,18 +28,44 @@ export const Search = () => {
       <br />
       <SearchBox.Root search={search}>
         <SearchBox.Input />
-        <SearchBox.Placeholder>
-          <div>Search for something</div>
+        <SearchBox.Placeholder asChild>
+          <SearchBox.HitsList asChild>
+            <ul>
+              <h3>Recent Searches</h3>
+              {search.recentSearches.hits?.map((hit) => {
+                return (
+                  <li key={hit._key}>
+                    <SearchBox.HitItem
+                      hit={hit}
+                      href={`/doc/${hit.document._id}`}
+                      className={s.hit}
+                    >
+                      <SearchBox.HitSnippet fieldPath="_title" />
+                      <SearchBox.HitSnippet fieldPath="content" />
+                    </SearchBox.HitItem>
+
+                    <button
+                      onClick={() => {
+                        search.recentSearches.remove(hit._key);
+                      }}
+                    >
+                      X
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </SearchBox.HitsList>
         </SearchBox.Placeholder>
         <SearchBox.Empty>
           <div>No results found for {search.query}</div>
         </SearchBox.Empty>
-        <SearchBox.Results asChild>
-          <ul>
+        <SearchBox.HitsList asChild>
+          <ul style={{ maxHeight: 200, overflowY: "auto" }}>
             {search.result?.hits.map((hit) => {
               return (
                 <li key={hit._key}>
-                  <SearchBox.Hit
+                  <SearchBox.HitItem
                     key={hit._key}
                     hit={hit}
                     href={`/doc/${hit.document._id}`}
@@ -43,12 +73,12 @@ export const Search = () => {
                   >
                     <SearchBox.HitSnippet fieldPath="_title" />
                     <SearchBox.HitSnippet fieldPath="content" />
-                  </SearchBox.Hit>
+                  </SearchBox.HitItem>
                 </li>
               );
             })}
           </ul>
-        </SearchBox.Results>
+        </SearchBox.HitsList>
       </SearchBox.Root>
     </>
   );
