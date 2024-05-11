@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.7
+
+### Patch Changes
+
+- add selection prefill
+
 ## 4.0.16-canary.6
 
 ### Patch Changes
