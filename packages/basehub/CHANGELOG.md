@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.8
+
+### Patch Changes
+
+- export more types
+
 ## 4.0.16-canary.7
 
 ### Patch Changes

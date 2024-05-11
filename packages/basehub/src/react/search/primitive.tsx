@@ -136,7 +136,7 @@ type BaseDoc = {
   _slugPath?: string;
 };
 
-type Highlight = {
+export type Highlight = {
   fieldPath: string;
   fieldValue: unknown;
   indices: number[];
@@ -146,16 +146,16 @@ type Highlight = {
   value: string | undefined;
 };
 
-type Hit<Doc extends BaseDoc> = {
+export type Hit<Doc = Record<string, unknown>> = {
   _key: string;
-  document: Doc;
+  document: Doc & BaseDoc;
   highlight: Record<string, Highlight> | undefined;
   highlights: Array<Highlight>;
   curated: boolean;
   _getField: (fieldPath: string) => unknown;
 };
 
-export type SearchResult<Doc extends BaseDoc> = {
+export type SearchResult<Doc = Record<string, unknown>> = {
   empty: boolean;
   found: number;
   outOf: number;
@@ -168,7 +168,7 @@ export type SearchResult<Doc extends BaseDoc> = {
  * See https://typesense.org/docs/26.0/api/search.html#search-parameters
  * for more information about available search options.
  */
-type UseSearchParams<SearchKey = string | null> = {
+export type UseSearchParams<SearchKey = string | null> = {
   /**
    * The _searchKey taken from a collection of our GraphQL API.
    */
@@ -179,13 +179,13 @@ type UseSearchParams<SearchKey = string | null> = {
   };
 } & SearchOptions;
 
-type UseSearchResult<Document = Record<string, unknown>> = {
-  result: SearchResult<Document & BaseDoc> | undefined;
+export type UseSearchResult<Document = Record<string, unknown>> = {
+  result: SearchResult<Document> | undefined;
   query: string;
   onQueryChange: (q: string) => Promise<void>;
   recentSearches?: {
-    hits: Hit<Document & BaseDoc>[] | undefined;
-    add: (hit: Hit<Document & BaseDoc>) => void;
+    hits: Hit<Document>[] | undefined;
+    add: (hit: Hit<Document>) => void;
     remove: (_key: string) => void;
     clear: () => void;
   };
@@ -204,8 +204,6 @@ export const useSearch = <
 }: UseSearchParams<SearchKey>): SearchKey extends null
   ? { valid: false } & Partial<UseSearchResult<Document>>
   : { valid: true } & UseSearchResult<Document> => {
-  type FullDoc = Document & BaseDoc;
-
   const { collectionName, valid } = decodeKey(_searchKey);
 
   const client = React.useMemo(() => {
@@ -213,9 +211,9 @@ export const useSearch = <
   }, [_searchKey]);
 
   const [query, setQuery] = React.useState("");
-  const [result, setResult] = React.useState<SearchResult<FullDoc>>();
+  const [result, setResult] = React.useState<SearchResult<Document>>();
   const [recentSearchesHits, setRecentSearchesHits] =
-    React.useState<Hit<FullDoc>[]>();
+    React.useState<Hit<Document>[]>();
 
   const searchOptionsRef = React.useRef(searchOptions);
   searchOptionsRef.current = searchOptions;
@@ -249,7 +247,7 @@ export const useSearch = <
         searchTimeMs: rawResult.search_time_ms,
         hits:
           rawResult.hits?.map((hit) => {
-            const document = deFlatten(hit.document) as FullDoc;
+            const document = deFlatten(hit.document) as Document & BaseDoc;
             const highlightRecord = {} as Record<string, Highlight>;
             const highlights =
               hit.highlights?.map((highlight) => {
@@ -303,68 +301,75 @@ export const useSearch = <
     [search, valid]
   );
 
-  // load recent searches
-  React.useEffect(() => {
-    if (!valid) return;
-    if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
-      return;
-    }
+  const recentSearchesManager = React.useMemo(() => {
+    const storageKey =
+      _searchKey && saveRecentSearches?.key
+        ? `${saveRecentSearches.key}-${_searchKey}`
+        : undefined;
 
-    const storage = getRecentSearchesStorageRef.current();
-    const raw = storage.getItem(saveRecentSearches.key);
-    if (!raw) return;
-
-    const parsed = JSON.parse(raw);
-    setRecentSearchesHits(
-      parsed.map((hit: Hit<FullDoc>) => {
-        return {
-          ...hit,
-          _getField: (fieldPath: string) => {
-            return get(hit.document, fieldPath) as unknown;
-          },
-        };
-      })
-    );
-  }, [valid, saveRecentSearches?.key]);
-
-  const recentSearches = React.useMemo(() => {
     return {
-      hits: recentSearchesHits,
-      add: (hit: Hit<FullDoc>) => {
-        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+      add: (hit: Hit<Document>) => {
+        if (!getRecentSearchesStorageRef.current || !storageKey) {
           return;
         }
         const storage = getRecentSearchesStorageRef.current();
 
         setRecentSearchesHits((prev) => {
           const next = prev ? [hit, ...prev] : [hit];
-          storage.setItem(saveRecentSearches.key, JSON.stringify(next));
+          storage.setItem(storageKey, JSON.stringify(next));
           return next;
         });
       },
       remove: (_key: string) => {
-        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+        if (!getRecentSearchesStorageRef.current || !storageKey) {
           return;
         }
         const storage = getRecentSearchesStorageRef.current();
 
         setRecentSearchesHits((prev) => {
           const next = prev?.filter((hit) => hit._key !== _key);
-          storage.setItem(saveRecentSearches.key, JSON.stringify(next));
+          storage.setItem(storageKey, JSON.stringify(next));
           return next;
         });
       },
       clear: () => {
-        if (!getRecentSearchesStorageRef.current || !saveRecentSearches?.key) {
+        if (!getRecentSearchesStorageRef.current || !storageKey) {
           return;
         }
         const storage = getRecentSearchesStorageRef.current();
 
         setRecentSearchesHits(undefined);
-        storage.removeItem(saveRecentSearches.key);
+        storage.removeItem(storageKey);
+      },
+      get: () => {
+        if (!getRecentSearchesStorageRef.current || !storageKey) {
+          return;
+        }
+        const storage = getRecentSearchesStorageRef.current();
+        const raw = storage.getItem(storageKey);
+        if (!raw) return;
+
+        return (JSON.parse(raw) as Hit<Document>[]).map((hit) => {
+          return {
+            ...hit,
+            _getField: (fieldPath: string) => {
+              return get(hit.document, fieldPath) as unknown;
+            },
+          };
+        });
       },
     };
-  }, [recentSearchesHits, saveRecentSearches?.key]);
+  }, [_searchKey, saveRecentSearches?.key]);
+
+  // load recent searches
+  React.useEffect(() => {
+    if (!valid) return;
+
+    const recentHits = recentSearchesManager.get();
+    if (recentHits) {
+      setRecentSearchesHits(recentHits);
+    }
+  }, [recentSearchesManager, valid]);
 
   const memoResult = React.useMemo(() => {
     if (!valid) {
@@ -377,9 +382,19 @@ export const useSearch = <
       result,
       query,
       onQueryChange,
-      recentSearches,
+      recentSearches: {
+        hits: recentSearchesHits,
+        ...recentSearchesManager,
+      },
     } satisfies { valid: true } & UseSearchResult<Document>;
-  }, [valid, onQueryChange, query, result, recentSearches]);
+  }, [
+    valid,
+    onQueryChange,
+    query,
+    result,
+    recentSearchesManager,
+    recentSearchesHits,
+  ]);
 
   return memoResult as SearchKey extends null
     ? { valid: false } & Partial<UseSearchResult<Document>>
