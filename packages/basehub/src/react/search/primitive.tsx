@@ -520,62 +520,93 @@ const Root = <
  * Input
  * -----------------------------------------------------------------------------------------------*/
 
+const useIsoLayoutEffect =
+  typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
+
 const Input = React.forwardRef<
   HTMLInputElement,
-  Omit<JSX.IntrinsicElements["input"] & { asChild?: boolean }, "ref">
->(({ asChild, onChange, onKeyDown, ...props }, ref) => {
-  const { id, query, onQueryChange, onIndexChange, recentSearches, result } =
-    useContext();
-  const Comp = asChild ? Slot : "input";
+  Omit<
+    JSX.IntrinsicElements["input"] & {
+      asChild?: boolean;
+      disableSelectionPrefill?: boolean;
+    },
+    "ref"
+  >
+>(
+  (
+    { asChild, onChange, onKeyDown, disableSelectionPrefill, ...props },
+    ref
+  ) => {
+    const { id, query, onQueryChange, onIndexChange, recentSearches, result } =
+      useContext();
+    const Comp = asChild ? Slot : "input";
 
-  return (
-    <Comp
-      {...props}
-      value={query}
-      onChange={(e) => {
-        onChange?.(e as React.ChangeEvent<HTMLInputElement>);
-        if (e.target instanceof HTMLInputElement) {
-          onQueryChange(e.target.value);
-        }
-      }}
-      onKeyDown={(e) => {
-        onKeyDown?.(e as React.KeyboardEvent<HTMLInputElement>);
-        // handle arrow keys and enter
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          onIndexChange({ type: "incr", scrollIntoView: true });
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          onIndexChange({ type: "decr", scrollIntoView: true });
-        } else if (e.key === "Enter") {
-          e.preventDefault();
-          const selectedNode = document.querySelector<HTMLElement>(
-            `[data-basehub-hit-for="${id}"], [data-selected="true"]`
-          );
-          if (selectedNode) {
-            const href = selectedNode.getAttribute("href");
-            if (href) {
-              if (e.metaKey) {
-                window.open(href, "_blank");
-              } else {
-                window.location.href = href;
-              }
-              if (recentSearches) {
-                const hit = result?.hits.find(
-                  (h) => h._key === selectedNode.dataset.basehubHitKey
-                );
-                if (hit) {
-                  recentSearches.add(hit);
+    const onQueryChangeRef = React.useRef(onQueryChange);
+    onQueryChangeRef.current = onQueryChange;
+
+    const queryRef = React.useRef(query);
+    queryRef.current = query;
+
+    useIsoLayoutEffect(() => {
+      if (!onQueryChangeRef.current) return;
+      const defaultQuery = disableSelectionPrefill
+        ? ""
+        : window.getSelection()?.toString() || "";
+
+      if (queryRef.current === defaultQuery) return;
+
+      onQueryChangeRef.current(defaultQuery);
+    }, [disableSelectionPrefill]);
+
+    return (
+      <Comp
+        {...props}
+        value={query}
+        onChange={(e) => {
+          onChange?.(e as React.ChangeEvent<HTMLInputElement>);
+          if (e.target instanceof HTMLInputElement) {
+            onQueryChange(e.target.value);
+          }
+        }}
+        onKeyDown={(e) => {
+          onKeyDown?.(e as React.KeyboardEvent<HTMLInputElement>);
+          // handle arrow keys and enter
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            onIndexChange({ type: "incr", scrollIntoView: true });
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            onIndexChange({ type: "decr", scrollIntoView: true });
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            const selectedNode = document.querySelector<HTMLElement>(
+              `[data-basehub-hit-for="${id}"], [data-selected="true"]`
+            );
+            if (selectedNode) {
+              const href = selectedNode.getAttribute("href");
+              if (href) {
+                if (e.metaKey) {
+                  window.open(href, "_blank");
+                } else {
+                  window.location.href = href;
+                }
+                if (recentSearches) {
+                  const hit = result?.hits.find(
+                    (h) => h._key === selectedNode.dataset.basehubHitKey
+                  );
+                  if (hit) {
+                    recentSearches.add(hit);
+                  }
                 }
               }
             }
           }
-        }
-      }}
-      ref={ref}
-    />
-  );
-});
+        }}
+        ref={ref}
+      />
+    );
+  }
+);
 
 /* -------------------------------------------------------------------------------------------------
  * Placeholder
