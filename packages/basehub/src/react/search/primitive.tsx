@@ -531,7 +531,7 @@ const Root = <
 
   // reset selected index when recent searches are in display (query is empty)
   React.useEffect(() => {
-    if (!search.recentSearches || search.query) return;
+    if (!search.recentSearches?.hits || search.query) return;
     setSelectedIndex(0);
     handleSelectedNodeDOMMutationsOnIndexChange({
       orderedNodes: undefined,
@@ -541,7 +541,7 @@ const Root = <
   }, [
     handleSelectedNodeDOMMutationsOnIndexChange,
     search.query,
-    search.recentSearches,
+    search.recentSearches?.hits,
   ]);
 
   if (search.valid === false) return null;
@@ -736,8 +736,8 @@ const HitItem = React.forwardRef<
     },
     "ref"
   >
->(({ asChild, hit, onClick, ...props }, ref) => {
-  const { id, recentSearches } = useContext();
+>(({ asChild, hit, onClick, onFocus, ...props }, ref) => {
+  const { id, recentSearches, onIndexChange } = useContext();
   const Comp = asChild ? Slot : "a";
 
   return (
@@ -752,6 +752,17 @@ const HitItem = React.forwardRef<
           if (recentSearches) {
             recentSearches.add(hit);
           }
+        }}
+        onFocus={(e) => {
+          onFocus?.(e as React.FocusEvent<HTMLAnchorElement>);
+          const orderedNodes = Array.from(
+            document.querySelectorAll<HTMLElement>(
+              `[data-basehub-hit-for="${id}"]`
+            )
+          );
+          const index = orderedNodes.indexOf(e.currentTarget);
+          if (index === -1) return;
+          onIndexChange({ type: "set", value: index });
         }}
       />
     </HitContext.Provider>
