@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.12
+
+### Patch Changes
+
+- expose onHitSelect
+
 ## 4.0.16-canary.11
 
 ### Patch Changes

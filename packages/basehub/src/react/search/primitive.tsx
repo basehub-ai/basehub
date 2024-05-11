@@ -421,6 +421,7 @@ export type SearchBoxContext<Document = Record<string, unknown>> =
         | { type: "set"; value: number }
       )
     ) => void;
+    onHitSelect?: (hit: Hit<Document>) => void;
   };
 
 const Context = React.createContext<SearchBoxContext | undefined>(undefined);
@@ -444,9 +445,11 @@ const Root = <
 >({
   children,
   search,
+  onHitSelect,
 }: {
   children?: React.ReactNode;
   search: ReturnType<typeof useSearch<Document>>;
+  onHitSelect?: (hit: Hit<Document>) => void;
 }) => {
   const id = React.useId();
   const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -547,7 +550,13 @@ const Root = <
   if (search.valid === false) return null;
   return (
     <Context.Provider
-      value={{ ...(search as any), id, selectedIndex, onIndexChange }}
+      value={{
+        ...(search as any),
+        id,
+        selectedIndex,
+        onIndexChange,
+        onHitSelect,
+      }}
     >
       {children}
     </Context.Provider>
@@ -575,8 +584,15 @@ const Input = React.forwardRef<
     { asChild, onChange, onKeyDown, disableSelectionPrefill, ...props },
     ref
   ) => {
-    const { id, query, onQueryChange, onIndexChange, recentSearches, result } =
-      useContext();
+    const {
+      id,
+      query,
+      onQueryChange,
+      onIndexChange,
+      recentSearches,
+      result,
+      onHitSelect,
+    } = useContext();
     const Comp = asChild ? Slot : "input";
 
     const onQueryChangeRef = React.useRef(onQueryChange);
@@ -622,19 +638,19 @@ const Input = React.forwardRef<
             );
             if (selectedNode) {
               const href = selectedNode.getAttribute("href");
-              if (href) {
+              const hit = [
+                ...(result?.hits ?? []), // first search in results
+                ...(recentSearches?.hits ?? []), // then in recent searches
+              ].find((h) => h._key === selectedNode.dataset.basehubHitKey);
+              if (href && hit) {
                 if (e.metaKey) {
                   window.open(href, "_blank");
                 } else {
                   window.location.href = href;
                 }
+                onHitSelect?.(hit);
                 if (recentSearches) {
-                  const hit = result?.hits.find(
-                    (h) => h._key === selectedNode.dataset.basehubHitKey
-                  );
-                  if (hit) {
-                    recentSearches.add(hit);
-                  }
+                  recentSearches.add(hit);
                 }
               }
             }
@@ -737,7 +753,7 @@ const HitItem = React.forwardRef<
     "ref"
   >
 >(({ asChild, hit, onClick, onFocus, ...props }, ref) => {
-  const { id, recentSearches, onIndexChange } = useContext();
+  const { id, recentSearches, onIndexChange, onHitSelect } = useContext();
   const Comp = asChild ? Slot : "a";
 
   return (
@@ -749,6 +765,7 @@ const HitItem = React.forwardRef<
         ref={ref}
         onClick={(e) => {
           onClick?.(e as React.MouseEvent<HTMLAnchorElement, MouseEvent>);
+          onHitSelect?.(hit);
           if (recentSearches) {
             recentSearches.add(hit);
           }
