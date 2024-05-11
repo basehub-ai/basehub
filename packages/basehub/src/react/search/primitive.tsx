@@ -315,6 +315,12 @@ export const useSearch = <
         const storage = getRecentSearchesStorageRef.current();
 
         setRecentSearchesHits((prev) => {
+          // check if this hit already exists
+          if (prev) {
+            const exists = prev.some((h) => h._key === hit._key);
+            if (exists) return prev;
+          }
+
           const next = prev ? [hit, ...prev] : [hit];
           storage.setItem(storageKey, JSON.stringify(next));
           return next;
@@ -513,6 +519,7 @@ const Root = <
 
   const hits = search.valid ? search.result?.hits : undefined;
 
+  // reset selected index when search results change
   React.useEffect(() => {
     setSelectedIndex(0);
     handleSelectedNodeDOMMutationsOnIndexChange({
@@ -521,6 +528,21 @@ const Root = <
       scrollIntoView: true,
     });
   }, [handleSelectedNodeDOMMutationsOnIndexChange, hits]);
+
+  // reset selected index when recent searches are in display (query is empty)
+  React.useEffect(() => {
+    if (!search.recentSearches || search.query) return;
+    setSelectedIndex(0);
+    handleSelectedNodeDOMMutationsOnIndexChange({
+      orderedNodes: undefined,
+      selectedIndex: 0,
+      scrollIntoView: true,
+    });
+  }, [
+    handleSelectedNodeDOMMutationsOnIndexChange,
+    search.query,
+    search.recentSearches,
+  ]);
 
   if (search.valid === false) return null;
   return (

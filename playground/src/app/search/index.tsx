@@ -7,7 +7,8 @@ export const Search = () => {
   const [open, setOpen] = useState(false);
 
   const search = useSearch<{ some: "thing" }>({
-    _searchKey: null,
+    _searchKey:
+      "k19b3p50ue6irgvnp-1.a1.typesense.net:YjY3bk8zVDFOY05mbTlCczk4U1dpU2Nqa2FTTHJKNXBxRHJPSWlHcTVRRT1WRnRteyJmaWx0ZXJfYnkiOiJfY29sbGVjdGlvbklkOnFmZDVva2FnaTA0eHc0ZmNmZjV6d3UyYSJ9:dbjFgtnqgk7aCqonrqA8Z__tm8owg2lnuah5n62mm56qqc7__zhzxbpr40ied562l74zvrdwg",
     queryBy: ["_title", "content"],
     saveRecentSearches: {
       getStorage: () => window.localStorage,

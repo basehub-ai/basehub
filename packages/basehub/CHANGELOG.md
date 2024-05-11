@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.10
+
+### Patch Changes
+
+- improve recent searches highlighting
+
 ## 4.0.16-canary.9
 
 ### Patch Changes
