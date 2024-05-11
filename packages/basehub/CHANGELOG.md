@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.9
+
+### Patch Changes
+
+- improve ts
+
 ## 4.0.16-canary.8
 
 ### Patch Changes

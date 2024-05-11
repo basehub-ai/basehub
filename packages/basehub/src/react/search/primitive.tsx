@@ -405,16 +405,17 @@ export const useSearch = <
  * Search Box
  * -----------------------------------------------------------------------------------------------*/
 
-export type SearchBoxContext<Document = BaseDoc> = UseSearchResult<Document> & {
-  id: string;
-  selectedIndex: number;
-  onIndexChange: (
-    op: { scrollIntoView?: boolean } & (
-      | { type: "incr" | "decr" }
-      | { type: "set"; value: number }
-    )
-  ) => void;
-};
+export type SearchBoxContext<Document = Record<string, unknown>> =
+  UseSearchResult<Document> & {
+    id: string;
+    selectedIndex: number;
+    onIndexChange: (
+      op: { scrollIntoView?: boolean } & (
+        | { type: "incr" | "decr" }
+        | { type: "set"; value: number }
+      )
+    ) => void;
+  };
 
 const Context = React.createContext<SearchBoxContext | undefined>(undefined);
 
@@ -691,9 +692,7 @@ const HitsList = React.forwardRef<
   );
 });
 
-const HitContext = React.createContext<
-  { hit: SearchResult<BaseDoc>["hits"][number] } | undefined
->(undefined);
+const HitContext = React.createContext<{ hit: Hit } | undefined>(undefined);
 
 const useHitContext = () => {
   const ctx = React.useContext(HitContext);
@@ -710,7 +709,7 @@ const HitItem = React.forwardRef<
   Omit<
     JSX.IntrinsicElements["a"] & {
       asChild?: boolean;
-      hit: Hit<BaseDoc>;
+      hit: Hit;
       href: string;
     },
     "ref"
