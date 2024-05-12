@@ -646,7 +646,7 @@ const Input = React.forwardRef<
                 if (e.metaKey) {
                   window.open(href, "_blank");
                 } else {
-                  window.location.href = href;
+                  selectedNode.click();
                 }
                 onHitSelect?.(hit);
                 if (recentSearches) {
