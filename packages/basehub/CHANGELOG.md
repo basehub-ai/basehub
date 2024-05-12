@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.13
+
+### Patch Changes
+
+- fix next link bug
+
 ## 4.0.16-canary.12
 
 ### Patch Changes
