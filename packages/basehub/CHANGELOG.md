@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.15
+
+### Patch Changes
+
+- Make recent searches keys just use the document id
+
 ## 4.0.16-canary.14
 
 ### Patch Changes

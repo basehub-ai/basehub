@@ -3,7 +3,7 @@ import { Client } from "typesense";
 import type { SearchParams } from "typesense/lib/Typesense/Documents";
 import get from "lodash.get";
 import { Slot } from "@radix-ui/react-slot";
-import { cyrb64Hash } from "./hash";
+import { getHitKey, getHitRecentSearchKey } from "./helpers";
 
 /* -------------------------------------------------------------------------------------------------
  * Utils
@@ -129,7 +129,7 @@ export type SearchOptions = {
   queryByWeights?: SearchParams["query_by_weights"];
 };
 
-type BaseDoc = {
+export type BaseDoc = {
   _id: string;
   _idPath: string;
   _title?: string;
@@ -269,16 +269,7 @@ export const useSearch = <
                 return cast;
               }) ?? [];
 
-            const _key = cyrb64Hash(
-              JSON.stringify({
-                _id: document._id,
-                curated: hit.curated,
-                highlight: hit.highlight,
-                highlights: hit.highlights,
-                text_match: hit.text_match,
-                text_match_info: hit.text_match_info,
-              })
-            );
+            const _key = getHitKey(hit);
 
             return {
               _key,
@@ -326,14 +317,17 @@ export const useSearch = <
         }
         const storage = getRecentSearchesStorageRef.current();
 
+        const _key = getHitRecentSearchKey(hit);
+        const updatedHit = { ...hit, _key };
+
         setRecentSearchesHits((prev) => {
           // check if this hit already exists
           if (prev) {
-            const exists = prev.some((h) => h._key === hit._key);
+            const exists = prev.some((h) => h._key === updatedHit._key);
             if (exists) return prev;
           }
 
-          const next = prev ? [hit, ...prev] : [hit];
+          const next = prev ? [updatedHit, ...prev] : [hit];
           storage.setItem(storageKey, JSON.stringify(next));
           return next;
         });

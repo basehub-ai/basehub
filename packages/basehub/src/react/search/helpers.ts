@@ -5,6 +5,10 @@
 // A fast and simple 64-bit (or 53-bit) string hash function with decent collision resistance.
 // Largely inspired by MurmurHash2/3, but with a focus on speed/simplicity.
 // See https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript/52171480#52171480
+
+import type { SearchResponseHit } from "typesense/lib/Typesense/Documents";
+import type { BaseDoc } from "./primitive";
+
 // https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js
 const cyrb64 = (str: string, seed = 0) => {
   let h1 = 0xdeadbeef ^ seed,
@@ -30,3 +34,23 @@ export const cyrb64Hash = (str: string, seed = 0) => {
   const [h2, h1] = cyrb64(str, seed);
   return h2.toString(36).padStart(7, "0") + h1.toString(36).padStart(7, "0");
 };
+
+export function getHitKey(hit: SearchResponseHit<object>): string {
+  return cyrb64Hash(
+    JSON.stringify({
+      _id: (hit.document as BaseDoc)._id,
+      curated: hit.curated,
+      highlight: hit.highlight,
+      highlights: hit.highlights,
+      text_match: hit.text_match,
+      text_match_info: hit.text_match_info,
+    })
+  );
+}
+
+export function getHitRecentSearchKey(hit: { document: BaseDoc }): string {
+  /**
+   * We'll just use the document ID as the recent search key so that you can't save a document multiple times into recent searches.
+   */
+  return `recent-search-${hit.document._id}`;
+}
