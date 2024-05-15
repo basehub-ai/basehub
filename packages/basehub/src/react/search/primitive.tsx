@@ -3,6 +3,7 @@ import { Client } from "typesense";
 import type { SearchParams } from "typesense/lib/Typesense/Documents";
 import get from "lodash.get";
 import { Slot } from "@radix-ui/react-slot";
+import { cyrb64Hash } from "./hash";
 
 /* -------------------------------------------------------------------------------------------------
  * Utils
@@ -268,8 +269,19 @@ export const useSearch = <
                 return cast;
               }) ?? [];
 
+            const _key = cyrb64Hash(
+              JSON.stringify({
+                _id: document._id,
+                curated: hit.curated,
+                highlight: hit.highlight,
+                highlights: hit.highlights,
+                text_match: hit.text_match,
+                text_match_info: hit.text_match_info,
+              })
+            );
+
             return {
-              _key: document._id,
+              _key,
               curated: hit.curated ?? false,
               document,
               highlight: highlightRecord,
@@ -634,7 +646,7 @@ const Input = React.forwardRef<
           } else if (e.key === "Enter") {
             e.preventDefault();
             const selectedNode = document.querySelector<HTMLElement>(
-              `[data-basehub-hit-for="${id}"], [data-selected="true"]`
+              `[data-basehub-hit-for="${id}"][data-selected="true"]`
             );
             if (selectedNode) {
               const href = selectedNode.getAttribute("href");
@@ -696,7 +708,7 @@ const Empty = React.forwardRef<
  * Results
  * -----------------------------------------------------------------------------------------------*/
 
-const HitsList = React.forwardRef<
+const HitList = React.forwardRef<
   HTMLDivElement,
   Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
 >(({ asChild, onMouseMove, ...props }, ref) => {
@@ -893,7 +905,7 @@ export const SearchBox = {
   Input,
   Placeholder,
   Empty,
-  HitsList,
+  HitList,
   HitItem,
   HitSnippet,
   useContext,

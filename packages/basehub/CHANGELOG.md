@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.14
+
+### Patch Changes
+
+- Fix querySelector bug
+
 ## 4.0.16-canary.13
 
 ### Patch Changes
