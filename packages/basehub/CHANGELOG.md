@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.16-canary.16
+
+### Patch Changes
+
+- add \_getFieldHighlight helper
+
 ## 4.0.16-canary.15
 
 ### Patch Changes

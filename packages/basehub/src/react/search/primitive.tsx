@@ -154,6 +154,10 @@ export type Hit<Doc = Record<string, unknown>> = {
   highlights: Array<Highlight>;
   curated: boolean;
   _getField: (fieldPath: string) => unknown;
+  _getFieldHighlight: (
+    fieldPath: string,
+    fallbackFieldPaths?: string[]
+  ) => ReturnType<typeof _getFieldHighlightImpl>;
 };
 
 export type SearchResult<Doc = Record<string, unknown>> = {
@@ -271,16 +275,33 @@ export const useSearch = <
 
             const _key = getHitKey(hit);
 
-            return {
+            const _getField = (fieldPath: string) => {
+              return get(document, fieldPath) as unknown;
+            };
+
+            const fullHit: Hit<Document> = {
               _key,
               curated: hit.curated ?? false,
               document,
               highlight: highlightRecord,
               highlights,
-              _getField: (fieldPath: string) => {
-                return get(document, fieldPath) as unknown;
-              },
+              _getField,
+              _getFieldHighlight: () => null,
             };
+
+            fullHit._getFieldHighlight = (
+              fieldPath: string,
+              fallbackFieldPaths?: string[]
+            ) => {
+              return _getFieldHighlightImpl({
+                fieldPath,
+                fallbackFieldPaths,
+                includeFallback: true,
+                hit: fullHit,
+              });
+            };
+
+            return fullHit;
           }) ?? [],
       };
 
@@ -362,12 +383,18 @@ export const useSearch = <
         if (!raw) return;
 
         return (JSON.parse(raw) as Hit<Document>[]).map((hit) => {
-          return {
-            ...hit,
-            _getField: (fieldPath: string) => {
-              return get(hit.document, fieldPath) as unknown;
-            },
+          hit._getField = (fieldPath: string) => {
+            return get(hit.document, fieldPath) as unknown;
           };
+          hit._getFieldHighlight = (fieldPath, fallbackFieldPaths) => {
+            return _getFieldHighlightImpl({
+              fieldPath,
+              fallbackFieldPaths,
+              includeFallback: true,
+              hit: hit,
+            });
+          };
+          return hit;
         });
       },
     };
@@ -794,9 +821,11 @@ const HitItem = React.forwardRef<
 
 const HitSnippet = ({
   fieldPath,
+  fallbackFieldPaths,
   components,
 }: {
   fieldPath: string;
+  fallbackFieldPaths?: string[];
   components?: {
     container?: ({
       children,
@@ -808,58 +837,11 @@ const HitSnippet = ({
   };
 }) => {
   const { hit } = useHitContext();
-  const field = hit._getField(fieldPath);
-  if (!field) return null;
 
-  const isRichText =
-    Array.isArray(field) && field[0]?._type === "rich-text-section";
+  const res = hit._getFieldHighlight(fieldPath, fallbackFieldPaths);
+  if (!res) return null;
 
-  let snippetByExactMatch: string | undefined = undefined;
-  let snippetByPrefix: string | undefined = undefined;
-
-  const prefix = fieldPath.endsWith(".") ? fieldPath : fieldPath + ".";
-
-  hit.highlights.forEach((highlight) => {
-    if (!snippetByExactMatch && highlight.fieldPath === fieldPath) {
-      snippetByExactMatch = highlight.snippet;
-    }
-    if (!snippetByPrefix && highlight.fieldPath.startsWith(prefix)) {
-      snippetByPrefix = highlight.snippet;
-    }
-  });
-
-  // get first piece of text we find under `field`
-  function getFallbackString(
-    current: unknown,
-    opts: {
-      isRichText: boolean;
-    }
-  ): string | undefined {
-    if (typeof current === "string") return current;
-
-    if (current === null || current === undefined) return undefined;
-
-    if (Array.isArray(current)) {
-      const found = current
-        .map((c) => getFallbackString(c, opts))
-        .find((v) => v);
-      return found;
-    } else if (typeof current === "object") {
-      const found = Object.entries(current)
-        .map(([key, value]) => {
-          if (opts.isRichText && key !== "_content") return undefined;
-          return getFallbackString(value, opts);
-        })
-        .find((v) => v);
-      return found;
-    }
-  }
-
-  const snippet =
-    snippetByExactMatch ||
-    snippetByPrefix ||
-    getFallbackString(field, { isRichText }) ||
-    "";
+  const snippet = res.snippet ?? "";
 
   const matches = [
     ...snippet.matchAll(/(.*?)<mark>(.*?)<\/mark>(.*?)(?=(?:<mark>|$))/gm),
@@ -893,6 +875,154 @@ const HitSnippet = ({
     </Container>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * Hit Utils
+ * -----------------------------------------------------------------------------------------------*/
+
+type HighlightedField =
+  | undefined
+  | {
+      _type: "rich-text-section";
+      _content: string;
+      _id?: string;
+      _level?: number;
+    }
+  | {
+      _type: "text";
+      _content: string;
+    }
+  | {
+      _type: "unknown";
+      _content: unknown;
+    };
+
+function _getFieldHighlightImpl({
+  hit,
+  fieldPath,
+  fallbackFieldPaths,
+  includeFallback,
+}: {
+  hit: Hit;
+  fieldPath: string;
+  fallbackFieldPaths?: string[];
+  includeFallback?: boolean;
+}): null | {
+  highlightedField: HighlightedField;
+  snippet: string | undefined;
+  snippetByExactMatch: string | undefined;
+  snippetByPrefix: string | undefined;
+  fallbackSnippet: string | undefined;
+} {
+  const field = hit._getField(fieldPath);
+  if (!field) return null;
+
+  const isRichText =
+    Array.isArray(field) && field[0]?._type === "rich-text-section";
+
+  let snippetByExactMatch: string | undefined = undefined;
+  let snippetByPrefix: string | undefined = undefined;
+
+  const prefix = fieldPath.endsWith(".") ? fieldPath : fieldPath + ".";
+
+  let highlightedField: HighlightedField = undefined;
+
+  hit.highlights.forEach((h) => {
+    if (h.fieldPath !== fieldPath && h.fieldPath.startsWith(prefix) === false) {
+      return;
+    }
+    if (!highlightedField) {
+      const adjustedPath = isRichText
+        ? h.fieldPath.split(".").slice(0, 2).join(".")
+        : h.fieldPath;
+      const fieldData = hit._getField(adjustedPath);
+      if (!fieldData) return;
+      else if (typeof fieldData === "string") {
+        highlightedField = {
+          _type: "text",
+          _content: fieldData,
+        };
+      } else if (
+        typeof fieldData === "object" &&
+        "_type" in fieldData &&
+        fieldData._type === "rich-text-section"
+      ) {
+        highlightedField = fieldData as HighlightedField;
+      } else {
+        highlightedField = {
+          _type: "unknown",
+          _content: fieldData,
+        };
+      }
+    }
+
+    if (!snippetByExactMatch && h.fieldPath === fieldPath) {
+      snippetByExactMatch = h.snippet;
+    }
+    if (!snippetByPrefix && h.fieldPath.startsWith(prefix)) {
+      snippetByPrefix = h.snippet;
+    }
+  });
+
+  // get first piece of text we find under `field`
+  function getFallbackString(
+    current: unknown,
+    opts: { isRichText: boolean }
+  ): string | undefined {
+    if (typeof current === "string") return current;
+
+    if (current === null || current === undefined) {
+      return undefined;
+    }
+
+    if (Array.isArray(current)) {
+      const found = current
+        .map((c) => getFallbackString(c, opts))
+        .find((v) => v);
+      return found;
+    } else if (typeof current === "object") {
+      const found = Object.entries(current)
+        .map(([key, value]) => {
+          if (opts.isRichText && key !== "_content") {
+            return undefined;
+          }
+          return getFallbackString(value, opts);
+        })
+        .find((v) => v);
+      return found;
+    }
+  }
+
+  let fallbackSnippet;
+  let snippet: string | undefined =
+    snippetByExactMatch || snippetByPrefix || undefined;
+
+  if (snippet === undefined && fallbackFieldPaths && fallbackFieldPaths[0]) {
+    const [fallbackFieldPath, ...rest] = fallbackFieldPaths;
+    const fallbackResult = _getFieldHighlightImpl({
+      hit,
+      fieldPath: fallbackFieldPath,
+      fallbackFieldPaths: rest,
+      includeFallback: false,
+    });
+    snippet = fallbackResult?.snippet;
+    fallbackSnippet = fallbackResult?.snippet;
+  }
+
+  if (snippet === undefined && includeFallback) {
+    // if snippet is still undefined after trying all fallbacks, we'll fallback to the first piece of text we find in the field
+    fallbackSnippet = getFallbackString(field, { isRichText });
+    snippet = fallbackSnippet;
+  }
+
+  return {
+    highlightedField,
+    snippet,
+    snippetByExactMatch: snippetByExactMatch as string | undefined,
+    snippetByPrefix: snippetByPrefix as string | undefined,
+    fallbackSnippet,
+  };
+}
 
 export const SearchBox = {
   Root,
