@@ -1,5 +1,27 @@
 # basehub
 
+## 4.0.16
+
+### Patch Changes
+
+- defbe89: Make recent searches keys just use the document id
+- 6c55965: Introduce `useSearch` (alpha)
+- 452a6de: nits
+- c706083: upd
+- 0df0a6e: expose onHitSelect
+- 364ff62: Fix querySelector bug
+- 576f0bc: changes
+- 177fd64: expose search files in package.json
+- 4574dab: improve ts
+- f4c4b75: add \_getFieldHighlight helper
+- 08ee565: nits
+- 97c1ce1: improve types
+- 0806303: export more types
+- 12fa9ee: Implement SearchBox
+- 6e7bd4a: add selection prefill
+- 0ecdf13: improve recent searches highlighting
+- d5e33c9: fix next link bug
+
 ## 4.0.16-canary.16
 
 ### Patch Changes
