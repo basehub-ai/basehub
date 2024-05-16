@@ -8,6 +8,7 @@ export default defineConfig((_options: Options) => {
       "react-rich-text": "./src/react/rich-text/index.ts",
       "react-search": "./src/react/search/index.ts",
       "api-transaction": "./src/api-transaction.ts",
+      analytics: "./src/analytics/index.ts",
     },
     format: ["esm"],
   };

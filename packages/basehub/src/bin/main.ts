@@ -190,7 +190,7 @@ export const main = async (
 
     if (isCustomOutput) {
       // alias react-rich-text and other packages to the generated client for better import experience
-      ["react-rich-text", "api-transaction", "react-search"].map(
+      ["react-rich-text", "api-transaction", "react-search", "analytics"].map(
         (pathsToAlias) => {
           // create a file in the output directory that aliases the package to the generated client
           fs.writeFileSync(
