@@ -37,10 +37,18 @@ export const main = async (
       );
     }
 
-    const pathArgs = output
-      ? [output]
-      : ["node_modules", "basehub", "dist", "generated-client"]; // default output path
-    const isCustomOutput = !!output;
+    let shouldAppendToGitIgnore = "";
+    let pathArgs: string[] = [];
+    if (output === "node_modules") {
+      // old default
+      pathArgs = ["node_modules", "basehub", "dist", "generated-client"];
+    } else if (output) {
+      pathArgs = [output];
+    } else {
+      // default
+      pathArgs = [".basehub"];
+      shouldAppendToGitIgnore = ".basehub";
+    }
 
     const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
 
@@ -188,7 +196,7 @@ export const main = async (
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
 
-    if (isCustomOutput) {
+    if (output !== "node_modules") {
       // alias react-rich-text and other packages to the generated client for better import experience
       ["react-rich-text", "api-transaction", "react-search"].map(
         (pathsToAlias) => {
@@ -203,6 +211,39 @@ export const main = async (
           );
         }
       );
+    }
+
+    if (shouldAppendToGitIgnore) {
+      function findClosestGitignore(startDir: string) {
+        let currentDir = startDir;
+        let gitignorePath = null;
+
+        while (currentDir !== "/") {
+          const potentialGitignore = path.join(currentDir, ".gitignore");
+          if (fs.existsSync(potentialGitignore)) {
+            gitignorePath = potentialGitignore;
+            break;
+          }
+          currentDir = path.dirname(currentDir);
+        }
+
+        return gitignorePath;
+      }
+
+      const gitIgnorePath = findClosestGitignore(process.cwd());
+      if (gitIgnorePath && fs.existsSync(gitIgnorePath)) {
+        const gitIgnoreContents = fs.readFileSync(gitIgnorePath, "utf-8");
+        if (!gitIgnoreContents.includes(shouldAppendToGitIgnore)) {
+          fs.appendFileSync(
+            gitIgnorePath,
+            `\n\n# BaseHub\n${shouldAppendToGitIgnore}`
+          );
+          logIfNotSilent(
+            silent,
+            `🤫 Added "${shouldAppendToGitIgnore}" .gitignore`
+          );
+        }
+      }
     }
 
     logIfNotSilent(silent, "🪄 Generated `basehub` client");

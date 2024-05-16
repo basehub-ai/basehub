@@ -35,4 +35,6 @@ yarn-error.log*
 
 .env
 .vercel
+
+# BaseHub
 .basehub
