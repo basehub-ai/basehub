@@ -1,5 +1,12 @@
 # playground
 
+## 0.0.88
+
+### Patch Changes
+
+- Updated dependencies [335ae9a]
+  - basehub@5.0.0
+
 ## 0.0.88-canary.0
 
 ### Patch Changes
