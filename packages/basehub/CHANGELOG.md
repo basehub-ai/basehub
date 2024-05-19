@@ -1,5 +1,11 @@
 # basehub
 
+## 4.0.17
+
+### Patch Changes
+
+- Support <kbd> in rich text
+
 ## 4.0.16
 
 ### Patch Changes
