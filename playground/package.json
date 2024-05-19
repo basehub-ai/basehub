@@ -1,13 +1,14 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.87",
+  "version": "0.0.88-canary.0",
   "scripts": {
     "dev": "basehub dev & next dev",
-    "build": "next build",
+    "build": "basehub & next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate": "basehub"
   },
   "dependencies": {
     "basehub": "workspace:^",

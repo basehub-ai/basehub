@@ -211,6 +211,46 @@ export const main = async (
           );
         }
       );
+
+      // override index.js and index.d.ts to point to the generated client
+      const indexJsPath = path.join(basehubModulePath, "index.js");
+      const indexDtsPath = path.join(basehubModulePath, "index.d.ts");
+      const reactPumpIndexJsPath = path.join(
+        basehubModulePath,
+        "react-pump.js"
+      );
+      const reactPumpIndexDtsPath = path.join(
+        basehubModulePath,
+        "react-pump.d.ts"
+      );
+      fs.writeFileSync(
+        indexJsPath,
+        `module.exports = require("${path.relative(
+          basehubModulePath,
+          generatedMainExportPath
+        )}");`
+      );
+      fs.writeFileSync(
+        indexDtsPath,
+        `export * from "${path.relative(
+          basehubModulePath,
+          generatedMainExportPath
+        )}";`
+      );
+      fs.writeFileSync(
+        reactPumpIndexJsPath,
+        `module.exports = require("${path.relative(
+          basehubModulePath,
+          path.join(reactPumpOutDir, "index.js")
+        )}");`
+      );
+      fs.writeFileSync(
+        reactPumpIndexDtsPath,
+        `export * from "${path.relative(
+          basehubModulePath,
+          path.join(reactPumpOutDir, "index.d.ts")
+        )}";`
+      );
     }
 
     if (shouldAppendToGitIgnore) {

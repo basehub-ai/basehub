@@ -1,5 +1,11 @@
 # basehub
 
+## 5.0.0-canary.0
+
+### Major Changes
+
+- Default to outputting stuff into .basehub and aliasing basehub to it.
+
 ## 4.0.17
 
 ### Patch Changes
