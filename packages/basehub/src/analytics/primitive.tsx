@@ -1,8 +1,15 @@
+/* eslint-disable turbo/no-undeclared-env-vars */
+
 /* -------------------------------------------------------------------------------------------------
  * Client
  * -----------------------------------------------------------------------------------------------*/
 
-const ANALYTICS_ENDPOINT_URL = "https://basehub.com/api/v1/analytics";
+let ANALYTICS_ENDPOINT_URL = "https://basehub.com/api/v1/analytics";
+if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_ENDPOINT) {
+  ANALYTICS_ENDPOINT_URL = process.env.NEXT_PUBLIC_BASEHUB_ANALYTICS_ENDPOINT;
+} else if (process?.env?.BASEHUB_ANALYTICS_ENDPOINT) {
+  ANALYTICS_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_ENDPOINT;
+}
 
 export type AnalyticsParams = {
   /**
@@ -11,37 +18,56 @@ export type AnalyticsParams = {
   _analyticsKey: string;
 };
 
-export const getAnalyticsClient = ({ _analyticsKey }: AnalyticsParams) => {
-  const getEventCount = async (name: string) => {
-    const response = await fetch(ANALYTICS_ENDPOINT_URL, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, _analyticsKey }),
-    });
+export const getEventCount = async <Name extends string | string[]>({
+  name,
+  _analyticsKey,
+}: {
+  name: Name;
+} & AnalyticsParams): Promise<
+  Name extends string ? number : Array<{ name: string; count: number }>
+> => {
+  if (typeof name === "string" && name.split(",").length > 1) {
+    throw new Error(
+      "If sending multiple events, pass an array of strings, instead of a single, comma-separated string."
+    );
+  }
 
-    const data = (await response.json()) as
-      | { success: true; count: number }
-      | { success: false; error: string };
+  const url = new URL(ANALYTICS_ENDPOINT_URL);
+  url.searchParams.append("key", _analyticsKey);
+  url.searchParams.append(
+    "event-name",
+    typeof name === "string" ? name : name.join(",")
+  );
 
-    return data;
-  };
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
 
-  const sendEvent = async (
-    name: string,
-    metadata?: Record<string, unknown>
-  ) => {
-    const response = await fetch(ANALYTICS_ENDPOINT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, metadata, _analyticsKey }),
-    });
+  const data = (await response.json()) as Array<{
+    count: number;
+    name: string;
+  }>;
 
-    const data = (await response.json()) as
-      | { success: true }
-      | { success: false; error: string };
+  return (
+    typeof name === "string" ? data[0]?.count ?? 0 : data
+  ) as Name extends string ? number : { name: string; count: number }[];
+};
 
-    return data;
-  };
+export const sendEvent = async ({
+  name,
+  metadata,
+  _analyticsKey,
+}: { name: string; metadata?: Record<string, unknown> } & AnalyticsParams) => {
+  const response = await fetch(ANALYTICS_ENDPOINT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, metadata, key: _analyticsKey }),
+  });
 
-  return { sendEvent, getEventCount };
+  const data = (await response.json()) as
+    | { success: true }
+    | { success: false; error: string };
+
+  return data;
 };

@@ -1,2 +1,1 @@
-export { getAnalyticsClient } from "./primitive";
-export type { AnalyticsParams } from "./primitive";
+export { getEventCount, sendEvent } from "./primitive";
