@@ -22,7 +22,9 @@
     "react-search.js",
     "react-search.d.ts",
     "src-react-pump",
-    "api-transaction.d.ts"
+    "api-transaction.d.ts",
+    "analytics.js",
+    "analytics.d.ts"
   ],
   "sideEffects": false,
   "scripts": {
