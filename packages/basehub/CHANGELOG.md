@@ -1,5 +1,11 @@
 # basehub
 
+## 5.0.3
+
+### Patch Changes
+
+- use revalidate: 0 instead of no-store for draft requests
+
 ## 5.0.2
 
 ### Patch Changes

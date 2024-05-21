@@ -341,7 +341,7 @@ export const basehub = (options?: Options) => {
 
   return {
     ...createClient(${
-      noStore ? "{ ...options, cache: 'no-store' }" : "options"
+      noStore ? "{ ...options, next: { revalidate: 0 } }" : "options"
     }),
     raw: createFetcher({ ...options, url, headers }) as <Cast = unknown>(
       gql: GraphqlOperation
