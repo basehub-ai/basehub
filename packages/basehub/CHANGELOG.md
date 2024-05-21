@@ -1,5 +1,11 @@
 # basehub
 
+## 5.0.2
+
+### Patch Changes
+
+- Update @basehub/genql
+
 ## 5.0.1
 
 ### Patch Changes
