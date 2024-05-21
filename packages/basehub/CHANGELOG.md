@@ -1,5 +1,11 @@
 # basehub
 
+## 5.0.1
+
+### Patch Changes
+
+- 24d2545: Introduce analytics utils
+
 ## 5.0.0
 
 ### Major Changes
