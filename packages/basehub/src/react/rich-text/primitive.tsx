@@ -24,7 +24,7 @@ interface Attrs {
 const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
 type Mark =
-  | { type: "bold" | "italic" | "underline" | "strike" }
+  | { type: "bold" | "italic" | "underline" | "strike" | "kbd" }
   | {
       type: "code";
       attrs: { isInline?: boolean; language: string; code: string };
@@ -127,6 +127,7 @@ type Handlers = {
   b: (props: { children: ReactNode }) => ReactNode;
   em: (props: { children: ReactNode }) => ReactNode;
   s: (props: { children: ReactNode }) => ReactNode;
+  kbd: (props: { children: ReactNode }) => ReactNode;
   code: (props: {
     children: ReactNode;
     isInline: boolean;
@@ -258,6 +259,7 @@ const defaultHandlers: Handlers = {
   b: ({ children }) => <b>{children}</b>,
   em: ({ children }) => <em>{children}</em>,
   s: ({ children }) => <s>{children}</s>,
+  kbd: ({ children }) => <kbd>{children}</kbd>,
   code: ({ children, isInline, language }) => {
     return (
       <code
@@ -576,6 +578,10 @@ const Marks = ({
     case "strike":
       handler = components?.s ?? defaultHandlers.s;
       props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
+      break;
+    case "kbd":
+      handler = components?.kbd ?? defaultHandlers.kbd;
+      props = { children } satisfies ExtractPropsForHandler<Handlers["kbd"]>;
       break;
     case "code":
       handler = components?.code ?? defaultHandlers.code;
