@@ -143,10 +143,12 @@ export const main = async (
       "react-dom",
       "../index",
       "@basehub/mutation-api-helpers",
+      "next",
     ];
 
     logIfNotSilent(silent, "📦 Compiling to JavaScript...");
     const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
+    const nextToolbarOutDir = path.join(basehubOutputPath, "next-toolbar");
     await Promise.all([
       esbuild.build({
         entryPoints: [generatedMainExportPath],
@@ -192,6 +194,40 @@ export const main = async (
           },
         ],
       }),
+      esbuild.build({
+        entryPoints: [
+          path.join(basehubModulePath, "src", "next", "toolbar", "index.ts"),
+        ],
+        bundle: true,
+        outdir: nextToolbarOutDir,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        target: ["es2020", "node18"],
+        external: peerDependencies,
+        plugins: [
+          {
+            name: "use-client-for-client-components",
+            setup(build) {
+              build.onEnd(() => {
+                const rxp = /['"]use client['"]\s?;/i;
+                const outputFilePaths = fs.readdirSync(nextToolbarOutDir);
+                outputFilePaths
+                  ?.filter((fileName) => !fileName.endsWith(".map"))
+                  .forEach((fileName) => {
+                    // if the file contains "use client" we'll make sure it's on the top.
+                    const filePath = path.join(nextToolbarOutDir, fileName);
+                    const fileContents = fs.readFileSync(filePath, "utf-8");
+                    if (!rxp.test(fileContents)) return;
+                    const newContents = fileContents.replace(rxp, "");
+                    fs.writeFileSync(filePath, `"use client";\n${newContents}`);
+                  });
+              });
+            },
+          },
+        ],
+      }),
     ]);
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
@@ -223,6 +259,14 @@ export const main = async (
         basehubModulePath,
         "react-pump.d.ts"
       );
+      const nextToolbarIndexJsPath = path.join(
+        basehubModulePath,
+        "next-toolbar.js"
+      );
+      const nextToolbarIndexDtsPath = path.join(
+        basehubModulePath,
+        "next-toolbar.d.ts"
+      );
       fs.writeFileSync(
         indexJsPath,
         `module.exports = require("${path.relative(
@@ -249,6 +293,20 @@ export const main = async (
         `export * from "${path.relative(
           basehubModulePath,
           path.join(reactPumpOutDir, "index.d.ts")
+        )}";`
+      );
+      fs.writeFileSync(
+        nextToolbarIndexJsPath,
+        `module.exports = require("${path.relative(
+          basehubModulePath,
+          path.join(nextToolbarOutDir, "index.js")
+        )}");`
+      );
+      fs.writeFileSync(
+        nextToolbarIndexDtsPath,
+        `export * from "${path.relative(
+          basehubModulePath,
+          path.join(nextToolbarOutDir, "index.d.ts")
         )}";`
       );
     }
