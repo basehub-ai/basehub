@@ -4,6 +4,7 @@ import path from "path";
 import { Args } from ".";
 import fs from "fs";
 import * as esbuild from "esbuild";
+import { ScssModulesPlugin } from "esbuild-scss-modules-plugin";
 import {
   getStuffFromEnv,
   runtime__getStuffFromEnvString,
@@ -207,6 +208,7 @@ export const main = async (
         target: ["es2020", "node18"],
         external: peerDependencies,
         plugins: [
+          ScssModulesPlugin(),
           {
             name: "use-client-for-client-components",
             setup(build) {

@@ -62,6 +62,7 @@
     "@types/node": "18.13.0",
     "@types/react": "18.2.20",
     "@types/react-dom": "18.2.7",
+    "esbuild-scss-modules-plugin": "^1.1.1",
     "next": "^13.5.3",
     "tsconfig": "workspace:*",
     "tsup": "8.0.2",

@@ -8,6 +8,8 @@ import {
   // eslint-disable-next-line import/no-unresolved
 } from "../index";
 
+const isDev = process.env.NODE_ENV === "development";
+
 // we use react.lazy to code split client-toolbar
 const LazyClientToolbar = React.lazy(() =>
   import("./client-toolbar").then((mod) => ({ default: mod.ClientToolbar }))
@@ -25,13 +27,13 @@ export const ServerToolbar = () => {
         // TODO: update this to the correct endpoint
         // enablePreviewEndpoint = "https://basehub.com/api/preview";
         enablePreviewEndpoint =
-          "https://basehub-git-preview-exp-basehub.vercel.app/api/preview";
+          "http://localhost:3000/api/preview";
         break;
       case url.origin.includes("api.bshb.dev"):
         // TODO: update this to the correct endpoint
         // enablePreviewEndpoint = "https://basehub.dev/api/preview";
         enablePreviewEndpoint =
-          "https://basehub-git-preview-exp-basehub.vercel.app/api/preview";
+          "http://localhost:3000/api/preview";
         break;
       default:
         enablePreviewEndpoint = url.toString();
@@ -70,30 +72,11 @@ export const ServerToolbar = () => {
   };
 
   return (
-    <>
-      <div
-        style={{
-          position: "fixed",
-          bottom: 32,
-          right: 32,
-          borderRadius: 6,
-          zIndex: 1000,
-          height: 36,
-          overflow: "hidden",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          border: "1px solid #252525",
-          background: "#040404",
-          boxShadow: "0px 0px 100px 20px #000",
-        }}
-      >
-        <LazyClientToolbar
-          draft={draftMode().isEnabled}
-          enableDraftMode={enableDraftMode}
-          disableDraftMode={disableDraftMode}
-        />
-      </div>
-    </>
+    <LazyClientToolbar
+      draft={draftMode().isEnabled}
+      isDev={isDev}
+      enableDraftMode={enableDraftMode}
+      disableDraftMode={disableDraftMode}
+    />
   );
 };
