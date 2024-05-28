@@ -2,38 +2,38 @@ import * as React from "react";
 
 import { draftMode } from "next/headers";
 import {
-  // @ts-ignore
   getStuffFromEnv,
+  basehub,
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../index";
-
-const isDev = process.env.NODE_ENV === "development";
 
 // we use react.lazy to code split client-toolbar
 const LazyClientToolbar = React.lazy(() =>
   import("./client-toolbar").then((mod) => ({ default: mod.ClientToolbar }))
 );
 
-export const ServerToolbar = () => {
+type ServerToolbarProps = Parameters<typeof basehub>[0];
+
+export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
+  const { isForcedDraft } = getStuffFromEnv(basehubProps);
+
   const enableDraftMode = async (bshbPreviewToken: string) => {
     "use server";
+    const { headers, url } = getStuffFromEnv(basehubProps);
 
-    const { headers, url } = getStuffFromEnv({});
     const token = headers["x-basehub-token"];
     let enablePreviewEndpoint: string;
     switch (true) {
       case url.origin.includes("api.basehub.com"):
         // TODO: update this to the correct endpoint
         // enablePreviewEndpoint = "https://basehub.com/api/preview";
-        enablePreviewEndpoint =
-          "http://localhost:3000/api/preview";
+        enablePreviewEndpoint = "http://localhost:3000/api/preview";
         break;
       case url.origin.includes("api.bshb.dev"):
         // TODO: update this to the correct endpoint
         // enablePreviewEndpoint = "https://basehub.dev/api/preview";
-        enablePreviewEndpoint =
-          "http://localhost:3000/api/preview";
+        enablePreviewEndpoint = "http://localhost:3000/api/preview";
         break;
       default:
         enablePreviewEndpoint = url.toString();
@@ -74,7 +74,7 @@ export const ServerToolbar = () => {
   return (
     <LazyClientToolbar
       draft={draftMode().isEnabled}
-      isDev={isDev}
+      isForcedDraft={isForcedDraft}
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
     />

@@ -118,7 +118,11 @@ export const main = async (
 
     // this should go at the end so that it doesn't suffer any modifications.
     schemaFileContents = schemaFileContents.concat(
-      `\n${runtime__getStuffFromEnvString({ ...options, draft })}}`
+      `\n${runtime__getStuffFromEnvString({
+        ...options,
+        draft,
+        forceDraft: opts?.forceDraft,
+      })}}`
     );
 
     // 3. append our basehub function to the end of the file.

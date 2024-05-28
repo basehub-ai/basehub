@@ -18,7 +18,10 @@ export const DragHandle = ({
     const handleDrag = (e: PointerEvent) => {
       if (!isDragging) return;
 
-      onDrag({ x: e.clientX, y: e.clientY });
+      const x = Math.round(e.clientX);
+      const y = Math.round(e.clientY);
+
+      onDrag({ x, y });
     };
 
     window.addEventListener("pointermove", handleDrag);
@@ -53,7 +56,9 @@ export const DragHandle = ({
       }}
       onPointerUp={() => {
         setIsDragging(false);
-        onDragEnd();
+        if (isDragging) {
+          onDragEnd();
+        }
       }}
     >
       <DragIcon />

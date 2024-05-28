@@ -1,14 +1,14 @@
 import s from "../toolbar.module.scss";
 
 export const BranchSwitcher = ({
-  isDev,
+  isForcedDraft,
   draft,
 }: {
-  isDev: boolean;
+  isForcedDraft: boolean;
   draft: boolean;
 }) => {
   return (
-    <div className={s.branch} data-draft-active={isDev || draft}>
+    <div className={s.branch} data-draft-active={isForcedDraft || draft}>
       <BranchIcon />
       &nbsp;main
     </div>
@@ -17,29 +17,29 @@ export const BranchSwitcher = ({
 
 const BranchIcon = () => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none">
       <path
         fill="#F3F3F3"
         fillRule="evenodd"
-        d="M14.184 5.96a1.39 1.39 0 1 0 .001-2.78 1.39 1.39 0 0 0 0 2.78Zm0 1.182a2.572 2.572 0 1 0-2.573-2.571c0 1.42 1.152 2.57 2.573 2.57ZM5.816 16.818a1.39 1.39 0 1 0 .001-2.779 1.39 1.39 0 0 0-.001 2.78Zm0 1.182a2.572 2.572 0 1 0-2.573-2.57c0 1.42 1.152 2.57 2.573 2.57Z"
+        d="M12.765 5.365a1.25 1.25 0 1 0 .002-2.502 1.25 1.25 0 0 0-.002 2.502Zm0 1.063a2.315 2.315 0 1 0-2.315-2.313 2.315 2.315 0 0 0 2.316 2.313ZM5.234 15.137a1.25 1.25 0 1 0 .001-2.501 1.25 1.25 0 0 0 0 2.501Zm0 1.064a2.315 2.315 0 1 0-2.316-2.314 2.315 2.315 0 0 0 2.316 2.314Z"
         clipRule="evenodd"
       />
       <path
         fill="#F3F3F3"
         fillRule="evenodd"
-        d="M6.407 9.977v4.053H5.225V9.977h1.182ZM14.775 6.442v2.993h-1.182V6.442h1.182Z"
+        d="M5.767 8.98v3.648H4.702V8.98h1.065ZM13.298 5.798v2.694h-1.065V5.798h1.065Z"
         clipRule="evenodd"
       />
       <path
         fill="#F3F3F3"
         fillRule="evenodd"
-        d="M14.775 9.386c0 .326-.264.59-.59.59H5.876a.591.591 0 1 1 0-1.181h8.307c.327 0 .591.264.591.59ZM5.816 3.182a1.39 1.39 0 1 1 .001 2.78 1.39 1.39 0 0 1-.001-2.78Zm0-1.182a2.572 2.572 0 1 1-2.573 2.571c0-1.42 1.152-2.57 2.573-2.57Z"
+        d="M13.298 8.448a.532.532 0 0 1-.533.532H5.29a.532.532 0 1 1 0-1.064h7.476c.294 0 .533.238.533.532ZM5.234 2.864a1.25 1.25 0 1 1 .001 2.502 1.25 1.25 0 0 1 0-2.502Zm0-1.063a2.315 2.315 0 1 1-2.316 2.314A2.315 2.315 0 0 1 5.234 1.8Z"
         clipRule="evenodd"
       />
       <path
         fill="#F3F3F3"
         fillRule="evenodd"
-        d="M6.407 10.024V5.97H5.225v4.054h1.182Z"
+        d="M5.767 9.022V5.374H4.702v3.648h1.065Z"
         clipRule="evenodd"
       />
     </svg>
