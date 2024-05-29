@@ -1,0 +1,262 @@
+.branch {
+  padding-left: 9px;
+  padding-right: 15px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.wrapper {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: #040404;
+  z-index: 1000;
+  border-radius: 7px;
+  animation: in 0.3s ease-out;
+  display: flex;
+}
+
+.root {
+  border-radius: 6px;
+  height: 36px;
+  color: white;
+  display: flex;
+  border: 1px solid #303030;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  &[data-draft-active="true"]  {
+    border-color: #FF6C02;
+    background-color: rgba(255, 108, 2, 0.15);
+
+    &:has(button.draft:enabled:hover) {
+      border-color: #FF8B35;
+    }
+  }
+
+  &:hover {
+    .dragHandle {
+      visibility: visible;
+    }
+  }
+}
+
+.draft {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: #646464;
+  border-left: 1px solid #303030;
+  border-radius: 0 5px 5px 0;
+  margin: -1px;
+
+  &:disabled {
+    &:hover{ 
+      cursor: not-allowed;
+    }
+  }
+
+  &[data-active="true"] {
+    border-color: #FF6C02;
+
+    &:enabled:hover {
+      border-color: #FF8B35;
+    }
+  }
+
+  &:focus-visible {
+    outline: 1px solid;
+    outline-offset: -1px;
+    outline-color: #303030;
+    border-radius: 0 6px 6px 0;
+  }
+
+  &:hover {
+    background-color: #0C0C0C;
+  }
+  
+  &[data-active="true"] {
+    color: #000;
+    background-color: #FF6C02;
+
+    &:enabled {
+      &:hover {
+        background-color: #FF8B35;
+      }
+    }
+  }
+
+  &[data-loading="true"] {
+    cursor: wait;
+
+    svg {
+      animation: breathe 1s infinite;
+    }
+  }
+}
+
+.tooltipWrapper {
+  position: relative;
+  display: flex;
+
+  &[data-disabled="false"] {
+    &:hover {
+      .tooltip {
+        visibility: visible;
+      }
+    }
+  }
+}
+
+.dragHandle {
+  all: unset;
+  position: absolute;
+  top: -12px;
+  left: 0;
+  transform: translateX(-50%);
+  background-color: #0C0C0C;
+  border: 1px solid #303030;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  z-index: 1000;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  visibility: hidden;
+  
+  &.dragging {
+    cursor: grabbing;
+    visibility: visible;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:focus-visible {
+    outline: 1px solid;
+    outline-offset: -1px;
+    outline-color: #303030;
+    border-radius: 0 6px 6px 0;
+  }
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background-color: #0C0C0C;
+  border: 1px solid #303030;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  z-index: 1000;
+  visibility: hidden;
+  --translate-x: -50%;
+
+  &.forceVisible {
+    visibility: visible;
+  }
+  
+  &.top {
+    top: 100%;
+    bottom: unset;
+    transform: translateY(0) translateX(var(--translate-x));
+
+    &:before {
+      mask-image: linear-gradient(135deg, rgb(0, 0, 0) 29%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 100%);
+      top: -4.5px;
+      bottom: unset;
+      transform: translateX(var(--translate-x)) rotate(45deg);
+    }
+  }
+
+  &.bottom {
+    bottom: 100%;
+    top: unset;
+    transform: translateY(0) translateX(var(--translate-x));
+
+    &:before {
+      bottom: -4.5px;
+      top: unset;
+      transform: translateX(0) rotate(45deg);
+    }
+  }
+
+  &.right {
+    right: 0;
+    left: unset;
+    transform: translateX(0);
+    --translate-x: 0;
+
+    &:before {
+      right: 8px;
+      left: unset;
+      transform: translateX(--translate-x) rotate(45deg);
+    }
+  }
+
+  &.left {
+    left: 50%;
+    right: unset;
+    transform: translateX(-50%);
+    --translate-x: -50%;
+
+    &:before {
+      left: 50%;
+      right: unset;
+      transform: translateX(-50%) rotate(45deg);
+    }
+  }
+
+  &:before {
+    z-index: -1;
+    mask-image: linear-gradient(-45deg, rgb(0, 0, 0) 29%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 100%);
+    content: '';
+    position: absolute;
+    bottom: -4.5px;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background-color: #0C0C0C;
+    transform: rotate(45deg) translateX(-50%);
+    border-radius: 2px;
+    border: 1px solid #303030;
+  }
+}
+
+@keyframes in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes breathe {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 1;
+  }
+}

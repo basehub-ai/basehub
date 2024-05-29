@@ -9,6 +9,7 @@ export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
 
 export type Options = {
+  forceDraft?: boolean;
   draft?: boolean;
   output: string | undefined;
   prefix: string | undefined;
@@ -295,6 +296,7 @@ export const getStuffFromEnv = (options) => {
     // 3. done.
 
     return {
+      isForcedDraft: ${!!options.forceDraft},
       draft,
       url: basehubUrl,
       headers: {

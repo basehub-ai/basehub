@@ -79,7 +79,8 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   }> = await Promise.all(
     queriesWithFallback.map(async (singleQuery) => {
       const rawQueryOp = generateQueryOp(singleQuery);
-      const cacheKey = JSON.stringify(rawQueryOp);
+      const cacheKey =
+        JSON.stringify(rawQueryOp) + (draft ? "_draft" : "_prod");
 
       let data: QueryResults<Queries>[number] | undefined = undefined;
 

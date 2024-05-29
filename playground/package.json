@@ -1,7 +1,7 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.91",
+  "version": "0.0.92",
   "scripts": {
     "dev": "basehub dev & next dev",
     "build": "basehub & next build",
@@ -15,7 +15,7 @@
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
     "graphql": "^16.8.1",
-    "next": "^13.5.3",
+    "next": "^14.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-tweet": "^3.1.1",

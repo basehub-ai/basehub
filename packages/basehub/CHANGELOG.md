@@ -1,5 +1,14 @@
 # basehub
 
+## 5.1.0
+
+### Minor Changes
+
+- aeac3b6: Toolbar V1.0:
+
+  - Hardcoded & disabled branch switcher
+  - Draft mode button
+
 ## 5.0.3
 
 ### Patch Changes
