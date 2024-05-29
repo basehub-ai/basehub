@@ -4,8 +4,8 @@
 
 ### Patch Changes
 
-- Updated dependencies
-  - next@14.2.3
+- Updated dependencies [aeac3b6]
+  - basehub@5.1.0
 
 ## 0.0.91
 
