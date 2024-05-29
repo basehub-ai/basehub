@@ -1,20 +1,7 @@
 import path from "path";
 import fs from "fs";
 
-export function writeReactPump({
-  modulePath,
-  outputPath,
-}: {
-  modulePath: string;
-  outputPath: string;
-}) {
-  const nextPumpSrcPath = path.resolve(modulePath, "src-react-pump");
-  const nextPumpOutputPath = path.resolve(outputPath, "react-pump");
-
-  copyDirSync(nextPumpSrcPath, nextPumpOutputPath);
-}
-
-function copyDirSync(src: string, dest: string) {
+export function copyDirSync(src: string, dest: string) {
   // Create the destination directory if it doesn't exist
   if (!fs.existsSync(dest)) {
     fs.mkdirSync(dest, { recursive: true });

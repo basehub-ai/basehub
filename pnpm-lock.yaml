@@ -79,6 +79,9 @@ importers:
       esbuild:
         specifier: 0.19.2
         version: 0.19.2
+      esbuild-plugin-d.ts:
+        specifier: 1.2.3
+        version: 1.2.3(typescript@5.4.5)
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -136,7 +139,7 @@ importers:
         version: link:../../internal/tsconfig
       tsup:
         specifier: 8.0.2
-        version: 8.0.2(postcss@8.4.38)(typescript@5.2.2)
+        version: 8.0.2(postcss@8.4.38)(typescript@5.4.5)
       type-fest:
         specifier: 3.0.0
         version: 3.0.0
@@ -2449,6 +2452,17 @@ packages:
       is-callable: 1.2.7
       is-date-object: 1.0.5
       is-symbol: 1.0.4
+    dev: false
+
+  /esbuild-plugin-d.ts@1.2.3(typescript@5.4.5):
+    resolution: {integrity: sha512-JkNqcCTkv0N39izAOLaiAQcFA6DfbhDkef1ZO6NvnHtTT+7i+4VHjCcAM2yFslRTBTK1TuF41FLSwWvGm88N7w==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      typescript: '*'
+    dependencies:
+      chalk: 4.1.2
+      lodash.merge: 4.6.2
+      typescript: 5.4.5
     dev: false
 
   /esbuild-scss-modules-plugin@1.1.1(cssnano@5.0.17):
@@ -5582,7 +5596,7 @@ packages:
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
-  /tsup@8.0.2(postcss@8.4.38)(typescript@5.2.2):
+  /tsup@8.0.2(postcss@8.4.38)(typescript@5.4.5):
     resolution: {integrity: sha512-NY8xtQXdH7hDUAZwcQdY/Vzlw9johQsaqf7iwZ6g1DOUlFYQ5/AtVAjTvihhEyeRlGo4dLRVHtrRaL35M1daqQ==}
     engines: {node: '>=18'}
     hasBin: true
@@ -5616,7 +5630,7 @@ packages:
       source-map: 0.8.0-beta.0
       sucrase: 3.35.0
       tree-kill: 1.2.2
-      typescript: 5.2.2
+      typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
       - ts-node
@@ -5802,7 +5816,6 @@ packages:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: false
 
   /typesense@1.8.2(@babel/runtime@7.24.6):
     resolution: {integrity: sha512-aBpePjA99Qvo+OP2pJwMpvga4Jrm1Y2oV5NsrWXBxlqUDNEUCPZBIksPv2Hq0jxQxHhLLyJVbjXjByXsvpCDVA==}
