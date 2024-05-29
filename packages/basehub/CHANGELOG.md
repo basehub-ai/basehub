@@ -1,5 +1,11 @@
 # basehub
 
+## 5.2.1
+
+### Patch Changes
+
+- trigger release
+
 ## 5.2.0
 
 ### Minor Changes

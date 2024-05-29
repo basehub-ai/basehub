@@ -7,9 +7,8 @@
     "sourceMap": false,
     "emitDeclarationOnly": true,
     "declarationMap": false,
-    "paths": {
-      "basehub": ["./dist/generated-client"]
-    }
+    "noImplicitAny": true,
+    "alwaysStrict": true
   },
   "exclude": [
     "dist",
