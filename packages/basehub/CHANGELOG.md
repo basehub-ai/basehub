@@ -1,5 +1,13 @@
 # basehub
 
+## 5.1.1
+
+### Patch Changes
+
+- af73b24: Lazy loading
+- af73b24: fix react import
+- af73b24: Fixed dts generation
+
 ## 5.1.1-canary.2
 
 ### Patch Changes
