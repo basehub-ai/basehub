@@ -62,8 +62,8 @@ importers:
   packages/basehub:
     dependencies:
       '@basehub/genql':
-        specifier: 7.0.8
-        version: 7.0.8
+        specifier: 8.0.0
+        version: 8.0.0
       '@basehub/mutation-api-helpers':
         specifier: 1.0.5
         version: 1.0.5
@@ -224,8 +224,8 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  /@basehub/genql@7.0.8:
-    resolution: {integrity: sha512-vVHkAPdiIxKptciTrwIhhlChyWnGxKjYN0nuj50pWQ/ZSz7UheDyAB9RPWKJU4qdCkKpQ9urjruddEXvPMfTaQ==}
+  /@basehub/genql@8.0.0:
+    resolution: {integrity: sha512-hR7dKm/TCDf2PzRcOUhCKYlYJP2QAmULPWWyHt6EOzf+d5mNiXbsKxq0EFTS0AbakwVc69QWPZZfIS9KyKlqfQ==}
     dependencies:
       '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.1)
       '@graphql-tools/load': 7.8.14(graphql@16.8.1)
@@ -4995,6 +4995,7 @@ packages:
 
   /rimraf@2.7.1:
     resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3

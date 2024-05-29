@@ -1,5 +1,11 @@
 # basehub
 
+## 5.2.0
+
+### Minor Changes
+
+- Support more specific types for select blocks
+
 ## 5.1.1
 
 ### Patch Changes
