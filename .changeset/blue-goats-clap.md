@@ -1,0 +1,5 @@
+---
+"basehub": patch
+---
+
+Lazy loading

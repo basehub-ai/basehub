@@ -1,6 +1,6 @@
 import * as React from "react";
-import s from "../toolbar.module.scss";
 import debounce from "lodash.debounce";
+import s from "../toolbar.module.scss";
 
 export type Tooltip = { checkOverflow: () => void };
 

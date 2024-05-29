@@ -1,5 +1,23 @@
 # basehub
 
+## 5.1.1-canary.2
+
+### Patch Changes
+
+- Lazy loading
+
+## 5.1.1-canary.1
+
+### Patch Changes
+
+- fix react import
+
+## 5.1.1-canary.0
+
+### Patch Changes
+
+- Fixed dts generation
+
 ## 5.1.0
 
 ### Minor Changes

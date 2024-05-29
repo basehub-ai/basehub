@@ -1,3 +1,4 @@
+import * as React from "react"; // important line, don't remove, as we need react to be in context.
 import s from "../toolbar.module.scss";
 
 export const BranchSwitcher = ({
