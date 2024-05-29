@@ -26,14 +26,10 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
     let enablePreviewEndpoint: string;
     switch (true) {
       case url.origin.includes("api.basehub.com"):
-        // TODO: update this to the correct endpoint
-        // enablePreviewEndpoint = "https://basehub.com/api/preview";
-        enablePreviewEndpoint = "http://localhost:3000/api/preview";
+        enablePreviewEndpoint = "https://basehub.com/api/preview/auth";
         break;
       case url.origin.includes("api.bshb.dev"):
-        // TODO: update this to the correct endpoint
-        // enablePreviewEndpoint = "https://basehub.dev/api/preview";
-        enablePreviewEndpoint = "http://localhost:3000/api/preview";
+        enablePreviewEndpoint = "https://basehub.dev/api/preview/auth";
         break;
       default:
         enablePreviewEndpoint = url.toString();
