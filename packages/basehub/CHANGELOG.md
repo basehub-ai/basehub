@@ -2,6 +2,8 @@
 
 ## 5.0.3
 
+- Add toolbar v1.0
+
 ### Patch Changes
 
 - use revalidate: 0 instead of no-store for draft requests
