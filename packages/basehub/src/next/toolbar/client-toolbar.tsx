@@ -15,6 +15,9 @@ export const ClientToolbar = ({
   isForcedDraft,
   enableDraftMode,
   disableDraftMode,
+  bshbPreviewToken,
+  shouldAutoEnableDraft,
+  seekAndStoreBshbPreviewToken,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -22,6 +25,9 @@ export const ClientToolbar = ({
     bshbPreviewToken: string
   ) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
+  bshbPreviewToken: string;
+  shouldAutoEnableDraft: boolean | undefined;
+  seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
 }) => {
   const router = useRouter();
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
@@ -29,45 +35,15 @@ export const ClientToolbar = ({
   );
   const tooltipRef = React.useRef<Tooltip>(null);
   const [isDragging, setIsDragging] = React.useState(false);
-  const [hasRendered, setHasRendered] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [automaticDraftDetection, setAutomaticDraftDetection] =
-    React.useState(true);
-
-  const updateBshbPreviewToken = (value: string | undefined) => {
-    setBshbPreviewToken(value);
-    if (!value) return;
-    window.localStorage.setItem("bshb-preview", value);
-  };
 
   const displayMessage = React.useCallback(
     (message: string) => {
       setMessage(message);
-      tooltipRef.current?.checkOverflow()
-      // setTimeout(() => setMessage(""), 5000);
+      setTimeout(() => setMessage(""), 5000);
     },
     [setMessage]
-  );
-
-  const seekAndStoreBshbPreviewToken = React.useCallback(
-    (type?: "url-only") => {
-      if (typeof window === "undefined") return;
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const bshbPreviewToken = urlParams.get("bshb-preview");
-
-      if (bshbPreviewToken) {
-        window.localStorage.setItem("bshb-preview", bshbPreviewToken);
-        return bshbPreviewToken;
-      }
-
-      if (type === "url-only") return;
-
-      const fromStorage = window.localStorage.getItem("bshb-preview");
-      if (fromStorage) return fromStorage;
-    },
-    []
   );
 
   const triggerDraftMode = React.useCallback(
@@ -76,7 +52,6 @@ export const ClientToolbar = ({
       enableDraftMode(previewToken)
         .then(({ status, response }) => {
           if (status === 200) {
-            updateBshbPreviewToken(previewToken);
             // refresh
             router.refresh();
           } else if ("error" in response) {
@@ -90,18 +65,22 @@ export const ClientToolbar = ({
     [enableDraftMode, displayMessage, router]
   );
 
-  const [bshbPreviewToken, setBshbPreviewToken] = React.useState<
-    string | undefined
-  >(seekAndStoreBshbPreviewToken);
+  const [hasAutoEnabledDraftOnce, setHasAutoEnabledDraftOnce] =
+    React.useState(false);
 
   React.useLayoutEffect(() => {
-    if (draft || !automaticDraftDetection) return;
+    if (
+      draft ||
+      hasAutoEnabledDraftOnce ||
+      !shouldAutoEnableDraft ||
+      isForcedDraft ||
+      !bshbPreviewToken
+    ) {
+      return;
+    }
 
-    const previewToken = seekAndStoreBshbPreviewToken("url-only");
-    if (!previewToken) return;
-
-    triggerDraftMode(previewToken);
-    setAutomaticDraftDetection(false);
+    triggerDraftMode(bshbPreviewToken);
+    setHasAutoEnabledDraftOnce(true);
   }, [
     isForcedDraft,
     enableDraftMode,
@@ -110,12 +89,13 @@ export const ClientToolbar = ({
     displayMessage,
     triggerDraftMode,
     draft,
-    automaticDraftDetection,
+    shouldAutoEnableDraft,
+    hasAutoEnabledDraftOnce,
   ]);
 
-  React.useEffect(() => {
-    setHasRendered(true);
-  }, []);
+  React.useLayoutEffect(() => {
+    tooltipRef.current?.checkOverflow();
+  }, [message]);
 
   const getStoredToolbarPosition = React.useCallback(() => {
     if (!toolbarRef) return;
@@ -205,13 +185,10 @@ export const ClientToolbar = ({
     repositionToolbar();
 
     window.addEventListener("resize", repositionToolbar);
-
     return () => {
       window.removeEventListener("resize", repositionToolbar);
     };
   }, [getStoredToolbarPosition, dragToolbar]);
-
-  if ((!draft && !bshbPreviewToken) || !hasRendered) return null;
 
   const tooltip = isForcedDraft
     ? "Draft enforced by dev env"
@@ -219,58 +196,62 @@ export const ClientToolbar = ({
 
   return (
     <div className={s.wrapper} ref={(ref) => setToolbarRef(ref)}>
-      <div className={s.root} data-draft-active={isForcedDraft || draft}>
-        {/* branch switcher */}
-        <BranchSwitcher isForcedDraft={isForcedDraft} draft={draft} />
+      <DragHandle
+        onDrag={(pos) => {
+          dragToolbar(pos);
+          tooltipRef.current?.checkOverflow();
+        }}
+        onDragStart={() => setTimeout(() => setIsDragging(true), 500)}
+        onDragEnd={() => {
+          setTimeout(() => setIsDragging(false), 500);
+        }}
+      >
+        <div className={s.root} data-draft-active={isForcedDraft || draft}>
+          {/* branch switcher */}
+          <BranchSwitcher isForcedDraft={isForcedDraft} draft={draft} />
 
-        {/* draft mode button */}
-        <Tooltip
-          content={message || tooltip}
-          ref={tooltipRef}
-          disabled={isDragging}
-          forceVisible={Boolean(message)}
-        >
-          <button
-            className={s.draft}
-            data-active={isForcedDraft || draft}
-            data-loading={loading}
-            disabled={isForcedDraft}
-            onClick={() => {
-              if (loading) return;
-
-              if (draft) {
-                disableDraftMode().then(() => {
-                  const pathname = window.location.pathname;
-                  const urlWithoutPreview = pathname.replace(
-                    /(\?|&)bshb-preview=[^&]*/,
-                    ""
-                  );
-                  router.push(urlWithoutPreview);
-                });
-              } else {
-                const previewToken =
-                  bshbPreviewToken ?? seekAndStoreBshbPreviewToken();
-                if (!previewToken) {
-                  return displayMessage("No preview token found");
-                }
-
-                triggerDraftMode(previewToken);
-              }
-            }}
+          {/* draft mode button */}
+          <Tooltip
+            content={message || tooltip}
+            ref={tooltipRef}
+            forceVisible={Boolean(message)}
           >
-            {draft || isForcedDraft ? <EyeIcon /> : <EyeDashedIcon />}
-          </button>
-        </Tooltip>
+            <button
+              className={s.draft}
+              data-active={isForcedDraft || draft}
+              data-loading={loading}
+              disabled={isForcedDraft || loading}
+              onClick={() => {
+                if (loading || isDragging) return;
 
-        <DragHandle
-          onDrag={(pos) => {
-            dragToolbar(pos);
-            tooltipRef.current?.checkOverflow();
-          }}
-          onDragStart={() => setIsDragging(true)}
-          onDragEnd={() => setIsDragging(false)}
-        />
-      </div>
+                if (draft) {
+                  setLoading(true);
+                  disableDraftMode()
+                    .then(() => {
+                      const pathname = window.location.pathname;
+                      const urlWithoutPreview = pathname.replace(
+                        /(\?|&)bshb-preview=[^&]*/,
+                        ""
+                      );
+                      router.push(urlWithoutPreview);
+                    })
+                    .finally(() => setLoading(false));
+                } else {
+                  const previewToken =
+                    bshbPreviewToken ?? seekAndStoreBshbPreviewToken();
+                  if (!previewToken) {
+                    return displayMessage("No preview token found");
+                  }
+
+                  triggerDraftMode(previewToken);
+                }
+              }}
+            >
+              {draft || isForcedDraft ? <EyeIcon /> : <EyeDashedIcon />}
+            </button>
+          </Tooltip>
+        </div>
+      </DragHandle>
     </div>
   );
 };

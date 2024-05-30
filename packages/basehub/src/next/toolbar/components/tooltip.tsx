@@ -9,12 +9,10 @@ export const Tooltip = React.forwardRef(
     {
       children,
       content,
-      disabled,
       forceVisible,
     }: {
       content: string;
       children: React.ReactNode;
-      disabled?: boolean;
       forceVisible?: boolean;
     },
     ref
@@ -25,9 +23,25 @@ export const Tooltip = React.forwardRef(
       debounce(() => {
         if (tooltipContentRef.current) {
           const rect = tooltipContentRef.current.getBoundingClientRect();
+          const paddingInline = tooltipContentRef.current.classList.contains(
+            s.left
+          )
+            ? 0
+            : rect.width / 2;
+          const paddingBlock = rect.height;
+          const tooltipOffset = 50 * 2;
+          const isAlreadyToTop = tooltipContentRef.current.classList.contains(
+            s.bottom
+          );
+
+          console.log(rect.top, paddingBlock, tooltipOffset);
 
           // reached the top
-          if (rect.top < 0 || rect.top > window.innerHeight) {
+          if (
+            (isAlreadyToTop
+              ? rect.top
+              : rect.top - tooltipOffset - paddingBlock) <= 0
+          ) {
             tooltipContentRef.current.classList.remove(s.bottom);
             tooltipContentRef.current.classList.add(s.top);
           } else {
@@ -36,7 +50,8 @@ export const Tooltip = React.forwardRef(
           }
 
           // reached the right
-          if (rect.left < 0 || rect.right > window.innerWidth) {
+          console.log(rect.right, paddingInline, window.innerWidth);
+          if (rect.right + paddingInline > window.innerWidth) {
             tooltipContentRef.current.classList.remove(s.left);
             tooltipContentRef.current.classList.add(s.right);
           } else {
@@ -44,7 +59,7 @@ export const Tooltip = React.forwardRef(
             tooltipContentRef.current.classList.add(s.left);
           }
         }
-      }, 200),
+      }, 100),
       []
     );
 
@@ -58,16 +73,10 @@ export const Tooltip = React.forwardRef(
       };
     }, [checkOverflow]);
 
-    React.useImperativeHandle(
-      ref,
-      () => ({
-        checkOverflow,
-      }),
-      [checkOverflow]
-    );
+    React.useImperativeHandle(ref, () => ({ checkOverflow }), [checkOverflow]);
 
     return (
-      <div className={s.tooltipWrapper} data-disabled={disabled}>
+      <div className={s.tooltipWrapper}>
         <p
           ref={tooltipContentRef}
           className={
