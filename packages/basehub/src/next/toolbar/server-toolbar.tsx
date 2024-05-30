@@ -9,8 +9,10 @@ import {
 } from "../index";
 
 // we use react.lazy to code split client-toolbar
-const LazyClientToolbar = React.lazy(() =>
-  import("./client-toolbar").then((mod) => ({ default: mod.ClientToolbar }))
+const LazyClientConditionalRenderer = React.lazy(() =>
+  import("./client-conditional-renderer").then((mod) => ({
+    default: mod.ClientConditionalRenderer,
+  }))
 );
 
 type ServerToolbarProps = Parameters<typeof basehub>[0];
@@ -68,7 +70,7 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
   };
 
   return (
-    <LazyClientToolbar
+    <LazyClientConditionalRenderer
       draft={draftMode().isEnabled}
       isForcedDraft={isForcedDraft}
       enableDraftMode={enableDraftMode}

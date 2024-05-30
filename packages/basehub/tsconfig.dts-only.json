@@ -1,0 +1,21 @@
+{
+  "extends": "tsconfig/react-library.json",
+  "include": ["."],
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "dts",
+    "sourceMap": false,
+    "emitDeclarationOnly": true,
+    "declarationMap": false,
+    "noImplicitAny": true,
+    "alwaysStrict": true
+  },
+  "exclude": [
+    "dist",
+    "dts",
+    "build",
+    "node_modules",
+    "tsup-bin.config.ts",
+    "tsup-client.config.ts"
+  ]
+}

@@ -74,7 +74,10 @@ export function appendGeneratedCodeBanner(
       toAppend += `// @ts-nocheck\n`;
     }
 
-    if (toAppend) {
+    const alreadyHasBanner =
+      fileContent.startsWith(toAppend) || fileContent.includes(toAppend);
+
+    if (toAppend && !alreadyHasBanner) {
       fs.writeFileSync(filePath, `${toAppend}\n${fileContent}`);
     }
   });

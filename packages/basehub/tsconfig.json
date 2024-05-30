@@ -7,5 +7,5 @@
       "basehub": ["./dist/generated-client"]
     }
   },
-  "exclude": ["dist", "build", "node_modules"]
+  "exclude": ["dist", "dts", "build", "node_modules"]
 }

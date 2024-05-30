@@ -11,7 +11,7 @@ import {
   Options,
 } from "./util/get-stuff-from-env";
 import { appendGeneratedCodeBanner } from "./util/disable-linters";
-import { writeReactPump } from "./util/write-react-pump";
+import { copyDirSync } from "./util/cp";
 
 export const main = async (
   args: Args,
@@ -134,14 +134,6 @@ export const main = async (
     // 4. write the file back.
     fs.writeFileSync(generatedMainExportPath, schemaFileContents);
 
-    /**
-     * Next Pump stuff.
-     */
-    writeReactPump({
-      modulePath: basehubModulePath,
-      outputPath: basehubOutputPath,
-    });
-
     // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
     const peerDependencies = [
       "react",
@@ -150,6 +142,26 @@ export const main = async (
       "@basehub/mutation-api-helpers",
       "next",
     ];
+
+    const useClientPlugin: esbuild.Plugin = {
+      name: "use-client-for-client-components",
+      setup(build) {
+        build.onEnd(() => {
+          const rxp = /['"]use client['"]\s?;/i;
+          const outputFilePaths = fs.readdirSync(reactPumpOutDir);
+          outputFilePaths
+            ?.filter((fileName) => !fileName.endsWith(".map"))
+            .forEach((fileName) => {
+              // if the file contains "use client" we'll make sure it's on the top.
+              const filePath = path.join(reactPumpOutDir, fileName);
+              const fileContents = fs.readFileSync(filePath, "utf-8");
+              if (!rxp.test(fileContents)) return;
+              const newContents = fileContents.replace(rxp, "");
+              fs.writeFileSync(filePath, `"use client";\n${newContents}`);
+            });
+        });
+      },
+    };
 
     logIfNotSilent(silent, "📦 Compiling to JavaScript...");
     const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
@@ -167,7 +179,7 @@ export const main = async (
       }),
       esbuild.build({
         entryPoints: [
-          path.join(basehubModulePath, "src-react-pump", "index.ts"),
+          path.join(basehubModulePath, "src", "react", "pump", "index.ts"),
         ],
         bundle: true,
         outdir: reactPumpOutDir,
@@ -177,27 +189,7 @@ export const main = async (
         format: "esm",
         target: ["es2020", "node18"],
         external: peerDependencies,
-        plugins: [
-          {
-            name: "use-client-for-client-components",
-            setup(build) {
-              build.onEnd(() => {
-                const rxp = /['"]use client['"]\s?;/i;
-                const outputFilePaths = fs.readdirSync(reactPumpOutDir);
-                outputFilePaths
-                  ?.filter((fileName) => !fileName.endsWith(".map"))
-                  .forEach((fileName) => {
-                    // if the file contains "use client" we'll make sure it's on the top.
-                    const filePath = path.join(reactPumpOutDir, fileName);
-                    const fileContents = fs.readFileSync(filePath, "utf-8");
-                    if (!rxp.test(fileContents)) return;
-                    const newContents = fileContents.replace(rxp, "");
-                    fs.writeFileSync(filePath, `"use client";\n${newContents}`);
-                  });
-              });
-            },
-          },
-        ],
+        plugins: [useClientPlugin],
       }),
       esbuild.build({
         entryPoints: [
@@ -211,30 +203,21 @@ export const main = async (
         format: "esm",
         target: ["es2020", "node18"],
         external: peerDependencies,
-        plugins: [
-          ScssModulesPlugin(),
-          {
-            name: "use-client-for-client-components",
-            setup(build) {
-              build.onEnd(() => {
-                const rxp = /['"]use client['"]\s?;/i;
-                const outputFilePaths = fs.readdirSync(nextToolbarOutDir);
-                outputFilePaths
-                  ?.filter((fileName) => !fileName.endsWith(".map"))
-                  .forEach((fileName) => {
-                    // if the file contains "use client" we'll make sure it's on the top.
-                    const filePath = path.join(nextToolbarOutDir, fileName);
-                    const fileContents = fs.readFileSync(filePath, "utf-8");
-                    if (!rxp.test(fileContents)) return;
-                    const newContents = fileContents.replace(rxp, "");
-                    fs.writeFileSync(filePath, `"use client";\n${newContents}`);
-                  });
-              });
-            },
-          },
-        ],
+        plugins: [ScssModulesPlugin(), useClientPlugin],
       }),
     ]);
+
+    /**
+     * DTS stuff.
+     */
+    copyDirSync(
+      path.join(basehubModulePath, "dts", "src", "react", "pump"),
+      reactPumpOutDir
+    );
+    copyDirSync(
+      path.join(basehubModulePath, "dts", "src", "next", "toolbar"),
+      nextToolbarOutDir
+    );
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
 

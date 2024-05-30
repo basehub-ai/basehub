@@ -1,5 +1,43 @@
 # basehub
 
+## 5.2.1
+
+### Patch Changes
+
+- trigger release
+
+## 5.2.0
+
+### Minor Changes
+
+- Support more specific types for select blocks
+
+## 5.1.1
+
+### Patch Changes
+
+- af73b24: Lazy loading
+- af73b24: fix react import
+- af73b24: Fixed dts generation
+
+## 5.1.1-canary.2
+
+### Patch Changes
+
+- Lazy loading
+
+## 5.1.1-canary.1
+
+### Patch Changes
+
+- fix react import
+
+## 5.1.1-canary.0
+
+### Patch Changes
+
+- Fixed dts generation
+
 ## 5.1.0
 
 ### Minor Changes

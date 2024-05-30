@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "5.1.0",
+  "version": "5.2.1",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -11,6 +11,7 @@
     "basehub": "./dist/bin.js"
   },
   "files": [
+    "dts",
     "dist",
     "scripts",
     "index.js",
@@ -20,20 +21,21 @@
     "next-toolbar.js",
     "next-toolbar.d.ts",
     "src/next/toolbar",
+    "src/react/pump",
     "react-rich-text.js",
     "react-rich-text.d.ts",
     "react-search.js",
     "react-search.d.ts",
-    "src-react-pump",
     "api-transaction.d.ts",
     "analytics.js",
     "analytics.d.ts"
   ],
   "sideEffects": false,
   "scripts": {
-    "dev": "pnpm build --watch",
+    "emit-dts": "tsc --project tsconfig.dts-only.json",
+    "dev": "pnpm emit-dts && pnpm build --watch",
     "build": "pnpm build:bin & pnpm build:client",
-    "build:bin": "tsup --config tsup-bin.config.ts",
+    "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
     "build:client": "tsup --config tsup-client.config.ts"
   },
   "peerDependencies": {
@@ -41,12 +43,13 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
-    "@basehub/genql": "7.0.8",
+    "@basehub/genql": "8.0.0",
     "@basehub/mutation-api-helpers": "1.0.5",
     "@radix-ui/react-slot": "1.0.2",
     "arg": "5.0.1",
     "dotenv-mono": "1.3.10",
     "esbuild": "0.19.2",
+    "esbuild-plugin-d.ts": "1.2.3",
     "github-slugger": "^2.0.0",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "4.4.2",

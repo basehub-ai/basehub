@@ -24,8 +24,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       typescript:
-        specifier: ^5.2.2
-        version: 5.2.2
+        specifier: ^5.4.5
+        version: 5.4.5
 
   internal/eslint-config-custom:
     dependencies:
@@ -62,8 +62,8 @@ importers:
   packages/basehub:
     dependencies:
       '@basehub/genql':
-        specifier: 7.0.8
-        version: 7.0.8
+        specifier: 8.0.0
+        version: 8.0.0
       '@basehub/mutation-api-helpers':
         specifier: 1.0.5
         version: 1.0.5
@@ -79,6 +79,9 @@ importers:
       esbuild:
         specifier: 0.19.2
         version: 0.19.2
+      esbuild-plugin-d.ts:
+        specifier: 1.2.3
+        version: 1.2.3(typescript@5.4.5)
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -136,7 +139,7 @@ importers:
         version: link:../../internal/tsconfig
       tsup:
         specifier: 8.0.2
-        version: 8.0.2(postcss@8.4.38)(typescript@5.2.2)
+        version: 8.0.2(postcss@8.4.38)(typescript@5.4.5)
       type-fest:
         specifier: 3.0.0
         version: 3.0.0
@@ -221,8 +224,8 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  /@basehub/genql@7.0.8:
-    resolution: {integrity: sha512-vVHkAPdiIxKptciTrwIhhlChyWnGxKjYN0nuj50pWQ/ZSz7UheDyAB9RPWKJU4qdCkKpQ9urjruddEXvPMfTaQ==}
+  /@basehub/genql@8.0.0:
+    resolution: {integrity: sha512-hR7dKm/TCDf2PzRcOUhCKYlYJP2QAmULPWWyHt6EOzf+d5mNiXbsKxq0EFTS0AbakwVc69QWPZZfIS9KyKlqfQ==}
     dependencies:
       '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.1)
       '@graphql-tools/load': 7.8.14(graphql@16.8.1)
@@ -2449,6 +2452,17 @@ packages:
       is-callable: 1.2.7
       is-date-object: 1.0.5
       is-symbol: 1.0.4
+    dev: false
+
+  /esbuild-plugin-d.ts@1.2.3(typescript@5.4.5):
+    resolution: {integrity: sha512-JkNqcCTkv0N39izAOLaiAQcFA6DfbhDkef1ZO6NvnHtTT+7i+4VHjCcAM2yFslRTBTK1TuF41FLSwWvGm88N7w==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      typescript: '*'
+    dependencies:
+      chalk: 4.1.2
+      lodash.merge: 4.6.2
+      typescript: 5.4.5
     dev: false
 
   /esbuild-scss-modules-plugin@1.1.1(cssnano@5.0.17):
@@ -4981,6 +4995,7 @@ packages:
 
   /rimraf@2.7.1:
     resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3
@@ -5582,7 +5597,7 @@ packages:
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
-  /tsup@8.0.2(postcss@8.4.38)(typescript@5.2.2):
+  /tsup@8.0.2(postcss@8.4.38)(typescript@5.4.5):
     resolution: {integrity: sha512-NY8xtQXdH7hDUAZwcQdY/Vzlw9johQsaqf7iwZ6g1DOUlFYQ5/AtVAjTvihhEyeRlGo4dLRVHtrRaL35M1daqQ==}
     engines: {node: '>=18'}
     hasBin: true
@@ -5616,7 +5631,7 @@ packages:
       source-map: 0.8.0-beta.0
       sucrase: 3.35.0
       tree-kill: 1.2.2
-      typescript: 5.2.2
+      typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
       - ts-node
@@ -5792,17 +5807,10 @@ packages:
       possible-typed-array-names: 1.0.0
     dev: false
 
-  /typescript@5.2.2:
-    resolution: {integrity: sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-    dev: true
-
   /typescript@5.4.5:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: false
 
   /typesense@1.8.2(@babel/runtime@7.24.6):
     resolution: {integrity: sha512-aBpePjA99Qvo+OP2pJwMpvga4Jrm1Y2oV5NsrWXBxlqUDNEUCPZBIksPv2Hq0jxQxHhLLyJVbjXjByXsvpCDVA==}

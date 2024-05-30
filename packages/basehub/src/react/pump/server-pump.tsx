@@ -77,6 +77,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     data: QueryResults<Queries>[number] | undefined;
     rawQueryOp: { query: string; variables?: any };
   }> = await Promise.all(
+    // @ts-ignore
     queriesWithFallback.map(async (singleQuery) => {
       const rawQueryOp = generateQueryOp(singleQuery);
       const cacheKey =
@@ -210,7 +211,6 @@ export const createPump = <
     const queryResult =
       typeof queries === "function" ? queries((props as any).params) : queries;
 
-    // @ts-expect-error rsc
     return <Pump {...props} queries={queryResult} />;
   };
 };
