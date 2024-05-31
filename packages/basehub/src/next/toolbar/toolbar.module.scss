@@ -5,13 +5,14 @@
   display: flex;
   align-items: center;
   font-weight: 500;
+  user-select: none;
 }
 
 .wrapper {
   position: fixed;
   bottom: 32px;
   right: 32px;
-  background: #040404;
+  background: #0C0C0C;
   z-index: 1000;
   border-radius: 7px;
   animation: in 0.3s ease-out;
@@ -34,12 +35,6 @@
       border-color: #FF8B35;
     }
   }
-
-  &:hover {
-    .dragHandle {
-      visibility: visible;
-    }
-  }
 }
 
 .draft {
@@ -47,7 +42,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #000;
   padding: 8px 10px;
   cursor: pointer;
   color: #646464;
@@ -56,7 +50,7 @@
   margin: -1px;
 
   &:disabled {
-    &:hover{ 
+    &:hover { 
       cursor: not-allowed;
     }
   }
@@ -66,6 +60,15 @@
 
     &:enabled:hover {
       border-color: #FF8B35;
+      background-color: #FF8B35;
+    }
+  }
+
+  &[data-active="false"] {
+    border: 1px solid #303030;
+
+    &:enabled:hover {
+      background-color: #0C0C0C;
     }
   }
 
@@ -75,24 +78,24 @@
     outline-color: #303030;
     border-radius: 0 6px 6px 0;
   }
-
-  &:hover {
-    background-color: #0C0C0C;
-  }
   
   &[data-active="true"] {
     color: #000;
     background-color: #FF6C02;
+  }
+
+  &[data-loading="false"] &[data-active="true"] {
+    transition: color 0.2s, background-color 0.2s;
 
     &:enabled {
       &:hover {
-        background-color: #FF8B35;
+        color: #FFF;
       }
     }
   }
 
   &[data-loading="true"] {
-    cursor: wait;
+    cursor: wait !important;
 
     svg {
       animation: breathe 1s infinite;
@@ -104,56 +107,29 @@
   position: relative;
   display: flex;
 
-  &[data-disabled="false"] {
-    &:hover {
-      .tooltip {
-        visibility: visible;
-      }
+  &:hover {
+    .tooltip {
+      visibility: visible;
     }
   }
 }
 
 .dragHandle {
   all: unset;
-  position: absolute;
-  top: -12px;
-  left: 0;
-  transform: translateX(-50%);
-  background-color: #0C0C0C;
-  border: 1px solid #303030;
-  color: white;
-  border-radius: 4px;
-  font-size: 14px;
-  white-space: nowrap;
-  z-index: 1000;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: grab;
-  visibility: hidden;
   
   &.dragging {
     cursor: grabbing;
-    visibility: visible;
   }
 
   &:active {
     cursor: grabbing;
   }
-
-  &:focus-visible {
-    outline: 1px solid;
-    outline-offset: -1px;
-    outline-color: #303030;
-    border-radius: 0 6px 6px 0;
-  }
 }
 
 .tooltip {
   position: absolute;
-  bottom: 100%;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%) translateY(0);
   background-color: #0C0C0C;
@@ -161,8 +137,9 @@
   color: white;
   padding: 3px 8px;
   border-radius: 4px;
+  max-width: 200px;
+  width: max-content;
   font-size: 14px;
-  white-space: nowrap;
   z-index: 1000;
   visibility: hidden;
   --translate-x: -50%;
@@ -172,12 +149,12 @@
   }
   
   &.top {
-    top: 100%;
+    top: 40px;
     bottom: unset;
     transform: translateY(0) translateX(var(--translate-x));
 
     &:before {
-      mask-image: linear-gradient(135deg, rgb(0, 0, 0) 29%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 100%);
+      mask-image: linear-gradient(135deg, rgb(0, 0, 0) 31%, rgba(0, 0, 0, 0) 31%, rgba(0, 0, 0, 0) 100%);
       top: -4.5px;
       bottom: unset;
       transform: translateX(var(--translate-x)) rotate(45deg);
@@ -185,7 +162,7 @@
   }
 
   &.bottom {
-    bottom: 100%;
+    bottom: 40px;
     top: unset;
     transform: translateY(0) translateX(var(--translate-x));
 
@@ -224,7 +201,7 @@
 
   &:before {
     z-index: -1;
-    mask-image: linear-gradient(-45deg, rgb(0, 0, 0) 29%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(-45deg, rgb(0, 0, 0) 31%, rgba(0, 0, 0, 0) 31%, rgba(0, 0, 0, 0) 100%);
     content: '';
     position: absolute;
     bottom: -4.5px;
