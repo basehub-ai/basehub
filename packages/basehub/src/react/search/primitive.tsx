@@ -957,10 +957,10 @@ function _getFieldHighlightImpl({
     }
 
     if (!snippetByExactMatch && h.fieldPath === fieldPath) {
-      snippetByExactMatch = h.snippet;
+      snippetByExactMatch = h.snippet ?? h.snippets[0];
     }
     if (!snippetByPrefix && h.fieldPath.startsWith(prefix)) {
-      snippetByPrefix = h.snippet;
+      snippetByPrefix = h.snippet ?? h.snippets[0];
     }
   });
 
