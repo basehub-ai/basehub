@@ -4,7 +4,6 @@ import * as React from "react";
 import s from "./toolbar.module.scss";
 import { Tooltip } from "./components/tooltip";
 import { DragHandle } from "./components/drag-handle";
-import { useRouter } from "next/navigation";
 import { BranchSwitcher } from "./components/branch-swticher";
 import debounce from "lodash.debounce";
 
@@ -29,7 +28,6 @@ export const ClientToolbar = ({
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
 }) => {
-  const router = useRouter();
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
   );
@@ -53,7 +51,7 @@ export const ClientToolbar = ({
         .then(({ status, response }) => {
           if (status === 200) {
             // refresh
-            router.refresh();
+            window.location.reload();
           } else if ("error" in response) {
             displayMessage(`Draft mode activation error: ${response.error}`);
           } else {
@@ -62,7 +60,7 @@ export const ClientToolbar = ({
         })
         .finally(() => setLoading(false));
     },
-    [enableDraftMode, displayMessage, router]
+    [enableDraftMode, displayMessage]
   );
 
   const [hasAutoEnabledDraftOnce, setHasAutoEnabledDraftOnce] =
@@ -228,12 +226,11 @@ export const ClientToolbar = ({
                   setLoading(true);
                   disableDraftMode()
                     .then(() => {
-                      const pathname = window.location.pathname;
-                      const urlWithoutPreview = pathname.replace(
-                        /(\?|&)bshb-preview=[^&]*/,
-                        ""
-                      );
-                      router.push(urlWithoutPreview);
+                      const url = new URL(window.location.href);
+                      url.searchParams.delete("bshb-preview");
+                      url.searchParams.delete("__vercel_draft");
+
+                      window.location.href = url.toString();
                     })
                     .finally(() => setLoading(false));
                 } else {

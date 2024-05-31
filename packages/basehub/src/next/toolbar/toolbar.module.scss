@@ -126,7 +126,7 @@
 
 .tooltip {
   position: absolute;
-  bottom: 50px;
+  bottom: 45px;
   left: 50%;
   transform: translateX(-50%) translateY(0);
   background-color: #0C0C0C;
@@ -146,7 +146,7 @@
   }
   
   &.top {
-    top: 50px;
+    top: 45px;
     bottom: unset;
     transform: translateY(0) translateX(var(--translate-x));
 
@@ -159,7 +159,7 @@
   }
 
   &.bottom {
-    bottom: 50px;
+    bottom: 45px;
     top: unset;
     transform: translateY(0) translateX(var(--translate-x));
 
