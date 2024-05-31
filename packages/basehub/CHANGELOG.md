@@ -1,5 +1,11 @@
 # basehub
 
+## 5.2.2
+
+### Patch Changes
+
+- 33819d9: Refresh on draft mode activation, styling corrections, full drag handle.
+
 ## 5.2.1
 
 ### Patch Changes
