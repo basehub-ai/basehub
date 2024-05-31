@@ -1,5 +1,11 @@
 # basehub
 
+## 5.2.3
+
+### Patch Changes
+
+- ignore \_id and \_slug in search fallback searcher
+
 ## 5.2.2
 
 ### Patch Changes
