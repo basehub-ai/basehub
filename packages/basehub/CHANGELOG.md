@@ -1,5 +1,11 @@
 # basehub
 
+## 5.2.4
+
+### Patch Changes
+
+- fallback to first snippet if array of snippets
+
 ## 5.2.3
 
 ### Patch Changes
