@@ -981,14 +981,18 @@ function _getFieldHighlightImpl({
         .find((v) => v);
       return found;
     } else if (typeof current === "object") {
-      const found = Object.entries(current)
-        .map(([key, value]) => {
-          if (opts.isRichText && key !== "_content") {
-            return undefined;
-          }
-          return getFallbackString(value, opts);
-        })
-        .find((v) => v);
+      let found: string | undefined = undefined;
+      for (const [key, value] of Object.entries(current)) {
+        if (["_id", "_slug"].includes(key)) continue;
+        if (opts.isRichText && key !== "_content") {
+          continue;
+        }
+        const processedRecursive = getFallbackString(value, opts);
+        if (processedRecursive) {
+          found = processedRecursive;
+          break;
+        }
+      }
       return found;
     }
   }
