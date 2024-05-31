@@ -59,6 +59,7 @@
 
     &:enabled:hover {
       border-color: #FF8B35;
+      background-color: #FF8B35;
     }
   }
 
@@ -82,8 +83,9 @@
     background-color: #FF6C02;
   }
 
-  &[data-loading="false"] {
+  &[data-loading="false"] &[data-active="true"] {
     transition: color 0.2s, background-color 0.2s;
+
     &:enabled {
       &:hover {
         color: #FFF;
