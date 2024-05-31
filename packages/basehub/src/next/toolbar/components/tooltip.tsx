@@ -29,12 +29,10 @@ export const Tooltip = React.forwardRef(
             ? 0
             : rect.width / 2;
           const paddingBlock = rect.height;
-          const tooltipOffset = 50 * 2;
+          const tooltipOffset = 40 * 2;
           const isAlreadyToTop = tooltipContentRef.current.classList.contains(
             s.bottom
           );
-
-          console.log(rect.top, paddingBlock, tooltipOffset);
 
           // reached the top
           if (
@@ -50,7 +48,6 @@ export const Tooltip = React.forwardRef(
           }
 
           // reached the right
-          console.log(rect.right, paddingInline, window.innerWidth);
           if (rect.right + paddingInline > window.innerWidth) {
             tooltipContentRef.current.classList.remove(s.left);
             tooltipContentRef.current.classList.add(s.right);

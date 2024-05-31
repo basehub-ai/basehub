@@ -5,6 +5,7 @@
   display: flex;
   align-items: center;
   font-weight: 500;
+  user-select: none;
 }
 
 .wrapper {
@@ -128,7 +129,7 @@
 
 .tooltip {
   position: absolute;
-  bottom: 45px;
+  bottom: 40px;
   left: 50%;
   transform: translateX(-50%) translateY(0);
   background-color: #0C0C0C;
@@ -148,7 +149,7 @@
   }
   
   &.top {
-    top: 45px;
+    top: 40px;
     bottom: unset;
     transform: translateY(0) translateX(var(--translate-x));
 
@@ -161,7 +162,7 @@
   }
 
   &.bottom {
-    bottom: 45px;
+    bottom: 40px;
     top: unset;
     transform: translateY(0) translateX(var(--translate-x));
 

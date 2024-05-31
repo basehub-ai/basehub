@@ -31,8 +31,8 @@ export const ClientToolbar = ({
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
   );
+  const dragHandleRef = React.useRef<DragHandle>(null);
   const tooltipRef = React.useRef<Tooltip>(null);
-  const [isDragging, setIsDragging] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
 
@@ -195,13 +195,10 @@ export const ClientToolbar = ({
   return (
     <div className={s.wrapper} ref={(ref) => setToolbarRef(ref)}>
       <DragHandle
+        ref={dragHandleRef}
         onDrag={(pos) => {
           dragToolbar(pos);
           tooltipRef.current?.checkOverflow();
-        }}
-        onDragStart={() => setTimeout(() => setIsDragging(true), 500)}
-        onDragEnd={() => {
-          setTimeout(() => setIsDragging(false), 500);
         }}
       >
         <div className={s.root} data-draft-active={isForcedDraft || draft}>
@@ -220,7 +217,7 @@ export const ClientToolbar = ({
               data-loading={loading}
               disabled={isForcedDraft || loading}
               onClick={() => {
-                if (loading || isDragging) return;
+                if (loading || dragHandleRef.current?.hasDragged) return;
 
                 if (draft) {
                   setLoading(true);
