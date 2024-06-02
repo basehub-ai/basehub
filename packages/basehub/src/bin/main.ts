@@ -106,8 +106,8 @@ export const main = async (
     );
 
     schemaFileContents = schemaFileContents.replace(
-      "...options",
-      "...options,\n    headers: { ...options?.headers, ...headers }"
+      "\n    ...options",
+      "    ...options,\n    headers: { ...options?.headers, ...headers }"
     );
 
     // 2. remove export for `createClient`, as it holds options that we don't want to expose.
@@ -124,6 +124,29 @@ export const main = async (
         forceDraft: opts?.forceDraft,
       })}}`
     );
+
+    if (
+      schemaFileContents.includes("mutation<R extends MutationGenqlSelection>")
+    ) {
+      // edit `MutationGenqlSelection` to receive the Transaction directly instead of a string
+      schemaFileContents = schemaFileContents.replace(
+        "mutation<R extends MutationGenqlSelection>",
+        `mutation<
+R extends Omit<MutationGenqlSelection, "transaction"> & {
+  transaction?: Omit<MutationGenqlSelection["transaction"], "__args"> & {
+    __args: Omit<
+      NonNullable<MutationGenqlSelection["transaction"]>["__args"],
+      "data"
+    > & { data: Transaction };
+  };
+},
+>`
+      );
+
+      // add import for Transaction at the start of the file
+      schemaFileContents +=
+        "\nimport type { Transaction } from './api-transaction';\n";
+    }
 
     // 3. append our basehub function to the end of the file.
     const basehubExport = getBaseHubExport(draft);

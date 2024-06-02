@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.0-esm-only.2
+
+### Patch Changes
+
+- improve mutation type
+
 ## 6.0.0-esm-only.1
 
 ### Patch Changes
