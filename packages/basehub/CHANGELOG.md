@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.0-esm-only.3
+
+### Patch Changes
+
+- update genql
+
 ## 6.0.0-esm-only.2
 
 ### Patch Changes
