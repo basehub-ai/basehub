@@ -1,5 +1,12 @@
 # playground
 
+## 0.0.99-esm-only.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@6.0.0-esm-only.0
+
 ## 0.0.98
 
 ### Patch Changes

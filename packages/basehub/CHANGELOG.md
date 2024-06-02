@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.0-esm-only.0
+
+### Major Changes
+
+- Pass everything except for our CLI to ESM only
+
 ## 5.2.4
 
 ### Patch Changes
