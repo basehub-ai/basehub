@@ -8,8 +8,9 @@
   "bugs": "https://github.com/basehub-ai/basehub/issues",
   "homepage": "https://basehub.com",
   "bin": {
-    "basehub": "./dist/bin.js"
+    "basehub": "./dist/bin.cjs"
   },
+  "type": "module",
   "files": [
     "dts",
     "dist",

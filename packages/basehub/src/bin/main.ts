@@ -232,7 +232,7 @@ export const main = async (
           );
           fs.writeFileSync(
             path.join(basehubOutputPath, `${pathsToAlias}.js`),
-            `module.exports = require("basehub/${pathsToAlias}");`
+            `export * from "basehub/${pathsToAlias}";`
           );
         }
       );
@@ -258,10 +258,10 @@ export const main = async (
       );
       fs.writeFileSync(
         indexJsPath,
-        `module.exports = require("${path.relative(
+        `export * from "${path.relative(
           basehubModulePath,
-          generatedMainExportPath
-        )}");`
+          path.join(basehubOutputPath, "index.js")
+        )}";`
       );
       fs.writeFileSync(
         indexDtsPath,
@@ -272,10 +272,10 @@ export const main = async (
       );
       fs.writeFileSync(
         reactPumpIndexJsPath,
-        `module.exports = require("${path.relative(
+        `export * from "${path.relative(
           basehubModulePath,
           path.join(reactPumpOutDir, "index.js")
-        )}");`
+        )}";`
       );
       fs.writeFileSync(
         reactPumpIndexDtsPath,
@@ -286,10 +286,10 @@ export const main = async (
       );
       fs.writeFileSync(
         nextToolbarIndexJsPath,
-        `module.exports = require("${path.relative(
+        `export * from "${path.relative(
           basehubModulePath,
           path.join(nextToolbarOutDir, "index.js")
-        )}");`
+        )}";`
       );
       fs.writeFileSync(
         nextToolbarIndexDtsPath,

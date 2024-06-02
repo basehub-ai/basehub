@@ -1,1 +1,1 @@
-module.exports = require("./dist/react-search.mjs");
+export * from "./dist/react-search.mjs";
