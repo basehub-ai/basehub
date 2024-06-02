@@ -1,1 +1,1 @@
-export * from "./dist/api-transaction.mjs";
+export * from "./dist/api-transaction";

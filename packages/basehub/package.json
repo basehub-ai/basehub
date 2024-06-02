@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "6.0.0-esm-only.0",
+  "version": "6.0.0-esm-only.1",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -10,6 +10,8 @@
   "bin": {
     "basehub": "./dist/bin.cjs"
   },
+  "main": "index.js",
+  "types": "index.d.ts",
   "type": "module",
   "files": [
     "dts",

@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.0-esm-only.1
+
+### Patch Changes
+
+- Fix some old exports
+
 ## 6.0.0-esm-only.0
 
 ### Major Changes
