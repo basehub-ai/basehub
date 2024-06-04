@@ -1,10 +1,27 @@
 .hit {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 10px;
   border-bottom: 1px solid #ccc;
+  color: white;
+  text-decoration: none;
 }
 
 .hit[data-selected="true"] {
-  background-color: #f0f0f0;
+  background-color: #3f3f3f;
+}
+
+.hit h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.hit p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.hit mark {
+  background-color: rgb(138, 138, 2);
+  color: white;
 }

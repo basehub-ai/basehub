@@ -95,6 +95,7 @@ export const getSearchClient = (
   return new Client({
     apiKey,
     nodes: [{ host: domain, port: 443, protocol: "https" }],
+    useServerSideSearchCache: true,
   });
 };
 
@@ -153,6 +154,7 @@ export type Hit<Doc = Record<string, unknown>> = {
   highlight: Record<string, Highlight> | undefined;
   highlights: Array<Highlight>;
   curated: boolean;
+  textMatch: number;
   _getField: (fieldPath: string) => unknown;
   _getFieldHighlight: (
     fieldPath: string,
@@ -189,7 +191,7 @@ export type UseSearchResult<Document = Record<string, unknown>> = {
   query: string;
   onQueryChange: (q: string) => Promise<void>;
   recentSearches?: {
-    hits: Hit<Document>[] | undefined;
+    hits: (Hit<Document> & { addedAt: number })[] | undefined;
     add: (hit: Hit<Document>) => void;
     remove: (_key: string) => void;
     clear: () => void;
@@ -218,7 +220,7 @@ export const useSearch = <
   const [query, setQuery] = React.useState("");
   const [result, setResult] = React.useState<SearchResult<Document>>();
   const [recentSearchesHits, setRecentSearchesHits] =
-    React.useState<Hit<Document>[]>();
+    React.useState<(Hit<Document> & { addedAt: number })[]>();
 
   const searchOptionsRef = React.useRef(searchOptions);
   searchOptionsRef.current = searchOptions;
@@ -285,6 +287,7 @@ export const useSearch = <
               document,
               highlight: highlightRecord,
               highlights,
+              textMatch: hit.text_match,
               _getField,
               _getFieldHighlight: () => null,
             };
@@ -339,7 +342,7 @@ export const useSearch = <
         const storage = getRecentSearchesStorageRef.current();
 
         const _key = getHitRecentSearchKey(hit);
-        const updatedHit = { ...hit, _key };
+        const updatedHit = { ...hit, _key, addedAt: Date.now() };
 
         setRecentSearchesHits((prev) => {
           // check if this hit already exists
@@ -348,7 +351,7 @@ export const useSearch = <
             if (exists) return prev;
           }
 
-          const next = prev ? [updatedHit, ...prev] : [hit];
+          const next = prev ? [updatedHit, ...prev] : [updatedHit];
           storage.setItem(storageKey, JSON.stringify(next));
           return next;
         });
@@ -382,20 +385,22 @@ export const useSearch = <
         const raw = storage.getItem(storageKey);
         if (!raw) return;
 
-        return (JSON.parse(raw) as Hit<Document>[]).map((hit) => {
-          hit._getField = (fieldPath: string) => {
-            return get(hit.document, fieldPath) as unknown;
-          };
-          hit._getFieldHighlight = (fieldPath, fallbackFieldPaths) => {
-            return _getFieldHighlightImpl({
-              fieldPath,
-              fallbackFieldPaths,
-              includeFallback: true,
-              hit: hit,
-            });
-          };
-          return hit;
-        });
+        return (JSON.parse(raw) as (Hit<Document> & { addedAt: number })[]).map(
+          (hit) => {
+            hit._getField = (fieldPath: string) => {
+              return get(hit.document, fieldPath) as unknown;
+            };
+            hit._getFieldHighlight = (fieldPath, fallbackFieldPaths) => {
+              return _getFieldHighlightImpl({
+                fieldPath,
+                fallbackFieldPaths,
+                includeFallback: true,
+                hit: hit,
+              });
+            };
+            return hit;
+          }
+        );
       },
     };
   }, [_searchKey, saveRecentSearches?.key]);
@@ -915,7 +920,18 @@ function _getFieldHighlightImpl({
   fallbackSnippet: string | undefined;
 } {
   const field = hit._getField(fieldPath);
-  if (!field) return null;
+  if (!field) {
+    if (fallbackFieldPaths && fallbackFieldPaths[0]) {
+      const [fallbackFieldPath, ...rest] = fallbackFieldPaths;
+      return _getFieldHighlightImpl({
+        hit,
+        fieldPath: fallbackFieldPath,
+        fallbackFieldPaths: rest,
+        includeFallback: true,
+      });
+    }
+    return null;
+  }
 
   const isRichText =
     Array.isArray(field) && field[0]?._type === "rich-text-section";

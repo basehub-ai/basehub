@@ -19,6 +19,13 @@
 
 - Pass everything except for our CLI to ESM only
 
+
+## 5.2.5
+
+### Patch Changes
+
+- Expose textMatch prop and also cache search results by default
+
 ## 5.2.4
 
 ### Patch Changes
