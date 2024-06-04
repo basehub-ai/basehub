@@ -1,2 +1,6 @@
-/* eslint-disable import/no-unresolved */
-export * from "./dist/generated-client/next-toolbar.js";
+throw new Error(
+  `\`next-toolbar\` not found. Make sure to run \`npx basehub\` in order to generate it.
+    
+If the error persist, please raise an issue at https://github.com/basehub-ai/basehub
+`
+);

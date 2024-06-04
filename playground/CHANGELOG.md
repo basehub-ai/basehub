@@ -4,8 +4,33 @@
 
 ### Patch Changes
 
+- Updated dependencies [5f2f9ea]
+- Updated dependencies [bf871c3]
+- Updated dependencies [2dc79d3]
+- Updated dependencies [d25c4dc]
+  - basehub@6.0.0
+
+## 0.0.99-esm-only.4
+
+### Patch Changes
+
 - Updated dependencies
-  - basehub@5.2.5
+- Updated dependencies [d25c4dc]
+  - basehub@6.0.0-esm-only.2
+
+## 0.0.99-esm-only.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@6.0.0-esm-only.1
+
+## 0.0.99-esm-only.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@6.0.0-esm-only.0
 
 ## 0.0.98
 
