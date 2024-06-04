@@ -1,5 +1,12 @@
 # basehub
 
+## 6.0.0-esm-only.4
+
+### Patch Changes
+
+- Implement response hashing to dedupe queries
+- d25c4dc: Add api versioning
+
 ## 6.0.0-esm-only.1
 
 ### Patch Changes

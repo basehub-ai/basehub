@@ -53,9 +53,11 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
 }: PumpProps<Queries>) => {
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
+  const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
   const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
+  const apiVersion = headers["x-basehub-api-version"];
   let pumpEndpoint: string;
   switch (true) {
     case url.origin.includes("api.basehub.com"):
@@ -78,7 +80,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     rawQueryOp: { query: string; variables?: any };
   }> = await Promise.all(
     // @ts-ignore
-    queriesWithFallback.map(async (singleQuery) => {
+    queriesWithFallback.map(async (singleQuery, index) => {
       const rawQueryOp = generateQueryOp(singleQuery);
       const cacheKey =
         JSON.stringify(rawQueryOp) + (draft ? "_draft" : "_prod");
@@ -101,6 +103,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
               headers: {
                 "content-type": "application/json",
                 "x-basehub-token": token,
+                "x-basehub-api-version": apiVersion,
               },
               body: JSON.stringify(rawQueryOp),
             }).then(async (response) => {
@@ -110,11 +113,13 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
                 errors: _errors = null,
                 spaceID: _spaceID,
                 pusherData: _pusherData,
+                responseHash: _responseHash,
               } = await response.json();
               pumpToken = newPumpToken;
               pusherData = _pusherData;
               spaceID = _spaceID;
               errors.push(_errors);
+              responseHashes[index] = _responseHash;
 
               return data;
             })
@@ -153,6 +158,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       console.log("Pump Token:", pumpToken);
       console.log("Space ID:", spaceID);
       console.log("Pusher Data:", pusherData);
+      console.log("Response Hashes:", JSON.stringify(responseHashes, null, 2));
       throw new Error(
         "Pump did not return the necessary data. Look at the logs to see what's missing."
       );
@@ -176,12 +182,14 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
           // @ts-ignore
           data: !noQueries ? results.map((r) => r.data ?? null) : [],
           errors,
+          responseHashes,
           pusherData: pusherData,
           spaceID: spaceID,
         }}
         pumpEndpoint={pumpEndpoint}
         pumpToken={pumpToken ?? undefined}
         initialResolvedChildren={resolvedChildren}
+        apiVersion={apiVersion}
       >
         {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
         {/* @ts-ignore */}
