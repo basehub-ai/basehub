@@ -25,6 +25,7 @@ export const main = async (
       prefix: args["--env-prefix"],
       output: args["--output"],
       draft: args["--draft"],
+      apiVersion: args["--api-version"],
       ...(opts?.forceDraft && { draft: true }),
     };
 
