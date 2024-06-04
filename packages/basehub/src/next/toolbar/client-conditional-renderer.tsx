@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 
 const LazyClientToolbar = React.lazy(() =>
   import("./client-toolbar").then((mod) => ({ default: mod.ClientToolbar }))
@@ -67,8 +68,11 @@ export const ClientConditionalRenderer = ({
     setHasRendered(true);
   }, []);
 
-  if (!bshbPreviewToken || !hasRendered) return null;
-  return (
+  if (!bshbPreviewToken || !hasRendered || typeof document === "undefined") {
+    return null;
+  }
+
+  const Portal = createPortal(
     <LazyClientToolbar
       disableDraftMode={disableDraftMode}
       enableDraftMode={enableDraftMode}
@@ -77,6 +81,9 @@ export const ClientConditionalRenderer = ({
       bshbPreviewToken={bshbPreviewToken}
       shouldAutoEnableDraft={shouldAutoEnableDraft}
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
-    />
+    />,
+    document.body
   );
+
+  return Portal;
 };
