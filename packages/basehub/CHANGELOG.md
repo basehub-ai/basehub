@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.1
+
+### Patch Changes
+
+- 1d57369: Improve toolbar styles
+
 ## 6.0.0
 
 ### Major Changes
