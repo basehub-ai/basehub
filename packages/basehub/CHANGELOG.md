@@ -1,5 +1,68 @@
 # basehub
 
+## 6.0.0
+
+### Major Changes
+
+- 2dc79d3: Pass everything except for our CLI to ESM only
+- 5f2f9ea: Fix some old exports
+- bf871c3: Implement response hashing to dedupe queries
+- d25c4dc: Add api versioning
+
+#### New API Versioning
+
+We work hard to avoid breaking changes in our GraphQL API (api.basehub.com/graphql). In fact, up until now, we've never had one. That being said, there were some little quirks we wanted to fix, and therefore we decided to create a new API Version.
+
+`basehub@6` will query `api.basehub.com/graphql?api-version=1` by default. You can override this behaviour and go back to the default version by using the environment variable `BASEHUB_API_VERSION="default"`. Older versions of `basehub` will still query the default version, so using the new API Version is totally opt in.
+
+#### GraphQL API Version 1
+
+We fixed two quirks:
+
+1. Collection template components' names, in GraphQL, were inferred from the component's "display title", or from the collection's api name. The component's own api name was ignored. No any more.
+2. Reference and union blocks are represented in GraphQL by a GraphQL Union. Before this new version, reference and union blocks that accepted just one component value were not represented by a Union, but rather referenced that component directly. While we designed this with good intentions—we wanted to save developers of doing `...on SomeFragment` for simple use cases—, this created more harm than good, as the action of allowing one more option would break apps. Fixed.
+
+#### ESM Only
+
+Before this version, we had a nasty mix between cjs and esm that introduced problems with some vite-based frameworks (sveltekit, astrok, remix, etc). We now only ship esm. Hopefully this doesn't break stuff elsewhere. We don't think so, as people often times use `basehub` with a modern web framework.
+
+## 6.0.0-esm-only.4
+
+### Patch Changes
+
+- Implement response hashing to dedupe queries
+- d25c4dc: Add api versioning
+
+## 6.0.0-esm-only.1
+
+### Patch Changes
+
+- Fix some old exports
+
+## 6.0.0-esm-only.0
+
+### Major Changes
+
+- Pass everything except for our CLI to ESM only
+
+## 5.2.5
+
+### Patch Changes
+
+- Expose textMatch prop and also cache search results by default
+
+## 5.2.4
+
+### Patch Changes
+
+- fallback to first snippet if array of snippets
+
+## 5.2.3
+
+### Patch Changes
+
+- ignore \_id and \_slug in search fallback searcher
+
 ## 5.2.2
 
 ### Patch Changes

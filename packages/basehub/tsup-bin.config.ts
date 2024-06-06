@@ -7,5 +7,6 @@ export default defineConfig((_options) => {
     entry: {
       bin: "./src/bin/index.ts",
     },
+    format: ["cjs"],
   };
 });

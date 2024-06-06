@@ -10,10 +10,12 @@ export type ResponseCache = {
   };
   newPumpToken: string;
   errors: { message: string; path?: string[] }[] | null;
+  responseHash: string;
 };
 
 export type PumpState = {
   data: QueryResults<[]> | null[];
+  responseHashes: string[];
   errors: Array<ResponseCache["errors"]>;
   pusherData: ResponseCache["pusherData"];
   spaceID: string;

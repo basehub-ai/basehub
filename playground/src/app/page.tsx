@@ -1,20 +1,31 @@
-import { basehub } from "basehub";
-import { Toolbar } from 'basehub/next-toolbar'
-import { Counter } from "./counter";
-import { Search } from "./search";
+import { Pump } from "basehub/react-pump";
 
 export default async function HomePage() {
-  const { homepage } = await basehub().query({
-    homepage: {
-      _analyticsKey: true,
-    },
-  });
-
   return (
-    <main className="">
-      <Toolbar />
-      <Counter _analyticsKey={homepage._analyticsKey} />
-      <Search />
-    </main>
+    <Pump
+      queries={[
+        {
+          blog: {
+            posts: {
+              items: {
+                _title: true,
+                richText: {
+                  html: true,
+                },
+              },
+            },
+          },
+        },
+      ]}
+    >
+      {async ([data]) => {
+        "use server";
+        return (
+          <pre>
+            <code>{JSON.stringify(data, null, 2)}</code>
+          </pre>
+        );
+      }}
+    </Pump>
   );
 }

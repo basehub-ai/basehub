@@ -17,9 +17,11 @@ const clientCache = new Map<
   string, // a query string (with the variables included)
   {
     start: number; // the time the query was started
-    response: Promise<void | ResponseCache>; // the promise that resolves to the data
+    response: Promise<void | (ResponseCache & { changed: boolean })>; // the promise that resolves to the data
   }
 >();
+
+const lastResponseHashCache = new Map<string, string>();
 
 const DEDUPE_TIME_MS = 500;
 
@@ -30,6 +32,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   pumpToken: initialPumpToken,
   initialState,
   initialResolvedChildren,
+  apiVersion,
 }: {
   children: PumpProps<Queries>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
@@ -37,6 +40,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   pumpToken: string | undefined;
   initialState: PumpState | undefined;
   initialResolvedChildren?: React.ReactNode;
+  apiVersion: string;
 }) => {
   const pumpTokenRef = React.useRef<string | undefined>(initialPumpToken);
   const [result, setResult] = React.useState<PumpState | undefined>(
@@ -44,6 +48,9 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   );
 
   type Result = NonNullable<typeof result>;
+
+  const initialStateRef = React.useRef<PumpState | undefined>(initialState);
+  initialStateRef.current = initialState;
 
   /**
    * Query the Draft API.
@@ -54,13 +61,17 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     let spaceID: Result["spaceID"] | undefined = undefined;
 
     const responses = await Promise.all(
-      rawQueries.map(async (rawQueryOp) => {
+      rawQueries.map(async (rawQueryOp, index) => {
         if (!pumpTokenRef.current) {
           console.warn("No pump token found. Skipping query.");
           return null;
         }
 
         const cacheKey = JSON.stringify(rawQueryOp);
+        const lastResponseHash =
+          lastResponseHashCache.get(cacheKey) ||
+          initialStateRef.current?.responseHashes?.[index] ||
+          "";
 
         if (clientCache.has(cacheKey)) {
           const cached = clientCache.get(cacheKey)!;
@@ -82,6 +93,10 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           headers: {
             "content-type": "application/json",
             "x-basehub-pump-token": pumpTokenRef.current,
+            "x-basehub-api-version": apiVersion,
+            ...(lastResponseHash
+              ? { "x-basehub-last-response-hash": lastResponseHash }
+              : undefined),
           },
           body: JSON.stringify(rawQueryOp),
         })
@@ -92,7 +107,10 @@ export const ClientPump = <Queries extends PumpQuery[]>({
               newPumpToken,
               spaceID,
               pusherData,
+              responseHash,
             } = await response.json();
+
+            lastResponseHashCache.set(cacheKey, responseHash);
 
             return {
               data,
@@ -100,7 +118,9 @@ export const ClientPump = <Queries extends PumpQuery[]>({
               pusherData,
               newPumpToken,
               errors,
-            } as ResponseCache;
+              responseHash,
+              changed: lastResponseHash !== responseHash,
+            } as ResponseCache & { changed: boolean };
           })
           .catch((err: unknown) => {
             console.error(err);
@@ -128,19 +148,31 @@ export const ClientPump = <Queries extends PumpQuery[]>({
       })
     );
 
-    if (!pusherData || !spaceID) return;
-
-    setResult({
-      data: responses.map((r) => r?.data ?? null),
-      errors: responses.map((r) => r?.errors ?? null),
-      pusherData,
-      spaceID,
-    });
+    const shouldUpdate = responses.some((r) => r?.changed);
+    if (shouldUpdate) {
+      if (!pusherData || !spaceID) return;
+      setResult((p) => {
+        if (!pusherData || !spaceID) return p;
+        return {
+          data: responses.map((r, i) => {
+            if (!r?.changed) return p?.data?.[i] ?? null;
+            return r?.data ?? null;
+          }),
+          errors: responses.map((r, i) => {
+            if (!r?.changed) return p?.errors?.[i] ?? null;
+            return r?.errors ?? null;
+          }),
+          responseHashes: responses.map((r) => r?.responseHash ?? ""),
+          pusherData,
+          spaceID,
+        };
+      });
+    }
 
     if (newPumpToken) {
       pumpTokenRef.current = newPumpToken;
     }
-  }, [pumpEndpoint, rawQueries]);
+  }, [pumpEndpoint, rawQueries, apiVersion]);
 
   const currentToastRef = React.useRef<string | number | null>(null);
 
@@ -239,9 +271,14 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     if (!pusher) return;
 
     const channel = pusher.subscribe(pusherChannelKey);
-    channel.bind("poke", () => {
-      subscribers.forEach((sub) => sub());
-    });
+    channel.bind(
+      "poke",
+      (message?: Partial<{ mutatedEntryTypes: string[] }>) => {
+        if (message?.mutatedEntryTypes?.includes("block")) {
+          subscribers.forEach((sub) => sub());
+        }
+      }
+    );
 
     return () => {
       channel.unsubscribe();

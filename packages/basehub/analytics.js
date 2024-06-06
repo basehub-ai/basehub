@@ -1,1 +1,1 @@
-module.exports = require("./dist/analytics.mjs");
+export * from "./dist/analytics";

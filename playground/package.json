@@ -1,10 +1,10 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.96",
+  "version": "0.0.99",
   "scripts": {
     "dev": "basehub dev & next dev",
-    "build": "basehub & next build",
+    "build": "basehub && next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",

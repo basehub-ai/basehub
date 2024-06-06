@@ -30,8 +30,9 @@ async function help(code: number) {
     --output, -o  Output directory, if you don't want the default behavior.
     --env-prefix, -ep  Prefix for environment variables.
     --banner, -b  Add code at the top of each generated file.
-    --watch, -v  Watch for changes and regenerate.
-    --draft, -v  Generate with draft mode enabled.
+    --watch, -w  Watch for changes and regenerate.
+    --draft, -d  Generate with draft mode enabled.
+    --api-version, -av  The version of the API to use.
     --version, -v  Version number.
     --help, -h     Display this message.`);
   process.exit(code);
@@ -57,6 +58,7 @@ const args = arg(
     "--draft": Boolean,
     "--help": Boolean,
     "--watch": Boolean,
+    "--api-version": String,
     // aliases
     "-o": "--output",
     "-t": "--token",
@@ -66,6 +68,7 @@ const args = arg(
     "-d": "--draft",
     "-h": "--help",
     "-w": "--watch",
+    "-av": "--api-version",
   },
   { permissive: true }
 );

@@ -7,6 +7,7 @@ import { dotenvLoad } from "dotenv-mono";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
+const DEFAULT_API_VERSION = "1";
 
 export type Options = {
   forceDraft?: boolean;
@@ -17,6 +18,7 @@ export type Options = {
    * @deprecated
    */
   token: string | undefined;
+  apiVersion: string | undefined;
 };
 
 export const getStuffFromEnv = (
@@ -35,7 +37,8 @@ export const getStuffFromEnv = (
     | "DRAFT"
     | "DEBUG_FORCED_URL"
     | "URL"
-    | "OUTPUT";
+    | "OUTPUT"
+    | "API_VERSION";
 
   const buildEnvVarName = (name: EnvVarName) => {
     let prefix = defaultEnvVarPrefix;
@@ -134,6 +137,18 @@ export const getStuffFromEnv = (
     draft = true;
   }
 
+  let apiVersion =
+    basehubUrl.searchParams.get("api-version") ??
+    getEnvVar("API_VERSION") ??
+    (backwardsCompatURL
+      ? backwardsCompatURL.searchParams.get("api-version")
+      : undefined) ??
+    DEFAULT_API_VERSION;
+
+  if (options?.apiVersion) {
+    apiVersion = options.apiVersion;
+  }
+
   // 2. let's validate the URL
 
   if (basehubUrl.pathname.split("/")[1] !== "graphql") {
@@ -160,6 +175,7 @@ export const getStuffFromEnv = (
       "x-basehub-token": token,
       ...(ref ? { "x-basehub-ref": ref } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
+      ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
     },
   };
 };
@@ -236,6 +252,7 @@ export const getStuffFromEnv = (options) => {
     const parsedBasehubTokenEnv = getEnvVar("TOKEN");
     const parsedBasehubRefEnv = getEnvVar("REF");
     const parsedBasehubDraftEnv = getEnvVar("DRAFT");
+    const parsedBasehubApiVersionEnv = getEnvVar("API_VERSION");
 
     const resolveTokenParam = (token) => {
       if (!token) return null;
@@ -282,6 +299,18 @@ export const getStuffFromEnv = (options) => {
       draft = options.draft;
     }
 
+    let apiVersion =
+      basehubUrl.searchParams.get("api-version") ??
+      parsedBasehubApiVersionEnv ??
+      (backwardsCompatURL
+        ? backwardsCompatURL.searchParams.get("api-version")
+        : undefined) ??
+      "${DEFAULT_API_VERSION}";
+
+      if (options?.apiVersion !== undefined) {
+        apiVersion = options.apiVersion;
+      }
+  
     // 2. let's validate the URL
 
     if (basehubUrl.pathname.split("/")[1] !== "graphql") {
@@ -292,6 +321,7 @@ export const getStuffFromEnv = (options) => {
     basehubUrl.searchParams.delete("token");
     basehubUrl.searchParams.delete("ref");
     basehubUrl.searchParams.delete("draft");
+    basehubUrl.searchParams.delete("api-version");
 
     // 3. done.
 
@@ -303,6 +333,7 @@ export const getStuffFromEnv = (options) => {
         "x-basehub-token": token,
         ...(ref ? { "x-basehub-ref": ref } : {}),
         ...(draft ? { "x-basehub-draft": "true" } : {}),
+        ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
       },
     };
 `;
