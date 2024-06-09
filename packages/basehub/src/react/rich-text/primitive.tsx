@@ -4,17 +4,6 @@ import { type ReactNode } from "react";
 import GithubSlugger from "github-slugger";
 import { extractTextFromNode } from "./util/heading-id";
 
-/**
- * TODOs
- *
- * - support json, html, markdown, plain text? we'd need to see the impact on bundle size
- */
-
-// type Formats =
-// | { type: "json"; children: unknown }
-// | { type: "html" | "markdown" | "plain-text"; children: string };
-type Formats = { children: unknown }; // only json supported for now.
-
 const isDev = process.env.NODE_ENV === "development";
 
 interface Attrs {
@@ -217,7 +206,12 @@ type MarkHandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
 
 export type RichTextProps<
   CustomBlocks extends CustomBlocksBase = readonly any[],
-> = Formats & {
+> = {
+  content?: Node[];
+  /**
+   * @deprecated Use `content` instead.
+   */
+  children?: unknown;
   blocks?: CustomBlocks;
   components?: Partial<
     Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
@@ -229,7 +223,7 @@ export const RichText = <
 >(
   props: RichTextProps<CustomBlocks>
 ): ReactNode => {
-  const value = props.children as Node[] | undefined;
+  const value = (props.content ?? props.children) as Node[] | undefined;
   const slugger = new GithubSlugger();
 
   return (

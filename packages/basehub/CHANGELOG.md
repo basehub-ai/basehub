@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.2
+
+### Patch Changes
+
+- add content prop and deprecate children for the RichText
+
 ## 6.0.1
 
 ### Patch Changes
