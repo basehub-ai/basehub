@@ -69,14 +69,12 @@ export const useSearch = <
   );
   getRecentSearchesStorageRef.current = saveRecentSearches?.getStorage;
 
-  const lastQueryRef = React.useRef<string | null>(null);
   const queryQueueRef = React.useRef<Array<string>>([]);
 
   const onQueryChange = React.useCallback(
     async (q: string) => {
       if (!valid) throw new Error("Not enabled");
 
-      lastQueryRef.current = q;
       queryQueueRef.current.push(q);
       setQuery(q);
       if (!q) {
