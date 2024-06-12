@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.5
+
+### Patch Changes
+
+- improve race conditioning logic
+
 ## 6.0.4
 
 ### Patch Changes

@@ -70,12 +70,14 @@ export const useSearch = <
   getRecentSearchesStorageRef.current = saveRecentSearches?.getStorage;
 
   const lastQueryRef = React.useRef<string | null>(null);
+  const queryQueueRef = React.useRef<Array<string>>([]);
 
   const onQueryChange = React.useCallback(
     async (q: string) => {
       if (!valid) throw new Error("Not enabled");
 
       lastQueryRef.current = q;
+      queryQueueRef.current.push(q);
       setQuery(q);
       if (!q) {
         setResult(undefined);
@@ -85,10 +87,16 @@ export const useSearch = <
           q,
           searchOptionsRef.current
         );
-        if (lastQueryRef.current === q) {
+
+        // keep the order of the queries
+        // a query can skip previous entries in the queue, but it can't go back
+        // to do this, we'll check if the item is in the queue, and then remove previous items
+        // (so that if they arrive later they won't find themselves in the queue and just return)
+        if (queryQueueRef.current.includes(q)) {
+          queryQueueRef.current = queryQueueRef.current.slice(
+            queryQueueRef.current.indexOf(q)
+          );
           setResult(r);
-        } else {
-          // we throw it away if we're having race condition issues
         }
       }
     },
