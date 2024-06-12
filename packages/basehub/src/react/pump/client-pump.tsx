@@ -22,6 +22,11 @@ const clientCache = new Map<
 >();
 
 const lastResponseHashCache = new Map<string, string>();
+let currentToast: null | {
+  ref: string | number;
+  addedAt: number;
+  key: string;
+} = null;
 
 const DEDUPE_TIME_MS = 500;
 
@@ -174,49 +179,74 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     }
   }, [pumpEndpoint, rawQueries, apiVersion]);
 
-  const currentToastRef = React.useRef<string | number | null>(null);
-
   /**
-   * Surface errors.
+   * Surface errors (one per app).
    */
   React.useEffect(() => {
-    if (currentToastRef.current) {
-      // first, dismiss current.
-      toast.dismiss(currentToastRef.current);
+    const now = Date.now();
+
+    // "throttle" the toasts
+    let timeoutTime = 0;
+    if (currentToast) {
+      if (currentToast.addedAt + 1_000 > now) {
+        timeoutTime = 1_000 - (now - currentToast.addedAt);
+      }
     }
+
+    timeoutTime += Math.random() * 500;
 
     if (!result?.errors) return;
     const mainError = result.errors[0]?.[0];
     if (!mainError) return;
 
-    currentToastRef.current = toast.error(
-      <div style={{ lineHeight: 1.3 }}>
-        Error fetching data from the BaseHub Draft API:
-        {mainError.message}
-        {mainError.path ? (
-          <>
-            {" "}
-            at <ToastInlineCode>{mainError.path?.join(".")}</ToastInlineCode>
-          </>
-        ) : (
-          ""
-        )}
-        <p
-          style={{
-            opacity: 0.7,
-            fontSize: "0.85em",
-            margin: 0,
-            marginTop: "0.25em",
-          }}
-        >
-          Check if that block is defined in your BaseHub Repo.
-        </p>
-      </div>,
-      {
-        dismissible: true,
-        duration: Infinity,
+    const errorKey = mainError.message + mainError.path?.join(".");
+
+    const timeout = setTimeout(() => {
+      if (currentToast && currentToast.key === errorKey) return;
+      if (currentToast?.ref && currentToast.ref !== "noop") {
+        // first, dismiss current.
+        toast.dismiss(currentToast.ref);
       }
-    );
+
+      const newToastRef = toast.error(
+        <div style={{ lineHeight: 1.3 }}>
+          Error fetching data from the BaseHub Draft API:{" "}
+          {mainError.message.trim()}
+          {mainError.path ? (
+            <>
+              {" "}
+              at <ToastInlineCode>{mainError.path?.join(".")}</ToastInlineCode>
+            </>
+          ) : (
+            ""
+          )}
+          <p
+            style={{
+              opacity: 0.7,
+              fontSize: "0.85em",
+              margin: 0,
+              marginTop: "0.25em",
+            }}
+          >
+            Check if that block is defined in your BaseHub Repo.
+          </p>
+        </div>,
+        {
+          dismissible: true,
+          duration: Infinity,
+        }
+      );
+
+      currentToast = {
+        ref: newToastRef,
+        addedAt: Date.now(),
+        key: errorKey,
+      };
+    }, timeoutTime);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [result?.errors]);
 
   /**

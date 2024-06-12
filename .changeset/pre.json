@@ -1,0 +1,17 @@
+{
+  "mode": "pre",
+  "tag": "canary",
+  "initialVersions": {
+    "eslint-config-custom": "1.0.0",
+    "tsconfig": "1.0.0",
+    "basehub": "6.0.2",
+    "playground": "0.0.101"
+  },
+  "changesets": [
+    "fast-chefs-sell",
+    "fifty-panthers-talk",
+    "flat-rings-teach",
+    "lazy-flowers-remain",
+    "rotten-oranges-reply"
+  ]
+}

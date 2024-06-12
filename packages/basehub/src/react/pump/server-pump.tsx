@@ -66,6 +66,9 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     case url.origin.includes("api.bshb.dev"):
       pumpEndpoint = "https://basehub.dev/api/pump";
       break;
+    case url.origin.includes("localhost:3000"):
+      pumpEndpoint = "https://localhost:3000/api/pump";
+      break;
     default:
       pumpEndpoint = url.toString();
   }

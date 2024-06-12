@@ -1,5 +1,35 @@
 # basehub
 
+## 6.0.3-canary.4
+
+### Patch Changes
+
+- fix
+
+## 6.0.3-canary.3
+
+### Patch Changes
+
+- fix
+
+## 6.0.3-canary.2
+
+### Patch Changes
+
+- fix
+
+## 6.0.3-canary.1
+
+### Patch Changes
+
+- fix
+
+## 6.0.3-canary.0
+
+### Patch Changes
+
+- Improve toasts behavior
+
 ## 6.0.2
 
 ### Patch Changes
