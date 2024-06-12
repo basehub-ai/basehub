@@ -7,7 +7,7 @@
 // See https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript/52171480#52171480
 
 import type { SearchResponseHit } from "typesense/lib/Typesense/Documents";
-import type { BaseDoc } from "./primitive";
+import { BaseDoc } from "./primitive";
 
 // https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js
 const cyrb64 = (str: string, seed = 0) => {

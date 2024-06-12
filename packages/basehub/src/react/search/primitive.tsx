@@ -1,7 +1,7 @@
 import * as React from "react";
 import get from "lodash.get";
 import { Slot } from "@radix-ui/react-slot";
-import { getHitRecentSearchKey } from "./helpers";
+import { getHitRecentSearchKey } from "../../search/helpers";
 import {
   Hit,
   SearchOptions,
