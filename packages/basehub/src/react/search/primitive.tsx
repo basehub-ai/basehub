@@ -1,175 +1,18 @@
 import * as React from "react";
-import { Client } from "typesense";
-import type { SearchParams } from "typesense/lib/Typesense/Documents";
 import get from "lodash.get";
 import { Slot } from "@radix-ui/react-slot";
-import { getHitKey, getHitRecentSearchKey } from "./helpers";
-
-/* -------------------------------------------------------------------------------------------------
- * Utils
- * -----------------------------------------------------------------------------------------------*/
-
-const decodeKey = (_searchKey: string | null) => {
-  if (_searchKey === null) {
-    return { valid: false } as const;
-  }
-  const [domain, apiKey, collectionName] = _searchKey.split(":");
-
-  if (typeof domain !== "string") {
-    throw new Error(`Couldn't get domain from _searchKey: ${_searchKey}`);
-  }
-  if (typeof apiKey !== "string") {
-    throw new Error(`Couldn't get apiKey from _searchKey: ${_searchKey}`);
-  }
-  if (typeof collectionName !== "string") {
-    throw new Error(
-      `Couldn't get collectionName from _searchKey: ${_searchKey}`
-    );
-  }
-
-  return { domain, apiKey, collectionName, valid: true } as const;
-};
-
-const camelToSnake = (str: string) =>
-  str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
-function deFlatten(flattened: object) {
-  const newObject: Record<string, unknown> = {};
-  Object.keys(flattened).forEach((key) => {
-    const splitted = key.split(".");
-    let previous: any = {};
-    let current: any = {};
-    splitted.forEach((split, i) => {
-      const parent = splitted[i - 1];
-      const isFirst = i === 0;
-      const isLast = i === splitted.length - 1;
-
-      const splitAsNumber = Number(split);
-      const isArrayItem = Number.isNaN(splitAsNumber) === false;
-
-      if (isArrayItem) {
-        if (parent) {
-          if (!previous[parent] || Array.isArray(previous[parent]) === false) {
-            previous[parent] = [];
-            current = previous[parent];
-          }
-        }
-      }
-
-      const newVal = {};
-      const newKey = isArrayItem ? splitAsNumber : split;
-
-      if (isFirst) {
-        previous = newObject;
-        newObject[newKey] = isLast
-          ? // @ts-ignore
-            flattened[key]
-          : newObject[newKey] ?? newVal;
-        current = newObject[newKey];
-      } else {
-        previous = current;
-        current[newKey] = isLast
-          ? // @ts-ignore
-            flattened[key]
-          : current[newKey] ?? newVal;
-        current = current[newKey];
-      }
-    });
-  });
-  return newObject;
-}
-
-/* -------------------------------------------------------------------------------------------------
- * Get Search Client
- * -----------------------------------------------------------------------------------------------*/
-
-export const getSearchClient = (
-  /**
-   * The _searchKey taken from a collection of our GraphQL API.
-   */
-  _searchKey: string | null
-) => {
-  const { domain, apiKey, valid } = decodeKey(_searchKey);
-
-  if (!valid) return;
-  return new Client({
-    apiKey,
-    nodes: [{ host: domain, port: 443, protocol: "https" }],
-    useServerSideSearchCache: true,
-  });
-};
+import { getHitRecentSearchKey } from "./helpers";
+import {
+  Hit,
+  SearchOptions,
+  SearchResult,
+  search as searchRaw,
+  decodeKey,
+} from "../../search/primitive";
 
 /* -------------------------------------------------------------------------------------------------
  * useSearch
  * -----------------------------------------------------------------------------------------------*/
-
-export type SearchOptions = {
-  queryBy: SearchParams["query_by"];
-  filterBy?: SearchParams["filter_by"];
-  sortBy?: SearchParams["sort_by"];
-  groupBy?: SearchParams["group_by"];
-  includeFields?: SearchParams["include_fields"];
-  excludeFields?: SearchParams["exclude_fields"];
-  page?: SearchParams["page"];
-  perPage?: SearchParams["per_page"];
-  query?: SearchParams["q"];
-  highlightFields?: SearchParams["highlight_fields"];
-  highlightFullFields?: SearchParams["highlight_full_fields"];
-  highlightStartTag?: SearchParams["highlight_start_tag"];
-  highlightEndTag?: SearchParams["highlight_end_tag"];
-  limitHits?: SearchParams["limit_hits"];
-  pinnedHits?: SearchParams["pinned_hits"];
-  hiddenHits?: SearchParams["hidden_hits"];
-  offset?: SearchParams["offset"];
-  limit?: SearchParams["limit"];
-  stopwords?: SearchParams["stopwords"];
-  numTypos?: SearchParams["num_typos"];
-  prioritizeExactMatch?: SearchParams["prioritize_exact_match"];
-  textMatchType?: SearchParams["text_match_type"];
-  prefix?: SearchParams["prefix"];
-  queryByWeights?: SearchParams["query_by_weights"];
-};
-
-export type BaseDoc = {
-  _id: string;
-  _idPath: string;
-  _title?: string;
-  _slug?: string;
-  _slugPath?: string;
-};
-
-export type Highlight = {
-  fieldPath: string;
-  fieldValue: unknown;
-  indices: number[];
-  matchedTokens: string[] | string[][];
-  snippet: string | undefined;
-  snippets: string[];
-  value: string | undefined;
-};
-
-export type Hit<Doc = Record<string, unknown>> = {
-  _key: string;
-  document: Doc & BaseDoc;
-  highlight: Record<string, Highlight> | undefined;
-  highlights: Array<Highlight>;
-  curated: boolean;
-  textMatch: number;
-  _getField: (fieldPath: string) => unknown;
-  _getFieldHighlight: (
-    fieldPath: string,
-    fallbackFieldPaths?: string[]
-  ) => ReturnType<typeof _getFieldHighlightImpl>;
-};
-
-export type SearchResult<Doc = Record<string, unknown>> = {
-  empty: boolean;
-  found: number;
-  outOf: number;
-  page: number;
-  searchTimeMs: number;
-  hits: Array<Hit<Doc>>;
-};
 
 /**
  * See https://typesense.org/docs/26.0/api/search.html#search-parameters
@@ -211,11 +54,7 @@ export const useSearch = <
 }: UseSearchParams<SearchKey>): SearchKey extends null
   ? { valid: false } & Partial<UseSearchResult<Document>>
   : { valid: true } & UseSearchResult<Document> => {
-  const { collectionName, valid } = decodeKey(_searchKey);
-
-  const client = React.useMemo(() => {
-    return getSearchClient(_searchKey);
-  }, [_searchKey]);
+  const { valid } = decodeKey(_searchKey);
 
   const [query, setQuery] = React.useState("");
   const [result, setResult] = React.useState<SearchResult<Document>>();
@@ -230,102 +69,30 @@ export const useSearch = <
   );
   getRecentSearchesStorageRef.current = saveRecentSearches?.getStorage;
 
-  const search = React.useCallback(
-    async (q: string, opts?: SearchOptions): Promise<typeof result> => {
-      if (!client || !valid) throw new Error("Not enabled");
-
-      const options: Record<string, unknown> = { q };
-      Object.entries({ ...searchOptionsRef.current, ...opts }).forEach(
-        ([key, value]) => {
-          options[camelToSnake(key)] = value;
-        }
-      );
-
-      const rawResult = await client
-        .collections(collectionName)
-        .documents()
-        .search(options);
-
-      const newResult: typeof result = {
-        empty: !rawResult.found,
-        found: rawResult.found,
-        outOf: rawResult.out_of,
-        page: rawResult.page,
-        searchTimeMs: rawResult.search_time_ms,
-        hits:
-          rawResult.hits?.map((hit) => {
-            const document = deFlatten(hit.document) as Document & BaseDoc;
-            const highlightRecord = {} as Record<string, Highlight>;
-            const highlights =
-              hit.highlights?.map((highlight) => {
-                const fieldPath = highlight.field as string;
-
-                const cast: Highlight = {
-                  fieldPath,
-                  fieldValue: get(document, fieldPath) as unknown,
-                  indices: highlight.indices ?? [],
-                  matchedTokens: highlight.matched_tokens,
-                  snippet: highlight.snippet,
-                  snippets: highlight.snippets ?? [],
-                  value: highlight.value,
-                };
-
-                highlightRecord[highlight.field as string] = cast;
-
-                return cast;
-              }) ?? [];
-
-            const _key = getHitKey(hit);
-
-            const _getField = (fieldPath: string) => {
-              return get(document, fieldPath) as unknown;
-            };
-
-            const fullHit: Hit<Document> = {
-              _key,
-              curated: hit.curated ?? false,
-              document,
-              highlight: highlightRecord,
-              highlights,
-              textMatch: hit.text_match,
-              _getField,
-              _getFieldHighlight: () => null,
-            };
-
-            fullHit._getFieldHighlight = (
-              fieldPath: string,
-              fallbackFieldPaths?: string[]
-            ) => {
-              return _getFieldHighlightImpl({
-                fieldPath,
-                fallbackFieldPaths,
-                includeFallback: true,
-                hit: fullHit,
-              });
-            };
-
-            return fullHit;
-          }) ?? [],
-      };
-
-      return newResult;
-    },
-    [client, collectionName, valid]
-  );
+  const lastQueryRef = React.useRef<string | null>(null);
 
   const onQueryChange = React.useCallback(
     async (q: string) => {
       if (!valid) throw new Error("Not enabled");
 
+      lastQueryRef.current = q;
       setQuery(q);
       if (!q) {
         setResult(undefined);
       } else {
-        const r = await search(q);
-        setResult(r);
+        const r = await searchRaw<Document>(
+          _searchKey,
+          q,
+          searchOptionsRef.current
+        );
+        if (lastQueryRef.current === q) {
+          setResult(r);
+        } else {
+          // we throw it away if we're having race condition issues
+        }
       }
     },
-    [search, valid]
+    [_searchKey, valid]
   );
 
   const recentSearchesManager = React.useMemo(() => {

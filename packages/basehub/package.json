@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "6.0.2",
+  "version": "6.0.3",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -31,7 +31,9 @@
     "react-search.d.ts",
     "api-transaction.d.ts",
     "analytics.js",
-    "analytics.d.ts"
+    "analytics.d.ts",
+    "search.js",
+    "search.d.ts"
   ],
   "sideEffects": false,
   "scripts": {

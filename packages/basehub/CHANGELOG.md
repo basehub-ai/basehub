@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.3
+
+### Patch Changes
+
+- Fix race conditions on use search
+
 ## 6.0.2
 
 ### Patch Changes

@@ -9,6 +9,7 @@ export default defineConfig((_options: Options) => {
       "react-search": "./src/react/search/index.ts",
       "api-transaction": "./src/api-transaction.ts",
       analytics: "./src/analytics/index.ts",
+      search: "./src/search/index.ts",
     },
     format: ["esm"],
   };

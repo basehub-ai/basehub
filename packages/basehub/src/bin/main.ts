@@ -224,19 +224,23 @@ export const main = async (
 
     if (output !== "node_modules") {
       // alias react-rich-text and other packages to the generated client for better import experience
-      ["react-rich-text", "api-transaction", "react-search", "analytics"].map(
-        (pathsToAlias) => {
-          // create a file in the output directory that aliases the package to the generated client
-          fs.writeFileSync(
-            path.join(basehubOutputPath, `${pathsToAlias}.d.ts`),
-            `export * from "basehub/${pathsToAlias}";`
-          );
-          fs.writeFileSync(
-            path.join(basehubOutputPath, `${pathsToAlias}.js`),
-            `export * from "basehub/${pathsToAlias}";`
-          );
-        }
-      );
+      [
+        "react-rich-text",
+        "api-transaction",
+        "react-search",
+        "analytics",
+        "search",
+      ].map((pathsToAlias) => {
+        // create a file in the output directory that aliases the package to the generated client
+        fs.writeFileSync(
+          path.join(basehubOutputPath, `${pathsToAlias}.d.ts`),
+          `export * from "basehub/${pathsToAlias}";`
+        );
+        fs.writeFileSync(
+          path.join(basehubOutputPath, `${pathsToAlias}.js`),
+          `export * from "basehub/${pathsToAlias}";`
+        );
+      });
 
       // override index.js and index.d.ts to point to the generated client
       const indexJsPath = path.join(basehubModulePath, "index.js");
