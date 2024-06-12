@@ -4,4 +4,4 @@ export type {
   UseSearchParams,
   UseSearchResult,
 } from "./primitive";
-export * from "../search";
+export * from "../../search";

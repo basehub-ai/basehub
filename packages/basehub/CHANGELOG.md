@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.4
+
+### Patch Changes
+
+- fix missing type exports
+
 ## 6.0.3
 
 ### Patch Changes

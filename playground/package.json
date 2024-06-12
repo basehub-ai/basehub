@@ -1,7 +1,7 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.102",
+  "version": "0.0.103",
   "scripts": {
     "dev": "basehub dev & next dev",
     "build": "basehub && next build",
