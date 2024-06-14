@@ -1,5 +1,11 @@
 # basehub
 
+## 6.0.7
+
+### Patch Changes
+
+- improve transaction typings
+
 ## 6.0.6
 
 ### Patch Changes
