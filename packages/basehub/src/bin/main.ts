@@ -253,6 +253,7 @@ R extends Omit<MutationGenqlSelection, "transaction"> & {
         "react-search",
         "analytics",
         "search",
+        "next-image",
       ].map((pathsToAlias) => {
         // create a file in the output directory that aliases the package to the generated client
         fs.writeFileSync(

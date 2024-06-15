@@ -1,5 +1,29 @@
 # basehub
 
+## 7.0.0
+
+### Major Changes
+
+- Change asset delivery domain from basehub.earth to assets.basehub.com
+
+  basehub.earth will still work, but the response from our API will default to the new origin.
+
+  This is a breaking change because many developers already allowed basehub.earth as a domain for next/image and not yet assets.basehub.earth
+
+  So, why the change?
+
+  basehub.earth is the "raw" asset URL (that's stored in cloudflare r2). In order to perform image optimization and improve caching (assets are now cached as immutable), we needed to place a worker in front of r2. This new worker is in assets.basehub.com
+
+  Oh, also! We're introducing our next/image loader.
+
+  ```tsx
+  import { BaseHubImage, basehubImageLoader } from "basehub/next-image";
+  ```
+
+  `BaseHubImage` just returns the regular `next/image` but passes a loader that understands our image optimization cdn. This is great, as you can leverage our cdn instead of needing the asset to pass again via Next.js' optimization pipeline. Also, the URLs will be cleaner.
+
+  Enjoy!
+
 ## 6.0.7
 
 ### Patch Changes

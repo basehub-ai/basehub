@@ -7,7 +7,7 @@ import { dotenvLoad } from "dotenv-mono";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
-const DEFAULT_API_VERSION = "1";
+const DEFAULT_API_VERSION = "2";
 
 export type Options = {
   forceDraft?: boolean;

@@ -6,7 +6,7 @@ const nextConfig = {
   swcMinify: true,
   experimental: { appDir: true, serverActions: true },
   images: {
-    domains: ["lab.basement.studio"],
+    domains: ["lab.basement.studio", "assets.basehub.com", "basehub.earth"],
   },
 };
 
