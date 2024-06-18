@@ -214,6 +214,7 @@ export const ClientToolbar = ({
             <button
               className={s.draft}
               data-active={isForcedDraft || draft}
+              aria-label={`${draft ? "Disable" : "Enable"} draft mode`}
               data-loading={loading}
               disabled={isForcedDraft || loading}
               onClick={() => {
