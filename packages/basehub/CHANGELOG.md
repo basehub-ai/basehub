@@ -1,5 +1,11 @@
 # basehub
 
+## 7.0.2
+
+### Patch Changes
+
+- add a build-manifest so we cleanup existing outputs when version changes
+
 ## 7.0.1
 
 ### Patch Changes
