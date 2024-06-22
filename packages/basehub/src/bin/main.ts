@@ -12,6 +12,14 @@ import {
 } from "./util/get-stuff-from-env";
 import { appendGeneratedCodeBanner } from "./util/disable-linters";
 import { copyDirSync } from "./util/cp";
+import { z } from "zod";
+import { createHash } from "crypto";
+
+const buildManifestSchema = z.object({
+  sdkVersion: z.string(),
+  inputHash: z.string(),
+  schemaHash: z.string(),
+});
 
 export const main = async (
   args: Args,
@@ -61,6 +69,45 @@ export const main = async (
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,
       ]);
+    }
+
+    // cleanup the output directory if input hash changes
+    const buildManifestPath = path.join(
+      basehubOutputPath,
+      "build-manifest.json"
+    );
+    let currentBuildManifest;
+    try {
+      currentBuildManifest = fs.existsSync(buildManifestPath)
+        ? buildManifestSchema.parse(
+            JSON.parse(fs.readFileSync(buildManifestPath, "utf-8"))
+          )
+        : {};
+    } catch (error) {
+      // ignore
+    }
+
+    const inputHash = createHash("sha256")
+      .update(
+        JSON.stringify({
+          url: url.toString(),
+          headers,
+          draft,
+          output,
+          version: opts.version,
+          apiVersion: options.apiVersion,
+        })
+      )
+      .digest("hex")
+      .substring(0, 32);
+
+    if (currentBuildManifest?.inputHash !== inputHash) {
+      // remove files and directories recursively under dir but not the dir itself
+      if (fs.existsSync(basehubOutputPath)) {
+        fs.rmdirSync(basehubOutputPath, { recursive: true });
+      }
+      // create the directory again
+      fs.mkdirSync(basehubOutputPath, { recursive: true });
     }
 
     const { preventedClientGeneration, schemaHash } = await generate({
@@ -360,6 +407,25 @@ R extends Omit<MutationGenqlSelection, "transaction"> & {
           );
         }
       }
+    }
+
+    if (
+      currentBuildManifest?.inputHash !== inputHash ||
+      currentBuildManifest.schemaHash !== schemaHash
+    ) {
+      // create new build manifest
+      fs.writeFileSync(
+        buildManifestPath,
+        JSON.stringify(
+          {
+            sdkVersion: opts.version,
+            inputHash,
+            schemaHash,
+          } satisfies z.infer<typeof buildManifestSchema>,
+          null,
+          2
+        )
+      );
     }
 
     logIfNotSilent(silent, "🪄 Generated `basehub` client");
