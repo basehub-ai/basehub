@@ -65,8 +65,8 @@ importers:
         specifier: 8.0.1
         version: 8.0.1
       '@basehub/mutation-api-helpers':
-        specifier: 1.0.5
-        version: 1.0.5
+        specifier: 1.0.6
+        version: 1.0.6
       '@radix-ui/react-slot':
         specifier: 1.0.2
         version: 1.0.2(@types/react@18.2.20)(react@18.2.0)
@@ -245,8 +245,8 @@ packages:
       - enquirer
     dev: false
 
-  /@basehub/mutation-api-helpers@1.0.5:
-    resolution: {integrity: sha512-vDhKkdCvA9OgqTm6L/6ryrI6StpIkn0vcVzMKQQc7fDfeHyJAWNzGBjzHdBpFMpOacUn/KI1PN7WQAvK6UbQGg==}
+  /@basehub/mutation-api-helpers@1.0.6:
+    resolution: {integrity: sha512-8Q7X2Z+orp7hN8gcAhyD1R1SB2ALjXC3jhZ7IgbnGL7IF31qJ3Dt7oX4sJDZLn8SK0OdgUOAwJQQc/f6vyY+XQ==}
     dependencies:
       type-fest: 3.7.1
     dev: false
