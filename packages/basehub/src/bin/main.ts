@@ -181,16 +181,13 @@ export const main = async (
         "mutation<R extends MutationGenqlSelection>",
         `mutation<
 R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> & {
-      transaction?: Omit<MutationGenqlSelection["transaction"], "__args"> & {
+      transaction?: {
         __args: Omit<
           NonNullable<MutationGenqlSelection["transaction"]>["__args"],
           "data"
         > & { data: Transaction | string };
       };
-      transactionAwaitable?: Omit<
-        MutationGenqlSelection["transactionAwaitable"],
-        "__args"
-      > & {
+      transactionAwaitable?: TransactionStatusGenqlSelection & {
         __args: Omit<
           NonNullable<MutationGenqlSelection["transactionAwaitable"]>["__args"],
           "data"
@@ -202,7 +199,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
 
       // add import for Transaction at the start of the file
       schemaFileContents +=
-        "\nimport type { Transaction } from './api-transaction';\n";
+        "\nimport type { Transaction } from './api-transaction';\nimport type { TransactionStatusGenqlSelection } from './schema';\n";
     }
 
     // 3. append our basehub function to the end of the file.
