@@ -180,14 +180,23 @@ export const main = async (
       schemaFileContents = schemaFileContents.replace(
         "mutation<R extends MutationGenqlSelection>",
         `mutation<
-R extends Omit<MutationGenqlSelection, "transaction"> & {
-  transaction?: Omit<MutationGenqlSelection["transaction"], "__args"> & {
-    __args: Omit<
-      NonNullable<MutationGenqlSelection["transaction"]>["__args"],
-      "data"
-    > & { data: Transaction | string };
-  };
-},
+R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> & {
+      transaction?: Omit<MutationGenqlSelection["transaction"], "__args"> & {
+        __args: Omit<
+          NonNullable<MutationGenqlSelection["transaction"]>["__args"],
+          "data"
+        > & { data: Transaction | string };
+      };
+      transactionAwaitable?: Omit<
+        MutationGenqlSelection["transactionAwaitable"],
+        "__args"
+      > & {
+        __args: Omit<
+          NonNullable<MutationGenqlSelection["transactionAwaitable"]>["__args"],
+          "data"
+        > & { data: Transaction | string };
+      };
+    },
 >`
       );
 
