@@ -1,5 +1,11 @@
 # basehub
 
+## 7.0.5
+
+### Patch Changes
+
+- fix transactionAwaitable type signature
+
 ## 7.0.4
 
 ### Patch Changes
