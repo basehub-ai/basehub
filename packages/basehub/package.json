@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@basehub/genql": "8.0.1",
-    "@basehub/mutation-api-helpers": "1.0.6",
+    "@basehub/mutation-api-helpers": "2.0.0",
     "@radix-ui/react-slot": "1.0.2",
     "arg": "5.0.1",
     "dotenv-mono": "1.3.10",
