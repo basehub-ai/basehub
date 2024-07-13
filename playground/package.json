@@ -4,14 +4,14 @@
   "version": "0.0.113",
   "scripts": {
     "dev": "basehub dev & next dev",
-    "build": "node ./vision.js && next build",
+    "build": "basehub && next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
     "generate": "basehub"
   },
   "dependencies": {
-    "basehub": "link:../packages/basehub",
+    "basehub": "workspace:*",
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
     "graphql": "^16.8.1",
