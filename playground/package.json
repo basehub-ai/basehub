@@ -4,7 +4,7 @@
   "version": "0.0.113",
   "scripts": {
     "dev": "basehub dev & next dev",
-    "build": "pnpm basehub && next build",
+    "build": "basehub && next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
