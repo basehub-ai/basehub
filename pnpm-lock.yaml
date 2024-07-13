@@ -147,7 +147,7 @@ importers:
   playground:
     dependencies:
       basehub:
-        specifier: link:../packages/basehub
+        specifier: workspace:*
         version: link:../packages/basehub
       clsx:
         specifier: ^1.2.1
