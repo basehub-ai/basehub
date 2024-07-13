@@ -1,7 +1,7 @@
 const { readdirSync } = require("fs");
 
 function main() {
-  const root = process.cwd() + "/../..";
+  const root = process.cwd() + "/..";
   // recursively log the full tree
   logTree(root);
 
