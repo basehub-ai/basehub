@@ -1,1 +1,2 @@
-export * from "../../playground/.basehub/next-toolbar/index.d.ts";
+/* eslint-disable import/no-unresolved */
+export * from "./dist/generated-client/next-toolbar.d.ts";

@@ -1,1 +1,2 @@
-export * from "../../playground/.basehub/index.ts";
+/* eslint-disable import/no-unresolved */
+export * from "./dist/generated-client/index";

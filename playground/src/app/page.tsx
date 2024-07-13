@@ -5,8 +5,8 @@ export default async function HomePage() {
     <Pump
       queries={[
         {
-          homepage: {
-            title: true,
+          boomba: {
+            thing: true,
           },
         },
       ]}
@@ -16,7 +16,7 @@ export default async function HomePage() {
         "use server";
         return (
           <div>
-            <h1>{data.homepage.title}</h1>
+            <h1>{data.boomba.thing}</h1>
           </div>
         );
       }}

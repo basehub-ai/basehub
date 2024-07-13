@@ -1,1 +1,6 @@
-export * from "../../playground/.basehub/react-pump/index.js";
+throw new Error(
+  `\`react-pump\` not found. Make sure to run \`npx basehub\` in order to generate it.
+
+If the error persist, please raise an issue at https://github.com/basehub-ai/basehub
+  `
+);
