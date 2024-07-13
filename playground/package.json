@@ -11,7 +11,7 @@
     "generate": "basehub"
   },
   "dependencies": {
-    "basehub": "workspace:^",
+    "basehub": "workspace:*",
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
     "graphql": "^16.8.1",
