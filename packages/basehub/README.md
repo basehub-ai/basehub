@@ -1,6 +1,6 @@
 # `basehub` 🪄
 
-JavaScript / TypeScript SDK for [BaseHub](https://basehub.com/), the first AI-native content hub.
+JavaScript / TypeScript SDK for [BaseHub](https://basehub.com/), a very fast headless cms.
 
 **Features:**
 
