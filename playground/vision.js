@@ -1,7 +1,7 @@
 const { readdirSync } = require("fs");
 
 function main() {
-  const root = process.cwd() + "/../node_modules/basehub";
+  const root = process.cwd() + "/../node_modules/.pnpm/basehub";
   // recursively log the full tree
   logTree(root);
 
