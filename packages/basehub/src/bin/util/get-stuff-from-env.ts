@@ -172,7 +172,7 @@ export const getStuffFromEnv = (
   // 3. handle deployment platforms
   if (!ref) {
     // try to infer ref from the environment.
-    ref = getRefFromDeploymentPlatform({ ref });
+    ref = getRefFromDeploymentPlatform({ ref, draft });
   }
 
   return {
@@ -336,7 +336,7 @@ export const getStuffFromEnv = (options) => {
 
     // 3. handle deployment platforms
     if (!ref) {
-      ref = getRefFromDeploymentPlatform({ ref })
+      ref = getRefFromDeploymentPlatform({ ref, draft })
     }
 
     return {

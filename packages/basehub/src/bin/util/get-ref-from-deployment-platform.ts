@@ -4,6 +4,7 @@ export const getRefFromDeploymentPlatform = ({
   ref,
 }: {
   ref: string | null;
+  draft: boolean;
 }) => {
   if (ref) return ref;
 
@@ -24,7 +25,7 @@ export const getRefFromDeploymentPlatform = ({
 };
 
 export const runtime__getRefFromDeploymentPlatform = () => /**JavaScript */ `
-export const getRefFromDeploymentPlatform = ({ ref }) => {
+export const getRefFromDeploymentPlatform = ({ ref, draft }) => {
   if (ref) return ref;
 
   console.log('VERCEL_GIT_COMMIT_REF', process.env.VERCEL_GIT_COMMIT_REF);
