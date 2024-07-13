@@ -1,5 +1,9 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 import { dotenvLoad } from "dotenv-mono";
+import {
+  getRefFromDeploymentPlatform,
+  runtime__getRefFromDeploymentPlatform,
+} from "./get-ref-from-deployment-platform";
 
 /**
  * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
@@ -117,7 +121,7 @@ export const getStuffFromEnv = (
     process.exit(1);
   }
 
-  const ref =
+  let ref =
     basehubUrl.searchParams.get("ref") ??
     getEnvVar("REF") ??
     (backwardsCompatURL
@@ -163,9 +167,13 @@ export const getStuffFromEnv = (
   basehubUrl.searchParams.delete("ref");
   basehubUrl.searchParams.delete("draft");
 
-  // 3. done.
-
   draft = !!draft;
+
+  // 3. handle deployment platforms
+  if (!ref) {
+    // try to infer ref from the environment.
+    ref = getRefFromDeploymentPlatform({ ref });
+  }
 
   return {
     draft,
@@ -187,6 +195,9 @@ export const getStuffFromEnv = (
 export const runtime__getStuffFromEnvString = (
   options: Options
 ) => /**JavaScript */ `
+
+${runtime__getRefFromDeploymentPlatform()}
+
 export const getStuffFromEnv = (options) => {
     const defaultEnvVarPrefix = "${defaultEnvVarPrefix}";
 
@@ -279,7 +290,7 @@ export const getStuffFromEnv = (options) => {
       );
     }
 
-    const ref =
+    let ref =
       basehubUrl.searchParams.get("ref") ??
       parsedBasehubRefEnv ??
       (backwardsCompatURL
@@ -323,7 +334,10 @@ export const getStuffFromEnv = (options) => {
     basehubUrl.searchParams.delete("draft");
     basehubUrl.searchParams.delete("api-version");
 
-    // 3. done.
+    // 3. handle deployment platforms
+    if (!ref) {
+      ref = getRefFromDeploymentPlatform({ ref })
+    }
 
     return {
       isForcedDraft: ${!!options.forceDraft},
