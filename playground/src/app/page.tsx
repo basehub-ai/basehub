@@ -10,6 +10,7 @@ export default async function HomePage() {
           },
         },
       ]}
+      next={{ revalidate: 1 }}
     >
       {async ([data]) => {
         "use server";
