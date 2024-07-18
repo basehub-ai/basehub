@@ -1,5 +1,26 @@
 # basehub
 
+## 7.0.7
+
+### Patch Changes
+
+- patch
+- Fix error log when token is not found
+- 4940acc: Auto alias union fields to prevent conflicts
+- e83c917: replaceSystemAliases on pump response also
+
+## 7.0.7-canary.3
+
+### Patch Changes
+
+- Fix error log when token is not found
+
+## 7.0.7-canary.2
+
+### Patch Changes
+
+- patch
+
 ## 7.0.7-canary.1
 
 ### Patch Changes

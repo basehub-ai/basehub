@@ -497,7 +497,7 @@ export const basehub = (options?: Options) => {
   };
 };
 
-basehub.replaceSystemAliases = createClient.replaceSystemAliases;
+basehub.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
 `;
 
 function logInsideBox(lines: string[]) {
