@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "7.0.7-canary.0",
+  "version": "7.0.7-canary.1",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -50,7 +50,7 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
-    "@basehub/genql": "9.0.0-canary.0",
+    "@basehub/genql": "9.0.0-canary.1",
     "@basehub/mutation-api-helpers": "2.0.0",
     "@radix-ui/react-slot": "1.0.2",
     "arg": "5.0.1",

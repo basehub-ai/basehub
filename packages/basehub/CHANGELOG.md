@@ -1,5 +1,11 @@
 # basehub
 
+## 7.0.7-canary.1
+
+### Patch Changes
+
+- replaceSystemAliases on pump response also
+
 ## 7.0.7-canary.0
 
 ### Patch Changes

@@ -8,6 +8,7 @@
     "playground": "0.0.113"
   },
   "changesets": [
-    "tame-horses-protect"
+    "tame-horses-protect",
+    "tiny-bananas-begin"
   ]
 }

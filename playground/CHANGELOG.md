@@ -1,5 +1,12 @@
 # playground
 
+## 0.0.114-canary.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.0.7-canary.1
+
 ## 0.0.114-canary.0
 
 ### Patch Changes

@@ -496,6 +496,8 @@ export const basehub = (options?: Options) => {
     ) => Promise<Cast>,
   };
 };
+
+basehub.replaceSystemAliases = createClient.replaceSystemAliases;
 `;
 
 function logInsideBox(lines: string[]) {
