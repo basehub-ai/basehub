@@ -1,5 +1,11 @@
 # basehub
 
+## 7.0.7-canary.0
+
+### Patch Changes
+
+- Auto alias union fields to prevent conflicts
+
 ## 7.0.6
 
 ### Patch Changes

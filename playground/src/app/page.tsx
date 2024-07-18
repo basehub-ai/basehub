@@ -1,42 +1,36 @@
-import { Pump } from "basehub/react-pump";
-import { BaseHubImage } from "basehub/next-image";
-import Image from "next/image";
+import { basehub } from "basehub";
 
 export default async function HomePage() {
-  return (
-    <Pump
-      queries={[
-        {
-          footer: {
-            someImage: {
-              url: true,
-              width: true,
-              height: true,
-              alt: true,
+  const data = await basehub({ cache: "no-cache" }).query({
+    unionTests: {
+      union: {
+        on_FeaturesBigImageComponent: {
+          __typename: true,
+          // __scalar: true,
+          conflict: true,
+        },
+        on_AnotherCompComponent: {
+          __typename: true,
+          // __scalar: true,
+          conflict: true,
+          nested: {
+            on_AnotherCompComponent: {
+              conflict: true,
+            },
+            on_FeaturesBigImageComponent: {
+              conflict: true,
             },
           },
         },
-      ]}
-    >
-      {async ([data]) => {
-        "use server";
-        return (
-          <div>
-            <BaseHubImage
-              src={data.footer.someImage.url}
-              alt={data.footer.someImage.alt ?? ""}
-              width={1600 / 2}
-              height={900 / 2}
-            />
-            <Image
-              src={data.footer.someImage.url}
-              alt={data.footer.someImage.alt ?? ""}
-              width={1600 / 2}
-              height={900 / 2}
-            />
-          </div>
-        );
-      }}
-    </Pump>
+      },
+    },
+  });
+
+  return (
+    <div>
+      <pre>
+        <code>{JSON.stringify(data, null, 2)}</code>
+      </pre>
+    </div>
   );
 }
