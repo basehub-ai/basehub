@@ -579,7 +579,5 @@ const scheduleNonOverlappingWork = (
     }
   });
 
-  runWatch();
-
   return { watchPromise, stopWatching };
 };

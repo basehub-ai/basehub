@@ -1,5 +1,11 @@
 # basehub
 
+## 7.0.9
+
+### Patch Changes
+
+- Fix watcher coming up twice
+
 ## 7.0.8
 
 ### Patch Changes
