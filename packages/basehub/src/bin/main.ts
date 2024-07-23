@@ -441,21 +441,33 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
   if (args["--watch"]) {
     let isFirst = true;
     let previousHash = "";
-    await scheduleNonOverlappingWork(async () => {
-      const result = await generateSDK(!isFirst, previousHash);
-      if (isFirst) {
-        console.log(" ");
-        logInsideBox([
-          "👀 `basehub` experimental --watch mode. Tell us about our bugs: https://basehub.com/support",
-        ]);
-        console.log(" ");
-      } else if (!result.preventedClientGeneration) {
-        console.log("🔄 Detected changes, `basehub` re-generated");
-      }
+    const { watchPromise, stopWatching } = scheduleNonOverlappingWork(
+      async () => {
+        const result = await generateSDK(!isFirst, previousHash);
+        if (isFirst) {
+          console.log(" ");
+          logInsideBox([
+            "👀 `basehub` experimental --watch mode. Tell us about our bugs: https://basehub.com/support",
+          ]);
+          console.log(" ");
+        } else if (!result.preventedClientGeneration) {
+          console.log("🔄 Detected changes, `basehub` re-generated");
+        }
 
-      previousHash = result.schemaHash;
-      isFirst = false;
-    }, 3000);
+        previousHash = result.schemaHash;
+        isFirst = false;
+      },
+      2500,
+      1000 * 60 * 60 * 24 // 24 hours
+    );
+
+    process.on("SIGINT", () => {
+      stopWatching();
+      console.log("\n👋 Stopping `basehub` watcher");
+      process.exit(0);
+    });
+
+    await watchPromise;
   } else {
     await generateSDK(false, "");
   }
@@ -526,16 +538,48 @@ function logIfNotSilent(silent: boolean | undefined, message: string) {
   }
 }
 
-const scheduleNonOverlappingWork = async (
+const scheduleNonOverlappingWork = (
   callback: () => Promise<void>,
-  t: number
+  t: number,
+  totalTimeout?: number
 ) => {
-  await callback();
+  let isWatching = true;
+  let watcherTimeout: NodeJS.Timeout | null = null;
+  let totalTimeoutId: NodeJS.Timeout | null = null;
 
-  await new Promise((resolve) =>
-    // Re-schedule after operation completes (recursive!)
-    setTimeout(() => {
-      scheduleNonOverlappingWork(callback, t).then(resolve);
-    }, t)
-  );
+  const runWatch = async () => {
+    if (!isWatching) return;
+
+    await callback();
+
+    watcherTimeout = setTimeout(runWatch, t);
+  };
+
+  let stopWatching = () => undefined;
+
+  const watchPromise = new Promise<void>((resolve) => {
+    stopWatching = () => {
+      isWatching = false;
+      if (watcherTimeout !== null) {
+        clearTimeout(watcherTimeout);
+      }
+      if (totalTimeoutId !== null) {
+        clearTimeout(totalTimeoutId);
+      }
+      resolve();
+    };
+
+    runWatch();
+
+    if (totalTimeout) {
+      totalTimeoutId = setTimeout(() => {
+        console.log("\n⌛ Watch timeout reached. Stopping watcher.");
+        stopWatching();
+      }, totalTimeout);
+    }
+  });
+
+  runWatch();
+
+  return { watchPromise, stopWatching };
 };
