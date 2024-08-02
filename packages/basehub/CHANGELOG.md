@@ -1,5 +1,12 @@
 # basehub
 
+## 7.0.10
+
+### Patch Changes
+
+- 1f96141: Remove React from direct dependencies in favor of existing peer dependency declaration.
+- 249a647: Pin `@radix-ui/react-slot` dependency to SemVer MAJOR
+
 ## 7.0.9
 
 ### Patch Changes
