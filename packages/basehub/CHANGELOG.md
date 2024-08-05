@@ -1,5 +1,11 @@
 # basehub
 
+## 7.0.11
+
+### Patch Changes
+
+- 8b27ee9: Add unoptimized at BasehubImage for .svg files
+
 ## 7.0.10
 
 ### Patch Changes
