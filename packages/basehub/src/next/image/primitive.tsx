@@ -73,7 +73,7 @@ Expected origin to be one of:
 export const BaseHubImage = (props: ImageProps) => {
   "use client";
   // split url by `?` to check if it has query params
-  const unoptimized: boolean = props.unoptimized ?? props.src.toString().split("?")[0]!.endsWith(".svg");
+  const unoptimized = props.unoptimized ?? props.src.toString().split("?")[0]?.endsWith(".svg") ?? undefined;
   // eslint-disable-next-line jsx-a11y/alt-text
   return <Image {...props} loader={basehubImageLoader} unoptimized={unoptimized} />;
 };
