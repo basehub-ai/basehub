@@ -121,7 +121,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
               errors.push(_errors);
               responseHashes[index] = _responseHash;
 
-              return data;
+              return basehub.replaceSystemAliases(data);
             })
           : basehub(basehubProps).query(singleQuery);
         cache.set(cacheKey, {

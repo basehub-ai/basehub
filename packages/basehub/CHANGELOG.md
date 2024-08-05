@@ -1,5 +1,75 @@
 # basehub
 
+## 7.0.10
+
+### Patch Changes
+
+- 1f96141: Remove React from direct dependencies in favor of existing peer dependency declaration.
+- 249a647: Pin `@radix-ui/react-slot` dependency to SemVer MAJOR
+
+## 7.0.9
+
+### Patch Changes
+
+- Fix watcher coming up twice
+
+## 7.0.8
+
+### Patch Changes
+
+- Improve watcher logic
+
+## 7.0.7
+
+### Patch Changes
+
+- patch
+- Fix error log when token is not found
+- 4940acc: Auto alias union fields to prevent conflicts
+- e83c917: replaceSystemAliases on pump response also
+
+## 7.0.7-canary.3
+
+### Patch Changes
+
+- Fix error log when token is not found
+
+## 7.0.7-canary.2
+
+### Patch Changes
+
+- patch
+
+## 7.0.7-canary.1
+
+### Patch Changes
+
+- replaceSystemAliases on pump response also
+
+## 7.0.7-canary.0
+
+### Patch Changes
+
+- Auto alias union fields to prevent conflicts
+
+## 7.0.6
+
+### Patch Changes
+
+- Fix transactionAwaitable type
+
+## 7.0.5
+
+### Patch Changes
+
+- fix transactionAwaitable type signature
+
+## 7.0.4
+
+### Patch Changes
+
+- update @basehub/mutation-api-helpers
+
 ## 7.0.3
 
 ### Patch Changes
