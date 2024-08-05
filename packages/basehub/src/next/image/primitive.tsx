@@ -72,8 +72,8 @@ Expected origin to be one of:
  */
 export const BaseHubImage = (props: ImageProps) => {
   "use client";
-  let unoptimized: boolean = props.unoptimized ?? false;
-  if (typeof props.src === 'string') unoptimized = props.src.endsWith('.svg');
+  const url = new URL(props.src as string);
+  const unoptimized: boolean = props.unoptimized ?? url.href.endsWith('.svg')
   // eslint-disable-next-line jsx-a11y/alt-text
   return <Image {...props} loader={basehubImageLoader} unoptimized={unoptimized} />;
 };
