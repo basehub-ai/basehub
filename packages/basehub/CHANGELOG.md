@@ -1,5 +1,11 @@
 # basehub
 
+## 7.0.12
+
+### Patch Changes
+
+- 6042f19: Override placeholder so that it doesn't throw a typescript error
+
 ## 7.0.11
 
 ### Patch Changes
