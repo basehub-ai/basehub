@@ -70,10 +70,29 @@ Expected origin to be one of:
  * <Image {...props} loader={basehubImageLoader} />
  * ```
  */
-export const BaseHubImage = (props: ImageProps) => {
+export const BaseHubImage = (
+  props: Omit<ImageProps, "placeholder"> & {
+    /**
+     * A placeholder to use while the image is loading. Possible values are blur, empty, or data:image/...
+     * @defaultValue empty
+     * @see https://nextjs.org/docs/api-reference/next/image#placeholder
+     */
+    placeholder?: string;
+  }
+) => {
   "use client";
   // split url by `?` to check if it has query params
-  const unoptimized = props.unoptimized ?? props.src.toString().split("?")[0]?.endsWith(".svg") ?? undefined;
-  // eslint-disable-next-line jsx-a11y/alt-text
-  return <Image {...props} loader={basehubImageLoader} unoptimized={unoptimized} />;
+  const unoptimized =
+    props.unoptimized ??
+    props.src.toString().split("?")[0]?.endsWith(".svg") ??
+    undefined;
+  return (
+    // eslint-disable-next-line jsx-a11y/alt-text
+    <Image
+      {...props}
+      placeholder={props.placeholder as ImageProps["placeholder"]}
+      loader={basehubImageLoader}
+      unoptimized={unoptimized}
+    />
+  );
 };
