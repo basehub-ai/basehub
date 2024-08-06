@@ -62,6 +62,15 @@ Expected origin to be one of:
   return url.toString();
 };
 
+export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
+  /**
+   * A placeholder to use while the image is loading. Possible values are blur, empty, or data:image/...
+   * @defaultValue empty
+   * @see https://nextjs.org/docs/api-reference/next/image#placeholder
+   */
+  placeholder?: string;
+};
+
 /**
  * Uses `next/image` under the hood. Just passes BaseHub's `loader` so that it utilizes BaseHub's Image Optimization.
  *
@@ -70,16 +79,7 @@ Expected origin to be one of:
  * <Image {...props} loader={basehubImageLoader} />
  * ```
  */
-export const BaseHubImage = (
-  props: Omit<ImageProps, "placeholder"> & {
-    /**
-     * A placeholder to use while the image is loading. Possible values are blur, empty, or data:image/...
-     * @defaultValue empty
-     * @see https://nextjs.org/docs/api-reference/next/image#placeholder
-     */
-    placeholder?: string;
-  }
-) => {
+export const BaseHubImage = (props: BaseHubImageProps) => {
   "use client";
   // split url by `?` to check if it has query params
   const unoptimized =

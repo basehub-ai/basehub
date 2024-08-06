@@ -1,0 +1,5 @@
+---
+"basehub": patch
+---
+
+Export BaseHubImageProps
