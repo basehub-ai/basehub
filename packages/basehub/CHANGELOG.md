@@ -1,5 +1,11 @@
 # basehub
 
+## 7.0.13
+
+### Patch Changes
+
+- a5b750f: Export BaseHubImageProps
+
 ## 7.0.12
 
 ### Patch Changes
