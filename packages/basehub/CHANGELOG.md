@@ -1,5 +1,11 @@
 # basehub
 
+## 7.1.0-canary.0
+
+### Minor Changes
+
+- Support raw thumbhashes in basehub image
+
 ## 7.0.13
 
 ### Patch Changes

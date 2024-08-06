@@ -1,5 +1,6 @@
 import type { ImageLoaderProps, ImageProps } from "next/image";
 import Image from "next/image";
+import { thumbHashToDataURL } from "thumbhash";
 
 const r2URL_deprecated = `https://basehub.earth`;
 const assetsURL = `https://assets.basehub.com`;
@@ -64,11 +65,18 @@ Expected origin to be one of:
 
 export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
   /**
+   * Consider using `thumbhash` instead, as it'll send less KBs to the browser.
+   *
    * A placeholder to use while the image is loading. Possible values are blur, empty, or data:image/...
    * @defaultValue empty
    * @see https://nextjs.org/docs/api-reference/next/image#placeholder
+   * @deprecated Use `thumbhash` instead, as it'll
    */
   placeholder?: string;
+  /**
+   * A thumbhash that'll be used as a placeholder while the image is loading.
+   */
+  thumbhash?: string;
 };
 
 /**
@@ -86,11 +94,24 @@ export const BaseHubImage = (props: BaseHubImageProps) => {
     props.unoptimized ??
     props.src.toString().split("?")[0]?.endsWith(".svg") ??
     undefined;
+
+  let placeholder = props.placeholder;
+  if (placeholder === undefined && props.thumbhash) {
+    placeholder = thumbHashToDataURL(
+      new Uint8Array(
+        window
+          .atob(props.thumbhash)
+          .split("")
+          .map((x) => x.charCodeAt(0))
+      )
+    );
+  }
+
   return (
     // eslint-disable-next-line jsx-a11y/alt-text
     <Image
       {...props}
-      placeholder={props.placeholder as ImageProps["placeholder"]}
+      placeholder={placeholder as ImageProps["placeholder"]}
       loader={basehubImageLoader}
       unoptimized={unoptimized}
     />

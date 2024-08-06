@@ -1,0 +1,13 @@
+{
+  "mode": "pre",
+  "tag": "canary",
+  "initialVersions": {
+    "eslint-config-custom": "1.0.0",
+    "tsconfig": "1.0.0",
+    "basehub": "7.0.13",
+    "playground": "0.0.120"
+  },
+  "changesets": [
+    "clean-cougars-act"
+  ]
+}
