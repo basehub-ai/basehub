@@ -8,6 +8,7 @@
     "playground": "0.0.123"
   },
   "changesets": [
+    "empty-apes-bow",
     "sour-buses-hug",
     "tricky-impalas-obey"
   ]

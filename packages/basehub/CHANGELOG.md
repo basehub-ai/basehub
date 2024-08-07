@@ -1,5 +1,11 @@
 # basehub
 
+## 7.1.3-canary.2
+
+### Patch Changes
+
+- try another way
+
 ## 7.1.3-canary.1
 
 ### Patch Changes

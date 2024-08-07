@@ -1,5 +1,5 @@
 import type { ImageLoaderProps, ImageProps } from "next/image";
-import { unstable_getImgProps } from "next/image";
+import Image from "next/image";
 import { thumbHashToDataURL } from "thumbhash";
 import { forwardRef, useId } from "react";
 
@@ -116,28 +116,17 @@ export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
       placeholder = dummyPlaceholderURL;
     }
 
-    const imageProps = unstable_getImgProps({
-      ...props,
-      placeholder: placeholder as ImageProps["placeholder"],
-      unoptimized,
-      id,
-    });
-
-    if (
-      imageProps.props.style.backgroundImage &&
-      imageProps.props.style.backgroundImage.includes(dummyPlaceholderURL)
-    ) {
-      imageProps.props.style.backgroundImage =
-        imageProps.props.style.backgroundImage.replace(
-          dummyPlaceholderURL,
-          "var(--bshb-thumbhash-placeholder)"
-        );
-    }
-
     return (
       <>
-        {/* eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element */}
-        <img {...imageProps} ref={ref} />
+        {/* eslint-disable-next-line jsx-a11y/alt-text */}
+        <Image
+          {...props}
+          placeholder={placeholder as ImageProps["placeholder"]}
+          loader={basehubImageLoader}
+          unoptimized={unoptimized}
+          ref={ref}
+          id={id}
+        />
         {placeholder === undefined && thumbhash && (
           <script
             suppressHydrationWarning
@@ -146,7 +135,11 @@ export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
               __html: `
 try {
   const img = document.getElementById("${id}");
-  img.style["--bshb-thumbhash-placeholder"] = window.__bshb_thumbHashToDataURL("${thumbhash}");
+  const currentBg = img.style.backgroundImage;
+  if (currentBg.includes("${dummyPlaceholderURL}")) {
+    img.style["--bshb-thumbhash-placeholder"] = window.__bshb_thumbHashToDataURL("${thumbhash}");
+    img.style.backgroundImage = currentBg.replace("${dummyPlaceholderURL}", "var(--bshb-thumbhash-placeholder)");
+  }
 } catch (e) {
   // ignore
 }
