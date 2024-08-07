@@ -1,5 +1,11 @@
 # basehub
 
+## 7.1.1
+
+### Patch Changes
+
+- Fix client pump not removing aliases
+
 ## 7.1.0
 
 ### Minor Changes

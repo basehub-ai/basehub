@@ -218,6 +218,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       "../index",
       "@basehub/mutation-api-helpers",
       "next",
+      "../runtime/_aliasing.js",
     ];
 
     const useClientPlugin: esbuild.Plugin = {
