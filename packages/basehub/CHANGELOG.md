@@ -1,5 +1,15 @@
 # basehub
 
+## 7.1.0
+
+### Minor Changes
+
+- 6be2d3f: Support raw thumbhashes in basehub image
+
+### Patch Changes
+
+- 477049b: Improve prop descriptions
+
 ## 7.1.0-canary.1
 
 ### Patch Changes

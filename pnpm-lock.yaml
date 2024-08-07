@@ -100,9 +100,6 @@ importers:
       sonner:
         specifier: 1.4.3
         version: 1.4.3(react-dom@18.2.0)(react@18.2.0)
-      thumbhash:
-        specifier: 0.1.1
-        version: 0.1.1
       typesense:
         specifier: 1.8.2
         version: 1.8.2(@babel/runtime@7.24.6)
@@ -137,6 +134,9 @@ importers:
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
+      thumbhash:
+        specifier: 0.1.1
+        version: 0.1.1
       tsconfig:
         specifier: workspace:*
         version: link:../../internal/tsconfig
@@ -5539,7 +5539,7 @@ packages:
 
   /thumbhash@0.1.1:
     resolution: {integrity: sha512-kH5pKeIIBPQXAOni2AiY/Cu/NKdkFREdpH+TLdM0g6WA7RriCv0kPLgP731ady67MhTAqrVG/4mnEeibVuCJcg==}
-    dev: false
+    dev: true
 
   /tmp@0.0.33:
     resolution: {integrity: sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==}
