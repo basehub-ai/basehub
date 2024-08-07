@@ -1,7 +1,7 @@
 import type { ImageLoaderProps, ImageProps } from "next/image";
 import Image from "next/image";
 import { thumbHashToDataURL } from "thumbhash";
-import { forwardRef } from "react";
+import { forwardRef, useId } from "react";
 
 const r2URL_deprecated = `https://basehub.earth`;
 const assetsURL = `https://assets.basehub.com`;
@@ -78,6 +78,11 @@ export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
    * It'll automatically be converted to a data URL and used as a placeholder.
    */
   thumbhash?: string;
+  /**
+   * Nonce string to pass to the inline script for CSP headers.
+   * We use an inline script to set the thumbhash placeholder (which is generated on the client, on the fly).
+   */
+  nonce?: string | undefined;
 };
 
 /**
@@ -89,8 +94,12 @@ export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
  * ```
  */
 export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
-  (props, ref) => {
+  ({ thumbhash, ...props }, ref) => {
     "use client";
+
+    const _id = useId();
+    const id = `bshb-image-${_id}`;
+
     // split url by `?` to check if it has query params
     const unoptimized =
       props.unoptimized ??
@@ -98,26 +107,42 @@ export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
       undefined;
 
     let placeholder = props.placeholder;
-    if (placeholder === undefined && props.thumbhash) {
-      placeholder = thumbHashToDataURL(
-        new Uint8Array(
-          window
-            .atob(props.thumbhash)
-            .split("")
-            .map((x) => x.charCodeAt(0))
-        )
-      );
+    if (placeholder === undefined && thumbhash) {
+      if (typeof window !== "undefined") {
+        // @ts-ignore
+        window.__bshb_thumbHashToDataURL = thumbHashToDataURL;
+      }
+      placeholder = "var(--bshb-thumbhash-placeholder)";
     }
 
     return (
-      // eslint-disable-next-line jsx-a11y/alt-text
-      <Image
-        {...props}
-        placeholder={placeholder as ImageProps["placeholder"]}
-        loader={basehubImageLoader}
-        unoptimized={unoptimized}
-        ref={ref}
-      />
+      <>
+        {/* eslint-disable-next-line jsx-a11y/alt-text */}
+        <Image
+          {...props}
+          placeholder={placeholder as ImageProps["placeholder"]}
+          loader={basehubImageLoader}
+          unoptimized={unoptimized}
+          ref={ref}
+          id={id}
+        />
+        {placeholder === undefined && thumbhash && (
+          <script
+            suppressHydrationWarning
+            nonce={typeof window === "undefined" ? props.nonce : ""}
+            dangerouslySetInnerHTML={{
+              __html: `
+try {
+  const img = document.getElementById("${id}");
+  img.style["--bshb-thumbhash-placeholder"] = window.__bshb_thumbHashToDataURL("${thumbhash}");
+} catch (e) {
+  // ignore
+}
+`,
+            }}
+          />
+        )}
+      </>
     );
   }
 );

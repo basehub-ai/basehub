@@ -1,5 +1,11 @@
 # basehub
 
+## 7.1.3-canary.0
+
+### Patch Changes
+
+- Fix the way we generate placeholders: just client side, and preventing hydration mismatches with an inline script.
+
 ## 7.1.2
 
 ### Patch Changes
