@@ -1,6 +1,7 @@
 import type { ImageLoaderProps, ImageProps } from "next/image";
 import Image from "next/image";
 import { thumbHashToDataURL } from "thumbhash";
+import { forwardRef } from "react";
 
 const r2URL_deprecated = `https://basehub.earth`;
 const assetsURL = `https://assets.basehub.com`;
@@ -87,33 +88,36 @@ export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
  * <Image {...props} loader={basehubImageLoader} />
  * ```
  */
-export const BaseHubImage = (props: BaseHubImageProps) => {
-  "use client";
-  // split url by `?` to check if it has query params
-  const unoptimized =
-    props.unoptimized ??
-    props.src.toString().split("?")[0]?.endsWith(".svg") ??
-    undefined;
+export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
+  (props, ref) => {
+    "use client";
+    // split url by `?` to check if it has query params
+    const unoptimized =
+      props.unoptimized ??
+      props.src.toString().split("?")[0]?.endsWith(".svg") ??
+      undefined;
 
-  let placeholder = props.placeholder;
-  if (placeholder === undefined && props.thumbhash) {
-    placeholder = thumbHashToDataURL(
-      new Uint8Array(
-        window
-          .atob(props.thumbhash)
-          .split("")
-          .map((x) => x.charCodeAt(0))
-      )
+    let placeholder = props.placeholder;
+    if (placeholder === undefined && props.thumbhash) {
+      placeholder = thumbHashToDataURL(
+        new Uint8Array(
+          window
+            .atob(props.thumbhash)
+            .split("")
+            .map((x) => x.charCodeAt(0))
+        )
+      );
+    }
+
+    return (
+      // eslint-disable-next-line jsx-a11y/alt-text
+      <Image
+        {...props}
+        placeholder={placeholder as ImageProps["placeholder"]}
+        loader={basehubImageLoader}
+        unoptimized={unoptimized}
+        ref={ref}
+      />
     );
   }
-
-  return (
-    // eslint-disable-next-line jsx-a11y/alt-text
-    <Image
-      {...props}
-      placeholder={placeholder as ImageProps["placeholder"]}
-      loader={basehubImageLoader}
-      unoptimized={unoptimized}
-    />
-  );
-};
+);

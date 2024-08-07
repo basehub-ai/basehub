@@ -1,5 +1,11 @@
 # basehub
 
+## 7.1.2
+
+### Patch Changes
+
+- forwardRef basehub image
+
 ## 7.1.1
 
 ### Patch Changes
