@@ -1,5 +1,11 @@
 # basehub
 
+## 7.1.3-canary.1
+
+### Patch Changes
+
+- go over annoying next.js warning
+
 ## 7.1.3-canary.0
 
 ### Patch Changes

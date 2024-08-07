@@ -1,10 +1,11 @@
 import type { ImageLoaderProps, ImageProps } from "next/image";
-import Image from "next/image";
+import { unstable_getImgProps } from "next/image";
 import { thumbHashToDataURL } from "thumbhash";
 import { forwardRef, useId } from "react";
 
 const r2URL_deprecated = `https://basehub.earth`;
 const assetsURL = `https://assets.basehub.com`;
+const dummyPlaceholderURL = "data:image/bshb-replace-me";
 
 export const basehubImageLoader = ({
   src,
@@ -112,20 +113,31 @@ export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
         // @ts-ignore
         window.__bshb_thumbHashToDataURL = thumbHashToDataURL;
       }
-      placeholder = "var(--bshb-thumbhash-placeholder)";
+      placeholder = dummyPlaceholderURL;
+    }
+
+    const imageProps = unstable_getImgProps({
+      ...props,
+      placeholder: placeholder as ImageProps["placeholder"],
+      unoptimized,
+      id,
+    });
+
+    if (
+      imageProps.props.style.backgroundImage &&
+      imageProps.props.style.backgroundImage.includes(dummyPlaceholderURL)
+    ) {
+      imageProps.props.style.backgroundImage =
+        imageProps.props.style.backgroundImage.replace(
+          dummyPlaceholderURL,
+          "var(--bshb-thumbhash-placeholder)"
+        );
     }
 
     return (
       <>
-        {/* eslint-disable-next-line jsx-a11y/alt-text */}
-        <Image
-          {...props}
-          placeholder={placeholder as ImageProps["placeholder"]}
-          loader={basehubImageLoader}
-          unoptimized={unoptimized}
-          ref={ref}
-          id={id}
-        />
+        {/* eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element */}
+        <img {...imageProps} ref={ref} />
         {placeholder === undefined && thumbhash && (
           <script
             suppressHydrationWarning
