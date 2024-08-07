@@ -1,5 +1,23 @@
 # basehub
 
+## 7.2.0
+
+### Minor Changes
+
+- Revert back to not doing thumbhash magic
+
+### Patch Changes
+
+- d5008d7: try another way
+- 61149ce: go over annoying next.js warning
+- 72f877b: Fix the way we generate placeholders: just client side, and preventing hydration mismatches with an inline script.
+
+## 7.2.0-canary.3
+
+### Minor Changes
+
+- Revert back to not doing thumbhash magic
+
 ## 7.1.3-canary.2
 
 ### Patch Changes

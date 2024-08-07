@@ -1,11 +1,9 @@
 import type { ImageLoaderProps, ImageProps } from "next/image";
 import Image from "next/image";
-import { thumbHashToDataURL } from "thumbhash";
-import { forwardRef, useId } from "react";
+import { forwardRef } from "react";
 
 const r2URL_deprecated = `https://basehub.earth`;
 const assetsURL = `https://assets.basehub.com`;
-const dummyPlaceholderURL = "data:image/bshb-replace-me";
 
 export const basehubImageLoader = ({
   src,
@@ -67,23 +65,11 @@ Expected origin to be one of:
 
 export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
   /**
-   * Consider using `thumbhash` instead, as it'll send less KBs to the browser and look better. We'll automatically convert it to a data URL and use it as a placeholder.
-   *
    * A placeholder to use while the image is loading. Possible values are blur, empty, or data:image/...
    * @defaultValue empty
    * @see https://nextjs.org/docs/api-reference/next/image#placeholder
    */
   placeholder?: string;
-  /**
-   * A thumbhash that'll be used as a placeholder while the image is loading.
-   * It'll automatically be converted to a data URL and used as a placeholder.
-   */
-  thumbhash?: string;
-  /**
-   * Nonce string to pass to the inline script for CSP headers.
-   * We use an inline script to set the thumbhash placeholder (which is generated on the client, on the fly).
-   */
-  nonce?: string | undefined;
 };
 
 /**
@@ -93,61 +79,26 @@ export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
  * ```tsx
  * <Image {...props} loader={basehubImageLoader} />
  * ```
+ * and a few other props.
  */
 export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
-  ({ thumbhash, ...props }, ref) => {
+  (props, ref) => {
     "use client";
 
-    const _id = useId();
-    const id = `bshb-image-${_id}`;
-
-    // split url by `?` to check if it has query params
     const unoptimized =
       props.unoptimized ??
       props.src.toString().split("?")[0]?.endsWith(".svg") ??
       undefined;
 
-    let placeholder = props.placeholder;
-    if (placeholder === undefined && thumbhash) {
-      if (typeof window !== "undefined") {
-        // @ts-ignore
-        window.__bshb_thumbHashToDataURL = thumbHashToDataURL;
-      }
-      placeholder = dummyPlaceholderURL;
-    }
-
     return (
-      <>
-        {/* eslint-disable-next-line jsx-a11y/alt-text */}
-        <Image
-          {...props}
-          placeholder={placeholder as ImageProps["placeholder"]}
-          loader={basehubImageLoader}
-          unoptimized={unoptimized}
-          ref={ref}
-          id={id}
-        />
-        {placeholder === undefined && thumbhash && (
-          <script
-            suppressHydrationWarning
-            nonce={typeof window === "undefined" ? props.nonce : ""}
-            dangerouslySetInnerHTML={{
-              __html: `
-try {
-  const img = document.getElementById("${id}");
-  const currentBg = img.style.backgroundImage;
-  if (currentBg.includes("${dummyPlaceholderURL}")) {
-    img.style["--bshb-thumbhash-placeholder"] = window.__bshb_thumbHashToDataURL("${thumbhash}");
-    img.style.backgroundImage = currentBg.replace("${dummyPlaceholderURL}", "var(--bshb-thumbhash-placeholder)");
-  }
-} catch (e) {
-  // ignore
-}
-`,
-            }}
-          />
-        )}
-      </>
+      // eslint-disable-next-line jsx-a11y/alt-text
+      <Image
+        {...props}
+        placeholder={props.placeholder as ImageProps["placeholder"]}
+        loader={basehubImageLoader}
+        unoptimized={unoptimized}
+        ref={ref}
+      />
     );
   }
 );
