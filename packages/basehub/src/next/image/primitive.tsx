@@ -65,16 +65,16 @@ Expected origin to be one of:
 
 export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
   /**
-   * Consider using `thumbhash` instead, as it'll send less KBs to the browser.
+   * Consider using `thumbhash` instead, as it'll send less KBs to the browser and look better. We'll automatically convert it to a data URL and use it as a placeholder.
    *
    * A placeholder to use while the image is loading. Possible values are blur, empty, or data:image/...
    * @defaultValue empty
    * @see https://nextjs.org/docs/api-reference/next/image#placeholder
-   * @deprecated Use `thumbhash` instead, as it'll
    */
   placeholder?: string;
   /**
    * A thumbhash that'll be used as a placeholder while the image is loading.
+   * It'll automatically be converted to a data URL and used as a placeholder.
    */
   thumbhash?: string;
 };
