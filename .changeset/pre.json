@@ -8,6 +8,7 @@
     "playground": "0.0.120"
   },
   "changesets": [
-    "clean-cougars-act"
+    "clean-cougars-act",
+    "large-rules-vanish"
   ]
 }

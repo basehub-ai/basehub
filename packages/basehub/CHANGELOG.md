@@ -1,5 +1,11 @@
 # basehub
 
+## 7.1.0-canary.1
+
+### Patch Changes
+
+- Improve prop descriptions
+
 ## 7.1.0-canary.0
 
 ### Minor Changes
