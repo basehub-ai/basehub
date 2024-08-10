@@ -466,7 +466,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     );
 
     onProcessEndCallbacks.push(() => {
-      console.log("\n👋 Stopping `basehub` watcher");
+      console.log("\n👋 Stopped `basehub` watcher.");
       stopWatching();
     });
 
@@ -599,7 +599,7 @@ const scheduleNonOverlappingWork = (
 
     if (totalTimeout) {
       timeoutId = setTimeout(() => {
-        console.log("\n⌛ Watch timeout reached. Stopping watcher.");
+        console.log("\n⌛ Watch timeout reached. Stopped `basehub` watcher.");
         stopWatching();
       }, totalTimeout);
     }
