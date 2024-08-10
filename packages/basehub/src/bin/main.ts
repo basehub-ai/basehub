@@ -21,6 +21,8 @@ const buildManifestSchema = z.object({
   schemaHash: z.string(),
 });
 
+const onProcessEndCallbacks: Array<() => void> = [];
+
 export const main = async (
   args: Args,
   opts: { forceDraft?: boolean; version: string }
@@ -442,13 +444,14 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
   if (args["--watch"]) {
     let isFirst = true;
     let previousHash = "";
+
     const { watchPromise, stopWatching } = scheduleNonOverlappingWork(
       async () => {
         const result = await generateSDK(!isFirst, previousHash);
         if (isFirst) {
           console.log(" ");
           logInsideBox([
-            "👀 `basehub` experimental --watch mode. Tell us about our bugs: https://basehub.com/support",
+            "👀 `basehub` experimental --watch mode. Bugs: https://github.com/basehub-ai/basehub/issues",
           ]);
           console.log(" ");
         } else if (!result.preventedClientGeneration) {
@@ -462,10 +465,9 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       1000 * 60 * 60 * 24 // 24 hours
     );
 
-    process.on("SIGINT", () => {
-      stopWatching();
+    onProcessEndCallbacks.push(() => {
       console.log("\n👋 Stopping `basehub` watcher");
-      process.exit(0);
+      stopWatching();
     });
 
     await watchPromise;
@@ -473,6 +475,28 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     await generateSDK(false, "");
   }
 };
+
+// Handle signals
+["SIGINT", "SIGTERM", "SIGQUIT"].forEach((signal) => {
+  process.on(signal, () => {
+    onProcessEndCallbacks.forEach((cb) => cb());
+    process.exit(0);
+  });
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  onProcessEndCallbacks.forEach((cb) => cb());
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  onProcessEndCallbacks.forEach((cb) => cb());
+  process.exit(1);
+});
 
 const getBaseHubExport = (noStore: boolean) => `
 export type * from "@basehub/mutation-api-helpers";
@@ -546,31 +570,27 @@ function logIfNotSilent(silent: boolean | undefined, message: string) {
 
 const scheduleNonOverlappingWork = (
   callback: () => Promise<void>,
-  t: number,
+  interval: number,
   totalTimeout?: number
 ) => {
   let isWatching = true;
-  let watcherTimeout: NodeJS.Timeout | null = null;
-  let totalTimeoutId: NodeJS.Timeout | null = null;
+  let timeoutId: NodeJS.Timeout | null = null;
 
-  const runWatch = async () => {
-    if (!isWatching) return;
-
-    await callback();
-
-    watcherTimeout = setTimeout(runWatch, t);
+  const stopWatching = () => {
+    isWatching = false;
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   };
 
-  let stopWatching = () => undefined;
-
   const watchPromise = new Promise<void>((resolve) => {
-    stopWatching = () => {
-      isWatching = false;
-      if (watcherTimeout !== null) {
-        clearTimeout(watcherTimeout);
-      }
-      if (totalTimeoutId !== null) {
-        clearTimeout(totalTimeoutId);
+    const runWatch = async () => {
+      while (isWatching) {
+        await callback();
+
+        if (isWatching) {
+          await new Promise((resolve) => setTimeout(resolve, interval));
+        }
       }
       resolve();
     };
@@ -578,7 +598,7 @@ const scheduleNonOverlappingWork = (
     runWatch();
 
     if (totalTimeout) {
-      totalTimeoutId = setTimeout(() => {
+      timeoutId = setTimeout(() => {
         console.log("\n⌛ Watch timeout reached. Stopping watcher.");
         stopWatching();
       }, totalTimeout);

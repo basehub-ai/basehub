@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.2
+
+### Patch Changes
+
+- Fix race condition with watcher and async operation
+
 ## 7.2.1
 
 ### Patch Changes
