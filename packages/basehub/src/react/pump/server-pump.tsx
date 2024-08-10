@@ -97,8 +97,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       if (!data) {
         const dataPromise = draft
           ? fetch(pumpEndpoint, {
-              // @ts-expect-error - nextjs only option
-              next: { revalidate: 0 },
+              cache: "no-store",
               method: "POST",
               headers: {
                 "content-type": "application/json",

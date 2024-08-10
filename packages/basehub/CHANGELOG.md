@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.1
+
+### Patch Changes
+
+- Prevent conflict of cache no-store and revalidate: 0
+
 ## 7.2.0
 
 ### Minor Changes

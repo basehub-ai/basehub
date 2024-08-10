@@ -502,7 +502,12 @@ export const basehub = (options?: Options) => {
 
   return {
     ...createClient(${
-      noStore ? "{ ...options, next: { revalidate: 0 } }" : "options"
+      noStore
+        ? `
+// force revalidate to undefined on purpose as it can't coexist with cache: 'no-store'
+// we use cache: 'no-store' as we're in draft mode. in prod, we won't touch this.
+{ ...options, cache: 'no-store', next: { ...options?.next, revalidate: undefined } }`
+        : "options"
     }),
     raw: createFetcher({ ...options, url, headers }) as <Cast = unknown>(
       gql: GraphqlOperation
