@@ -6,6 +6,9 @@ import {
   // @ts-ignore
   type QueryGenqlSelection as PumpQuery,
 } from "./index";
+// @ts-ignore
+// eslint-disable-next-line import/no-unresolved
+import { replaceSystemAliases } from "../runtime/_aliasing.js";
 import type Pusher from "pusher-js/types/src/core/pusher";
 import { toast, Toaster } from "sonner";
 import type { ResponseCache, PumpState } from "./types";
@@ -113,7 +116,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
             lastResponseHashCache.set(cacheKey, responseHash);
 
             return {
-              data,
+              data: replaceSystemAliases(data),
               spaceID,
               pusherData,
               newPumpToken,

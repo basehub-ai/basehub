@@ -1,5 +1,157 @@
 # basehub
 
+## 7.2.2
+
+### Patch Changes
+
+- Fix race condition with watcher and async operation
+
+## 7.2.1
+
+### Patch Changes
+
+- Prevent conflict of cache no-store and revalidate: 0
+
+## 7.2.0
+
+### Minor Changes
+
+- Revert back to not doing thumbhash magic
+
+### Patch Changes
+
+- d5008d7: try another way
+- 61149ce: go over annoying next.js warning
+- 72f877b: Fix the way we generate placeholders: just client side, and preventing hydration mismatches with an inline script.
+
+## 7.2.0-canary.3
+
+### Minor Changes
+
+- Revert back to not doing thumbhash magic
+
+## 7.1.3-canary.2
+
+### Patch Changes
+
+- try another way
+
+## 7.1.3-canary.1
+
+### Patch Changes
+
+- go over annoying next.js warning
+
+## 7.1.3-canary.0
+
+### Patch Changes
+
+- Fix the way we generate placeholders: just client side, and preventing hydration mismatches with an inline script.
+
+## 7.1.2
+
+### Patch Changes
+
+- forwardRef basehub image
+
+## 7.1.1
+
+### Patch Changes
+
+- Fix client pump not removing aliases
+
+## 7.1.0
+
+### Minor Changes
+
+- 6be2d3f: Support raw thumbhashes in basehub image
+
+### Patch Changes
+
+- 477049b: Improve prop descriptions
+
+## 7.1.0-canary.1
+
+### Patch Changes
+
+- Improve prop descriptions
+
+## 7.1.0-canary.0
+
+### Minor Changes
+
+- Support raw thumbhashes in basehub image
+
+## 7.0.13
+
+### Patch Changes
+
+- a5b750f: Export BaseHubImageProps
+
+## 7.0.12
+
+### Patch Changes
+
+- 6042f19: Override placeholder so that it doesn't throw a typescript error
+
+## 7.0.11
+
+### Patch Changes
+
+- 8b27ee9: Add unoptimized at BasehubImage for .svg files
+
+## 7.0.10
+
+### Patch Changes
+
+- 1f96141: Remove React from direct dependencies in favor of existing peer dependency declaration.
+- 249a647: Pin `@radix-ui/react-slot` dependency to SemVer MAJOR
+
+## 7.0.9
+
+### Patch Changes
+
+- Fix watcher coming up twice
+
+## 7.0.8
+
+### Patch Changes
+
+- Improve watcher logic
+
+## 7.0.7
+
+### Patch Changes
+
+- patch
+- Fix error log when token is not found
+- 4940acc: Auto alias union fields to prevent conflicts
+- e83c917: replaceSystemAliases on pump response also
+
+## 7.0.7-canary.3
+
+### Patch Changes
+
+- Fix error log when token is not found
+
+## 7.0.7-canary.2
+
+### Patch Changes
+
+- patch
+
+## 7.0.7-canary.1
+
+### Patch Changes
+
+- replaceSystemAliases on pump response also
+
+## 7.0.7-canary.0
+
+### Patch Changes
+
+- Auto alias union fields to prevent conflicts
+
 ## 7.0.6
 
 ### Patch Changes

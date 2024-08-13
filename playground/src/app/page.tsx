@@ -1,25 +1,17 @@
-import { Pump } from "basehub/react-pump";
+import { basehub } from "basehub";
 
 export default async function HomePage() {
+  const data = await basehub({ cache: "no-cache" }).query({
+    _sys: {
+      id: true,
+    },
+  });
+
   return (
-    <Pump
-      queries={[
-        {
-          boomba: {
-            thing: true,
-          },
-        },
-      ]}
-      next={{ revalidate: 1 }}
-    >
-      {async ([data]) => {
-        "use server";
-        return (
-          <div>
-            <h1>{data.boomba.thing}</h1>
-          </div>
-        );
-      }}
-    </Pump>
+    <div>
+      <pre>
+        <code>{JSON.stringify(data, null, 2)}</code>
+      </pre>
+    </div>
   );
 }

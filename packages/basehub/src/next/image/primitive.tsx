@@ -1,5 +1,6 @@
 import type { ImageLoaderProps, ImageProps } from "next/image";
 import Image from "next/image";
+import { forwardRef } from "react";
 
 const r2URL_deprecated = `https://basehub.earth`;
 const assetsURL = `https://assets.basehub.com`;
@@ -62,6 +63,15 @@ Expected origin to be one of:
   return url.toString();
 };
 
+export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
+  /**
+   * A placeholder to use while the image is loading. Possible values are blur, empty, or data:image/...
+   * @defaultValue empty
+   * @see https://nextjs.org/docs/api-reference/next/image#placeholder
+   */
+  placeholder?: string;
+};
+
 /**
  * Uses `next/image` under the hood. Just passes BaseHub's `loader` so that it utilizes BaseHub's Image Optimization.
  *
@@ -69,9 +79,26 @@ Expected origin to be one of:
  * ```tsx
  * <Image {...props} loader={basehubImageLoader} />
  * ```
+ * and a few other props.
  */
-export const BaseHubImage = (props: ImageProps) => {
-  "use client";
-  // eslint-disable-next-line jsx-a11y/alt-text
-  return <Image {...props} loader={basehubImageLoader} />;
-};
+export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
+  (props, ref) => {
+    "use client";
+
+    const unoptimized =
+      props.unoptimized ??
+      props.src.toString().split("?")[0]?.endsWith(".svg") ??
+      undefined;
+
+    return (
+      // eslint-disable-next-line jsx-a11y/alt-text
+      <Image
+        {...props}
+        placeholder={props.placeholder as ImageProps["placeholder"]}
+        loader={basehubImageLoader}
+        unoptimized={unoptimized}
+        ref={ref}
+      />
+    );
+  }
+);

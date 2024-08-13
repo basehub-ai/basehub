@@ -21,6 +21,8 @@ const buildManifestSchema = z.object({
   schemaHash: z.string(),
 });
 
+const onProcessEndCallbacks: Array<() => void> = [];
+
 export const main = async (
   args: Args,
   opts: { forceDraft?: boolean; version: string }
@@ -218,6 +220,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       "../index",
       "@basehub/mutation-api-helpers",
       "next",
+      "../runtime/_aliasing.js",
     ];
 
     const useClientPlugin: esbuild.Plugin = {
@@ -441,25 +444,59 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
   if (args["--watch"]) {
     let isFirst = true;
     let previousHash = "";
-    await scheduleNonOverlappingWork(async () => {
-      const result = await generateSDK(!isFirst, previousHash);
-      if (isFirst) {
-        console.log(" ");
-        logInsideBox([
-          "👀 `basehub` experimental --watch mode. Tell us about our bugs: https://basehub.com/support",
-        ]);
-        console.log(" ");
-      } else if (!result.preventedClientGeneration) {
-        console.log("🔄 Detected changes, `basehub` re-generated");
-      }
 
-      previousHash = result.schemaHash;
-      isFirst = false;
-    }, 3000);
+    const { watchPromise, stopWatching } = scheduleNonOverlappingWork(
+      async () => {
+        const result = await generateSDK(!isFirst, previousHash);
+        if (isFirst) {
+          console.log(" ");
+          logInsideBox([
+            "👀 `basehub` experimental --watch mode. Bugs: https://github.com/basehub-ai/basehub/issues",
+          ]);
+          console.log(" ");
+        } else if (!result.preventedClientGeneration) {
+          console.log("🔄 Detected changes, `basehub` re-generated");
+        }
+
+        previousHash = result.schemaHash;
+        isFirst = false;
+      },
+      2500,
+      1000 * 60 * 60 * 24 // 24 hours
+    );
+
+    onProcessEndCallbacks.push(() => {
+      console.log("\n👋 Stopped `basehub` watcher.");
+      stopWatching();
+    });
+
+    await watchPromise;
   } else {
     await generateSDK(false, "");
   }
 };
+
+// Handle signals
+["SIGINT", "SIGTERM", "SIGQUIT"].forEach((signal) => {
+  process.on(signal, () => {
+    onProcessEndCallbacks.forEach((cb) => cb());
+    process.exit(0);
+  });
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  onProcessEndCallbacks.forEach((cb) => cb());
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  onProcessEndCallbacks.forEach((cb) => cb());
+  process.exit(1);
+});
 
 const getBaseHubExport = (noStore: boolean) => `
 export type * from "@basehub/mutation-api-helpers";
@@ -489,13 +526,20 @@ export const basehub = (options?: Options) => {
 
   return {
     ...createClient(${
-      noStore ? "{ ...options, next: { revalidate: 0 } }" : "options"
+      noStore
+        ? `
+// force revalidate to undefined on purpose as it can't coexist with cache: 'no-store'
+// we use cache: 'no-store' as we're in draft mode. in prod, we won't touch this.
+{ ...options, cache: 'no-store', next: { ...options?.next, revalidate: undefined } }`
+        : "options"
     }),
     raw: createFetcher({ ...options, url, headers }) as <Cast = unknown>(
       gql: GraphqlOperation
     ) => Promise<Cast>,
   };
 };
+
+basehub.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
 `;
 
 function logInsideBox(lines: string[]) {
@@ -524,16 +568,42 @@ function logIfNotSilent(silent: boolean | undefined, message: string) {
   }
 }
 
-const scheduleNonOverlappingWork = async (
+const scheduleNonOverlappingWork = (
   callback: () => Promise<void>,
-  t: number
+  interval: number,
+  totalTimeout?: number
 ) => {
-  await callback();
+  let isWatching = true;
+  let timeoutId: NodeJS.Timeout | null = null;
 
-  await new Promise((resolve) =>
-    // Re-schedule after operation completes (recursive!)
-    setTimeout(() => {
-      scheduleNonOverlappingWork(callback, t).then(resolve);
-    }, t)
-  );
+  const stopWatching = () => {
+    isWatching = false;
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  };
+
+  const watchPromise = new Promise<void>((resolve) => {
+    const runWatch = async () => {
+      while (isWatching) {
+        await callback();
+
+        if (isWatching) {
+          await new Promise((resolve) => setTimeout(resolve, interval));
+        }
+      }
+      resolve();
+    };
+
+    runWatch();
+
+    if (totalTimeout) {
+      timeoutId = setTimeout(() => {
+        console.log("\n⌛ Watch timeout reached. Stopped `basehub` watcher.");
+        stopWatching();
+      }, totalTimeout);
+    }
+  });
+
+  return { watchPromise, stopWatching };
 };

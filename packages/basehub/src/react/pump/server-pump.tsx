@@ -97,8 +97,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       if (!data) {
         const dataPromise = draft
           ? fetch(pumpEndpoint, {
-              // @ts-expect-error - nextjs only option
-              next: { revalidate: 0 },
+              cache: "no-store",
               method: "POST",
               headers: {
                 "content-type": "application/json",
@@ -121,7 +120,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
               errors.push(_errors);
               responseHashes[index] = _responseHash;
 
-              return data;
+              return basehub.replaceSystemAliases(data);
             })
           : basehub(basehubProps).query(singleQuery);
         cache.set(cacheKey, {

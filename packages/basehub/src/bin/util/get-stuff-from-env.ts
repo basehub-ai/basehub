@@ -84,11 +84,15 @@ export const getStuffFromEnv = (
     parsedDebugForcedURL ? parsedDebugForcedURL : `${basehubAPIOrigin}/graphql`
   );
 
+  let tokenNotFoundErrorMessage = `🔴 Token not found. Make sure to include the ${buildEnvVarName(
+    "TOKEN"
+  )} env var.`;
+
   const resolveTokenParam = (token: string | null) => {
     if (!token) return null;
-    console.warn(
-      `🚧 Warning! The --token parameter will be deprecated in the next major version. You should use --env-prefix instead.`
-    );
+    // console.warn(
+    //   `🚧 Warning! The --token parameter will be deprecated in the next major version. You should use --env-prefix instead.`
+    // );
     const isRaw = token.startsWith("bshb_");
     if (isRaw) {
       console.warn(
@@ -96,6 +100,7 @@ export const getStuffFromEnv = (
       );
       return token;
     }
+    tokenNotFoundErrorMessage = `🔴 Token not found. Make sure to include the ${token} env var.`;
     const fromEnv = process.env[token];
     if (fromEnv) return fromEnv;
     return ""; // empty string to prevent fallback
@@ -113,11 +118,7 @@ export const getStuffFromEnv = (
     null;
 
   if (!token) {
-    console.log(
-      `🔴 Token not found. Make sure to include the ${buildEnvVarName(
-        "TOKEN"
-      )} env var.`
-    );
+    console.log(tokenNotFoundErrorMessage);
     process.exit(1);
   }
 
@@ -265,10 +266,15 @@ export const getStuffFromEnv = (options) => {
     const parsedBasehubDraftEnv = getEnvVar("DRAFT");
     const parsedBasehubApiVersionEnv = getEnvVar("API_VERSION");
 
+    let tokenNotFoundErrorMessage = \`🔴 Token not found. Make sure to include the \${buildEnvVarName(
+      "TOKEN"
+    )} env var.\`;
+
     const resolveTokenParam = (token) => {
       if (!token) return null;
       const isRaw = token.startsWith("bshb_");
       if (isRaw) return token;
+      tokenNotFoundErrorMessage = \`🔴 Token not found. Make sure to include the \${token} env var.\`;
       return process.env[token] ?? ''; // empty string to prevent fallback
     };
 
@@ -283,11 +289,7 @@ export const getStuffFromEnv = (options) => {
       null;
 
     if (!token) {
-      throw new Error(
-        \`🔴 Token not found. Make sure to include the \${
-          buildEnvVarName("TOKEN")
-        } env var.\`
-      );
+      throw new Error(tokenNotFoundErrorMessage);
     }
 
     let ref =

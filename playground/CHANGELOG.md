@@ -1,5 +1,174 @@
 # playground
 
+## 0.0.126
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.2.2
+
+## 0.0.125
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.2.1
+
+## 0.0.124
+
+### Patch Changes
+
+- Updated dependencies [d5008d7]
+- Updated dependencies
+- Updated dependencies [61149ce]
+- Updated dependencies [72f877b]
+  - basehub@7.2.0
+
+## 0.0.124-canary.3
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.2.0-canary.3
+
+## 0.0.124-canary.2
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.1.3-canary.2
+
+## 0.0.124-canary.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.1.3-canary.1
+
+## 0.0.124-canary.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.1.3-canary.0
+
+## 0.0.123
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.1.2
+
+## 0.0.122
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.1.1
+
+## 0.0.121
+
+### Patch Changes
+
+- Updated dependencies [6be2d3f]
+- Updated dependencies [477049b]
+  - basehub@7.1.0
+
+## 0.0.121-canary.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.1.0-canary.1
+
+## 0.0.121-canary.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.1.0-canary.0
+
+## 0.0.120
+
+### Patch Changes
+
+- Updated dependencies [a5b750f]
+  - basehub@7.0.13
+
+## 0.0.119
+
+### Patch Changes
+
+- Updated dependencies [6042f19]
+  - basehub@7.0.12
+
+## 0.0.118
+
+### Patch Changes
+
+- Updated dependencies [8b27ee9]
+  - basehub@7.0.11
+
+## 0.0.117
+
+### Patch Changes
+
+- Updated dependencies [1f96141]
+- Updated dependencies [249a647]
+  - basehub@7.0.10
+
+## 0.0.116
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.0.9
+
+## 0.0.115
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.0.8
+
+## 0.0.114
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies
+- Updated dependencies [4940acc]
+- Updated dependencies [e83c917]
+  - basehub@7.0.7
+
+## 0.0.114-canary.3
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.0.7-canary.3
+
+## 0.0.114-canary.2
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.0.7-canary.2
+
+## 0.0.114-canary.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.0.7-canary.1
+
+## 0.0.114-canary.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.0.7-canary.0
+
 ## 0.0.113
 
 ### Patch Changes
