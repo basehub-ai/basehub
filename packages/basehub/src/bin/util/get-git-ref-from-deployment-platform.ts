@@ -1,13 +1,6 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 
-export const getRefFromDeploymentPlatform = ({
-  ref,
-}: {
-  ref: string | null;
-  draft: boolean;
-}) => {
-  if (ref) return ref;
-
+export const getGitRefFromDeploymentPlatform = () => {
   console.log("VERCEL_GIT_COMMIT_REF", process.env.VERCEL_GIT_COMMIT_REF);
   console.log("VERCEL_BRANCH_URL", process.env.VERCEL_BRANCH_URL);
   console.log("VERCEL_URL", process.env.VERCEL_URL);
@@ -18,16 +11,11 @@ export const getRefFromDeploymentPlatform = ({
     process.env.BRANCH ||
     process.env.CF_PAGES_BRANCH;
 
-  if (!gitBranch) return ref;
-
-  return ref;
-  // return gitBranch;
+  return { gitBranch };
 };
 
-export const runtime__getRefFromDeploymentPlatform = () => /**JavaScript */ `
-export const getRefFromDeploymentPlatform = ({ ref, draft }) => {
-  if (ref) return ref;
-
+export const runtime__getGitRefFromDeploymentPlatform = () => /**JavaScript */ `
+export const getGitRefFromDeploymentPlatform = () => {
   console.log('VERCEL_GIT_COMMIT_REF', process.env.VERCEL_GIT_COMMIT_REF);
   console.log('VERCEL_BRANCH_URL', process.env.VERCEL_BRANCH_URL);
   console.log('VERCEL_URL', process.env.VERCEL_URL);
@@ -38,9 +26,6 @@ export const getRefFromDeploymentPlatform = ({ ref, draft }) => {
     process.env.BRANCH ||
     process.env.CF_PAGES_BRANCH;
 
-  if (!gitBranch) return ref;
-
-  return ref;
-  // return gitBranch;
+  return { gitBranch };
 }
 `;

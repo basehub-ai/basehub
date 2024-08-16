@@ -1,9 +1,9 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 import { dotenvLoad } from "dotenv-mono";
 import {
-  getRefFromDeploymentPlatform,
-  runtime__getRefFromDeploymentPlatform,
-} from "./get-ref-from-deployment-platform";
+  getGitRefFromDeploymentPlatform,
+  runtime__getGitRefFromDeploymentPlatform,
+} from "./get-git-ref-from-deployment-platform";
 
 /**
  * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
@@ -122,7 +122,7 @@ export const getStuffFromEnv = (
     process.exit(1);
   }
 
-  let ref =
+  const ref =
     basehubUrl.searchParams.get("ref") ??
     getEnvVar("REF") ??
     (backwardsCompatURL
@@ -170,11 +170,8 @@ export const getStuffFromEnv = (
 
   draft = !!draft;
 
-  // 3. handle deployment platforms
-  if (!ref) {
-    // try to infer ref from the environment.
-    ref = getRefFromDeploymentPlatform({ ref, draft });
-  }
+  // 3.
+  const { gitBranch } = getGitRefFromDeploymentPlatform();
 
   return {
     draft,
@@ -182,6 +179,7 @@ export const getStuffFromEnv = (
     url: basehubUrl,
     headers: {
       "x-basehub-token": token,
+      ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
       ...(ref ? { "x-basehub-ref": ref } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
       ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
@@ -197,7 +195,7 @@ export const runtime__getStuffFromEnvString = (
   options: Options
 ) => /**JavaScript */ `
 
-${runtime__getRefFromDeploymentPlatform()}
+${runtime__getGitRefFromDeploymentPlatform()}
 
 export const getStuffFromEnv = (options) => {
     const defaultEnvVarPrefix = "${defaultEnvVarPrefix}";
@@ -336,10 +334,8 @@ export const getStuffFromEnv = (options) => {
     basehubUrl.searchParams.delete("draft");
     basehubUrl.searchParams.delete("api-version");
 
-    // 3. handle deployment platforms
-    if (!ref) {
-      ref = getRefFromDeploymentPlatform({ ref, draft })
-    }
+    // 3.
+    const { gitBranch } = getGitRefFromDeploymentPlatform()
 
     return {
       isForcedDraft: ${!!options.forceDraft},
@@ -347,6 +343,7 @@ export const getStuffFromEnv = (options) => {
       url: basehubUrl,
       headers: {
         "x-basehub-token": token,
+        ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
         ...(ref ? { "x-basehub-ref": ref } : {}),
         ...(draft ? { "x-basehub-draft": "true" } : {}),
         ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
