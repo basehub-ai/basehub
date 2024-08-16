@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.3
+
+### Patch Changes
+
+- f667be3: Pass env populated headers to Pump draft queries
+
 ## 7.2.2
 
 ### Patch Changes
