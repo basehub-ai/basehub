@@ -100,6 +100,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
               cache: "no-store",
               method: "POST",
               headers: {
+                ...headers,
                 "content-type": "application/json",
                 "x-basehub-token": token,
                 "x-basehub-api-version": apiVersion,
