@@ -305,19 +305,37 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       // alias react-rich-text and other packages to the generated client for better import experience
       [
         "react-rich-text",
+        "react-code-block/index",
+        "react-code-block/client",
         "api-transaction",
         "react-search",
         "analytics",
         "search",
         "next-image",
       ].map((pathsToAlias) => {
+        // ensure the directory exists
+        fs.mkdirSync(
+          path.join(basehubOutputPath, ...pathsToAlias.split("/").slice(0, -1)),
+          { recursive: true }
+        );
+
         // create a file in the output directory that aliases the package to the generated client
         fs.writeFileSync(
-          path.join(basehubOutputPath, `${pathsToAlias}.d.ts`),
+          path.join(
+            basehubOutputPath,
+            ...pathsToAlias
+              .split("/")
+              .map((p, i, { length }) => (i + 1 === length ? `${p}.d.ts` : p))
+          ),
           `export * from "basehub/${pathsToAlias}";`
         );
         fs.writeFileSync(
-          path.join(basehubOutputPath, `${pathsToAlias}.js`),
+          path.join(
+            basehubOutputPath,
+            ...pathsToAlias
+              .split("/")
+              .map((p, i, { length }) => (i + 1 === length ? `${p}.js` : p))
+          ),
           `export * from "basehub/${pathsToAlias}";`
         );
       });
