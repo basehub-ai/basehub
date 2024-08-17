@@ -1,5 +1,19 @@
 # basehub
 
+## 7.2.4
+
+### Patch Changes
+
+- 759148a: improvements
+- 759148a: include code files
+- 759148a: Export use context as another entrypoint
+- 759148a: dude
+- 759148a: useCopyToClipboard
+- 759148a: Wip code renderer
+- 759148a: export useCodeBlockContext
+- 759148a: Fix exports
+- 759148a: types stuff
+
 ## 7.2.4-code.8
 
 ### Patch Changes
