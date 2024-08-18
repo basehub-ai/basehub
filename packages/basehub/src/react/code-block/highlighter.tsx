@@ -29,6 +29,7 @@ export type HighlighterProps = {
   extraTransformers?: Array<ShikiTransformer>;
   startHidden: boolean;
   groupId: string;
+  lineNumbers?: boolean | { className?: string };
 };
 
 export const Highlighter = async ({
@@ -40,6 +41,7 @@ export const Highlighter = async ({
   extraTransformers,
   startHidden,
   groupId,
+  lineNumbers,
 }: HighlighterProps) => {
   const hast = await codeToHast(children, {
     lang,
@@ -49,6 +51,28 @@ export const Highlighter = async ({
       transformerNotationErrorLevel(),
       transformerNotationHighlight(),
       transformerNotationWordHighlight(),
+      ...(lineNumbers
+        ? [
+            {
+              line(node, line) {
+                node.children = [
+                  {
+                    type: "element",
+                    tagName: "span",
+                    properties: {
+                      class:
+                        lineNumbers === true
+                          ? "line-number"
+                          : lineNumbers.className,
+                    },
+                    children: [{ type: "text", value: line.toString() }],
+                  },
+                  ...node.children,
+                ];
+              },
+            } satisfies ShikiTransformer,
+          ]
+        : []),
       ...(extraTransformers ?? []),
     ],
   });

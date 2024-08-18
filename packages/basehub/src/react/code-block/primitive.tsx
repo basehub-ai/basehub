@@ -15,6 +15,7 @@ export type CodeBlockProps = {
   components?: HighlighterProps["components"];
   extraTransformers?: HighlighterProps["extraTransformers"];
   disableLocalStorageSelection?: boolean;
+  lineNumbers?: HighlighterProps["lineNumbers"];
 };
 
 export const CodeBlock = ({
@@ -24,6 +25,8 @@ export const CodeBlock = ({
   childrenBottom,
   components,
   disableLocalStorageSelection,
+  extraTransformers,
+  lineNumbers,
 }: CodeBlockProps) => {
   const groupId = "__bshb_code-block-id" + Math.random().toString(16).slice(2);
 
@@ -47,6 +50,8 @@ export const CodeBlock = ({
             components={components}
             startHidden={i > 0}
             groupId={groupId}
+            extraTransformers={extraTransformers}
+            lineNumbers={lineNumbers}
           >
             {snippet.code}
           </Highlighter>

@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.5
+
+### Patch Changes
+
+- Support lineNumbers out of the box
+
 ## 7.2.4
 
 ### Patch Changes
