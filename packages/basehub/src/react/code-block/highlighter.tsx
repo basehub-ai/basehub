@@ -64,6 +64,8 @@ export const Highlighter = async ({
                         lineNumbers === true
                           ? "line-number"
                           : lineNumbers.className,
+                      style:
+                        "user-select: none; pointer-events: none; text-align: right; display: inline-block;",
                     },
                     children: [{ type: "text", value: line.toString() }],
                   },

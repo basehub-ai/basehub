@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.8
+
+### Patch Changes
+
+- line numbers nit
+
 ## 7.2.7
 
 ### Patch Changes
