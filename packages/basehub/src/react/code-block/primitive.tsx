@@ -5,6 +5,7 @@ import { Highlighter, HighlighterProps } from "./highlighter";
 import { Snippet } from "./types";
 export { createCssVariablesTheme } from "shiki";
 export type { BundledLanguage as Language } from "shiki";
+import { useId } from "react";
 
 const LazyClientController = lazy(() => import("./client"));
 
@@ -29,13 +30,12 @@ export const CodeBlock = ({
   extraTransformers,
   lineNumbers,
 }: CodeBlockProps) => {
-  const groupId = "__bshb_code-block-id" + Math.random().toString(16).slice(2);
+  const groupId = useId();
 
-  const snippetsWithIds = snippets.map((s) => {
+  const snippetsWithIds = snippets.map((s, i) => {
     return {
       ...s,
-      id:
-        s.id ?? "__bshb_code-snippet-id" + Math.random().toString(16).slice(2),
+      id: s.id ?? groupId + "-snippet-" + i,
     };
   });
 

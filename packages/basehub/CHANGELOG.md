@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.7
+
+### Patch Changes
+
+- useId to generate IDs; works on RSC also!
+
 ## 7.2.6
 
 ### Patch Changes
