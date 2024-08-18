@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.6
+
+### Patch Changes
+
+- set id to optional
+
 ## 7.2.5
 
 ### Patch Changes

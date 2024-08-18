@@ -1,5 +1,6 @@
 import "server-only";
 import { lazy } from "react";
+import type { SetOptional } from "type-fest";
 import { Highlighter, HighlighterProps } from "./highlighter";
 import { Snippet } from "./types";
 export { createCssVariablesTheme } from "shiki";
@@ -8,7 +9,7 @@ export type { BundledLanguage as Language } from "shiki";
 const LazyClientController = lazy(() => import("./client"));
 
 export type CodeBlockProps = {
-  snippets: Array<Snippet>;
+  snippets: Array<SetOptional<Snippet, "id">>;
   theme: HighlighterProps["theme"];
   childrenTop?: React.ReactNode;
   childrenBottom?: React.ReactNode;
@@ -30,16 +31,24 @@ export const CodeBlock = ({
 }: CodeBlockProps) => {
   const groupId = "__bshb_code-block-id" + Math.random().toString(16).slice(2);
 
+  const snippetsWithIds = snippets.map((s) => {
+    return {
+      ...s,
+      id:
+        s.id ?? "__bshb_code-snippet-id" + Math.random().toString(16).slice(2),
+    };
+  });
+
   return (
     <LazyClientController
-      snippets={snippets.map((s) => {
+      snippets={snippetsWithIds.map((s) => {
         return { id: s.id, lang: s.lang, label: s.label };
       })}
       storeSnippetSelection={!disableLocalStorageSelection}
       groupId={groupId}
     >
       {childrenTop}
-      {snippets.map((snippet, i) => {
+      {snippetsWithIds.map((snippet, i) => {
         return (
           // @ts-ignore
           <Highlighter
