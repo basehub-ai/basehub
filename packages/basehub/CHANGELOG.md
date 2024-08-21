@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.9
+
+### Patch Changes
+
+- remove unused search param
+
 ## 7.2.8
 
 ### Patch Changes
