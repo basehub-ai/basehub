@@ -47,7 +47,6 @@ export type SearchOptions = {
   excludeFields?: SearchParams["exclude_fields"];
   page?: SearchParams["page"];
   perPage?: SearchParams["per_page"];
-  query?: SearchParams["q"];
   highlightFields?: SearchParams["highlight_fields"];
   highlightFullFields?: SearchParams["highlight_full_fields"];
   highlightStartTag?: SearchParams["highlight_start_tag"];
