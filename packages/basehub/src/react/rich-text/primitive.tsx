@@ -296,7 +296,11 @@ const defaultHandlers: Handlers = {
     />
   ),
   video: ({ caption, ...rest }) => (
-    <video {...rest} {...(caption ? { ["data-caption"]: caption } : {})} />
+    <video
+      controls
+      {...rest}
+      {...(caption ? { ["data-caption"]: caption } : {})}
+    />
   ),
   blockquote: ({ children }) => <blockquote>{children}</blockquote>,
   pre: ({ children, language }) => (
