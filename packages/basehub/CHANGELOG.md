@@ -1,5 +1,11 @@
 # basehub
 
+## 7.2.10
+
+### Patch Changes
+
+- Add controls to default video renderer
+
 ## 7.2.9
 
 ### Patch Changes
