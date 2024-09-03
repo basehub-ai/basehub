@@ -1,5 +1,11 @@
 # basehub
 
+## 7.3.0
+
+### Minor Changes
+
+- pass basehub.earth to assets.basehub.com in BaseHubImage
+
 ## 7.2.10
 
 ### Patch Changes
