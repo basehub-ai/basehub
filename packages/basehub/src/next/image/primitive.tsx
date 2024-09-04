@@ -73,6 +73,9 @@ Expected origin to be one of:
       imageURL.pathname = url.pathname;
       imageURL.search = url.search;
     }
+  } else {
+    imageURL.pathname = url.pathname;
+    imageURL.search = url.search;
   }
 
   return imageURL.toString();

@@ -1,5 +1,11 @@
 # basehub
 
+## 7.3.1
+
+### Patch Changes
+
+- Fix basehub image regression
+
 ## 7.3.0
 
 ### Minor Changes
