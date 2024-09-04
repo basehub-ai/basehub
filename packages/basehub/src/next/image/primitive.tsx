@@ -66,7 +66,6 @@ Expected origin to be one of:
     if (url.pathname.startsWith("/cdn-cgi/image/")) {
       const [_empty, _cdnThing, _imageThing, currentParams = "", ...rest] =
         url.pathname.split("/");
-      console.log({ currentParams });
       imageURL.pathname = rest.join("/");
       imageURL.search = currentParams.split(",").join("&");
     } else {
