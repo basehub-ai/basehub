@@ -1,5 +1,11 @@
 # basehub
 
+## 7.3.2
+
+### Patch Changes
+
+- remove log
+
 ## 7.3.1
 
 ### Patch Changes
