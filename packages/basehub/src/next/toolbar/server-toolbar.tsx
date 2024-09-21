@@ -23,23 +23,11 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
   const enableDraftMode = async (bshbPreviewToken: string) => {
     "use server";
     const { headers, url } = getStuffFromEnv(basehubProps);
-
+    const apiOrigin = getBaseHubApiOrigin(url);
     const token = headers["x-basehub-token"];
-    let enablePreviewEndpoint: string;
-    switch (true) {
-      case url.origin.includes("api.basehub.com"):
-        enablePreviewEndpoint = "https://basehub.com/api/preview/auth";
-        break;
-      case url.origin.includes("api.bshb.dev"):
-        enablePreviewEndpoint = "https://basehub.dev/api/preview/auth";
-        break;
-      default:
-        enablePreviewEndpoint = url.toString();
-    }
 
-    return fetch(enablePreviewEndpoint, {
-      // @ts-expect-error - nextjs only option
-      next: { revalidate: 0 },
+    return fetch(apiOrigin + "/api/nextjs/preview-auth", {
+      cache: "no-store",
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -69,12 +57,78 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
     draftMode().disable();
   };
 
+  const setupOnDemandRevalidation = async (origin: string) => {
+    "use server";
+
+    try {
+      // don't setup on demand revalidation in dev
+      if (process.env.NODE_ENV === "development") return;
+    } catch (error) {
+      // process not defined?
+    }
+
+    const { headers, url } = getStuffFromEnv(basehubProps);
+    const apiOrigin = getBaseHubApiOrigin(url);
+    const token = headers["x-basehub-token"];
+
+    await fetch(apiOrigin + "/api/nextjs/setup-odr", {
+      cache: "no-store",
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-basehub-token": token,
+      },
+      body: JSON.stringify({ origin }),
+    });
+  };
+
+  const revalidateTags = async (origin: string) => {
+    "use server";
+
+    const { headers, url } = getStuffFromEnv(basehubProps);
+    const apiOrigin = getBaseHubApiOrigin(url);
+    const token = headers["x-basehub-token"];
+
+    const res = await fetch(apiOrigin + "/api/nextjs/get-odr-cache-tags", {
+      cache: "no-store",
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-basehub-token": token,
+      },
+      body: JSON.stringify({ origin }),
+    });
+
+    if (res.status === 200) {
+      const { tags } = await res.json();
+      revalidateTags(tags);
+    }
+  };
+
   return (
     <LazyClientConditionalRenderer
       draft={draftMode().isEnabled}
       isForcedDraft={isForcedDraft}
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
+      setupOnDemandRevalidation={setupOnDemandRevalidation}
+      revalidateTags={revalidateTags}
     />
   );
 };
+
+function getBaseHubApiOrigin(url: URL) {
+  let origin: string;
+  switch (true) {
+    case url.origin.includes("api.basehub.com"):
+      origin = "https://basehub.com";
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      origin = "https://basehub.dev";
+      break;
+    default:
+      origin = url.origin;
+  }
+
+  return origin;
+}

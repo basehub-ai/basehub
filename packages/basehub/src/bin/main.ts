@@ -27,6 +27,8 @@ export const main = async (
   args: Args,
   opts: { forceDraft?: boolean; version: string }
 ) => {
+  const sdkBuildId = "bshb_sdk_" + Math.random().toString(16).slice(2);
+
   async function generateSDK(silent: boolean, previousSchemaHash: string) {
     logIfNotSilent(silent, "🪄 Generating...");
 
@@ -205,7 +207,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     }
 
     // 3. append our basehub function to the end of the file.
-    const basehubExport = getBaseHubExport(draft);
+    const basehubExport = getBaseHubExport({ noStore: draft, sdkBuildId });
     if (!schemaFileContents.includes(basehubExport)) {
       schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
     }
@@ -516,9 +518,75 @@ process.on("unhandledRejection", (reason, promise) => {
   process.exit(1);
 });
 
-const getBaseHubExport = (noStore: boolean) => `
+const getBaseHubExport = ({
+  noStore,
+  sdkBuildId,
+}: {
+  noStore: boolean;
+  sdkBuildId: string;
+}) => `
 export type * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
+
+/**
+ * Returns a hash code from an object
+ * @param  {Object} obj The object to hash.
+ * @return {String}    A hash string
+ */
+function hashObject(obj: Record<string, unknown>): string {
+    const sortObjectKeys = <O extends Record<string, unknown>>(obj: O): O => {
+        if (!isObjectAsWeCommonlyCallIt(obj)) return obj;
+        return Object.keys(obj)
+            .sort()
+            .reduce((acc, key) => {
+                acc[key as keyof O] = obj[key as keyof O];
+                return acc;
+            }, {} as O);
+    };
+
+    const recursiveSortObjectKeys = <O extends Record<string, unknown>>(obj: O): O => {
+        const sortedObj = sortObjectKeys(obj);
+
+        if (!isObjectAsWeCommonlyCallIt(sortedObj)) return sortedObj;
+
+        Object.keys(sortedObj).forEach((key) => {
+            if (isObjectAsWeCommonlyCallIt(sortedObj[key as keyof O])) {
+                sortedObj[key as keyof O] = recursiveSortObjectKeys(
+                    sortedObj[key as keyof O] as O
+                ) as O[keyof O];
+            } else if (Array.isArray(sortedObj[key as keyof O])) {
+                sortedObj[key as keyof O] = (sortedObj[key as keyof O] as unknown[]).map(
+                    (item) => {
+                        if (isObjectAsWeCommonlyCallIt(item)) {
+                            return recursiveSortObjectKeys(item);
+                        } else {
+                            return item;
+                        }
+                    }
+                ) as O[keyof O];
+            }
+        });
+
+        return sortedObj;
+    };
+
+    const isObjectAsWeCommonlyCallIt = (
+        obj: unknown
+    ): obj is Record<string, unknown> => {
+        return Object.prototype.toString.call(obj) === '[object Object]';
+    };
+
+    const sortedObj = recursiveSortObjectKeys(obj);
+    const str = JSON.stringify(sortedObj);
+
+    let hash = 0;
+    for (let i = 0, len = str.length; i < len; i++) {
+        let chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString();
+}
 
 // we limit options to only the ones we want to expose.
 type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean, token?: string }
@@ -541,6 +609,20 @@ type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 
  */
 export const basehub = (options?: Options) => {
   const { url, headers } = getStuffFromEnv(options);
+
+  options.getExtraFetchOptions = (op, body) => {
+    if (op !== 'query') return {}
+    const queryHash = createClientOriginal.hashObject(body)
+    const cacheTag = 'basehub-' + queryHash
+
+    // don't override if we're in draft mode
+    if (${noStore}) return {}
+
+    // don't override if revalidation is already being handled by the user
+    if (typeof options?.next !== 'undefined') return {}
+
+    return { next: { tags: [cacheTag] }, headers: { ...options?.headers, 'x-basehub-sdk-build-id': "${sdkBuildId}", 'x-basehub-cache-tag': cacheTag }}
+  }
 
   return {
     ...createClient(${

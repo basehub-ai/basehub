@@ -17,6 +17,8 @@ export const ClientToolbar = ({
   bshbPreviewToken,
   shouldAutoEnableDraft,
   seekAndStoreBshbPreviewToken,
+  setupOnDemandRevalidation,
+  revalidateTags,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -27,6 +29,8 @@ export const ClientToolbar = ({
   bshbPreviewToken: string;
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
+  setupOnDemandRevalidation: (origin: string) => Promise<void>;
+  revalidateTags: (origin: string) => Promise<void>;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
@@ -187,6 +191,19 @@ export const ClientToolbar = ({
       window.removeEventListener("resize", repositionToolbar);
     };
   }, [getStoredToolbarPosition, dragToolbar]);
+
+  React.useEffect(() => {
+    const origin = window.location.origin;
+    if (origin.includes("localhost")) return;
+    setupOnDemandRevalidation(origin);
+  }, [setupOnDemandRevalidation]);
+
+  React.useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("bshb-revalidate-cache-tags") === "true") {
+      revalidateTags(url.origin);
+    }
+  }, [revalidateTags]);
 
   const tooltip = isForcedDraft
     ? "Draft enforced by dev env"

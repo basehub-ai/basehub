@@ -1,5 +1,11 @@
 # basehub
 
+## 7.4.0-canary.0
+
+### Minor Changes
+
+- Auto on-demand revalidation and draftMode for Next.js
+
 ## 7.3.3
 
 ### Patch Changes

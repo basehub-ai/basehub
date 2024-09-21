@@ -55,6 +55,18 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
+  let isNextjsDraftMode = false;
+  try {
+    const { draftMode } = await import("next/headers");
+    isNextjsDraftMode = (await draftMode()).isEnabled;
+  } catch (error) {
+    // noop, not using nextjs
+  }
+
+  if (isNextjsDraftMode && basehubProps.draft === undefined) {
+    basehubProps.draft = true;
+  }
+
   const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
   const apiVersion = headers["x-basehub-api-version"];

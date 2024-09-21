@@ -12,6 +12,8 @@ export const ClientConditionalRenderer = ({
   isForcedDraft,
   enableDraftMode,
   disableDraftMode,
+  setupOnDemandRevalidation,
+  revalidateTags,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -19,6 +21,8 @@ export const ClientConditionalRenderer = ({
     bshbPreviewToken: string
   ) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
+  setupOnDemandRevalidation: (origin: string) => Promise<void>;
+  revalidateTags: (origin: string) => Promise<void>;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
 
@@ -81,6 +85,8 @@ export const ClientConditionalRenderer = ({
       bshbPreviewToken={bshbPreviewToken}
       shouldAutoEnableDraft={shouldAutoEnableDraft}
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
+      setupOnDemandRevalidation={setupOnDemandRevalidation}
+      revalidateTags={revalidateTags}
     />,
     document.body
   );
