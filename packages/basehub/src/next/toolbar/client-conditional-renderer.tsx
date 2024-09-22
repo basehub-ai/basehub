@@ -12,8 +12,8 @@ export const ClientConditionalRenderer = ({
   isForcedDraft,
   enableDraftMode,
   disableDraftMode,
-  setupOnDemandRevalidation,
   revalidateTags,
+  buildSecret,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -21,8 +21,8 @@ export const ClientConditionalRenderer = ({
     bshbPreviewToken: string
   ) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
-  setupOnDemandRevalidation: (origin: string) => Promise<void>;
-  revalidateTags: (origin: string) => Promise<void>;
+  revalidateTags: (o: { buildSecret: string; tags: string[] }) => Promise<void>;
+  buildSecret: string;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
 
@@ -85,8 +85,8 @@ export const ClientConditionalRenderer = ({
       bshbPreviewToken={bshbPreviewToken}
       shouldAutoEnableDraft={shouldAutoEnableDraft}
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
-      setupOnDemandRevalidation={setupOnDemandRevalidation}
       revalidateTags={revalidateTags}
+      buildSecret={buildSecret}
     />,
     document.body
   );

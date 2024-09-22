@@ -17,8 +17,8 @@ export const ClientToolbar = ({
   bshbPreviewToken,
   shouldAutoEnableDraft,
   seekAndStoreBshbPreviewToken,
-  setupOnDemandRevalidation,
   revalidateTags,
+  buildSecret,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -29,8 +29,8 @@ export const ClientToolbar = ({
   bshbPreviewToken: string;
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
-  setupOnDemandRevalidation: (origin: string) => Promise<void>;
-  revalidateTags: (origin: string) => Promise<void>;
+  revalidateTags: (o: { buildSecret: string; tags: string[] }) => Promise<void>;
+  buildSecret: string;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
@@ -193,17 +193,12 @@ export const ClientToolbar = ({
   }, [getStoredToolbarPosition, dragToolbar]);
 
   React.useEffect(() => {
-    const origin = window.location.origin;
-    if (origin.includes("localhost")) return;
-    setupOnDemandRevalidation(origin);
-  }, [setupOnDemandRevalidation]);
-
-  React.useEffect(() => {
     const url = new URL(window.location.href);
-    if (url.searchParams.get("bshb-revalidate-cache-tags") === "true") {
-      revalidateTags(url.origin);
+    const tags = url.searchParams.get("bshb-odr-tags");
+    if (tags) {
+      revalidateTags({ buildSecret, tags: tags.split(",") });
     }
-  }, [revalidateTags]);
+  }, [revalidateTags, buildSecret]);
 
   const tooltip = isForcedDraft
     ? "Draft enforced by dev env"

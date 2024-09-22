@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { draftMode } from "next/headers";
+import { revalidateTag } from "next/cache";
 import {
   getStuffFromEnv,
   basehub,
@@ -19,6 +20,14 @@ type ServerToolbarProps = Parameters<typeof basehub>[0];
 
 export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
+
+  /**
+   * Not a secret, just a string that'll be passed down to authenticated clients.
+   * Authenticated clients will pass the secret back to call server actions.
+   *
+   * This is used to prevent random people from finding + calling our server actions.
+   */
+  const buildSecret = Math.random().toString(16).slice(2);
 
   const enableDraftMode = async (bshbPreviewToken: string) => {
     "use server";
@@ -57,51 +66,16 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
     draftMode().disable();
   };
 
-  const setupOnDemandRevalidation = async (origin: string) => {
+  const revalidateTags = async ({
+    buildSecret: clientBuildSecret,
+    tags,
+  }: {
+    buildSecret: string;
+    tags: string[];
+  }) => {
     "use server";
-
-    try {
-      // don't setup on demand revalidation in dev
-      if (process.env.NODE_ENV === "development") return;
-    } catch (error) {
-      // process not defined?
-    }
-
-    const { headers, url } = getStuffFromEnv(basehubProps);
-    const apiOrigin = getBaseHubApiOrigin(url);
-    const token = headers["x-basehub-token"];
-
-    await fetch(apiOrigin + "/api/nextjs/setup-odr", {
-      cache: "no-store",
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-basehub-token": token,
-      },
-      body: JSON.stringify({ origin }),
-    });
-  };
-
-  const revalidateTags = async (origin: string) => {
-    "use server";
-
-    const { headers, url } = getStuffFromEnv(basehubProps);
-    const apiOrigin = getBaseHubApiOrigin(url);
-    const token = headers["x-basehub-token"];
-
-    const res = await fetch(apiOrigin + "/api/nextjs/get-odr-cache-tags", {
-      cache: "no-store",
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-basehub-token": token,
-      },
-      body: JSON.stringify({ origin }),
-    });
-
-    if (res.status === 200) {
-      const { tags } = await res.json();
-      revalidateTags(tags);
+    if (buildSecret === clientBuildSecret) {
+      tags.forEach(revalidateTag);
     }
   };
 
@@ -111,8 +85,8 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
       isForcedDraft={isForcedDraft}
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
-      setupOnDemandRevalidation={setupOnDemandRevalidation}
       revalidateTags={revalidateTags}
+      buildSecret={buildSecret}
     />
   );
 };
