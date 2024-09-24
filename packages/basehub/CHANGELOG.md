@@ -1,5 +1,11 @@
 # basehub
 
+## 7.3.4
+
+### Patch Changes
+
+- update @basehub/mutation-api-helpers
+
 ## 7.3.3
 
 ### Patch Changes
