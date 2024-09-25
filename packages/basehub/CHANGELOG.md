@@ -1,5 +1,11 @@
 # basehub
 
+## 7.4.0-canary.5
+
+### Patch Changes
+
+- fix rendering toolbar when there are tags to revalidate
+
 ## 7.4.0-canary.4
 
 ### Patch Changes

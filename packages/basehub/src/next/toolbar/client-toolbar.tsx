@@ -17,8 +17,6 @@ export const ClientToolbar = ({
   bshbPreviewToken,
   shouldAutoEnableDraft,
   seekAndStoreBshbPreviewToken,
-  revalidateTags,
-  buildSecret,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -26,14 +24,9 @@ export const ClientToolbar = ({
     bshbPreviewToken: string
   ) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
-  bshbPreviewToken: string;
+  bshbPreviewToken: string | undefined;
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
-  revalidateTags: (o: {
-    buildSecret: string;
-    tags: string[];
-  }) => Promise<{ success: boolean }>;
-  buildSecret: string;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
@@ -194,20 +187,6 @@ export const ClientToolbar = ({
       window.removeEventListener("resize", repositionToolbar);
     };
   }, [getStoredToolbarPosition, dragToolbar]);
-
-  React.useEffect(() => {
-    const url = new URL(window.location.href);
-    const tags = url.searchParams.get("bshb-odr-tags");
-    if (tags) {
-      revalidateTags({ buildSecret, tags: tags.split(",") }).then(
-        ({ success }) => {
-          document.documentElement.dataset.basehubOdrStatus = success
-            ? "success"
-            : "error";
-        }
-      );
-    }
-  }, [revalidateTags, buildSecret]);
 
   const tooltip = isForcedDraft
     ? "Draft enforced by dev env"

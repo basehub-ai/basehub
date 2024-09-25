@@ -29,6 +29,10 @@ export const ClientConditionalRenderer = ({
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
 
+  React.useEffect(() => {
+    setHasRendered(true);
+  }, []);
+
   const seekAndStoreBshbPreviewToken = React.useCallback(
     (type?: "url-only") => {
       if (typeof window === "undefined") return;
@@ -72,13 +76,22 @@ export const ClientConditionalRenderer = ({
   }, [draft, isForcedDraft, seekAndStoreBshbPreviewToken]);
 
   React.useEffect(() => {
-    setHasRendered(true);
-  }, []);
+    const url = new URL(window.location.href);
+    const tags = url.searchParams.get("bshb-odr-tags");
+    if (tags) {
+      revalidateTags({ buildSecret, tags: tags.split(",") }).then(
+        ({ success }) => {
+          document.documentElement.dataset.basehubOdrStatus = success
+            ? "success"
+            : "error";
+        }
+      );
+    }
+  }, [revalidateTags, buildSecret]);
 
   if (!bshbPreviewToken || !hasRendered || typeof document === "undefined") {
     return null;
   }
-
   const Portal = createPortal(
     <LazyClientToolbar
       disableDraftMode={disableDraftMode}
@@ -88,8 +101,6 @@ export const ClientConditionalRenderer = ({
       bshbPreviewToken={bshbPreviewToken}
       shouldAutoEnableDraft={shouldAutoEnableDraft}
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
-      revalidateTags={revalidateTags}
-      buildSecret={buildSecret}
     />,
     document.body
   );

@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "The first AI-native content hub.",
   "author": "JB <jb@basehub.com>",
-  "version": "7.4.0-canary.4",
+  "version": "7.4.0-canary.5",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
