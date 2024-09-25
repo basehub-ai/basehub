@@ -76,7 +76,9 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
     "use server";
     if (buildSecret === clientBuildSecret) {
       tags.forEach(revalidateTag);
+      return { success: true };
     }
+    return { success: false };
   };
 
   return (

@@ -21,7 +21,10 @@ export const ClientConditionalRenderer = ({
     bshbPreviewToken: string
   ) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
-  revalidateTags: (o: { buildSecret: string; tags: string[] }) => Promise<void>;
+  revalidateTags: (o: {
+    buildSecret: string;
+    tags: string[];
+  }) => Promise<{ success: boolean }>;
   buildSecret: string;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);

@@ -29,7 +29,10 @@ export const ClientToolbar = ({
   bshbPreviewToken: string;
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
-  revalidateTags: (o: { buildSecret: string; tags: string[] }) => Promise<void>;
+  revalidateTags: (o: {
+    buildSecret: string;
+    tags: string[];
+  }) => Promise<{ success: boolean }>;
   buildSecret: string;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
@@ -196,7 +199,13 @@ export const ClientToolbar = ({
     const url = new URL(window.location.href);
     const tags = url.searchParams.get("bshb-odr-tags");
     if (tags) {
-      revalidateTags({ buildSecret, tags: tags.split(",") });
+      revalidateTags({ buildSecret, tags: tags.split(",") }).then(
+        ({ success }) => {
+          document.documentElement.dataset.basehubOdrStatus = success
+            ? "success"
+            : "error";
+        }
+      );
     }
   }, [revalidateTags, buildSecret]);
 

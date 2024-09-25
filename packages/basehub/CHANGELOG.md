@@ -1,5 +1,11 @@
 # basehub
 
+## 7.4.0-canary.2
+
+### Patch Changes
+
+- add data attr to root post revalidation
+
 ## 7.4.0-canary.1
 
 ### Patch Changes
