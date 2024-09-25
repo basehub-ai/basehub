@@ -1,5 +1,11 @@
 # basehub
 
+## 7.4.0-canary.4
+
+### Patch Changes
+
+- upgrade genql
+
 ## 7.4.0-canary.3
 
 ### Patch Changes

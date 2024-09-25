@@ -621,7 +621,7 @@ export const basehub = (options?: Options) => {
     // don't override if revalidation is already being handled by the user
     if (typeof options?.next !== 'undefined') return {}
 
-    return { next: { tags: [cacheTag] }, headers: { ...options?.headers, 'x-basehub-sdk-build-id': "${sdkBuildId}", 'x-basehub-cache-tag': cacheTag }}
+    return { next: { tags: [cacheTag] }, headers: { 'x-basehub-sdk-build-id': "${sdkBuildId}", 'x-basehub-cache-tag': cacheTag }}
   }
 
   return {
