@@ -612,7 +612,7 @@ export const basehub = (options?: Options) => {
 
   options.getExtraFetchOptions = (op, body) => {
     if (op !== 'query') return {}
-    const queryHash = createClientOriginal.hashObject(body)
+    const queryHash = hashObject(body)
     const cacheTag = 'basehub-' + queryHash
 
     // don't override if we're in draft mode
