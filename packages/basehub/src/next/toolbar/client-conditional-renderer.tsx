@@ -79,13 +79,15 @@ export const ClientConditionalRenderer = ({
     const url = new URL(window.location.href);
     const tags = url.searchParams.get("bshb-odr-tags");
     if (tags) {
-      revalidateTags({ buildSecret, tags: tags.split(",") }).then(
-        ({ success }) => {
+      revalidateTags({ buildSecret, tags: tags.split(",") })
+        .then(({ success }) => {
           document.documentElement.dataset.basehubOdrStatus = success
             ? "success"
             : "error";
-        }
-      );
+        })
+        .catch(() => {
+          document.documentElement.dataset.basehubOdrStatus = "error";
+        });
     }
   }, [revalidateTags, buildSecret]);
 
