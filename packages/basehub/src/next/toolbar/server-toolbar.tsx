@@ -21,7 +21,11 @@ type ServerToolbarProps = Parameters<typeof basehub>[0];
 export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
 
-  const enableDraftMode = async (bshbPreviewToken: string) => {
+  const enableDraftMode = async ({
+    bshbPreviewToken,
+  }: {
+    bshbPreviewToken: string;
+  }) => {
     "use server";
     const { headers, url } = getStuffFromEnv(basehubProps);
     const apiOrigin = getBaseHubApiOrigin(url);
@@ -54,13 +58,16 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
 
   const disableDraftMode = async () => {
     "use server";
-
     draftMode().disable();
   };
 
   const revalidateTags = async ({ tags }: { tags: string[] }) => {
     "use server";
-    tags.forEach(revalidateTag);
+    tags.forEach((tag) => {
+      if (tag.startsWith("basehub-")) {
+        revalidateTag(tag);
+      }
+    });
     return { success: true };
   };
 

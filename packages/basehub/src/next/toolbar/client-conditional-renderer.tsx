@@ -16,9 +16,9 @@ export const ClientConditionalRenderer = ({
 }: {
   draft: boolean;
   isForcedDraft: boolean;
-  enableDraftMode: (
-    bshbPreviewToken: string
-  ) => Promise<{ status: number; response: object }>;
+  enableDraftMode: (o: {
+    bshbPreviewToken: string;
+  }) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
   revalidateTags: (o: { tags: string[] }) => Promise<{ success: boolean }>;
 }) => {

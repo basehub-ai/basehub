@@ -528,6 +528,8 @@ const getBaseHubExport = ({
 export type * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
 
+export const sdkBuildId = "${sdkBuildId}";
+
 /**
  * Returns a hash code from an object
  * @param  {Object} obj The object to hash.
