@@ -612,6 +612,10 @@ type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 
 export const basehub = (options?: Options) => {
   const { url, headers } = getStuffFromEnv(options);
 
+  if (!options) {
+    options = {};
+  }
+
   options.getExtraFetchOptions = (op, body) => {
     if (op !== 'query') return {}
     const queryHash = hashObject(body)

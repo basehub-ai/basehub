@@ -1,5 +1,11 @@
 # basehub
 
+## 7.4.1
+
+### Patch Changes
+
+- fix type error
+
 ## 7.4.0
 
 ### Minor Changes
