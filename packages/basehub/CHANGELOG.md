@@ -1,5 +1,27 @@
 # basehub
 
+## 7.4.0
+
+### Minor Changes
+
+- e7f7042: Auto on-demand revalidation and draftMode for Next.js
+
+### Patch Changes
+
+- c048383: upgrade genql
+- 3edca41: made it simpler
+- make sure revalidateTag is only allowed against basehub- tags
+- 6f9406a: add data attr to root post revalidation
+- 4e6819b: fix rendering toolbar when there are tags to revalidate
+- ee86877: fix
+- 9b01a98: catch
+
+## 7.4.0-canary.7
+
+### Patch Changes
+
+- make sure revalidateTag is only allowed against basehub- tags
+
 ## 7.4.0-canary.6
 
 ### Patch Changes

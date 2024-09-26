@@ -1,5 +1,26 @@
 # playground
 
+## 0.0.139
+
+### Patch Changes
+
+- Updated dependencies [c048383]
+- Updated dependencies [3edca41]
+- Updated dependencies
+- Updated dependencies [6f9406a]
+- Updated dependencies [4e6819b]
+- Updated dependencies [e7f7042]
+- Updated dependencies [ee86877]
+- Updated dependencies [9b01a98]
+  - basehub@7.4.0
+
+## 0.0.139-canary.7
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.4.0-canary.7
+
 ## 0.0.139-canary.6
 
 ### Patch Changes
