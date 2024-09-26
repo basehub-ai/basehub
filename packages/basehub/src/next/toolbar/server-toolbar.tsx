@@ -21,14 +21,6 @@ type ServerToolbarProps = Parameters<typeof basehub>[0];
 export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
 
-  /**
-   * Not a secret, just a string that'll be passed down to authenticated clients.
-   * Authenticated clients will pass the secret back to call server actions.
-   *
-   * This is used to prevent random people from finding + calling our server actions.
-   */
-  const buildSecret = Math.random().toString(16).slice(2);
-
   const enableDraftMode = async (bshbPreviewToken: string) => {
     "use server";
     const { headers, url } = getStuffFromEnv(basehubProps);
@@ -66,19 +58,10 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
     draftMode().disable();
   };
 
-  const revalidateTags = async ({
-    buildSecret: clientBuildSecret,
-    tags,
-  }: {
-    buildSecret: string;
-    tags: string[];
-  }) => {
+  const revalidateTags = async ({ tags }: { tags: string[] }) => {
     "use server";
-    if (buildSecret === clientBuildSecret) {
-      tags.forEach(revalidateTag);
-      return { success: true };
-    }
-    return { success: false };
+    tags.forEach(revalidateTag);
+    return { success: true };
   };
 
   return (
@@ -88,7 +71,6 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
       revalidateTags={revalidateTags}
-      buildSecret={buildSecret}
     />
   );
 };

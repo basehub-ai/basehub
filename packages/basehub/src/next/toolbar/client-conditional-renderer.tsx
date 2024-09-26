@@ -13,7 +13,6 @@ export const ClientConditionalRenderer = ({
   enableDraftMode,
   disableDraftMode,
   revalidateTags,
-  buildSecret,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -21,11 +20,7 @@ export const ClientConditionalRenderer = ({
     bshbPreviewToken: string
   ) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
-  revalidateTags: (o: {
-    buildSecret: string;
-    tags: string[];
-  }) => Promise<{ success: boolean }>;
-  buildSecret: string;
+  revalidateTags: (o: { tags: string[] }) => Promise<{ success: boolean }>;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
 
@@ -79,7 +74,7 @@ export const ClientConditionalRenderer = ({
     const url = new URL(window.location.href);
     const tags = url.searchParams.get("bshb-odr-tags");
     if (tags) {
-      revalidateTags({ buildSecret, tags: tags.split(",") })
+      revalidateTags({ tags: tags.split(",") })
         .then(({ success }) => {
           document.documentElement.dataset.basehubOdrStatus = success
             ? "success"
@@ -89,7 +84,7 @@ export const ClientConditionalRenderer = ({
           document.documentElement.dataset.basehubOdrStatus = "error";
         });
     }
-  }, [revalidateTags, buildSecret]);
+  }, [revalidateTags]);
 
   if (!bshbPreviewToken || !hasRendered || typeof document === "undefined") {
     return null;
