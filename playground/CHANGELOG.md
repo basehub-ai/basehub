@@ -70,6 +70,13 @@
 - Updated dependencies
   - basehub@7.4.0-canary.0
 
+## 0.0.139
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.3.4
+
 ## 0.0.138
 
 ### Patch Changes
