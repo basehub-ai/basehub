@@ -148,6 +148,7 @@
 .tooltipWrapper {
   position: relative;
   display: flex;
+  padding: 4px 8px;
 
   &:hover {
     .tooltip {
