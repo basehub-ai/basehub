@@ -74,6 +74,8 @@ export const ClientConditionalRenderer = ({
     const url = new URL(window.location.href);
     const tags = url.searchParams.get("bshb-odr-tags");
     if (tags) {
+      url.searchParams.delete("bshb-odr-tags");
+      window.history.replaceState(null, "", url);
       revalidateTags({ tags: tags.split(",") })
         .then(({ success }) => {
           document.documentElement.dataset.basehubOdrStatus = success
