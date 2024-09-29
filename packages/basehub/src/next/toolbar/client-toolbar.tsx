@@ -20,11 +20,11 @@ export const ClientToolbar = ({
 }: {
   draft: boolean;
   isForcedDraft: boolean;
-  enableDraftMode: (
-    bshbPreviewToken: string
-  ) => Promise<{ status: number; response: object }>;
+  enableDraftMode: (o: {
+    bshbPreviewToken: string;
+  }) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
-  bshbPreviewToken: string;
+  bshbPreviewToken: string | undefined;
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
 }) => {
@@ -47,7 +47,7 @@ export const ClientToolbar = ({
   const triggerDraftMode = React.useCallback(
     (previewToken: string) => {
       setLoading(true);
-      enableDraftMode(previewToken)
+      enableDraftMode({ bshbPreviewToken: previewToken })
         .then(({ status, response }) => {
           if (status === 200) {
             // refresh

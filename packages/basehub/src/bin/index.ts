@@ -83,6 +83,7 @@ if (args["--version"] || args["-v"]) {
 // CLI commands
 const cmds: { [key: string]: (args: Args) => Promise<void> } = {
   generate: () => main(args, { version }),
+  build: () => main(args, { version }), // same as "generate"
   dev: () => main({ ...args, "--watch": true }, { forceDraft: true, version }),
   help: () => help(0),
 };

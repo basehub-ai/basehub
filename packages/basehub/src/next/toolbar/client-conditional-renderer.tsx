@@ -12,15 +12,21 @@ export const ClientConditionalRenderer = ({
   isForcedDraft,
   enableDraftMode,
   disableDraftMode,
+  revalidateTags,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
-  enableDraftMode: (
-    bshbPreviewToken: string
-  ) => Promise<{ status: number; response: object }>;
+  enableDraftMode: (o: {
+    bshbPreviewToken: string;
+  }) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
+  revalidateTags: (o: { tags: string[] }) => Promise<{ success: boolean }>;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasRendered(true);
+  }, []);
 
   const seekAndStoreBshbPreviewToken = React.useCallback(
     (type?: "url-only") => {
@@ -65,13 +71,24 @@ export const ClientConditionalRenderer = ({
   }, [draft, isForcedDraft, seekAndStoreBshbPreviewToken]);
 
   React.useEffect(() => {
-    setHasRendered(true);
-  }, []);
+    const url = new URL(window.location.href);
+    const tags = url.searchParams.get("bshb-odr-tags");
+    if (tags) {
+      revalidateTags({ tags: tags.split(",") })
+        .then(({ success }) => {
+          document.documentElement.dataset.basehubOdrStatus = success
+            ? "success"
+            : "error";
+        })
+        .catch(() => {
+          document.documentElement.dataset.basehubOdrStatus = "error";
+        });
+    }
+  }, [revalidateTags]);
 
   if (!bshbPreviewToken || !hasRendered || typeof document === "undefined") {
     return null;
   }
-
   const Portal = createPortal(
     <LazyClientToolbar
       disableDraftMode={disableDraftMode}

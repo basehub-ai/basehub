@@ -38,7 +38,7 @@ Expected origin to be one of:
           !param.startsWith("q=")
         );
       });
-      let newParams = filteredParams.join(",") + params.join(",");
+      let newParams = [...filteredParams, ...params].join(",");
       if (newParams.includes("format=") === false) {
         newParams += ",format=auto";
       }
@@ -60,7 +60,24 @@ Expected origin to be one of:
     }
   }
 
-  return url.toString();
+  // pass old origin to new origin
+  const imageURL = new URL(assetsURL);
+  if (url.href.includes(r2URL_deprecated)) {
+    if (url.pathname.startsWith("/cdn-cgi/image/")) {
+      const [_empty, _cdnThing, _imageThing, currentParams = "", ...rest] =
+        url.pathname.split("/");
+      imageURL.pathname = rest.join("/");
+      imageURL.search = currentParams.split(",").join("&");
+    } else {
+      imageURL.pathname = url.pathname;
+      imageURL.search = url.search;
+    }
+  } else {
+    imageURL.pathname = url.pathname;
+    imageURL.search = url.search;
+  }
+
+  return imageURL.toString();
 };
 
 export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {

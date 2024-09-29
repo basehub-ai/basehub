@@ -39,6 +39,7 @@ export type PumpProps<Queries extends Array<PumpQuery>> = {
     data: QueryResults<Queries>
   ) => React.ReactNode | Promise<React.ReactNode>;
   queries: [...Queries]; // Tuple type for better type inference
+  disableNextjsAutoDraftMode?: boolean;
 } & Parameters<typeof basehub>[0];
 
 // Utility type to infer result types from an array of queries
@@ -49,11 +50,26 @@ export type QueryResults<Queries extends Array<PumpQuery>> = {
 export const Pump = async <Queries extends Array<PumpQuery>>({
   children,
   queries,
+  disableNextjsAutoDraftMode,
   ...basehubProps
 }: PumpProps<Queries>) => {
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
+
+  let isNextjsDraftMode = false;
+  if (!disableNextjsAutoDraftMode) {
+    try {
+      const { draftMode } = await import("next/headers");
+      isNextjsDraftMode = (await draftMode()).isEnabled;
+    } catch (error) {
+      // noop, not using nextjs
+    }
+  }
+
+  if (isNextjsDraftMode && basehubProps.draft === undefined) {
+    basehubProps.draft = true;
+  }
 
   const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
@@ -100,6 +116,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
               cache: "no-store",
               method: "POST",
               headers: {
+                ...headers,
                 "content-type": "application/json",
                 "x-basehub-token": token,
                 "x-basehub-api-version": apiVersion,

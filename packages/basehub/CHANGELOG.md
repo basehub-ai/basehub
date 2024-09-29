@@ -1,5 +1,215 @@
 # basehub
 
+## 7.4.1
+
+### Patch Changes
+
+- fix type error
+
+## 7.4.0
+
+### Minor Changes
+
+- e7f7042: Auto on-demand revalidation and draftMode for Next.js
+
+### Patch Changes
+
+- c048383: upgrade genql
+- 3edca41: made it simpler
+- make sure revalidateTag is only allowed against basehub- tags
+- 6f9406a: add data attr to root post revalidation
+- 4e6819b: fix rendering toolbar when there are tags to revalidate
+- ee86877: fix
+- 9b01a98: catch
+
+## 7.4.0-canary.7
+
+### Patch Changes
+
+- make sure revalidateTag is only allowed against basehub- tags
+
+## 7.4.0-canary.6
+
+### Patch Changes
+
+- catch
+
+## 7.4.0-canary.5
+
+### Patch Changes
+
+- fix rendering toolbar when there are tags to revalidate
+
+## 7.4.0-canary.4
+
+### Patch Changes
+
+- upgrade genql
+
+## 7.4.0-canary.3
+
+### Patch Changes
+
+- fix
+
+## 7.4.0-canary.2
+
+### Patch Changes
+
+- add data attr to root post revalidation
+
+## 7.4.0-canary.1
+
+### Patch Changes
+
+- made it simpler
+
+## 7.4.0-canary.0
+
+### Minor Changes
+
+- Auto on-demand revalidation and draftMode for Next.js
+
+## 7.3.4
+
+### Patch Changes
+
+- update @basehub/mutation-api-helpers
+
+## 7.3.3
+
+### Patch Changes
+
+- upgrade shiki
+
+## 7.3.2
+
+### Patch Changes
+
+- remove log
+
+## 7.3.1
+
+### Patch Changes
+
+- Fix basehub image regression
+
+## 7.3.0
+
+### Minor Changes
+
+- pass basehub.earth to assets.basehub.com in BaseHubImage
+
+## 7.2.10
+
+### Patch Changes
+
+- Add controls to default video renderer
+
+## 7.2.9
+
+### Patch Changes
+
+- remove unused search param
+
+## 7.2.8
+
+### Patch Changes
+
+- line numbers nit
+
+## 7.2.7
+
+### Patch Changes
+
+- useId to generate IDs; works on RSC also!
+
+## 7.2.6
+
+### Patch Changes
+
+- set id to optional
+
+## 7.2.5
+
+### Patch Changes
+
+- Support lineNumbers out of the box
+
+## 7.2.4
+
+### Patch Changes
+
+- 759148a: improvements
+- 759148a: include code files
+- 759148a: Export use context as another entrypoint
+- 759148a: dude
+- 759148a: useCopyToClipboard
+- 759148a: Wip code renderer
+- 759148a: export useCodeBlockContext
+- 759148a: Fix exports
+- 759148a: types stuff
+
+## 7.2.4-code.8
+
+### Patch Changes
+
+- useCopyToClipboard
+
+## 7.2.4-code.7
+
+### Patch Changes
+
+- Fix exports
+
+## 7.2.4-code.6
+
+### Patch Changes
+
+- Export use context as another entrypoint
+
+## 7.2.4-code.5
+
+### Patch Changes
+
+- types stuff
+
+## 7.2.4-code.4
+
+### Patch Changes
+
+- improvements
+
+## 7.2.4-code.3
+
+### Patch Changes
+
+- dude
+
+## 7.2.4-code.2
+
+### Patch Changes
+
+- export useCodeBlockContext
+
+## 7.2.4-code.1
+
+### Patch Changes
+
+- include code files
+
+## 7.2.4-code.0
+
+### Patch Changes
+
+- Wip code renderer
+
+## 7.2.3
+
+### Patch Changes
+
+- f667be3: Pass env populated headers to Pump draft queries
+
 ## 7.2.2
 
 ### Patch Changes

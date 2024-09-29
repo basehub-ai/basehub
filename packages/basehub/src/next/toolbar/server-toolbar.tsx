@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { draftMode } from "next/headers";
+import { revalidateTag } from "next/cache";
 import {
   getStuffFromEnv,
   basehub,
@@ -20,26 +21,18 @@ type ServerToolbarProps = Parameters<typeof basehub>[0];
 export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
 
-  const enableDraftMode = async (bshbPreviewToken: string) => {
+  const enableDraftMode = async ({
+    bshbPreviewToken,
+  }: {
+    bshbPreviewToken: string;
+  }) => {
     "use server";
     const { headers, url } = getStuffFromEnv(basehubProps);
-
+    const apiOrigin = getBaseHubApiOrigin(url);
     const token = headers["x-basehub-token"];
-    let enablePreviewEndpoint: string;
-    switch (true) {
-      case url.origin.includes("api.basehub.com"):
-        enablePreviewEndpoint = "https://basehub.com/api/preview/auth";
-        break;
-      case url.origin.includes("api.bshb.dev"):
-        enablePreviewEndpoint = "https://basehub.dev/api/preview/auth";
-        break;
-      default:
-        enablePreviewEndpoint = url.toString();
-    }
 
-    return fetch(enablePreviewEndpoint, {
-      // @ts-expect-error - nextjs only option
-      next: { revalidate: 0 },
+    return fetch(apiOrigin + "/api/nextjs/preview-auth", {
+      cache: "no-store",
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -65,8 +58,17 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
 
   const disableDraftMode = async () => {
     "use server";
-
     draftMode().disable();
+  };
+
+  const revalidateTags = async ({ tags }: { tags: string[] }) => {
+    "use server";
+    tags.forEach((tag) => {
+      if (tag.startsWith("basehub-")) {
+        revalidateTag(tag);
+      }
+    });
+    return { success: true };
   };
 
   return (
@@ -75,6 +77,23 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
       isForcedDraft={isForcedDraft}
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
+      revalidateTags={revalidateTags}
     />
   );
 };
+
+function getBaseHubApiOrigin(url: URL) {
+  let origin: string;
+  switch (true) {
+    case url.origin.includes("api.basehub.com"):
+      origin = "https://basehub.com";
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      origin = "https://basehub.dev";
+      break;
+    default:
+      origin = url.origin;
+  }
+
+  return origin;
+}
