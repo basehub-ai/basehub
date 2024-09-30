@@ -29,7 +29,7 @@ export const getStuffFromEnv = (
   url: URL;
   headers: Record<string, string>;
 } => {
-  dotenvLoad();
+  dotenvLoad({ priorities: { ".dev.vars": 1 } });
 
   type EnvVarName =
     | "TOKEN"
