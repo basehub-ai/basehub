@@ -1,5 +1,11 @@
 # basehub
 
+## 7.4.2
+
+### Patch Changes
+
+- support loading env from .dev.vars
+
 ## 7.4.1
 
 ### Patch Changes
