@@ -1,9 +1,6 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 import { dotenvLoad } from "dotenv-mono";
-import {
-  getGitRefFromDeploymentPlatform,
-  runtime__getGitRefFromDeploymentPlatform,
-} from "./get-git-ref-from-deployment-platform";
+import { getGitEnv } from "./get-git-env";
 
 /**
  * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
@@ -32,6 +29,8 @@ export const getStuffFromEnv = (
   draft: boolean;
   url: URL;
   headers: Record<string, string>;
+  gitBranch: string | null;
+  gitCommitSHA: string | null;
 } => {
   dotenvLoad({ priorities: { ".dev.vars": 1 } });
 
@@ -171,15 +170,18 @@ export const getStuffFromEnv = (
   draft = !!draft;
 
   // 3.
-  const { gitBranch } = getGitRefFromDeploymentPlatform();
+  const { gitBranch, gitCommitSHA } = getGitEnv();
 
   return {
     draft,
     output: getEnvVar("OUTPUT") ?? options.output ?? null,
     url: basehubUrl,
+    gitBranch,
+    gitCommitSHA,
     headers: {
       "x-basehub-token": token,
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
+      ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
       ...(ref ? { "x-basehub-ref": ref } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
       ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
@@ -192,11 +194,11 @@ export const getStuffFromEnv = (
  * doesn't use Zod nor dotenv-flow (so we don't ship extra stuff to the generated bundle). Assumes the env vars are already loaded.
  */
 export const runtime__getStuffFromEnvString = (
-  options: Options
+  options: Options & {
+    gitBranch: string | null;
+    gitCommitSHA: string | null;
+  }
 ) => /**JavaScript */ `
-
-${runtime__getGitRefFromDeploymentPlatform()}
-
 export const getStuffFromEnv = (options) => {
     const defaultEnvVarPrefix = "${defaultEnvVarPrefix}";
 
@@ -335,7 +337,10 @@ export const getStuffFromEnv = (options) => {
     basehubUrl.searchParams.delete("api-version");
 
     // 3.
-    const { gitBranch } = getGitRefFromDeploymentPlatform()
+    const gitBranch = ${options.gitBranch ? `"${options.gitBranch}"` : null};
+    const gitCommitSHA = ${
+      options.gitCommitSHA ? `"${options.gitCommitSHA}"` : null
+    };
 
     return {
       isForcedDraft: ${!!options.forceDraft},
@@ -344,6 +349,7 @@ export const getStuffFromEnv = (options) => {
       headers: {
         "x-basehub-token": token,
         ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
+        ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
         ...(ref ? { "x-basehub-ref": ref } : {}),
         ...(draft ? { "x-basehub-draft": "true" } : {}),
         ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),

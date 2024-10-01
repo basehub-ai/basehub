@@ -41,7 +41,8 @@ export const main = async (
       ...(opts?.forceDraft && { draft: true }),
     };
 
-    const { url, headers, draft, output } = getStuffFromEnv(options);
+    const { url, headers, draft, output, gitBranch, gitCommitSHA } =
+      getStuffFromEnv(options);
 
     const basehubModulePath = resolvePkg("basehub");
 
@@ -72,6 +73,8 @@ export const main = async (
         `🔗 Endpoint: ${url.toString()}`,
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,
+        gitBranch ? `🌳 Git Branch: ${gitBranch}` : null,
+        // `🔑 Git Commit SHA: ${gitCommitSHA}`,
       ]);
     }
 
@@ -174,6 +177,8 @@ export const main = async (
         ...options,
         draft,
         forceDraft: opts?.forceDraft,
+        gitBranch,
+        gitCommitSHA,
       })}}`
     );
 
@@ -648,7 +653,8 @@ export const basehub = (options?: Options) => {
 basehub.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
 `;
 
-function logInsideBox(lines: string[]) {
+function logInsideBox(_lines: (string | null)[]) {
+  const lines = _lines.filter((line) => line !== null);
   // Determine the longest line to set the padding
   const longestLine = lines.reduce(
     (max, line) => Math.max(max, line.length),
