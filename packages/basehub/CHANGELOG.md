@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.0-canary.0
+
+### Minor Changes
+
+- Add support for linking git branches to basehub branches
+
 ## 7.4.2
 
 ### Patch Changes
