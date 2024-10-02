@@ -6,13 +6,12 @@ export default async function HomePage() {
       __typename: true,
       id: true,
     },
-    collections: {
+    collectionssA: {
       authors: {
-        __args: {
-          first: 5,
-        },
         items: {
-          _id: true,
+          name: true,
+          _title: true,
+          role: true,
         },
       },
     },

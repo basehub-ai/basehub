@@ -41,7 +41,7 @@ export const main = async (
       ...(opts?.forceDraft && { draft: true }),
     };
 
-    const { url, headers, draft, output, gitBranch, gitCommitSHA } =
+    const { url, headers, draft, output, gitBranch, gitCommitSHA, token } =
       getStuffFromEnv(options);
 
     const basehubModulePath = resolvePkg("basehub");
@@ -67,13 +67,28 @@ export const main = async (
 
     const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
 
+    const resolvedRef = await resolveRef({
+      url,
+      token,
+      ref: gitBranch,
+      gitBranch,
+      gitCommitSHA,
+    });
+
     if (!silent) {
       logInsideBox([
         `🎫 SDK Version: ${opts.version}`,
         `🔗 Endpoint: ${url.toString()}`,
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,
-        gitBranch ? `🌳 Git Branch: ${gitBranch}` : null,
+        `🔀 Ref: ${
+          resolvedRef.type === "branch"
+            ? resolvedRef.ref.name
+            : resolvedRef.ref.id
+        } (${resolvedRef.type})`,
+        resolvedRef.type === "branch" && resolvedRef.ref.git?.branch
+          ? `🌳 Linked Git Branch: ${resolvedRef.ref.git?.branch}`
+          : null,
         // `🔑 Git Commit SHA: ${gitCommitSHA}`,
       ]);
     }
@@ -654,7 +669,7 @@ basehub.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
 `;
 
 function logInsideBox(_lines: (string | null)[]) {
-  const lines = _lines.filter((line) => line !== null);
+  const lines = _lines.filter((line) => line !== null) as string[];
   // Determine the longest line to set the padding
   const longestLine = lines.reduce(
     (max, line) => Math.max(max, line.length),
@@ -719,3 +734,67 @@ const scheduleNonOverlappingWork = (
 
   return { watchPromise, stopWatching };
 };
+
+type ResolvedRef =
+  | {
+      type: "commit";
+      ref: {
+        id: string;
+        message: string;
+      };
+    }
+  | {
+      type: "branch";
+      ref: {
+        id: string;
+        name: string;
+        git?: { branch?: string | null };
+      };
+    };
+
+const refCache = new Map<string, ResolvedRef>();
+
+async function resolveRef({
+  url,
+  token,
+  ref,
+  gitBranch,
+  gitCommitSHA,
+}: {
+  url: URL;
+  token: string;
+  ref: string | null | undefined;
+  gitBranch: string | null;
+  gitCommitSHA: string | null;
+}) {
+  const cacheKey = [token, ref, gitBranch, gitCommitSHA].join("|");
+  const cached = refCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  let refResolverEndpoint: string;
+  switch (true) {
+    case url.origin.includes("api.basehub.com"):
+      refResolverEndpoint = "https://basehub.com/api/git/resolve-ref";
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      refResolverEndpoint = "https://basehub.dev/api/git/resolve-ref";
+      break;
+    default:
+      refResolverEndpoint = url.toString();
+  }
+
+  const res = await fetch(refResolverEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ token, ref, gitBranch, gitCommitSHA }),
+  });
+
+  const data = await res.json();
+  const resolvedRef = data as ResolvedRef;
+  refCache.set(cacheKey, resolvedRef);
+  return resolvedRef;
+}

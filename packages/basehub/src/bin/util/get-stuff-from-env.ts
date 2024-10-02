@@ -31,6 +31,7 @@ export const getStuffFromEnv = (
   headers: Record<string, string>;
   gitBranch: string | null;
   gitCommitSHA: string | null;
+  token: string;
 } => {
   dotenvLoad({ priorities: { ".dev.vars": 1 } });
 
@@ -178,6 +179,7 @@ export const getStuffFromEnv = (
     url: basehubUrl,
     gitBranch,
     gitCommitSHA,
+    token,
     headers: {
       "x-basehub-token": token,
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
