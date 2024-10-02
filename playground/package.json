@@ -3,12 +3,11 @@
   "private": true,
   "version": "0.0.141",
   "scripts": {
-    "dev": "basehub dev & next dev",
+    "dev": "basehub dev & next dev --port 3003",
     "build": "basehub && next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
-    "lint": "next lint",
-    "generate": "basehub"
+    "lint": "next lint"
   },
   "dependencies": {
     "basehub": "workspace:*",
