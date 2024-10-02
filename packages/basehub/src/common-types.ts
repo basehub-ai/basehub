@@ -13,4 +13,5 @@ export type ResolvedRef =
         name: string;
         git?: { branch?: string | null };
       };
+      createSuggestedBranchLink?: string;
     };

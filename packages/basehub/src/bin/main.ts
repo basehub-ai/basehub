@@ -43,7 +43,7 @@ export const main = async (
       ...(opts?.forceDraft && { draft: true }),
     };
 
-    const { url, headers, draft, output, gitBranch, gitCommitSHA, token } =
+    const { url, headers, draft, output, gitBranch, gitCommitSHA, token, ref } =
       getStuffFromEnv(options);
 
     const basehubModulePath = resolvePkg("basehub");
@@ -72,9 +72,12 @@ export const main = async (
     const resolvedRef = await resolveRef({
       url,
       token,
-      ref: gitBranch,
+      ref,
       gitBranch,
       gitCommitSHA,
+    }).catch((err) => {
+      console.log(err);
+      throw err;
     });
 
     if (!silent) {
@@ -88,8 +91,12 @@ export const main = async (
             ? resolvedRef.ref.name
             : resolvedRef.ref.id
         } (${resolvedRef.type})`,
-        resolvedRef.type === "branch" && resolvedRef.ref.git?.branch
-          ? `🌳 Linked Git Branch: ${resolvedRef.ref.git?.branch}`
+        resolvedRef.type === "branch"
+          ? resolvedRef.ref.git?.branch
+            ? `🌳 Linked Git Branch: ${resolvedRef.ref.git?.branch}`
+            : resolvedRef.createSuggestedBranchLink
+            ? `🤝 Link Git Branch to BaseHub Branch: ${resolvedRef.createSuggestedBranchLink}`
+            : null
           : null,
         // `🔑 Git Commit SHA: ${gitCommitSHA}`,
       ]);
@@ -750,7 +757,7 @@ const scheduleNonOverlappingWork = (
 const refCache = new Map<string, ResolvedRef>();
 
 async function resolveRef({
-  // url,
+  url,
   token,
   ref,
   gitBranch,
@@ -768,30 +775,27 @@ async function resolveRef({
     return cached;
   }
 
-  // let refResolverEndpoint: string;
-  // switch (true) {
-  //   case url.origin.includes("api.basehub.com"):
-  //     refResolverEndpoint = "https://basehub.com/api/git/resolve-ref";
-  //     break;
-  //   case url.origin.includes("api.bshb.dev"):
-  //     refResolverEndpoint = "https://basehub.dev/api/git/resolve-ref";
-  //     break;
-  //   default:
-  //     refResolverEndpoint = url.toString();
-  // }
+  let refResolverEndpoint: string;
+  switch (true) {
+    case url.origin.includes("api.basehub.com"):
+      refResolverEndpoint = "https://basehub.com/api/git/resolve-ref";
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      refResolverEndpoint = "https://basehub.dev/api/git/resolve-ref";
+      break;
+    default:
+      refResolverEndpoint = url.toString();
+  }
 
-  const res = await fetch(
-    "https://basehub-git-jb-branching-git-intgr-basehub.vercel.app/api/git/resolve-ref",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // eslint-disable-next-line turbo/no-undeclared-env-vars
-        "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_TOKEN!,
-      },
-      body: JSON.stringify({ token, ref, gitBranch, gitCommitSHA }),
-    }
-  );
+  const res = await fetch(refResolverEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, ref, gitBranch, gitCommitSHA }),
+  });
+
+  if (res.status !== 200) {
+    throw new Error(`Failed to resolve ref: ${res.statusText}`);
+  }
 
   const data = await res.json();
   const resolvedRef = data as ResolvedRef;
