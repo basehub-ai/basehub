@@ -42,7 +42,7 @@
   "scripts": {
     "emit-dts": "tsc --project tsconfig.dts-only.json",
     "dev": "pnpm emit-dts && pnpm build --watch",
-    "build": "pnpm build:bin & pnpm build:client",
+    "build": "pnpm build:bin && pnpm build:client",
     "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
     "build:client": "tsup --config tsup-client.config.ts"
   },

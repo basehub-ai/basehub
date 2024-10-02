@@ -15,9 +15,7 @@ export const BranchSwitcher = ({
     <div className={s.branch} data-draft-active={isForcedDraft || draft}>
       <BranchIcon />
       &nbsp;
-      {resolvedRef.type === "branch"
-        ? resolvedRef.ref.name
-        : "#" + resolvedRef.ref.id}
+      {resolvedRef.type === "branch" ? resolvedRef.name : "#" + resolvedRef.id}
     </div>
   );
 };

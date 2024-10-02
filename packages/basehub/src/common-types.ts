@@ -1,17 +1,14 @@
-export type ResolvedRef =
+export type ResolvedRef = { ref: string } & (
   | {
       type: "commit";
-      ref: {
-        id: string;
-        message: string;
-      };
+      id: string;
+      message: string;
     }
   | {
       type: "branch";
-      ref: {
-        id: string;
-        name: string;
-        git?: { branch?: string | null };
-      };
+      id: string;
+      name: string;
+      git?: { branch?: string | null };
       createSuggestedBranchLink?: string;
-    };
+    }
+);

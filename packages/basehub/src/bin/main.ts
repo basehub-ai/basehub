@@ -30,8 +30,16 @@ export const main = async (
 ) => {
   const sdkBuildId = "bshb_sdk_" + Math.random().toString(16).slice(2);
   const now = Date.now();
+  let previousResolvedRef: ResolvedRef | null = null;
 
-  async function generateSDK(silent: boolean, previousSchemaHash: string) {
+  async function generateSDK(
+    silent: boolean,
+    previousSchemaHash: string
+  ): Promise<{
+    preventedClientGeneration: boolean;
+    schemaHash: string;
+    newResolvedRef: ResolvedRef;
+  }> {
     logIfNotSilent(silent, "🪄 Generating...");
 
     const options: Options = {
@@ -43,8 +51,16 @@ export const main = async (
       ...(opts?.forceDraft && { draft: true }),
     };
 
-    const { url, headers, draft, output, gitBranch, gitCommitSHA, token, ref } =
-      getStuffFromEnv(options);
+    const {
+      url,
+      headers,
+      draft,
+      output,
+      gitBranch,
+      gitCommitSHA,
+      resolvedRef,
+      newResolvedRefPromise,
+    } = await getStuffFromEnv({ ...options, previousResolvedRef });
 
     const basehubModulePath = resolvePkg("basehub");
 
@@ -69,17 +85,6 @@ export const main = async (
 
     const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
 
-    const resolvedRef = await resolveRef({
-      url,
-      token,
-      ref,
-      gitBranch,
-      gitCommitSHA,
-    }).catch((err) => {
-      console.log(err);
-      throw err;
-    });
-
     if (!silent) {
       logInsideBox([
         `🎫 SDK Version: ${opts.version}`,
@@ -87,13 +92,11 @@ export const main = async (
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,
         `🔀 Ref: ${
-          resolvedRef.type === "branch"
-            ? resolvedRef.ref.name
-            : resolvedRef.ref.id
+          resolvedRef.type === "branch" ? resolvedRef.name : resolvedRef.id
         } (${resolvedRef.type})`,
         resolvedRef.type === "branch"
-          ? resolvedRef.ref.git?.branch
-            ? `🌳 Linked Git Branch: ${resolvedRef.ref.git?.branch}`
+          ? resolvedRef.git?.branch
+            ? `🌳 Linked Git Branch: ${resolvedRef.git?.branch}`
             : resolvedRef.createSuggestedBranchLink
             ? `🤝 Link Git Branch to BaseHub Branch: ${resolvedRef.createSuggestedBranchLink}`
             : null
@@ -157,7 +160,11 @@ export const main = async (
 
     if (preventedClientGeneration) {
       // done
-      return { preventedClientGeneration, schemaHash };
+      return {
+        preventedClientGeneration,
+        schemaHash,
+        newResolvedRef: await newResolvedRefPromise,
+      };
     }
 
     const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
@@ -494,7 +501,11 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       silent,
       `🪄 Generated \`basehub\` client in ${Date.now() - now}ms`
     );
-    return { preventedClientGeneration, schemaHash };
+    return {
+      preventedClientGeneration,
+      schemaHash,
+      newResolvedRef: await newResolvedRefPromise,
+    };
   }
 
   if (args["--watch"]) {
@@ -510,10 +521,24 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
             "👀 `basehub` experimental --watch mode. Bugs: https://github.com/basehub-ai/basehub/issues",
           ]);
           console.log(" ");
-        } else if (!result.preventedClientGeneration) {
-          console.log("🔄 Detected changes, `basehub` re-generated");
+        } else {
+          if (result.newResolvedRef.ref !== previousResolvedRef?.ref) {
+            logInsideBox([
+              `🔀 Ref changed, now querying from ${
+                result.newResolvedRef.type
+              } ${result.newResolvedRef.ref}${
+                result.newResolvedRef.type === "branch" &&
+                result.newResolvedRef.git?.branch
+                  ? ` (linked to Git branch ${result.newResolvedRef.git?.branch})`
+                  : ""
+              }`,
+            ]);
+          } else if (!result.preventedClientGeneration) {
+            console.log("🔄 Detected changes, `basehub` re-generated");
+          }
         }
 
+        previousResolvedRef = result.newResolvedRef;
         previousHash = result.schemaHash;
         isFirst = false;
       },
@@ -753,52 +778,3 @@ const scheduleNonOverlappingWork = (
 
   return { watchPromise, stopWatching };
 };
-
-const refCache = new Map<string, ResolvedRef>();
-
-async function resolveRef({
-  url,
-  token,
-  ref,
-  gitBranch,
-  gitCommitSHA,
-}: {
-  url: URL;
-  token: string;
-  ref: string | null | undefined;
-  gitBranch: string | null;
-  gitCommitSHA: string | null;
-}) {
-  const cacheKey = [token, ref, gitBranch, gitCommitSHA].join("|");
-  const cached = refCache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  let refResolverEndpoint: string;
-  switch (true) {
-    case url.origin.includes("api.basehub.com"):
-      refResolverEndpoint = "https://basehub.com/api/git/resolve-ref";
-      break;
-    case url.origin.includes("api.bshb.dev"):
-      refResolverEndpoint = "https://basehub.dev/api/git/resolve-ref";
-      break;
-    default:
-      refResolverEndpoint = url.toString();
-  }
-
-  const res = await fetch(refResolverEndpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token, ref, gitBranch, gitCommitSHA }),
-  });
-
-  if (res.status !== 200) {
-    throw new Error(`Failed to resolve ref: ${res.statusText}`);
-  }
-
-  const data = await res.json();
-  const resolvedRef = data as ResolvedRef;
-  refCache.set(cacheKey, resolvedRef);
-  return resolvedRef;
-}

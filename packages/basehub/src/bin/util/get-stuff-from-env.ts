@@ -1,6 +1,7 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 import { dotenvLoad } from "dotenv-mono";
 import { getGitEnv } from "./get-git-env";
+import { ResolvedRef } from "../../common-types";
 
 /**
  * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
@@ -22,9 +23,11 @@ export type Options = {
   apiVersion: string | undefined;
 };
 
-export const getStuffFromEnv = (
-  options: Options
-): {
+export const getStuffFromEnv = async (
+  options: Options & {
+    previousResolvedRef: ResolvedRef | null;
+  }
+): Promise<{
   output: string | null;
   draft: boolean;
   url: URL;
@@ -32,8 +35,9 @@ export const getStuffFromEnv = (
   gitBranch: string | null;
   gitCommitSHA: string | null;
   token: string;
-  ref: string | null;
-} => {
+  resolvedRef: ResolvedRef;
+  newResolvedRefPromise: Promise<ResolvedRef>;
+}> => {
   dotenvLoad({ priorities: { ".dev.vars": 1 } });
 
   type EnvVarName =
@@ -174,6 +178,17 @@ export const getStuffFromEnv = (
   // 3.
   const { gitBranch, gitCommitSHA } = getGitEnv();
 
+  const newResolvedRefPromise = resolveRef({
+    url: basehubUrl,
+    token,
+    ref,
+    gitBranch,
+    gitCommitSHA,
+  });
+
+  const resolvedRef =
+    options.previousResolvedRef ?? (await newResolvedRefPromise);
+
   return {
     draft,
     output: getEnvVar("OUTPUT") ?? options.output ?? null,
@@ -181,17 +196,61 @@ export const getStuffFromEnv = (
     gitBranch,
     gitCommitSHA,
     token,
-    ref,
+    resolvedRef,
+    newResolvedRefPromise,
     headers: {
       "x-basehub-token": token,
+      "x-basehub-ref": resolvedRef.ref,
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
       ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
-      ...(ref ? { "x-basehub-ref": ref } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
       ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
     },
   };
 };
+
+async function resolveRef({
+  url,
+  token,
+  ref,
+  gitBranch,
+  gitCommitSHA,
+}: {
+  url: URL;
+  token: string;
+  ref: string | null | undefined;
+  gitBranch: string | null;
+  gitCommitSHA: string | null;
+}) {
+  let refResolverEndpoint: string;
+  switch (true) {
+    case url.origin.includes("api.basehub.com"):
+      refResolverEndpoint = "https://basehub.com/api/git/resolve-ref";
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      refResolverEndpoint = "https://basehub.dev/api/git/resolve-ref";
+      break;
+    case url.origin.includes("localhost:3001"):
+      refResolverEndpoint = "http://localhost:3000/api/git/resolve-ref";
+      break;
+    default:
+      refResolverEndpoint = url.toString();
+  }
+
+  const res = await fetch(refResolverEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, ref, gitBranch, gitCommitSHA }),
+  });
+
+  if (res.status !== 200) {
+    throw new Error(`Failed to resolve ref: ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  const resolvedRef = data as ResolvedRef;
+  return resolvedRef;
+}
 
 /**
  * Will inject to generated code, so we keep the same logic and don't hardcode the URL in the generated output.
