@@ -9,6 +9,7 @@ import {
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../index";
+import { getBaseHubAppApiEndpoint } from "../../global-util";
 
 // we use react.lazy to code split client-toolbar
 const LazyClientConditionalRenderer = React.lazy(() =>
@@ -29,10 +30,13 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
   }) => {
     "use server";
     const { headers, url } = getStuffFromEnv(basehubProps);
-    const apiOrigin = getBaseHubApiOrigin(url);
+    const appApiEndpoint = getBaseHubAppApiEndpoint(
+      url,
+      "/api/nextjs/preview-auth"
+    );
     const token = headers["x-basehub-token"];
 
-    return fetch(apiOrigin + "/api/nextjs/preview-auth", {
+    return fetch(appApiEndpoint, {
       cache: "no-store",
       method: "POST",
       headers: {
@@ -83,19 +87,3 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
     />
   );
 };
-
-function getBaseHubApiOrigin(url: URL) {
-  let origin: string;
-  switch (true) {
-    case url.origin.includes("api.basehub.com"):
-      origin = "https://basehub.com";
-      break;
-    case url.origin.includes("api.bshb.dev"):
-      origin = "https://basehub.dev";
-      break;
-    default:
-      origin = url.origin;
-  }
-
-  return origin;
-}

@@ -8,6 +8,9 @@
     "playground": "0.0.141"
   },
   "changesets": [
+    "beige-doors-hunt",
+    "cyan-ears-reflect",
+    "great-carrots-clean",
     "stale-ducks-wonder"
   ]
 }

@@ -12,6 +12,7 @@ import {
   // @ts-ignore
   getStuffFromEnv,
 } from "../index";
+import { getBaseHubAppApiEndpoint } from "../../global-util";
 
 export { PumpQuery };
 
@@ -74,17 +75,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
   const apiVersion = headers["x-basehub-api-version"];
-  let pumpEndpoint: string;
-  switch (true) {
-    case url.origin.includes("api.basehub.com"):
-      pumpEndpoint = "https://basehub.com/api/pump";
-      break;
-    case url.origin.includes("api.bshb.dev"):
-      pumpEndpoint = "https://basehub.dev/api/pump";
-      break;
-    default:
-      pumpEndpoint = url.toString();
-  }
+  const pumpEndpoint = getBaseHubAppApiEndpoint(url, "/api/pump");
 
   const noQueries = queries.length === 0;
 

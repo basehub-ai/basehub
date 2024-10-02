@@ -1,5 +1,23 @@
 # basehub
 
+## 7.5.0-canary.3
+
+### Patch Changes
+
+- fix
+
+## 7.5.0-canary.2
+
+### Patch Changes
+
+- Fix
+
+## 7.5.0-canary.1
+
+### Patch Changes
+
+- Fix
+
 ## 7.5.0-canary.0
 
 ### Minor Changes

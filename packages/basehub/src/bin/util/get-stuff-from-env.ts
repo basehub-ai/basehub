@@ -2,6 +2,7 @@
 import { dotenvLoad } from "dotenv-mono";
 import { getGitEnv } from "./get-git-env";
 import { ResolvedRef } from "../../common-types";
+import { getBaseHubAppApiEndpoint } from "../../global-util";
 
 /**
  * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
@@ -222,20 +223,10 @@ async function resolveRef({
   gitBranch: string | null;
   gitCommitSHA: string | null;
 }) {
-  let refResolverEndpoint: string;
-  switch (true) {
-    case url.origin.includes("api.basehub.com"):
-      refResolverEndpoint = "https://basehub.com/api/git/resolve-ref";
-      break;
-    case url.origin.includes("api.bshb.dev"):
-      refResolverEndpoint = "https://basehub.dev/api/git/resolve-ref";
-      break;
-    case url.origin.includes("localhost:3001"):
-      refResolverEndpoint = "http://localhost:3000/api/git/resolve-ref";
-      break;
-    default:
-      refResolverEndpoint = url.toString();
-  }
+  const refResolverEndpoint = getBaseHubAppApiEndpoint(
+    url,
+    "/api/git/resolve-ref"
+  );
 
   const res = await fetch(refResolverEndpoint, {
     method: "POST",
