@@ -1,5 +1,12 @@
 # basehub
 
+## 7.5.0-canary.6
+
+### Patch Changes
+
+- Use resolvedRef in the runtime
+- fix
+
 ## 7.5.0-canary.5
 
 ### Patch Changes

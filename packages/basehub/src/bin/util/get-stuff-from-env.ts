@@ -345,14 +345,6 @@ export const getStuffFromEnv = (options) => {
       throw new Error(tokenNotFoundErrorMessage);
     }
 
-    let ref =
-      basehubUrl.searchParams.get("ref") ??
-      parsedBasehubRefEnv ??
-      (backwardsCompatURL
-        ? backwardsCompatURL.searchParams.get("ref")
-        : undefined) ??
-      null;
-
     let draft =
        basehubUrl.searchParams.get("draft") ??
       parsedBasehubDraftEnv ??
@@ -401,9 +393,9 @@ export const getStuffFromEnv = (options) => {
       url: basehubUrl,
       headers: {
         "x-basehub-token": token,
+        "x-basehub-ref": resolvedRef.ref,
         ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
         ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
-        ...(ref ? { "x-basehub-ref": ref } : {}),
         ...(draft ? { "x-basehub-draft": "true" } : {}),
         ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
       },

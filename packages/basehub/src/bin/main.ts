@@ -93,12 +93,12 @@ export const main = async (
         `📦 Output: ${basehubOutputPath}`,
         `🔀 Ref: ${
           resolvedRef.type === "branch" ? resolvedRef.name : resolvedRef.id
-        } (${resolvedRef.type})`,
+        } (basehub ${resolvedRef.type})`,
         resolvedRef.type === "branch"
           ? resolvedRef.git?.branch
-            ? `🌳 Linked Git Branch: ${resolvedRef.git?.branch}`
+            ? `🌳 Linked git branch: ${resolvedRef.git?.branch}`
             : resolvedRef.createSuggestedBranchLink
-            ? `🤝 Link Git Branch to BaseHub Branch: ${resolvedRef.createSuggestedBranchLink}`
+            ? `🤝 Want to link this git branch to a basehub branch? ${resolvedRef.createSuggestedBranchLink}`
             : null
           : null,
         // `🔑 Git Commit SHA: ${gitCommitSHA}`,
@@ -682,7 +682,10 @@ export const basehub = (options?: Options) => {
 
   options.getExtraFetchOptions = (op, body) => {
     if (op !== 'query') return {}
-    const queryHash = hashObject(body)
+
+    // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
+    // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
+    const queryHash = hashObject({ ...body, refId: resolvedRef.id })
     const cacheTag = 'basehub-' + queryHash
 
     // don't override if we're in draft mode
