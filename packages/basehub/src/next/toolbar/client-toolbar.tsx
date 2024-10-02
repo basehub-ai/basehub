@@ -6,6 +6,7 @@ import { Tooltip } from "./components/tooltip";
 import { DragHandle } from "./components/drag-handle";
 import { BranchSwitcher } from "./components/branch-swticher";
 import debounce from "lodash.debounce";
+import { ResolvedRef } from "../../common-types";
 
 const TOOLBAR_POSITION_STORAGE_KEY = "bshb_toolbar_pos";
 
@@ -17,6 +18,7 @@ export const ClientToolbar = ({
   bshbPreviewToken,
   shouldAutoEnableDraft,
   seekAndStoreBshbPreviewToken,
+  resolvedRef,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -27,6 +29,7 @@ export const ClientToolbar = ({
   bshbPreviewToken: string | undefined;
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
+  resolvedRef: ResolvedRef;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
@@ -203,7 +206,11 @@ export const ClientToolbar = ({
       >
         <div className={s.root} data-draft-active={isForcedDraft || draft}>
           {/* branch switcher */}
-          <BranchSwitcher isForcedDraft={isForcedDraft} draft={draft} />
+          <BranchSwitcher
+            isForcedDraft={isForcedDraft}
+            draft={draft}
+            resolvedRef={resolvedRef}
+          />
 
           {/* draft mode button */}
           <Tooltip

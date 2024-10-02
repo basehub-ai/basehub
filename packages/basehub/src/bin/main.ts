@@ -14,6 +14,7 @@ import { appendGeneratedCodeBanner } from "./util/disable-linters";
 import { copyDirSync } from "./util/cp";
 import { z } from "zod";
 import { createHash } from "crypto";
+import { ResolvedRef } from "../common-types";
 
 const buildManifestSchema = z.object({
   sdkVersion: z.string(),
@@ -28,6 +29,7 @@ export const main = async (
   opts: { forceDraft?: boolean; version: string }
 ) => {
   const sdkBuildId = "bshb_sdk_" + Math.random().toString(16).slice(2);
+  const now = Date.now();
 
   async function generateSDK(silent: boolean, previousSchemaHash: string) {
     logIfNotSilent(silent, "🪄 Generating...");
@@ -227,7 +229,11 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     }
 
     // 3. append our basehub function to the end of the file.
-    const basehubExport = getBaseHubExport({ noStore: draft, sdkBuildId });
+    const basehubExport = getBaseHubExport({
+      noStore: draft,
+      sdkBuildId,
+      resolvedRef,
+    });
     if (!schemaFileContents.includes(basehubExport)) {
       schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
     }
@@ -477,7 +483,10 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       );
     }
 
-    logIfNotSilent(silent, "🪄 Generated `basehub` client");
+    logIfNotSilent(
+      silent,
+      `🪄 Generated \`basehub\` client in ${Date.now() - now}ms`
+    );
     return { preventedClientGeneration, schemaHash };
   }
 
@@ -541,14 +550,17 @@ process.on("unhandledRejection", (reason, promise) => {
 const getBaseHubExport = ({
   noStore,
   sdkBuildId,
+  resolvedRef,
 }: {
   noStore: boolean;
   sdkBuildId: string;
+  resolvedRef: ResolvedRef;
 }) => `
 export type * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
 
 export const sdkBuildId = "${sdkBuildId}";
+export const resolvedRef = ${JSON.stringify(resolvedRef)};
 
 /**
  * Returns a hash code from an object
@@ -735,27 +747,10 @@ const scheduleNonOverlappingWork = (
   return { watchPromise, stopWatching };
 };
 
-type ResolvedRef =
-  | {
-      type: "commit";
-      ref: {
-        id: string;
-        message: string;
-      };
-    }
-  | {
-      type: "branch";
-      ref: {
-        id: string;
-        name: string;
-        git?: { branch?: string | null };
-      };
-    };
-
 const refCache = new Map<string, ResolvedRef>();
 
 async function resolveRef({
-  url,
+  // url,
   token,
   ref,
   gitBranch,
@@ -773,25 +768,30 @@ async function resolveRef({
     return cached;
   }
 
-  let refResolverEndpoint: string;
-  switch (true) {
-    case url.origin.includes("api.basehub.com"):
-      refResolverEndpoint = "https://basehub.com/api/git/resolve-ref";
-      break;
-    case url.origin.includes("api.bshb.dev"):
-      refResolverEndpoint = "https://basehub.dev/api/git/resolve-ref";
-      break;
-    default:
-      refResolverEndpoint = url.toString();
-  }
+  // let refResolverEndpoint: string;
+  // switch (true) {
+  //   case url.origin.includes("api.basehub.com"):
+  //     refResolverEndpoint = "https://basehub.com/api/git/resolve-ref";
+  //     break;
+  //   case url.origin.includes("api.bshb.dev"):
+  //     refResolverEndpoint = "https://basehub.dev/api/git/resolve-ref";
+  //     break;
+  //   default:
+  //     refResolverEndpoint = url.toString();
+  // }
 
-  const res = await fetch(refResolverEndpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ token, ref, gitBranch, gitCommitSHA }),
-  });
+  const res = await fetch(
+    "https://basehub-git-jb-branching-git-intgr-basehub.vercel.app/api/git/resolve-ref",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // eslint-disable-next-line turbo/no-undeclared-env-vars
+        "x-vercel-protection-bypass": process.env.VERCEL_BYPASS_TOKEN!,
+      },
+      body: JSON.stringify({ token, ref, gitBranch, gitCommitSHA }),
+    }
+  );
 
   const data = await res.json();
   const resolvedRef = data as ResolvedRef;

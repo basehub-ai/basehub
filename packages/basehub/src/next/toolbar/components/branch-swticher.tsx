@@ -1,17 +1,23 @@
 import * as React from "react"; // important line, don't remove, as we need react to be in context.
 import s from "../toolbar.module.scss";
+import { ResolvedRef } from "../../../common-types";
 
 export const BranchSwitcher = ({
   isForcedDraft,
   draft,
+  resolvedRef,
 }: {
   isForcedDraft: boolean;
   draft: boolean;
+  resolvedRef: ResolvedRef;
 }) => {
   return (
     <div className={s.branch} data-draft-active={isForcedDraft || draft}>
       <BranchIcon />
-      &nbsp;main
+      &nbsp;
+      {resolvedRef.type === "branch"
+        ? resolvedRef.ref.name
+        : "#" + resolvedRef.ref.id}
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { revalidateTag } from "next/cache";
 import {
   getStuffFromEnv,
   basehub,
+  resolvedRef,
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../index";
@@ -78,6 +79,7 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
       revalidateTags={revalidateTags}
+      resolvedRef={resolvedRef}
     />
   );
 };

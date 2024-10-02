@@ -76,6 +76,7 @@ export const Tooltip = React.forwardRef(
       <div className={s.tooltipWrapper}>
         <p
           ref={tooltipContentRef}
+          style={{ padding: "3px 8px" }}
           className={
             forceVisible
               ? `${s.tooltip} ${s.bottom} ${s.left} ${s.forceVisible}`
