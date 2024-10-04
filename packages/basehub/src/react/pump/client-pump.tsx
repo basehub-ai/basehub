@@ -316,8 +316,6 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     };
   }, [resolvedRef.ref]);
 
-  console.log("ref", ref);
-
   const resolvedData = React.useMemo(() => {
     return result?.data.map((r, i) => r ?? initialState?.data?.[i] ?? null);
   }, [initialState?.data, result?.data]);
