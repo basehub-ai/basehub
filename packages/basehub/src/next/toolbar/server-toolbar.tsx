@@ -33,31 +33,62 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
       url,
       "/api/nextjs/preview-auth"
     );
-    const token = headers["x-basehub-token"];
 
-    return fetch(appApiEndpoint, {
+    const res = await fetch(appApiEndpoint, {
       cache: "no-store",
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-basehub-token": token,
+        "x-basehub-token": headers["x-basehub-token"],
       },
       body: JSON.stringify({ bshbPreview: bshbPreviewToken }),
-    }).then(async (res) => {
-      try {
-        const responseIsJson = res.headers
-          .get("content-type")
-          ?.includes("json");
-        if (!responseIsJson) {
-          return { status: 400, response: { error: "Bad request" } };
-        }
-        const response = await res.json();
-        if (res.status === 200) draftMode().enable();
-        return { status: res.status, response };
-      } catch (error) {
-        return { status: 500, response: { error: "Something went wrong" } };
-      }
     });
+
+    try {
+      const responseIsJson = res.headers.get("content-type")?.includes("json");
+      if (!responseIsJson) {
+        return { status: 400, response: { error: "Bad request" } };
+      }
+      const response = await res.json();
+      if (res.status === 200) draftMode().enable();
+      return { status: res.status, response };
+    } catch (error) {
+      return { status: 500, response: { error: "Something went wrong" } };
+    }
+  };
+
+  const getLatestBranches = async ({
+    bshbPreviewToken,
+  }: {
+    bshbPreviewToken: string;
+  }) => {
+    "use server";
+    const { headers, url } = getStuffFromEnv(basehubProps);
+    const appApiEndpoint = getBaseHubAppApiEndpoint(
+      url,
+      "/api/nextjs/latest-branches"
+    );
+
+    const res = await fetch(appApiEndpoint, {
+      cache: "no-store",
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+        "x-basehub-token": headers["x-basehub-token"],
+        "x-basehub-preview-token": bshbPreviewToken,
+      },
+    });
+
+    try {
+      const responseIsJson = res.headers.get("content-type")?.includes("json");
+      if (!responseIsJson) {
+        return { status: 400, response: { error: "Bad request" } };
+      }
+      const response = await res.json();
+      return { status: res.status, response };
+    } catch (error) {
+      return { status: 500, response: { error: "Something went wrong" } };
+    }
   };
 
   const disableDraftMode = async () => {
@@ -82,6 +113,7 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
       revalidateTags={revalidateTags}
+      getLatestBranches={getLatestBranches}
       resolvedRef={resolvedRef}
     />
   );

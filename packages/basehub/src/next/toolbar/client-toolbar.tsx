@@ -19,17 +19,27 @@ export const ClientToolbar = ({
   shouldAutoEnableDraft,
   seekAndStoreBshbPreviewToken,
   resolvedRef,
+  getLatestBranches,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
-  enableDraftMode: (o: {
-    bshbPreviewToken: string;
-  }) => Promise<{ status: number; response: object }>;
+  enableDraftMode: (o: { bshbPreviewToken: string }) => Promise<{
+    status: number;
+    response: {
+      ref?: string;
+      error?: string;
+      latestBranches?: { name: string }[];
+    };
+  }>;
   disableDraftMode: () => Promise<void>;
   bshbPreviewToken: string | undefined;
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
   resolvedRef: ResolvedRef;
+  getLatestBranches: (o: { bshbPreviewToken: string }) => Promise<{
+    status: number;
+    response: { name: string }[] | { error: string };
+  }>;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
@@ -38,11 +48,25 @@ export const ClientToolbar = ({
   const tooltipRef = React.useRef<Tooltip>(null);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [ref, setRef] = React.useState(resolvedRef.ref);
+  const [latestBranches, setLatestBranches] = React.useState<
+    { name: string }[]
+  >([]);
+
+  React.useEffect(() => {
+    setRef(window.localStorage.getItem("bshb-preview-ref") || resolvedRef.ref);
+  }, [resolvedRef.ref]);
+
+  const currentMessageTimeout = React.useRef(0);
 
   const displayMessage = React.useCallback(
     (message: string) => {
+      window.clearTimeout(currentMessageTimeout.current);
       setMessage(message);
-      setTimeout(() => setMessage(""), 5000);
+      currentMessageTimeout.current = window.setTimeout(
+        () => setMessage(""),
+        5000
+      );
     },
     [setMessage]
   );
@@ -53,6 +77,7 @@ export const ClientToolbar = ({
       enableDraftMode({ bshbPreviewToken: previewToken })
         .then(({ status, response }) => {
           if (status === 200) {
+            setLatestBranches((p) => response.latestBranches ?? p);
             // refresh
             window.location.reload();
           } else if ("error" in response) {
@@ -93,6 +118,49 @@ export const ClientToolbar = ({
     shouldAutoEnableDraft,
     hasAutoEnabledDraftOnce,
   ]);
+
+  const getAndSetLatestBranches = React.useCallback(async () => {
+    let result: { name: string }[] = [];
+    if (bshbPreviewToken) {
+      const res = await getLatestBranches({ bshbPreviewToken });
+      if (Array.isArray(res.response)) {
+        result = res.response;
+      } else if ("error" in res.response) {
+        console.error(`BaseHub Toolbar Error: ${res.response.error}`);
+      }
+    }
+    setLatestBranches(result);
+  }, [bshbPreviewToken, getLatestBranches]);
+
+  /**
+   * Get latest branches every 30 seconds (we'll also get 'em on load and when the user hovers the branch switcher)
+   */
+  React.useEffect(() => {
+    if (!bshbPreviewToken) return;
+
+    async function effect() {
+      while (true) {
+        try {
+          getAndSetLatestBranches();
+          await new Promise((resolve) => setTimeout(resolve, 30_000));
+        } catch (error) {
+          console.error(`BaseHub Toolbar Error: ${error}`);
+          break;
+        }
+      }
+    }
+
+    effect();
+  }, [bshbPreviewToken, getAndSetLatestBranches]);
+
+  React.useEffect(() => {
+    const url = new URL(window.location.href);
+    const previewRef = url.searchParams.get("bshb-preview-ref");
+    if (!previewRef) return;
+
+    setRef(previewRef);
+    window.dispatchEvent(new Event("__bshb_ref_changed"));
+  }, []);
 
   React.useLayoutEffect(() => {
     tooltipRef.current?.checkOverflow();
@@ -209,7 +277,16 @@ export const ClientToolbar = ({
           <BranchSwitcher
             isForcedDraft={isForcedDraft}
             draft={draft}
-            resolvedRef={resolvedRef}
+            apiRref={ref}
+            latestBranches={latestBranches}
+            onRefChange={(newRef) => {
+              const url = new URL(window.location.href);
+              url.searchParams.set("bshb-preview-ref", newRef);
+              window.history.replaceState(null, "", url.toString());
+              window.dispatchEvent(new Event("__bshb_ref_changed"));
+              setRef(newRef);
+            }}
+            getAndSetLatestBranches={getAndSetLatestBranches}
           />
 
           {/* draft mode button */}

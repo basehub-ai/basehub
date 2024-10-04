@@ -20,9 +20,15 @@ export const getGitEnv = () => {
       process.env.CF_PAGES_COMMIT_SHA ||
       execSync("git rev-parse HEAD").toString().trim();
 
-    return { gitBranch, gitCommitSHA };
+    const gitBranchDeploymentURL =
+      process.env.VERCEL_BRANCH_URL ||
+      process.env.DEPLOY_PRIME_URL ||
+      process.env.CF_PAGES_URL ||
+      null;
+
+    return { gitBranch, gitCommitSHA, gitBranchDeploymentURL };
   } catch (error) {
     // ignore error as this should not a blocker
-    return { gitBranch: "", gitCommitSHA: "" };
+    return { gitBranch: "", gitCommitSHA: "", gitBranchDeploymentURL: "" };
   }
 };

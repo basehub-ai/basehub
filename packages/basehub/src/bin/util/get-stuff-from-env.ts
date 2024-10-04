@@ -34,6 +34,7 @@ export const getStuffFromEnv = async (
   headers: Record<string, string>;
   gitBranch: string | null;
   gitCommitSHA: string | null;
+  gitBranchDeploymentURL: string | null;
   token: string;
   resolvedRef: ResolvedRef;
   newResolvedRefPromise: Promise<ResolvedRef>;
@@ -176,7 +177,7 @@ export const getStuffFromEnv = async (
   draft = !!draft;
 
   // 3.
-  const { gitBranch, gitCommitSHA } = getGitEnv();
+  const { gitBranch, gitCommitSHA, gitBranchDeploymentURL } = getGitEnv();
 
   const newResolvedRefPromise = resolveRef({
     url: basehubUrl,
@@ -184,6 +185,7 @@ export const getStuffFromEnv = async (
     ref,
     gitBranch,
     gitCommitSHA,
+    gitBranchDeploymentURL,
   });
 
   const resolvedRef =
@@ -198,6 +200,7 @@ export const getStuffFromEnv = async (
     token,
     resolvedRef,
     newResolvedRefPromise,
+    gitBranchDeploymentURL,
     headers: {
       "x-basehub-token": token,
       "x-basehub-ref": resolvedRef.ref,
@@ -205,6 +208,9 @@ export const getStuffFromEnv = async (
       ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
       ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
+      ...(gitBranchDeploymentURL
+        ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
+        : {}),
     },
   };
 };
@@ -215,12 +221,14 @@ async function resolveRef({
   ref,
   gitBranch,
   gitCommitSHA,
+  gitBranchDeploymentURL,
 }: {
   url: URL;
   token: string;
   ref: string | null | undefined;
   gitBranch: string | null;
   gitCommitSHA: string | null;
+  gitBranchDeploymentURL: string | null;
 }) {
   const refResolverEndpoint = getBaseHubAppApiEndpoint(
     url,
@@ -230,7 +238,13 @@ async function resolveRef({
   const res = await fetch(refResolverEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token, ref, gitBranch, gitCommitSHA }),
+    body: JSON.stringify({
+      token,
+      ref,
+      gitBranch,
+      gitCommitSHA,
+      gitBranchDeploymentURL,
+    }),
   });
 
   if (res.status !== 200) {
@@ -396,6 +410,7 @@ export const getStuffFromEnv = (options) => {
         "x-basehub-ref": resolvedRef.ref,
         ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
         ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
+        ...(gitBranchDeploymentURL ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL } : {}),
         ...(draft ? { "x-basehub-draft": "true" } : {}),
         ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
       },

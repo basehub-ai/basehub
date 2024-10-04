@@ -1,21 +1,67 @@
 import * as React from "react"; // important line, don't remove, as we need react to be in context.
 import s from "../toolbar.module.scss";
-import { ResolvedRef } from "../../../common-types";
+import { Tooltip } from "./tooltip";
 
 export const BranchSwitcher = ({
   isForcedDraft,
   draft,
-  resolvedRef,
+  apiRref,
+  latestBranches,
+  onRefChange,
+  getAndSetLatestBranches,
 }: {
   isForcedDraft: boolean;
   draft: boolean;
-  resolvedRef: ResolvedRef;
+  apiRref: string;
+  latestBranches: { name: string }[];
+  onRefChange: (ref: string) => void;
+  getAndSetLatestBranches: () => Promise<void>;
 }) => {
+  const refOptions = React.useMemo(() => {
+    const options = new Set(latestBranches.map((branch) => branch.name));
+    options.add(apiRref);
+    return Array.from(options);
+  }, [latestBranches, apiRref]);
+
+  const [refetchLatestBranches, setRefetchLatestBranches] =
+    React.useState(false);
+
+  React.useEffect(() => {
+    if (refetchLatestBranches) {
+      getAndSetLatestBranches().then(() => {
+        setRefetchLatestBranches(false);
+      });
+    }
+  }, [refetchLatestBranches, getAndSetLatestBranches]);
+
   return (
-    <div className={s.branch} data-draft-active={isForcedDraft || draft}>
+    <div
+      className={s.branch}
+      data-draft-active={isForcedDraft || draft}
+      onMouseEnter={() => {
+        setRefetchLatestBranches(true);
+      }}
+    >
       <BranchIcon />
       &nbsp;
-      {resolvedRef.type === "branch" ? resolvedRef.name : "#" + resolvedRef.id}
+      <Tooltip content={"Switch branch"}>
+        <select
+          value={apiRref}
+          onChange={(e) => onRefChange(e.target.value)}
+          className={s.branchSelect}
+          onClick={() => {
+            setRefetchLatestBranches(true);
+          }}
+        >
+          {refOptions.map((r) => {
+            return (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            );
+          })}
+        </select>
+      </Tooltip>
     </div>
   );
 };

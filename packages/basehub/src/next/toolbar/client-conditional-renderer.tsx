@@ -15,6 +15,7 @@ export const ClientConditionalRenderer = ({
   disableDraftMode,
   revalidateTags,
   resolvedRef,
+  getLatestBranches,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -23,6 +24,10 @@ export const ClientConditionalRenderer = ({
   }) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
   revalidateTags: (o: { tags: string[] }) => Promise<{ success: boolean }>;
+  getLatestBranches: (o: { bshbPreviewToken: string }) => Promise<{
+    status: number;
+    response: { name: string }[] | { error: string };
+  }>;
   resolvedRef: ResolvedRef;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
@@ -102,6 +107,7 @@ export const ClientConditionalRenderer = ({
       shouldAutoEnableDraft={shouldAutoEnableDraft}
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
       resolvedRef={resolvedRef}
+      getLatestBranches={getLatestBranches}
     />,
     document.body
   );

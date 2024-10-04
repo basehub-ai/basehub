@@ -11,6 +11,8 @@ import {
   generateQueryOp,
   // @ts-ignore
   getStuffFromEnv,
+  // @ts-ignore
+  resolvedRef,
 } from "../index";
 
 export { PumpQuery };
@@ -89,7 +91,8 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     queriesWithFallback.map(async (singleQuery, index) => {
       const rawQueryOp = generateQueryOp(singleQuery);
       const cacheKey =
-        JSON.stringify(rawQueryOp) + (draft ? "_draft" : "_prod");
+        JSON.stringify({ ...rawQueryOp, ...headers }) +
+        (draft ? "_draft" : "_prod");
 
       let data: QueryResults<Queries>[number] | undefined = undefined;
 
@@ -196,6 +199,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
         pumpToken={pumpToken ?? undefined}
         initialResolvedChildren={resolvedChildren}
         apiVersion={apiVersion}
+        resolvedRef={resolvedRef}
       >
         {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
         {/* @ts-ignore */}
