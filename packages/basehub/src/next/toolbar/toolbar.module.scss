@@ -284,6 +284,8 @@
   white-space: normal;
   outline: none;
   color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @keyframes in {

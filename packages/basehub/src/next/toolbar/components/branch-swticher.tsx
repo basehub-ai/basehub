@@ -22,6 +22,9 @@ export const BranchSwitcher = ({
   onRefChange: (ref: string) => void;
   getAndSetLatestBranches: () => Promise<void>;
 }) => {
+  const shadowRef = React.useRef<HTMLSpanElement>(null);
+  const selectRef = React.useRef<HTMLSelectElement>(null);
+
   const sortedLatestBranches = React.useMemo(() => {
     return [...latestBranches].sort((a, b) => {
       if (a.isDefault) return -1;
@@ -47,6 +50,28 @@ export const BranchSwitcher = ({
     }
   }, [refetchLatestBranches, getAndSetLatestBranches]);
 
+  React.useEffect(() => {
+    const shadow = shadowRef.current;
+    const select = selectRef.current;
+
+    if (!shadow || !select) return;
+
+    const updateSelectWidth = () => {
+      const width = shadow.offsetWidth;
+      select.style.width = `${width}px`;
+    };
+
+    updateSelectWidth();
+    window.addEventListener("resize", updateSelectWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateSelectWidth);
+      if (select) {
+        select.style.removeProperty("width");
+      }
+    };
+  }, [apiRref]);
+
   return (
     <div
       className={s.branch}
@@ -61,6 +86,7 @@ export const BranchSwitcher = ({
         content={draft ? "Enable draft mode to switch branch" : "Switch branch"}
       >
         <select
+          ref={selectRef}
           value={apiRref}
           onChange={(e) => onRefChange(e.target.value)}
           className={s.branchSelect}
@@ -78,6 +104,21 @@ export const BranchSwitcher = ({
           })}
         </select>
       </Tooltip>
+      <span
+        className={s.branchSelect}
+        style={{
+          visibility: "hidden",
+          opacity: 0,
+          pointerEvents: "none",
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+        aria-hidden="true"
+        ref={shadowRef}
+      >
+        {apiRref}
+      </span>
     </div>
   );
 };
