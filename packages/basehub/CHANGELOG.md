@@ -1,5 +1,27 @@
 # basehub
 
+## 7.5.0
+
+### Minor Changes
+
+- e41cdd0: Add support for linking git branches to basehub branches
+
+### Patch Changes
+
+- 8945431: fix
+- 8945431: Fix
+- dbe9b38: Use resolvedRef in the runtime
+- 1f74c57: improvements
+- 8945431: Fix
+- dbe9b38: fix
+- b5a5bd6: sort by default or not
+- 9f17428: fix
+- 8d2af40: improvements
+- 1f24ced: fix
+- 7d76da3: log
+- bc9d438: make the branch switcher work
+- 7d76da3: fix resolve ref
+
 ## 7.5.0-canary.12
 
 ### Patch Changes
