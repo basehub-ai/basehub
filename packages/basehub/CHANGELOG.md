@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.1
+
+### Patch Changes
+
+- fix disabled logic
+
 ## 7.5.0
 
 ### Minor Changes

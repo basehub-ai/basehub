@@ -95,7 +95,7 @@ export const BranchSwitcher = ({
           onClick={() => {
             setRefetchLatestBranches(true);
           }}
-          disabled={draft}
+          disabled={!draft}
         >
           {refOptions.map((r) => {
             return (
