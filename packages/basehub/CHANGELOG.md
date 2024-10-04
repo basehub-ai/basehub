@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.0-canary.7
+
+### Patch Changes
+
+- make the branch switcher work
+
 ## 7.5.0-canary.6
 
 ### Patch Changes
