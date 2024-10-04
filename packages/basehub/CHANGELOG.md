@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.2
+
+### Patch Changes
+
+- bump width
+
 ## 7.5.1
 
 ### Patch Changes

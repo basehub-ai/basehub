@@ -58,7 +58,7 @@ export const BranchSwitcher = ({
 
     const updateSelectWidth = () => {
       const width = shadow.offsetWidth;
-      select.style.width = `${width}px`;
+      select.style.width = `${width + 20}px`;
     };
 
     updateSelectWidth();
