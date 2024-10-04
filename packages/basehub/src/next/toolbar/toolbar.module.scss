@@ -120,7 +120,7 @@
   }
 
   &[data-active="true"] {
-    color: #000;
+    color: #f3f3f3;
     background-color: #ff6c02;
   }
 
@@ -179,7 +179,7 @@
   border: 1px solid #303030;
   color: white;
   border-radius: 4px;
-  max-width: 200px;
+  max-width: 250px;
   width: max-content;
   font-size: 14px;
   z-index: 1000;
@@ -286,6 +286,7 @@
   color: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
+  opacity: 1;
 }
 
 @keyframes in {

@@ -83,7 +83,9 @@ export const BranchSwitcher = ({
       <BranchIcon />
       &nbsp;
       <Tooltip
-        content={draft ? "Enable draft mode to switch branch" : "Switch branch"}
+        content={
+          !draft ? "Enable draft mode to switch branches" : "Switch branch"
+        }
       >
         <select
           ref={selectRef}
