@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.0-canary.11
+
+### Patch Changes
+
+- improvements
+
 ## 7.5.0-canary.10
 
 ### Patch Changes
