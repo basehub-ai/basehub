@@ -4,7 +4,7 @@ import * as React from "react";
 import s from "./toolbar.module.scss";
 import { Tooltip } from "./components/tooltip";
 import { DragHandle } from "./components/drag-handle";
-import { BranchSwitcher } from "./components/branch-swticher";
+import { BranchSwitcher, LatestBranch } from "./components/branch-swticher";
 import debounce from "lodash.debounce";
 import { ResolvedRef } from "../../common-types";
 
@@ -28,7 +28,7 @@ export const ClientToolbar = ({
     response: {
       ref?: string;
       error?: string;
-      latestBranches?: { name: string }[];
+      latestBranches?: LatestBranch[];
     };
   }>;
   disableDraftMode: () => Promise<void>;
@@ -38,7 +38,7 @@ export const ClientToolbar = ({
   resolvedRef: ResolvedRef;
   getLatestBranches: (o: { bshbPreviewToken: string }) => Promise<{
     status: number;
-    response: { name: string }[] | { error: string };
+    response: LatestBranch[] | { error: string };
   }>;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
@@ -49,9 +49,9 @@ export const ClientToolbar = ({
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [ref, setRef] = React.useState(resolvedRef.ref);
-  const [latestBranches, setLatestBranches] = React.useState<
-    { name: string }[]
-  >([]);
+  const [latestBranches, setLatestBranches] = React.useState<LatestBranch[]>(
+    []
+  );
 
   React.useEffect(() => {
     setRef(window.localStorage.getItem("bshb-preview-ref") || resolvedRef.ref);
@@ -120,7 +120,7 @@ export const ClientToolbar = ({
   ]);
 
   const getAndSetLatestBranches = React.useCallback(async () => {
-    let result: { name: string }[] = [];
+    let result: LatestBranch[] = [];
     if (bshbPreviewToken) {
       const res = await getLatestBranches({ bshbPreviewToken });
       if (Array.isArray(res.response)) {

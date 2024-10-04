@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.0-canary.10
+
+### Patch Changes
+
+- sort by default or not
+
 ## 7.5.0-canary.9
 
 ### Patch Changes

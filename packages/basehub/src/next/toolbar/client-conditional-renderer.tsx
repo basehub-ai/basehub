@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { ResolvedRef } from "../../common-types";
+import { LatestBranch } from "./components/branch-swticher";
 
 const LazyClientToolbar = React.lazy(() =>
   import("./client-toolbar").then((mod) => ({ default: mod.ClientToolbar }))
@@ -26,7 +27,7 @@ export const ClientConditionalRenderer = ({
   revalidateTags: (o: { tags: string[] }) => Promise<{ success: boolean }>;
   getLatestBranches: (o: { bshbPreviewToken: string }) => Promise<{
     status: number;
-    response: { name: string }[] | { error: string };
+    response: LatestBranch[] | { error: string };
   }>;
   resolvedRef: ResolvedRef;
 }) => {

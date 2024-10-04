@@ -2,6 +2,11 @@ import * as React from "react"; // important line, don't remove, as we need reac
 import s from "../toolbar.module.scss";
 import { Tooltip } from "./tooltip";
 
+export type LatestBranch = {
+  name: string;
+  isDefault: boolean;
+};
+
 export const BranchSwitcher = ({
   isForcedDraft,
   draft,
@@ -13,15 +18,23 @@ export const BranchSwitcher = ({
   isForcedDraft: boolean;
   draft: boolean;
   apiRref: string;
-  latestBranches: { name: string }[];
+  latestBranches: LatestBranch[];
   onRefChange: (ref: string) => void;
   getAndSetLatestBranches: () => Promise<void>;
 }) => {
+  const sortedLatestBranches = React.useMemo(() => {
+    return [...latestBranches].sort((a, b) => {
+      if (a.isDefault) return -1;
+      if (b.isDefault) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [latestBranches]);
+
   const refOptions = React.useMemo(() => {
-    const options = new Set(latestBranches.map((branch) => branch.name));
+    const options = new Set(sortedLatestBranches.map((branch) => branch.name));
     options.add(apiRref);
     return Array.from(options);
-  }, [latestBranches, apiRref]);
+  }, [sortedLatestBranches, apiRref]);
 
   const [refetchLatestBranches, setRefetchLatestBranches] =
     React.useState(false);
@@ -44,7 +57,9 @@ export const BranchSwitcher = ({
     >
       <BranchIcon />
       &nbsp;
-      <Tooltip content={"Switch branch"}>
+      <Tooltip
+        content={draft ? "Enable draft mode to switch branch" : "Switch branch"}
+      >
         <select
           value={apiRref}
           onChange={(e) => onRefChange(e.target.value)}
@@ -52,6 +67,7 @@ export const BranchSwitcher = ({
           onClick={() => {
             setRefetchLatestBranches(true);
           }}
+          disabled={draft}
         >
           {refOptions.map((r) => {
             return (
