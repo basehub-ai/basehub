@@ -186,6 +186,7 @@ export const getStuffFromEnv = async (
     gitBranch,
     gitCommitSHA,
     gitBranchDeploymentURL,
+    apiVersion,
   });
 
   const resolvedRef =
@@ -222,6 +223,7 @@ async function resolveRef({
   gitBranch,
   gitCommitSHA,
   gitBranchDeploymentURL,
+  apiVersion,
 }: {
   url: URL;
   token: string;
@@ -229,6 +231,7 @@ async function resolveRef({
   gitBranch: string | null;
   gitCommitSHA: string | null;
   gitBranchDeploymentURL: string | null;
+  apiVersion: string | null;
 }) {
   const refResolverEndpoint = getBaseHubAppApiEndpoint(
     url,
@@ -237,14 +240,19 @@ async function resolveRef({
 
   const res = await fetch(refResolverEndpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      token,
-      ref,
-      gitBranch,
-      gitCommitSHA,
-      gitBranchDeploymentURL,
-    }),
+    headers: {
+      "Content-Type": "application/json",
+      "x-basehub-token": token,
+      ...(ref ? { "x-basehub-ref": ref } : {}),
+      ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
+      ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
+      ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
+      ...(gitBranchDeploymentURL
+        ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
+        : {}),
+    },
+    cache: "no-store",
+    body: JSON.stringify({}),
   });
 
   if (res.status !== 200) {

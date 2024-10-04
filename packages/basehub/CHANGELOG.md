@@ -1,5 +1,17 @@
 # basehub
 
+## 7.5.0-canary.9
+
+### Patch Changes
+
+- fix resolve ref
+
+## 7.5.0-canary.8
+
+### Patch Changes
+
+- log
+
 ## 7.5.0-canary.7
 
 ### Patch Changes
