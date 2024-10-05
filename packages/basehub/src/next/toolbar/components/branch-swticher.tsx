@@ -72,10 +72,12 @@ export const BranchSwitcher = ({
     };
   }, [apiRref]);
 
+  const isDraftActive = isForcedDraft || draft;
+
   return (
     <div
       className={s.branch}
-      data-draft-active={isForcedDraft || draft}
+      data-draft-active={isDraftActive}
       onMouseEnter={() => {
         setRefetchLatestBranches(true);
       }}
@@ -84,7 +86,9 @@ export const BranchSwitcher = ({
       &nbsp;
       <Tooltip
         content={
-          !draft ? "Enable draft mode to switch branches" : "Switch branch"
+          !isDraftActive
+            ? "Enable draft mode to switch branches"
+            : "Switch branch"
         }
       >
         <select
@@ -95,7 +99,7 @@ export const BranchSwitcher = ({
           onClick={() => {
             setRefetchLatestBranches(true);
           }}
-          disabled={!draft}
+          disabled={!isDraftActive}
         >
           {refOptions.map((r) => {
             return (

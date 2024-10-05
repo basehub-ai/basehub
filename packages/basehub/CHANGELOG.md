@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.3
+
+### Patch Changes
+
+- Fix branch switcher in localhost
+
 ## 7.5.2
 
 ### Patch Changes
