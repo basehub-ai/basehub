@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.4
+
+### Patch Changes
+
+- upgrade shiki
+
 ## 7.5.3
 
 ### Patch Changes
