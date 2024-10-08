@@ -107,7 +107,7 @@ importers:
         specifier: ^0.0.1
         version: 0.0.1
       shiki:
-        specifier: ^1.22.0
+        specifier: ^1.17.7
         version: 1.22.0
       sonner:
         specifier: 1.4.3
