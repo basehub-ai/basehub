@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.7
+
+### Patch Changes
+
+- cleanup search params on call to revalidateTag
+
 ## 7.5.6
 
 ### Patch Changes

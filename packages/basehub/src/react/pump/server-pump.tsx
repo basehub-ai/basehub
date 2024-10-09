@@ -208,7 +208,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     );
   }
 
-  return <>{resolvedChildren}</>;
+  return resolvedChildren;
 };
 
 /**
