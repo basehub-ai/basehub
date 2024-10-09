@@ -1,8 +1,8 @@
 {
   "name": "basehub",
-  "description": "The first AI-native content hub.",
+  "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "7.4.1",
+  "version": "7.5.6",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -42,7 +42,7 @@
   "scripts": {
     "emit-dts": "tsc --project tsconfig.dts-only.json",
     "dev": "pnpm emit-dts && pnpm build --watch",
-    "build": "pnpm build:bin & pnpm build:client",
+    "build": "pnpm build:bin && pnpm build:client",
     "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
     "build:client": "tsup --config tsup-client.config.ts"
   },

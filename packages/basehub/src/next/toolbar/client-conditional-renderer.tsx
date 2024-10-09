@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { ResolvedRef } from "../../common-types";
+import { LatestBranch } from "./components/branch-swticher";
 
 const LazyClientToolbar = React.lazy(() =>
   import("./client-toolbar").then((mod) => ({ default: mod.ClientToolbar }))
@@ -13,6 +15,8 @@ export const ClientConditionalRenderer = ({
   enableDraftMode,
   disableDraftMode,
   revalidateTags,
+  resolvedRef,
+  getLatestBranches,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -21,6 +25,11 @@ export const ClientConditionalRenderer = ({
   }) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
   revalidateTags: (o: { tags: string[] }) => Promise<{ success: boolean }>;
+  getLatestBranches: (o: { bshbPreviewToken: string }) => Promise<{
+    status: number;
+    response: LatestBranch[] | { error: string };
+  }>;
+  resolvedRef: ResolvedRef;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
 
@@ -100,6 +109,8 @@ export const ClientConditionalRenderer = ({
       bshbPreviewToken={bshbPreviewToken}
       shouldAutoEnableDraft={shouldAutoEnableDraft}
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
+      resolvedRef={resolvedRef}
+      getLatestBranches={getLatestBranches}
     />,
     document.body
   );

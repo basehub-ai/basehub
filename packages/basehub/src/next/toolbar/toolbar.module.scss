@@ -39,7 +39,7 @@
 
 .branch {
   padding-left: 9px;
-  padding-right: 15px;
+  padding-right: 12px;
   height: 100%;
   display: flex;
   align-items: center;
@@ -120,7 +120,7 @@
   }
 
   &[data-active="true"] {
-    color: #000;
+    color: #f3f3f3;
     background-color: #ff6c02;
   }
 
@@ -148,7 +148,7 @@
 .tooltipWrapper {
   position: relative;
   display: flex;
-  padding: 4px 8px;
+  height: 100%;
 
   &:hover {
     .tooltip {
@@ -178,9 +178,8 @@
   background-color: #0c0c0c;
   border: 1px solid #303030;
   color: white;
-  padding: 3px 8px;
   border-radius: 4px;
-  max-width: 200px;
+  max-width: 250px;
   width: max-content;
   font-size: 14px;
   z-index: 1000;
@@ -210,8 +209,8 @@
   }
 
   &.bottom {
-    bottom: 40px;
-    top: unset;
+    bottom: unset;
+    top: -40px;
     transform: translateY(0) translateX(var(--translate-x));
 
     &:before {
@@ -266,6 +265,28 @@
     border-radius: 2px;
     border: 1px solid #303030;
   }
+}
+
+.branchSelect {
+  height: 100%;
+  background: none;
+  border: none;
+  font-weight: 500;
+  font-family: inherit;
+  font-size: 16px;
+  padding-right: 8px;
+  padding-bottom: 0px;
+  margin-bottom: 2px;
+  min-width: 80px;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  outline: none;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 1;
 }
 
 @keyframes in {

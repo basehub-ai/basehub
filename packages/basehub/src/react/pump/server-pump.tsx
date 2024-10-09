@@ -11,6 +11,8 @@ import {
   generateQueryOp,
   // @ts-ignore
   getStuffFromEnv,
+  // @ts-ignore
+  resolvedRef,
 } from "../index";
 
 export { PumpQuery };
@@ -74,17 +76,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   const { headers, url, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
   const apiVersion = headers["x-basehub-api-version"];
-  let pumpEndpoint: string;
-  switch (true) {
-    case url.origin.includes("api.basehub.com"):
-      pumpEndpoint = "https://basehub.com/api/pump";
-      break;
-    case url.origin.includes("api.bshb.dev"):
-      pumpEndpoint = "https://basehub.dev/api/pump";
-      break;
-    default:
-      pumpEndpoint = url.toString();
-  }
+  const pumpEndpoint = getBaseHubAppApiEndpoint(url, "/api/pump");
 
   const noQueries = queries.length === 0;
 
@@ -99,7 +91,8 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     queriesWithFallback.map(async (singleQuery, index) => {
       const rawQueryOp = generateQueryOp(singleQuery);
       const cacheKey =
-        JSON.stringify(rawQueryOp) + (draft ? "_draft" : "_prod");
+        JSON.stringify({ ...rawQueryOp, ...headers }) +
+        (draft ? "_draft" : "_prod");
 
       let data: QueryResults<Queries>[number] | undefined = undefined;
 
@@ -206,6 +199,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
         pumpToken={pumpToken ?? undefined}
         initialResolvedChildren={resolvedChildren}
         apiVersion={apiVersion}
+        resolvedRef={resolvedRef}
       >
         {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
         {/* @ts-ignore */}
@@ -238,3 +232,22 @@ export const createPump = <
     return <Pump {...props} queries={queryResult} />;
   };
 };
+
+function getBaseHubAppApiEndpoint(url: URL, pathname: string) {
+  let origin: string;
+  switch (true) {
+    case url.origin.includes("api.basehub.com"):
+      origin = "https://basehub.com" + pathname + url.search + url.hash;
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      origin = "https://basehub.dev" + pathname + url.search + url.hash;
+      break;
+    case url.origin.includes("localhost:3001"):
+      origin = "http://localhost:3000" + pathname + url.search + url.hash;
+      break;
+    default:
+      origin = url.origin + pathname + url.search + url.hash;
+  }
+
+  return origin;
+}

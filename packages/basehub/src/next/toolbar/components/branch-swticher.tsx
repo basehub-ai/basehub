@@ -1,17 +1,130 @@
 import * as React from "react"; // important line, don't remove, as we need react to be in context.
 import s from "../toolbar.module.scss";
+import { Tooltip } from "./tooltip";
+
+export type LatestBranch = {
+  name: string;
+  isDefault: boolean;
+};
 
 export const BranchSwitcher = ({
   isForcedDraft,
   draft,
+  apiRref,
+  latestBranches,
+  onRefChange,
+  getAndSetLatestBranches,
 }: {
   isForcedDraft: boolean;
   draft: boolean;
+  apiRref: string;
+  latestBranches: LatestBranch[];
+  onRefChange: (ref: string) => void;
+  getAndSetLatestBranches: () => Promise<void>;
 }) => {
+  const shadowRef = React.useRef<HTMLSpanElement>(null);
+  const selectRef = React.useRef<HTMLSelectElement>(null);
+
+  const sortedLatestBranches = React.useMemo(() => {
+    return [...latestBranches].sort((a, b) => {
+      if (a.isDefault) return -1;
+      if (b.isDefault) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [latestBranches]);
+
+  const refOptions = React.useMemo(() => {
+    const options = new Set(sortedLatestBranches.map((branch) => branch.name));
+    options.add(apiRref);
+    return Array.from(options);
+  }, [sortedLatestBranches, apiRref]);
+
+  const [refetchLatestBranches, setRefetchLatestBranches] =
+    React.useState(false);
+
+  React.useEffect(() => {
+    if (refetchLatestBranches) {
+      getAndSetLatestBranches().then(() => {
+        setRefetchLatestBranches(false);
+      });
+    }
+  }, [refetchLatestBranches, getAndSetLatestBranches]);
+
+  React.useEffect(() => {
+    const shadow = shadowRef.current;
+    const select = selectRef.current;
+
+    if (!shadow || !select) return;
+
+    const updateSelectWidth = () => {
+      const width = shadow.offsetWidth;
+      select.style.width = `${width + 20}px`;
+    };
+
+    updateSelectWidth();
+    window.addEventListener("resize", updateSelectWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateSelectWidth);
+      if (select) {
+        select.style.removeProperty("width");
+      }
+    };
+  }, [apiRref]);
+
+  const isDraftActive = isForcedDraft || draft;
+
   return (
-    <div className={s.branch} data-draft-active={isForcedDraft || draft}>
+    <div
+      className={s.branch}
+      data-draft-active={isDraftActive}
+      onMouseEnter={() => {
+        setRefetchLatestBranches(true);
+      }}
+    >
       <BranchIcon />
-      &nbsp;main
+      &nbsp;
+      <Tooltip
+        content={
+          !isDraftActive
+            ? "Enable draft mode to switch branches"
+            : "Switch branch"
+        }
+      >
+        <select
+          ref={selectRef}
+          value={apiRref}
+          onChange={(e) => onRefChange(e.target.value)}
+          className={s.branchSelect}
+          onClick={() => {
+            setRefetchLatestBranches(true);
+          }}
+          disabled={!isDraftActive}
+        >
+          {refOptions.map((r) => {
+            return (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            );
+          })}
+        </select>
+      </Tooltip>
+      <span
+        className={s.branchSelect}
+        style={{
+          visibility: "hidden",
+          opacity: 0,
+          pointerEvents: "none",
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+        aria-hidden="true"
+        ref={shadowRef}
+      >
+        {apiRref}
+      </span>
     </div>
   );
 };

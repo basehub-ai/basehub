@@ -225,6 +225,7 @@ export const RichText = <
 ): ReactNode => {
   const value = (props.content ?? props.children) as Node[] | undefined;
   const slugger = new GithubSlugger();
+  // slugger.reset();
 
   return (
     <>
@@ -352,11 +353,11 @@ const Node = ({
     );
   });
 
-  let handler: Handlers[keyof Handlers];
-  let props: Parameters<typeof handler>[0];
+  let Handler: Handlers[keyof Handlers];
+  let props: Parameters<typeof Handler>[0];
   switch (node.type) {
     case "paragraph":
-      handler = components?.p ?? defaultHandlers.p;
+      Handler = components?.p ?? defaultHandlers.p;
       props = { children } satisfies ExtractPropsForHandler<Handlers["p"]>;
       break;
     case "text":
@@ -370,7 +371,7 @@ const Node = ({
           attrs: { isInline: false, language, code },
         } satisfies Mark);
       }
-      handler = ({ children }: { children?: ReactNode }) => (
+      Handler = ({ children }: { children?: ReactNode }) => (
         <Marks marks={clonedMarks} components={components} blocks={blocks}>
           {children}
         </Marks>
@@ -379,25 +380,25 @@ const Node = ({
       break;
     case "bulletList":
     case "taskList":
-      handler = components?.ul ?? defaultHandlers.ul;
+      Handler = components?.ul ?? defaultHandlers.ul;
       props = {
         children,
         isTasksList: node.type === "taskList",
       } satisfies ExtractPropsForHandler<Handlers["ul"]>;
       break;
     case "orderedList":
-      handler = components?.ol ?? defaultHandlers.ol;
+      Handler = components?.ol ?? defaultHandlers.ol;
       props = { children } satisfies ExtractPropsForHandler<Handlers["ol"]>;
       break;
     case "listItem":
-      handler = components?.li ?? defaultHandlers.li;
+      Handler = components?.li ?? defaultHandlers.li;
       props = {
         children,
         isTaskListItem: false,
       } satisfies ExtractPropsForHandler<Handlers["li"]>;
       break;
     case "taskItem":
-      handler = components?.li ?? defaultHandlers.li;
+      Handler = components?.li ?? defaultHandlers.li;
       props = {
         children,
         isTaskListItem: true,
@@ -406,25 +407,25 @@ const Node = ({
       break;
     case "heading":
       const handlerTag = `h${node.attrs.level}` as keyof Handlers;
-      handler = components?.[handlerTag] ?? defaultHandlers[handlerTag];
+      Handler = components?.[handlerTag] ?? defaultHandlers[handlerTag];
       const id = slugger.slug(extractTextFromNode(node));
 
       props = { children, id } satisfies ExtractPropsForHandler<Handlers["h1"]>;
       break;
     case "horizontalRule":
-      handler = components?.hr ?? defaultHandlers.hr;
+      Handler = components?.hr ?? defaultHandlers.hr;
       break;
     case "hardBreak":
-      handler = components?.br ?? defaultHandlers.br;
+      Handler = components?.br ?? defaultHandlers.br;
       break;
     case "blockquote":
-      handler = components?.blockquote ?? defaultHandlers.blockquote;
+      Handler = components?.blockquote ?? defaultHandlers.blockquote;
       props = { children } satisfies ExtractPropsForHandler<
         Handlers["blockquote"]
       >;
       break;
     case "codeBlock":
-      handler = components?.pre ?? defaultHandlers.pre;
+      Handler = components?.pre ?? defaultHandlers.pre;
       const code = node.content?.[0].text ?? "";
       props = {
         children,
@@ -433,7 +434,7 @@ const Node = ({
       } satisfies ExtractPropsForHandler<Handlers["pre"]>;
       break;
     case "table":
-      handler = components?.table ?? defaultHandlers.table;
+      Handler = components?.table ?? defaultHandlers.table;
 
       /**
        * In the case of table, we add a tableBody node that wraps its children, as it seems to be missing in the response.
@@ -453,11 +454,11 @@ const Node = ({
       >;
       break;
     case "tableRow":
-      handler = components?.tr ?? defaultHandlers.tr;
+      Handler = components?.tr ?? defaultHandlers.tr;
       props = { children } satisfies ExtractPropsForHandler<Handlers["tr"]>;
       break;
     case "tableCell":
-      handler = components?.td ?? defaultHandlers.td;
+      Handler = components?.td ?? defaultHandlers.td;
       props = {
         children,
         colspan: node.attrs.colspan,
@@ -465,7 +466,7 @@ const Node = ({
       } satisfies ExtractPropsForHandler<Handlers["td"]>;
       break;
     case "tableHeader":
-      handler = components?.th ?? defaultHandlers.th;
+      Handler = components?.th ?? defaultHandlers.th;
       props = {
         children,
         colspan: node.attrs.colspan,
@@ -473,15 +474,15 @@ const Node = ({
       } satisfies ExtractPropsForHandler<Handlers["th"]>;
       break;
     case "tableFooter":
-      handler = components?.tfoot ?? defaultHandlers.tfoot;
+      Handler = components?.tfoot ?? defaultHandlers.tfoot;
       props = { children } satisfies ExtractPropsForHandler<Handlers["tfoot"]>;
       break;
     case "tableBody":
-      handler = components?.tbody ?? defaultHandlers.tbody;
+      Handler = components?.tbody ?? defaultHandlers.tbody;
       props = { children } satisfies ExtractPropsForHandler<Handlers["tbody"]>;
       break;
     case "image":
-      handler = components?.img ?? defaultHandlers.img;
+      Handler = components?.img ?? defaultHandlers.img;
       props = {
         src: node.attrs.src,
         width: node.attrs.width,
@@ -491,7 +492,7 @@ const Node = ({
       } satisfies ExtractPropsForHandler<Handlers["img"]>;
       break;
     case "video":
-      handler = components?.video ?? defaultHandlers.video;
+      Handler = components?.video ?? defaultHandlers.video;
       props = {
         children,
         src: node.attrs.src,
@@ -528,7 +529,7 @@ const Node = ({
         break;
       }
       // @ts-ignore
-      handler = components?.[block?.__typename] ?? (() => <></>);
+      Handler = components?.[block?.__typename] ?? (() => <></>);
       // @ts-ignore
       props = block;
       break;
@@ -536,13 +537,13 @@ const Node = ({
   }
 
   // @ts-ignore
-  if (!handler) {
-    // console.warn(`No handler found for node type ${node.type}`);
+  if (!Handler) {
+    // console.warn(`No Handler found for node type ${node.type}`);
     return <></>;
   }
 
   // @ts-ignore
-  return handler(props);
+  return <Handler {...props} />;
 };
 
 const Marks = ({
@@ -562,27 +563,27 @@ const Marks = ({
 
   if (!mark) return <>{children}</>;
 
-  let handler: Handlers[keyof Handlers];
-  let props: Parameters<typeof handler>[0];
+  let Handler: Handlers[keyof Handlers];
+  let props: Parameters<typeof Handler>[0];
   switch (mark.type) {
     case "bold":
-      handler = components?.b ?? defaultHandlers.b;
+      Handler = components?.b ?? defaultHandlers.b;
       props = { children } satisfies ExtractPropsForHandler<Handlers["b"]>;
       break;
     case "italic":
-      handler = components?.em ?? defaultHandlers.em;
+      Handler = components?.em ?? defaultHandlers.em;
       props = { children } satisfies ExtractPropsForHandler<Handlers["em"]>;
       break;
     case "strike":
-      handler = components?.s ?? defaultHandlers.s;
+      Handler = components?.s ?? defaultHandlers.s;
       props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
       break;
     case "kbd":
-      handler = components?.kbd ?? defaultHandlers.kbd;
+      Handler = components?.kbd ?? defaultHandlers.kbd;
       props = { children } satisfies ExtractPropsForHandler<Handlers["kbd"]>;
       break;
     case "code":
-      handler = components?.code ?? defaultHandlers.code;
+      Handler = components?.code ?? defaultHandlers.code;
       props = {
         children,
         isInline: mark.attrs.isInline ?? true,
@@ -591,11 +592,11 @@ const Marks = ({
       } satisfies ExtractPropsForHandler<Handlers["code"]>;
       break;
     case "underline":
-      handler = components?.s ?? defaultHandlers.s;
+      Handler = components?.s ?? defaultHandlers.s;
       props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
       break;
     case "link":
-      handler = components?.a ?? defaultHandlers.a;
+      Handler = components?.a ?? defaultHandlers.a;
       props = {
         children,
         href: mark.attrs.href,
@@ -633,7 +634,7 @@ const Marks = ({
         // }
         break;
       }
-      handler =
+      Handler =
         // @ts-ignore
         components?.[block?.__typename + SUFFIX_CUSTOM_MARK] ??
         (() => <>{children}</>);
@@ -644,15 +645,15 @@ const Marks = ({
   }
 
   // @ts-ignore
-  if (!handler) {
-    // console.warn(`No handler found for mark ${mark}`);
+  if (!Handler) {
+    // console.warn(`No Handler found for mark ${mark}`);
     return <></>;
   }
 
   return (
     <Marks marks={marksClone} components={components} blocks={blocks}>
       {/* @ts-ignore */}
-      {handler(props)}
+      <Handler {...props} />
     </Marks>
   );
 };

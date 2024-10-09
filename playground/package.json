@@ -1,17 +1,16 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.140",
+  "version": "0.0.148",
   "scripts": {
-    "dev": "basehub dev & next dev",
+    "dev": "basehub dev & next dev --port 3003",
     "build": "basehub && next build",
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
-    "lint": "next lint",
-    "generate": "basehub --draft"
+    "lint": "next lint"
   },
   "dependencies": {
-    "basehub": "workspace:^",
+    "basehub": "workspace:*",
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
     "graphql": "^16.8.1",

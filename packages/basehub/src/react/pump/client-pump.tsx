@@ -12,6 +12,7 @@ import { replaceSystemAliases } from "../runtime/_aliasing.js";
 import type Pusher from "pusher-js/types/src/core/pusher";
 import { toast, Toaster } from "sonner";
 import type { ResponseCache, PumpState } from "./types";
+import { ResolvedRef } from "../../common-types";
 
 let pusherMounted = false;
 const subscribers = new Set<() => void>(); // we'll call these when pusher tells us to poke
@@ -36,6 +37,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   initialState,
   initialResolvedChildren,
   apiVersion,
+  resolvedRef,
 }: {
   children: PumpProps<Queries>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
@@ -44,6 +46,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   initialState: PumpState | undefined;
   initialResolvedChildren?: React.ReactNode;
   apiVersion: string;
+  resolvedRef: ResolvedRef;
 }) => {
   const pumpTokenRef = React.useRef<string | undefined>(initialPumpToken);
   const [result, setResult] = React.useState<PumpState | undefined>(
@@ -54,6 +57,8 @@ export const ClientPump = <Queries extends PumpQuery[]>({
 
   const initialStateRef = React.useRef<PumpState | undefined>(initialState);
   initialStateRef.current = initialState;
+
+  const [ref, setRef] = React.useState(resolvedRef.ref);
 
   /**
    * Query the Draft API.
@@ -70,14 +75,18 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           return null;
         }
 
-        const cacheKey = JSON.stringify(rawQueryOp);
+        const queryHash = JSON.stringify(rawQueryOp);
+        // intentionally not add ref here as we want responseHash to be the same across queries
+        const responseHashCacheKey = queryHash;
+        // in this case, we're matching for deduplication, and that's why we 100% need the ref and everything that might affect the response
+        const queryCacheKey = queryHash + ref;
         const lastResponseHash =
-          lastResponseHashCache.get(cacheKey) ||
+          lastResponseHashCache.get(responseHashCacheKey) ||
           initialStateRef.current?.responseHashes?.[index] ||
           "";
 
-        if (clientCache.has(cacheKey)) {
-          const cached = clientCache.get(cacheKey)!;
+        if (clientCache.has(queryCacheKey)) {
+          const cached = clientCache.get(queryCacheKey)!;
           if (Date.now() - cached.start < DEDUPE_TIME_MS) {
             const response = await cached.response;
             if (!response) return null;
@@ -97,6 +106,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
             "content-type": "application/json",
             "x-basehub-pump-token": pumpTokenRef.current,
             "x-basehub-api-version": apiVersion,
+            "x-basehub-ref": ref,
             ...(lastResponseHash
               ? { "x-basehub-last-response-hash": lastResponseHash }
               : undefined),
@@ -113,7 +123,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
               responseHash,
             } = await response.json();
 
-            lastResponseHashCache.set(cacheKey, responseHash);
+            lastResponseHashCache.set(responseHashCacheKey, responseHash);
 
             return {
               data: replaceSystemAliases(data),
@@ -133,7 +143,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           });
 
         // we quickly set the cache (without awaiting)
-        clientCache.set(cacheKey, {
+        clientCache.set(queryCacheKey, {
           start: Date.now(),
           response: responsePromise,
         });
@@ -175,7 +185,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     if (newPumpToken) {
       pumpTokenRef.current = newPumpToken;
     }
-  }, [pumpEndpoint, rawQueries, apiVersion]);
+  }, [pumpEndpoint, rawQueries, apiVersion, ref]);
 
   const currentToastRef = React.useRef<string | number | null>(null);
 
@@ -287,6 +297,24 @@ export const ClientPump = <Queries extends PumpQuery[]>({
       channel.unsubscribe();
     };
   }, [pusher, pusherChannelKey]);
+
+  /**
+   * Subscribe to ref changes
+   */
+  React.useEffect(() => {
+    function handleRefChange() {
+      const url = new URL(window.location.href);
+      const previewRef = url.searchParams.get("bshb-preview-ref");
+      if (!previewRef) return;
+      setRef(previewRef);
+    }
+
+    handleRefChange();
+    window.addEventListener("__bshb_ref_changed", handleRefChange);
+    return () => {
+      window.removeEventListener("__bshb_ref_changed", handleRefChange);
+    };
+  }, [resolvedRef.ref]);
 
   const resolvedData = React.useMemo(() => {
     return result?.data.map((r, i) => r ?? initialState?.data?.[i] ?? null);

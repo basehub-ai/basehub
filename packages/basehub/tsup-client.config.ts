@@ -18,7 +18,6 @@ export default defineConfig((_options: Options) => {
     },
     format: ["esm"],
     splitting: true,
-    clean: true,
     external: ["react", "react-dom", "next"],
     plugins: [
       {

@@ -1,5 +1,7 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 import { dotenvLoad } from "dotenv-mono";
+import { getGitEnv } from "./get-git-env";
+import { ResolvedRef } from "../../common-types";
 
 /**
  * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
@@ -21,15 +23,23 @@ export type Options = {
   apiVersion: string | undefined;
 };
 
-export const getStuffFromEnv = (
-  options: Options
-): {
+export const getStuffFromEnv = async (
+  options: Options & {
+    previousResolvedRef: ResolvedRef | null;
+  }
+): Promise<{
   output: string | null;
   draft: boolean;
   url: URL;
   headers: Record<string, string>;
-} => {
-  dotenvLoad();
+  gitBranch: string | null;
+  gitCommitSHA: string | null;
+  gitBranchDeploymentURL: string | null;
+  token: string;
+  resolvedRef: ResolvedRef;
+  newResolvedRefPromise: Promise<ResolvedRef>;
+}> => {
+  dotenvLoad({ priorities: { ".dev.vars": 1 } });
 
   type EnvVarName =
     | "TOKEN"
@@ -164,29 +174,105 @@ export const getStuffFromEnv = (
   basehubUrl.searchParams.delete("ref");
   basehubUrl.searchParams.delete("draft");
 
-  // 3. done.
-
   draft = !!draft;
+
+  // 3.
+  const { gitBranch, gitCommitSHA, gitBranchDeploymentURL } = getGitEnv();
+
+  const newResolvedRefPromise = resolveRef({
+    url: basehubUrl,
+    token,
+    ref,
+    gitBranch,
+    gitCommitSHA,
+    gitBranchDeploymentURL,
+    apiVersion,
+  });
+
+  const resolvedRef =
+    options.previousResolvedRef ?? (await newResolvedRefPromise);
 
   return {
     draft,
     output: getEnvVar("OUTPUT") ?? options.output ?? null,
     url: basehubUrl,
+    gitBranch,
+    gitCommitSHA,
+    token,
+    resolvedRef,
+    newResolvedRefPromise,
+    gitBranchDeploymentURL,
     headers: {
       "x-basehub-token": token,
-      ...(ref ? { "x-basehub-ref": ref } : {}),
+      "x-basehub-ref": resolvedRef.ref,
+      ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
+      ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
       ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
+      ...(gitBranchDeploymentURL
+        ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
+        : {}),
     },
   };
 };
+
+async function resolveRef({
+  url,
+  token,
+  ref,
+  gitBranch,
+  gitCommitSHA,
+  gitBranchDeploymentURL,
+  apiVersion,
+}: {
+  url: URL;
+  token: string;
+  ref: string | null | undefined;
+  gitBranch: string | null;
+  gitCommitSHA: string | null;
+  gitBranchDeploymentURL: string | null;
+  apiVersion: string | null;
+}) {
+  const refResolverEndpoint = getBaseHubAppApiEndpoint(
+    url,
+    "/api/git/resolve-ref"
+  );
+
+  const res = await fetch(refResolverEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-basehub-token": token,
+      ...(ref ? { "x-basehub-ref": ref } : {}),
+      ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
+      ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
+      ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
+      ...(gitBranchDeploymentURL
+        ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
+        : {}),
+    },
+    cache: "no-store",
+    body: JSON.stringify({}),
+  });
+
+  if (res.status !== 200) {
+    throw new Error(`Failed to resolve ref: ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  const resolvedRef = data as ResolvedRef;
+  return resolvedRef;
+}
 
 /**
  * Will inject to generated code, so we keep the same logic and don't hardcode the URL in the generated output.
  * doesn't use Zod nor dotenv-flow (so we don't ship extra stuff to the generated bundle). Assumes the env vars are already loaded.
  */
 export const runtime__getStuffFromEnvString = (
-  options: Options
+  options: Options & {
+    gitBranch: string | null;
+    gitCommitSHA: string | null;
+  }
 ) => /**JavaScript */ `
 export const getStuffFromEnv = (options) => {
     const defaultEnvVarPrefix = "${defaultEnvVarPrefix}";
@@ -281,14 +367,6 @@ export const getStuffFromEnv = (options) => {
       throw new Error(tokenNotFoundErrorMessage);
     }
 
-    const ref =
-      basehubUrl.searchParams.get("ref") ??
-      parsedBasehubRefEnv ??
-      (backwardsCompatURL
-        ? backwardsCompatURL.searchParams.get("ref")
-        : undefined) ??
-      null;
-
     let draft =
        basehubUrl.searchParams.get("draft") ??
       parsedBasehubDraftEnv ??
@@ -325,7 +403,11 @@ export const getStuffFromEnv = (options) => {
     basehubUrl.searchParams.delete("draft");
     basehubUrl.searchParams.delete("api-version");
 
-    // 3. done.
+    // 3.
+    const gitBranch = ${options.gitBranch ? `"${options.gitBranch}"` : null};
+    const gitCommitSHA = ${
+      options.gitCommitSHA ? `"${options.gitCommitSHA}"` : null
+    };
 
     return {
       isForcedDraft: ${!!options.forceDraft},
@@ -333,9 +415,31 @@ export const getStuffFromEnv = (options) => {
       url: basehubUrl,
       headers: {
         "x-basehub-token": token,
-        ...(ref ? { "x-basehub-ref": ref } : {}),
+        "x-basehub-ref": resolvedRef.ref,
+        ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
+        ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
+        ...(gitBranchDeploymentURL ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL } : {}),
         ...(draft ? { "x-basehub-draft": "true" } : {}),
         ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
       },
     };
 `;
+
+function getBaseHubAppApiEndpoint(url: URL, pathname: string) {
+  let origin: string;
+  switch (true) {
+    case url.origin.includes("api.basehub.com"):
+      origin = "https://basehub.com" + pathname + url.search + url.hash;
+      break;
+    case url.origin.includes("api.bshb.dev"):
+      origin = "https://basehub.dev" + pathname + url.search + url.hash;
+      break;
+    case url.origin.includes("localhost:3001"):
+      origin = "http://localhost:3000" + pathname + url.search + url.hash;
+      break;
+    default:
+      origin = url.origin + pathname + url.search + url.hash;
+  }
+
+  return origin;
+}

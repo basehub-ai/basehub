@@ -5,6 +5,7 @@ import { revalidateTag } from "next/cache";
 import {
   getStuffFromEnv,
   basehub,
+  resolvedRef,
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../index";
@@ -28,32 +29,66 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
   }) => {
     "use server";
     const { headers, url } = getStuffFromEnv(basehubProps);
-    const apiOrigin = getBaseHubApiOrigin(url);
-    const token = headers["x-basehub-token"];
+    const appApiEndpoint = getBaseHubAppApiEndpoint(
+      url,
+      "/api/nextjs/preview-auth"
+    );
 
-    return fetch(apiOrigin + "/api/nextjs/preview-auth", {
+    const res = await fetch(appApiEndpoint, {
       cache: "no-store",
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-basehub-token": token,
+        "x-basehub-token": headers["x-basehub-token"],
       },
       body: JSON.stringify({ bshbPreview: bshbPreviewToken }),
-    }).then(async (res) => {
-      try {
-        const responseIsJson = res.headers
-          .get("content-type")
-          ?.includes("json");
-        if (!responseIsJson) {
-          return { status: 400, response: { error: "Bad request" } };
-        }
-        const response = await res.json();
-        if (res.status === 200) draftMode().enable();
-        return { status: res.status, response };
-      } catch (error) {
-        return { status: 500, response: { error: "Something went wrong" } };
-      }
     });
+
+    try {
+      const responseIsJson = res.headers.get("content-type")?.includes("json");
+      if (!responseIsJson) {
+        return { status: 400, response: { error: "Bad request" } };
+      }
+      const response = await res.json();
+      if (res.status === 200) draftMode().enable();
+      return { status: res.status, response };
+    } catch (error) {
+      return { status: 500, response: { error: "Something went wrong" } };
+    }
+  };
+
+  const getLatestBranches = async ({
+    bshbPreviewToken,
+  }: {
+    bshbPreviewToken: string;
+  }) => {
+    "use server";
+    const { headers, url } = getStuffFromEnv(basehubProps);
+    const appApiEndpoint = getBaseHubAppApiEndpoint(
+      url,
+      "/api/nextjs/latest-branches"
+    );
+
+    const res = await fetch(appApiEndpoint, {
+      cache: "no-store",
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+        "x-basehub-token": headers["x-basehub-token"],
+        "x-basehub-preview-token": bshbPreviewToken,
+      },
+    });
+
+    try {
+      const responseIsJson = res.headers.get("content-type")?.includes("json");
+      if (!responseIsJson) {
+        return { status: 400, response: { error: "Bad request" } };
+      }
+      const response = await res.json();
+      return { status: res.status, response };
+    } catch (error) {
+      return { status: 500, response: { error: "Something went wrong" } };
+    }
   };
 
   const disableDraftMode = async () => {
@@ -78,21 +113,26 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
       revalidateTags={revalidateTags}
+      getLatestBranches={getLatestBranches}
+      resolvedRef={resolvedRef}
     />
   );
 };
 
-function getBaseHubApiOrigin(url: URL) {
+function getBaseHubAppApiEndpoint(url: URL, pathname: string) {
   let origin: string;
   switch (true) {
     case url.origin.includes("api.basehub.com"):
-      origin = "https://basehub.com";
+      origin = "https://basehub.com" + pathname + url.search + url.hash;
       break;
     case url.origin.includes("api.bshb.dev"):
-      origin = "https://basehub.dev";
+      origin = "https://basehub.dev" + pathname + url.search + url.hash;
+      break;
+    case url.origin.includes("localhost:3001"):
+      origin = "http://localhost:3000" + pathname + url.search + url.hash;
       break;
     default:
-      origin = url.origin;
+      origin = url.origin + pathname + url.search + url.hash;
   }
 
   return origin;

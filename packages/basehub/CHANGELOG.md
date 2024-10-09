@@ -1,5 +1,148 @@
 # basehub
 
+## 7.5.6
+
+### Patch Changes
+
+- use jsx for rich text handlers
+
+## 7.5.5
+
+### Patch Changes
+
+- revert upgrading shiki
+
+## 7.5.4
+
+### Patch Changes
+
+- upgrade shiki
+
+## 7.5.3
+
+### Patch Changes
+
+- Fix branch switcher in localhost
+
+## 7.5.2
+
+### Patch Changes
+
+- bump width
+
+## 7.5.1
+
+### Patch Changes
+
+- fix disabled logic
+
+## 7.5.0
+
+### Minor Changes
+
+- e41cdd0: Add support for linking git branches to basehub branches
+
+### Patch Changes
+
+- 8945431: fix
+- 8945431: Fix
+- dbe9b38: Use resolvedRef in the runtime
+- 1f74c57: improvements
+- 8945431: Fix
+- dbe9b38: fix
+- b5a5bd6: sort by default or not
+- 9f17428: fix
+- 8d2af40: improvements
+- 1f24ced: fix
+- 7d76da3: log
+- bc9d438: make the branch switcher work
+- 7d76da3: fix resolve ref
+
+## 7.5.0-canary.12
+
+### Patch Changes
+
+- fix
+
+## 7.5.0-canary.11
+
+### Patch Changes
+
+- improvements
+
+## 7.5.0-canary.10
+
+### Patch Changes
+
+- sort by default or not
+
+## 7.5.0-canary.9
+
+### Patch Changes
+
+- fix resolve ref
+
+## 7.5.0-canary.8
+
+### Patch Changes
+
+- log
+
+## 7.5.0-canary.7
+
+### Patch Changes
+
+- make the branch switcher work
+
+## 7.5.0-canary.6
+
+### Patch Changes
+
+- Use resolvedRef in the runtime
+- fix
+
+## 7.5.0-canary.5
+
+### Patch Changes
+
+- fix
+
+## 7.5.0-canary.4
+
+### Patch Changes
+
+- improvements
+
+## 7.5.0-canary.3
+
+### Patch Changes
+
+- fix
+
+## 7.5.0-canary.2
+
+### Patch Changes
+
+- Fix
+
+## 7.5.0-canary.1
+
+### Patch Changes
+
+- Fix
+
+## 7.5.0-canary.0
+
+### Minor Changes
+
+- Add support for linking git branches to basehub branches
+
+## 7.4.2
+
+### Patch Changes
+
+- support loading env from .dev.vars
+
 ## 7.4.1
 
 ### Patch Changes

@@ -14,6 +14,7 @@ import { appendGeneratedCodeBanner } from "./util/disable-linters";
 import { copyDirSync } from "./util/cp";
 import { z } from "zod";
 import { createHash } from "crypto";
+import { ResolvedRef } from "../common-types";
 
 const buildManifestSchema = z.object({
   sdkVersion: z.string(),
@@ -28,8 +29,17 @@ export const main = async (
   opts: { forceDraft?: boolean; version: string }
 ) => {
   const sdkBuildId = "bshb_sdk_" + Math.random().toString(16).slice(2);
+  const now = Date.now();
+  let previousResolvedRef: ResolvedRef | null = null;
 
-  async function generateSDK(silent: boolean, previousSchemaHash: string) {
+  async function generateSDK(
+    silent: boolean,
+    previousSchemaHash: string
+  ): Promise<{
+    preventedClientGeneration: boolean;
+    schemaHash: string;
+    newResolvedRef: ResolvedRef;
+  }> {
     logIfNotSilent(silent, "🪄 Generating...");
 
     const options: Options = {
@@ -41,7 +51,17 @@ export const main = async (
       ...(opts?.forceDraft && { draft: true }),
     };
 
-    const { url, headers, draft, output } = getStuffFromEnv(options);
+    const {
+      url,
+      headers,
+      draft,
+      output,
+      gitBranch,
+      gitCommitSHA,
+      gitBranchDeploymentURL,
+      resolvedRef,
+      newResolvedRefPromise,
+    } = await getStuffFromEnv({ ...options, previousResolvedRef });
 
     const basehubModulePath = resolvePkg("basehub");
 
@@ -72,6 +92,17 @@ export const main = async (
         `🔗 Endpoint: ${url.toString()}`,
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,
+        `🔀 Ref: ${
+          resolvedRef.type === "branch" ? resolvedRef.name : resolvedRef.id
+        } (basehub ${resolvedRef.type})`,
+        resolvedRef.type === "branch"
+          ? resolvedRef.git?.branch
+            ? `🌳 Linked git branch: ${resolvedRef.git?.branch}`
+            : resolvedRef.createSuggestedBranchLink
+            ? `🤝 Want to link this git branch to a basehub branch? ${resolvedRef.createSuggestedBranchLink}`
+            : null
+          : null,
+        // `🔑 Git Commit SHA: ${gitCommitSHA}`,
       ]);
     }
 
@@ -130,7 +161,11 @@ export const main = async (
 
     if (preventedClientGeneration) {
       // done
-      return { preventedClientGeneration, schemaHash };
+      return {
+        preventedClientGeneration,
+        schemaHash,
+        newResolvedRef: await newResolvedRefPromise,
+      };
     }
 
     const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
@@ -174,6 +209,8 @@ export const main = async (
         ...options,
         draft,
         forceDraft: opts?.forceDraft,
+        gitBranch,
+        gitCommitSHA,
       })}}`
     );
 
@@ -207,7 +244,12 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     }
 
     // 3. append our basehub function to the end of the file.
-    const basehubExport = getBaseHubExport({ noStore: draft, sdkBuildId });
+    const basehubExport = getBaseHubExport({
+      noStore: draft,
+      sdkBuildId,
+      resolvedRef,
+      gitBranchDeploymentURL,
+    });
     if (!schemaFileContents.includes(basehubExport)) {
       schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
     }
@@ -457,8 +499,15 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       );
     }
 
-    logIfNotSilent(silent, "🪄 Generated `basehub` client");
-    return { preventedClientGeneration, schemaHash };
+    logIfNotSilent(
+      silent,
+      `🪄 Generated \`basehub\` client in ${Date.now() - now}ms`
+    );
+    return {
+      preventedClientGeneration,
+      schemaHash,
+      newResolvedRef: await newResolvedRefPromise,
+    };
   }
 
   if (args["--watch"]) {
@@ -474,10 +523,24 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
             "👀 `basehub` experimental --watch mode. Bugs: https://github.com/basehub-ai/basehub/issues",
           ]);
           console.log(" ");
-        } else if (!result.preventedClientGeneration) {
-          console.log("🔄 Detected changes, `basehub` re-generated");
+        } else {
+          if (result.newResolvedRef.ref !== previousResolvedRef?.ref) {
+            logInsideBox([
+              `🔀 Ref changed, now querying from ${
+                result.newResolvedRef.type
+              } ${result.newResolvedRef.ref}${
+                result.newResolvedRef.type === "branch" &&
+                result.newResolvedRef.git?.branch
+                  ? ` (linked to Git branch ${result.newResolvedRef.git?.branch})`
+                  : ""
+              }`,
+            ]);
+          } else if (!result.preventedClientGeneration) {
+            console.log("🔄 Detected changes, `basehub` re-generated");
+          }
         }
 
+        previousResolvedRef = result.newResolvedRef;
         previousHash = result.schemaHash;
         isFirst = false;
       },
@@ -521,14 +584,22 @@ process.on("unhandledRejection", (reason, promise) => {
 const getBaseHubExport = ({
   noStore,
   sdkBuildId,
+  resolvedRef,
+  gitBranchDeploymentURL,
 }: {
   noStore: boolean;
   sdkBuildId: string;
+  resolvedRef: ResolvedRef;
+  gitBranchDeploymentURL: string | null;
 }) => `
 export type * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
 
 export const sdkBuildId = "${sdkBuildId}";
+export const resolvedRef = ${JSON.stringify(resolvedRef)};
+export const gitBranchDeploymentURL = ${
+  gitBranchDeploymentURL ? `"${gitBranchDeploymentURL}"` : "null"
+};
 
 /**
  * Returns a hash code from an object
@@ -618,7 +689,10 @@ export const basehub = (options?: Options) => {
 
   options.getExtraFetchOptions = (op, body) => {
     if (op !== 'query') return {}
-    const queryHash = hashObject(body)
+
+    // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
+    // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
+    const queryHash = hashObject({ ...body, refId: resolvedRef.id })
     const cacheTag = 'basehub-' + queryHash
 
     // don't override if we're in draft mode
@@ -648,7 +722,8 @@ export const basehub = (options?: Options) => {
 basehub.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
 `;
 
-function logInsideBox(lines: string[]) {
+function logInsideBox(_lines: (string | null)[]) {
+  const lines = _lines.filter((line) => line !== null) as string[];
   // Determine the longest line to set the padding
   const longestLine = lines.reduce(
     (max, line) => Math.max(max, line.length),
