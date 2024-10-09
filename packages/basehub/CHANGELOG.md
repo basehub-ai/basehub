@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.6
+
+### Patch Changes
+
+- use jsx for rich text handlers
+
 ## 7.5.5
 
 ### Patch Changes
