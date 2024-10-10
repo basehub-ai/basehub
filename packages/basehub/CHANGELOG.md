@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.9
+
+### Patch Changes
+
+- handle default case in rich text
+
 ## 7.5.8
 
 ### Patch Changes
