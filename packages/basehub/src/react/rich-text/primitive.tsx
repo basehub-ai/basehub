@@ -534,6 +534,12 @@ const Node = ({
       props = block;
       break;
     }
+    default:
+      // @ts-ignore
+      Handler = components?.[node.type] ?? (() => <></>);
+      // @ts-ignore
+      props = { ...node.attrs, children };
+      break;
   }
 
   // @ts-ignore
@@ -642,6 +648,12 @@ const Marks = ({
       props = { ...block, children };
       break;
     }
+    default:
+      // @ts-ignore
+      Handler = components?.[mark.type] ?? (() => <></>);
+      // @ts-ignore
+      props = { ...mark.attrs, children };
+      break;
   }
 
   // @ts-ignore
