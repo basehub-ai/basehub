@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.8
+
+### Patch Changes
+
+- prevent git env from logging an error in the case of failure. just let it fail.
+
 ## 7.5.7
 
 ### Patch Changes
