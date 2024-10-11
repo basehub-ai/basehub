@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.10
+
+### Patch Changes
+
+- add prop disableDefaultComponents to rich text
+
 ## 7.5.9
 
 ### Patch Changes

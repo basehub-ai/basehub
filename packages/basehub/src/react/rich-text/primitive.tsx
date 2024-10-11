@@ -216,6 +216,7 @@ export type RichTextProps<
   components?: Partial<
     Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
   >;
+  disableDefaultComponents?: boolean;
 };
 
 export const RichText = <
@@ -225,7 +226,6 @@ export const RichText = <
 ): ReactNode => {
   const value = (props.content ?? props.children) as Node[] | undefined;
   const slugger = new GithubSlugger();
-  // slugger.reset();
 
   return (
     <>
@@ -237,6 +237,7 @@ export const RichText = <
             components={props.components}
             blocks={props.blocks}
             slugger={slugger}
+            disableDefaultComponents={props.disableDefaultComponents}
           />
         );
       })}
@@ -333,12 +334,14 @@ const Node = ({
   blocks,
   parent,
   slugger,
+  disableDefaultComponents,
 }: {
   node: Node;
   components?: Partial<Handlers>;
   blocks?: readonly CustomBlockBase[];
   parent?: Node;
   slugger: GithubSlugger;
+  disableDefaultComponents?: boolean;
 }) => {
   const children = node.content?.map((childNode, index) => {
     return (
@@ -349,6 +352,7 @@ const Node = ({
         components={components}
         blocks={blocks}
         slugger={slugger}
+        disableDefaultComponents={disableDefaultComponents}
       />
     );
   });
@@ -357,7 +361,9 @@ const Node = ({
   let props: Parameters<typeof Handler>[0];
   switch (node.type) {
     case "paragraph":
-      Handler = components?.p ?? defaultHandlers.p;
+      Handler =
+        components?.p ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.p);
       props = { children } satisfies ExtractPropsForHandler<Handlers["p"]>;
       break;
     case "text":
@@ -372,7 +378,12 @@ const Node = ({
         } satisfies Mark);
       }
       Handler = ({ children }: { children?: ReactNode }) => (
-        <Marks marks={clonedMarks} components={components} blocks={blocks}>
+        <Marks
+          marks={clonedMarks}
+          components={components}
+          blocks={blocks}
+          disableDefaultComponents={disableDefaultComponents}
+        >
           {children}
         </Marks>
       );
@@ -380,25 +391,33 @@ const Node = ({
       break;
     case "bulletList":
     case "taskList":
-      Handler = components?.ul ?? defaultHandlers.ul;
+      Handler =
+        components?.ul ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.ul);
       props = {
         children,
         isTasksList: node.type === "taskList",
       } satisfies ExtractPropsForHandler<Handlers["ul"]>;
       break;
     case "orderedList":
-      Handler = components?.ol ?? defaultHandlers.ol;
+      Handler =
+        components?.ol ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.ol);
       props = { children } satisfies ExtractPropsForHandler<Handlers["ol"]>;
       break;
     case "listItem":
-      Handler = components?.li ?? defaultHandlers.li;
+      Handler =
+        components?.li ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.li);
       props = {
         children,
         isTaskListItem: false,
       } satisfies ExtractPropsForHandler<Handlers["li"]>;
       break;
     case "taskItem":
-      Handler = components?.li ?? defaultHandlers.li;
+      Handler =
+        components?.li ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.li);
       props = {
         children,
         isTaskListItem: true,
@@ -407,25 +426,35 @@ const Node = ({
       break;
     case "heading":
       const handlerTag = `h${node.attrs.level}` as keyof Handlers;
-      Handler = components?.[handlerTag] ?? defaultHandlers[handlerTag];
+      Handler =
+        components?.[handlerTag] ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers[handlerTag]);
       const id = slugger.slug(extractTextFromNode(node));
 
       props = { children, id } satisfies ExtractPropsForHandler<Handlers["h1"]>;
       break;
     case "horizontalRule":
-      Handler = components?.hr ?? defaultHandlers.hr;
+      Handler =
+        components?.hr ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.hr);
       break;
     case "hardBreak":
-      Handler = components?.br ?? defaultHandlers.br;
+      Handler =
+        components?.br ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.br);
       break;
     case "blockquote":
-      Handler = components?.blockquote ?? defaultHandlers.blockquote;
+      Handler =
+        components?.blockquote ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.blockquote);
       props = { children } satisfies ExtractPropsForHandler<
         Handlers["blockquote"]
       >;
       break;
     case "codeBlock":
-      Handler = components?.pre ?? defaultHandlers.pre;
+      Handler =
+        components?.pre ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.pre);
       const code = node.content?.[0].text ?? "";
       props = {
         children,
@@ -434,7 +463,9 @@ const Node = ({
       } satisfies ExtractPropsForHandler<Handlers["pre"]>;
       break;
     case "table":
-      Handler = components?.table ?? defaultHandlers.table;
+      Handler =
+        components?.table ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.table);
 
       /**
        * In the case of table, we add a tableBody node that wraps its children, as it seems to be missing in the response.
@@ -446,6 +477,7 @@ const Node = ({
           components={components}
           blocks={blocks}
           slugger={slugger}
+          disableDefaultComponents={disableDefaultComponents}
         />
       );
 
@@ -454,11 +486,15 @@ const Node = ({
       >;
       break;
     case "tableRow":
-      Handler = components?.tr ?? defaultHandlers.tr;
+      Handler =
+        components?.tr ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.tr);
       props = { children } satisfies ExtractPropsForHandler<Handlers["tr"]>;
       break;
     case "tableCell":
-      Handler = components?.td ?? defaultHandlers.td;
+      Handler =
+        components?.td ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.td);
       props = {
         children,
         colspan: node.attrs.colspan,
@@ -466,7 +502,9 @@ const Node = ({
       } satisfies ExtractPropsForHandler<Handlers["td"]>;
       break;
     case "tableHeader":
-      Handler = components?.th ?? defaultHandlers.th;
+      Handler =
+        components?.th ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.th);
       props = {
         children,
         colspan: node.attrs.colspan,
@@ -474,15 +512,21 @@ const Node = ({
       } satisfies ExtractPropsForHandler<Handlers["th"]>;
       break;
     case "tableFooter":
-      Handler = components?.tfoot ?? defaultHandlers.tfoot;
+      Handler =
+        components?.tfoot ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.tfoot);
       props = { children } satisfies ExtractPropsForHandler<Handlers["tfoot"]>;
       break;
     case "tableBody":
-      Handler = components?.tbody ?? defaultHandlers.tbody;
+      Handler =
+        components?.tbody ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.tbody);
       props = { children } satisfies ExtractPropsForHandler<Handlers["tbody"]>;
       break;
     case "image":
-      Handler = components?.img ?? defaultHandlers.img;
+      Handler =
+        components?.img ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.img);
       props = {
         src: node.attrs.src,
         width: node.attrs.width,
@@ -492,7 +536,9 @@ const Node = ({
       } satisfies ExtractPropsForHandler<Handlers["img"]>;
       break;
     case "video":
-      Handler = components?.video ?? defaultHandlers.video;
+      Handler =
+        components?.video ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.video);
       props = {
         children,
         src: node.attrs.src,
@@ -557,11 +603,13 @@ const Marks = ({
   children,
   components,
   blocks,
+  disableDefaultComponents,
 }: {
   marks?: Marks;
   children: ReactNode;
   components?: Partial<Handlers>;
   blocks?: readonly CustomBlockBase[];
+  disableDefaultComponents?: boolean;
 }) => {
   if (!marks) return <>{children}</>;
   const marksClone = [...marks];
@@ -573,23 +621,33 @@ const Marks = ({
   let props: Parameters<typeof Handler>[0];
   switch (mark.type) {
     case "bold":
-      Handler = components?.b ?? defaultHandlers.b;
+      Handler =
+        components?.b ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.b);
       props = { children } satisfies ExtractPropsForHandler<Handlers["b"]>;
       break;
     case "italic":
-      Handler = components?.em ?? defaultHandlers.em;
+      Handler =
+        components?.em ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.em);
       props = { children } satisfies ExtractPropsForHandler<Handlers["em"]>;
       break;
     case "strike":
-      Handler = components?.s ?? defaultHandlers.s;
+      Handler =
+        components?.s ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.s);
       props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
       break;
     case "kbd":
-      Handler = components?.kbd ?? defaultHandlers.kbd;
+      Handler =
+        components?.kbd ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.kbd);
       props = { children } satisfies ExtractPropsForHandler<Handlers["kbd"]>;
       break;
     case "code":
-      Handler = components?.code ?? defaultHandlers.code;
+      Handler =
+        components?.code ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.code);
       props = {
         children,
         isInline: mark.attrs.isInline ?? true,
@@ -598,11 +656,15 @@ const Marks = ({
       } satisfies ExtractPropsForHandler<Handlers["code"]>;
       break;
     case "underline":
-      Handler = components?.s ?? defaultHandlers.s;
+      Handler =
+        components?.s ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.s);
       props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
       break;
     case "link":
-      Handler = components?.a ?? defaultHandlers.a;
+      Handler =
+        components?.a ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.a);
       props = {
         children,
         href: mark.attrs.href,
@@ -663,7 +725,12 @@ const Marks = ({
   }
 
   return (
-    <Marks marks={marksClone} components={components} blocks={blocks}>
+    <Marks
+      marks={marksClone}
+      components={components}
+      blocks={blocks}
+      disableDefaultComponents={disableDefaultComponents}
+    >
       {/* @ts-ignore */}
       <Handler {...props} />
     </Marks>
