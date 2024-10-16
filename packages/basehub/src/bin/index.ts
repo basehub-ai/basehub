@@ -59,6 +59,7 @@ const args = arg(
     "--help": Boolean,
     "--watch": Boolean,
     "--api-version": String,
+    "--debug": Boolean,
     // aliases
     "-o": "--output",
     "-t": "--token",

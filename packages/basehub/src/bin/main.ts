@@ -61,6 +61,7 @@ export const main = async (
       gitBranchDeploymentURL,
       resolvedRef,
       newResolvedRefPromise,
+      token,
     } = await getStuffFromEnv({ ...options, previousResolvedRef });
 
     const basehubModulePath = resolvePkg("basehub");
@@ -104,6 +105,10 @@ export const main = async (
           : null,
         // `🔑 Git Commit SHA: ${gitCommitSHA}`,
       ]);
+
+      if (args["--debug"]) {
+        console.log(`[basehub] using token: ${token}`);
+      }
     }
 
     // cleanup the output directory if input hash changes
@@ -153,7 +158,7 @@ export const main = async (
         "Content-Type": "application/json",
       },
       output: path.join(basehubOutputPath),
-      verbose: false,
+      verbose: silent ? false : args["--debug"],
       sortProperties: true,
       silent,
       previousSchemaHash,
@@ -166,6 +171,10 @@ export const main = async (
         schemaHash,
         newResolvedRef: await newResolvedRefPromise,
       };
+    }
+
+    if (args["--debug"]) {
+      console.log(`[basehub] generated in: ${basehubOutputPath}`);
     }
 
     const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
@@ -290,46 +299,65 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     logIfNotSilent(silent, "📦 Compiling to JavaScript...");
     const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
     const nextToolbarOutDir = path.join(basehubOutputPath, "next-toolbar");
-    await Promise.all([
-      esbuild.build({
-        entryPoints: [generatedMainExportPath],
-        bundle: true,
-        outdir: basehubOutputPath,
-        minify: false,
-        treeShaking: true,
-        splitting: true,
-        format: "esm",
-        external: peerDependencies,
-      }),
-      esbuild.build({
-        entryPoints: [
-          path.join(basehubModulePath, "src", "react", "pump", "index.ts"),
-        ],
-        bundle: true,
-        outdir: reactPumpOutDir,
-        minify: false,
-        treeShaking: true,
-        splitting: true,
-        format: "esm",
-        target: ["es2020", "node18"],
-        external: peerDependencies,
-        plugins: [useClientPlugin],
-      }),
-      esbuild.build({
-        entryPoints: [
-          path.join(basehubModulePath, "src", "next", "toolbar", "index.ts"),
-        ],
-        bundle: true,
-        outdir: nextToolbarOutDir,
-        minify: false,
-        treeShaking: true,
-        splitting: true,
-        format: "esm",
-        target: ["es2020", "node18"],
-        external: peerDependencies,
-        plugins: [ScssModulesPlugin(), useClientPlugin],
-      }),
-    ]);
+
+    await esbuild.build({
+      entryPoints: [generatedMainExportPath],
+      bundle: true,
+      outdir: basehubOutputPath,
+      minify: false,
+      treeShaking: true,
+      splitting: true,
+      format: "esm",
+      external: peerDependencies,
+    });
+
+    if (args["--debug"]) {
+      console.log(
+        `[basehub] compiled main export with esbuild in: ${generatedMainExportPath}`
+      );
+    }
+
+    await esbuild.build({
+      entryPoints: [
+        path.join(basehubModulePath, "src", "react", "pump", "index.ts"),
+      ],
+      bundle: true,
+      outdir: reactPumpOutDir,
+      minify: false,
+      treeShaking: true,
+      splitting: true,
+      format: "esm",
+      target: ["es2020", "node18"],
+      external: peerDependencies,
+      plugins: [useClientPlugin],
+    });
+
+    if (args["--debug"]) {
+      console.log(
+        `[basehub] compiled react pump with esbuild in: ${reactPumpOutDir}`
+      );
+    }
+
+    await esbuild.build({
+      entryPoints: [
+        path.join(basehubModulePath, "src", "next", "toolbar", "index.ts"),
+      ],
+      bundle: true,
+      outdir: nextToolbarOutDir,
+      minify: false,
+      treeShaking: true,
+      splitting: true,
+      format: "esm",
+      target: ["es2020", "node18"],
+      external: peerDependencies,
+      plugins: [ScssModulesPlugin(), useClientPlugin],
+    });
+
+    if (args["--debug"]) {
+      console.log(
+        `[basehub] compiled next toolbar with esbuild in: ${nextToolbarOutDir}`
+      );
+    }
 
     /**
      * DTS stuff.
@@ -342,6 +370,13 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       path.join(basehubModulePath, "dts", "src", "next", "toolbar"),
       nextToolbarOutDir
     );
+
+    if (args["--debug"]) {
+      console.log(`[basehub] copied dts for react pump to: ${reactPumpOutDir}`);
+      console.log(
+        `[basehub] copied dts for next toolbar to: ${nextToolbarOutDir}`
+      );
+    }
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
 
@@ -445,6 +480,18 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
           path.join(nextToolbarOutDir, "index.d.ts")
         )}";`
       );
+
+      if (args["--debug"]) {
+        console.log(
+          `[basehub] aliased index.js and index.d.ts to: ${basehubOutputPath}`
+        );
+        console.log(
+          `[basehub] aliased react pump index.js and index.d.ts to: ${reactPumpOutDir}`
+        );
+        console.log(
+          `[basehub] aliased next toolbar index.js and index.d.ts to: ${nextToolbarOutDir}`
+        );
+      }
     }
 
     if (shouldAppendToGitIgnore) {
@@ -497,12 +544,37 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
           2
         )
       );
+
+      if (args["--debug"]) {
+        console.log(`[basehub] wrote build manifest to: ${buildManifestPath}`);
+      }
     }
 
     logIfNotSilent(
       silent,
       `🪄 Generated \`basehub\` client in ${Date.now() - now}ms`
     );
+
+    if (args["--debug"]) {
+      console.log(`[basehub] finished in ${Date.now() - now}ms`);
+      console.log(
+        `[basehub] checking if the generated client exists after 1 second`
+      );
+
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(null);
+          console.log(
+            `[basehub] generated client exists? ${
+              fs.existsSync(path.join(basehubOutputPath, "index.js"))
+                ? "YES"
+                : "NO"
+            }`
+          );
+        }, 1000);
+      });
+    }
+
     return {
       preventedClientGeneration,
       schemaHash,

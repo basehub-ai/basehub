@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.11
+
+### Patch Changes
+
+- add --debug option with additional logging
+
 ## 7.5.10
 
 ### Patch Changes
