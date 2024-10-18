@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.12
+
+### Patch Changes
+
+- add more stuff to build manifest
+
 ## 7.5.11
 
 ### Patch Changes
