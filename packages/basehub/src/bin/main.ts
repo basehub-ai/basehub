@@ -17,9 +17,11 @@ import { createHash } from "crypto";
 import { ResolvedRef } from "../common-types";
 
 const buildManifestSchema = z.object({
+  generatedAt: z.string(),
   sdkVersion: z.string(),
   inputHash: z.string(),
   schemaHash: z.string(),
+  resolvedRef: z.any(),
 });
 
 const onProcessEndCallbacks: Array<() => void> = [];
@@ -108,6 +110,13 @@ export const main = async (
 
       if (args["--debug"]) {
         console.log(`[basehub] using token: ${token}`);
+        console.log(
+          `[basehub] resolved ref (full): ${JSON.stringify(
+            resolvedRef,
+            null,
+            2
+          )}`
+        );
       }
     }
 
@@ -536,9 +545,11 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
         buildManifestPath,
         JSON.stringify(
           {
+            generatedAt: new Date().toISOString(),
             sdkVersion: opts.version,
             inputHash,
             schemaHash,
+            resolvedRef,
           } satisfies z.infer<typeof buildManifestSchema>,
           null,
           2
