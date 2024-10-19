@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.13
+
+### Patch Changes
+
+- fix windows powershell generating backslashes instead of forward slashes
+
 ## 7.5.12
 
 ### Patch Changes

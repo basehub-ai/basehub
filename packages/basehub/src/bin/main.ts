@@ -15,6 +15,7 @@ import { copyDirSync } from "./util/cp";
 import { z } from "zod";
 import { createHash } from "crypto";
 import { ResolvedRef } from "../common-types";
+import { ensureCrossPlatformTsImport } from "./util/cross-platform-ts-imports";
 
 const buildManifestSchema = z.object({
   generatedAt: z.string(),
@@ -449,45 +450,57 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       );
       fs.writeFileSync(
         indexJsPath,
-        `export * from "${path.relative(
-          basehubModulePath,
-          path.join(basehubOutputPath, "index.js")
-        )}";`
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(basehubOutputPath, "index.js")
+          )}";`
+        )
       );
       fs.writeFileSync(
         indexDtsPath,
-        `export * from "${path.relative(
-          basehubModulePath,
-          generatedMainExportPath
-        )}";`
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            generatedMainExportPath
+          )}";`
+        )
       );
       fs.writeFileSync(
         reactPumpIndexJsPath,
-        `export * from "${path.relative(
-          basehubModulePath,
-          path.join(reactPumpOutDir, "index.js")
-        )}";`
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(reactPumpOutDir, "index.js")
+          )}";`
+        )
       );
       fs.writeFileSync(
         reactPumpIndexDtsPath,
-        `export * from "${path.relative(
-          basehubModulePath,
-          path.join(reactPumpOutDir, "index.d.ts")
-        )}";`
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(reactPumpOutDir, "index.d.ts")
+          )}";`
+        )
       );
       fs.writeFileSync(
         nextToolbarIndexJsPath,
-        `export * from "${path.relative(
-          basehubModulePath,
-          path.join(nextToolbarOutDir, "index.js")
-        )}";`
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(nextToolbarOutDir, "index.js")
+          )}";`
+        )
       );
       fs.writeFileSync(
         nextToolbarIndexDtsPath,
-        `export * from "${path.relative(
-          basehubModulePath,
-          path.join(nextToolbarOutDir, "index.d.ts")
-        )}";`
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(nextToolbarOutDir, "index.d.ts")
+          )}";`
+        )
       );
 
       if (args["--debug"]) {
