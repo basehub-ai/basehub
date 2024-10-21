@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.14
+
+### Patch Changes
+
+- Support next@15
+
 ## 7.5.13
 
 ### Patch Changes

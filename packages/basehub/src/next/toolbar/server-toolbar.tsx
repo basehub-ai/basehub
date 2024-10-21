@@ -19,7 +19,9 @@ const LazyClientConditionalRenderer = React.lazy(() =>
 
 type ServerToolbarProps = Parameters<typeof basehub>[0];
 
-export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
+export const ServerToolbar = async ({
+  ...basehubProps
+}: ServerToolbarProps) => {
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
 
   const enableDraftMode = async ({
@@ -50,7 +52,7 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
         return { status: 400, response: { error: "Bad request" } };
       }
       const response = await res.json();
-      if (res.status === 200) draftMode().enable();
+      if (res.status === 200) (await draftMode()).enable();
       return { status: res.status, response };
     } catch (error) {
       return { status: 500, response: { error: "Something went wrong" } };
@@ -93,22 +95,24 @@ export const ServerToolbar = ({ ...basehubProps }: ServerToolbarProps) => {
 
   const disableDraftMode = async () => {
     "use server";
-    draftMode().disable();
+    (await draftMode()).disable();
   };
 
   const revalidateTags = async ({ tags }: { tags: string[] }) => {
     "use server";
-    tags.forEach((tag) => {
-      if (tag.startsWith("basehub-")) {
-        revalidateTag(tag);
-      }
-    });
+    await Promise.all(
+      tags.map(async (tag) => {
+        if (tag.startsWith("basehub-")) {
+          await revalidateTag(tag);
+        }
+      })
+    );
     return { success: true };
   };
 
   return (
     <LazyClientConditionalRenderer
-      draft={draftMode().isEnabled}
+      draft={(await draftMode()).isEnabled}
       isForcedDraft={isForcedDraft}
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
