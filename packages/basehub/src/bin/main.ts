@@ -783,7 +783,7 @@ export const basehub = (options?: Options) => {
     options = {};
   }
 
-  options.getExtraFetchOptions = (op, body) => {
+  options.getExtraFetchOptions = async (op, body) => {
     if (op !== 'query') return {}
 
     // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
@@ -794,10 +794,33 @@ export const basehub = (options?: Options) => {
     // don't override if we're in draft mode
     if (${noStore}) return {}
 
-    // don't override if revalidation is already being handled by the user
-    if (typeof options?.next !== 'undefined') return {}
+    let isNextjsDraftMode = false;
+    if (options.draft === undefined) {
+      // try to auto-detect (only if draft is not explicitly set by the user)
+      try {
+        const { draftMode } = await import("next/headers");
+        isNextjsDraftMode = (await draftMode()).isEnabled;
+      } catch (error) {
+        // noop, not using nextjs
+      }
+    }
 
-    return { next: { tags: [cacheTag] }, headers: { 'x-basehub-sdk-build-id': "${sdkBuildId}", 'x-basehub-cache-tag': cacheTag }}
+    let extra = {};
+    if (isNextjsDraftMode) {
+      extra.headers = { "x-basehub-draft": "true" };
+    }
+
+    if (typeof options?.next === 'undefined') {
+      // don't override if revalidation is already being handled by the user
+      extra.next = { tags: [cacheTag] };
+      extra.headers = {
+        ...extra.headers,
+        "x-basehub-sdk-build-id": "${sdkBuildId}",
+        "x-basehub-cache-tag": cacheTag,
+      };
+    }
+
+    return extra;
   }
 
   return {
