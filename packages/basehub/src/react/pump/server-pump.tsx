@@ -41,7 +41,6 @@ export type PumpProps<Queries extends Array<PumpQuery>> = {
     data: QueryResults<Queries>
   ) => React.ReactNode | Promise<React.ReactNode>;
   queries: [...Queries]; // Tuple type for better type inference
-  disableNextjsAutoDraftMode?: boolean;
 } & Parameters<typeof basehub>[0];
 
 // Utility type to infer result types from an array of queries
@@ -52,7 +51,6 @@ export type QueryResults<Queries extends Array<PumpQuery>> = {
 export const Pump = async <Queries extends Array<PumpQuery>>({
   children,
   queries,
-  disableNextjsAutoDraftMode,
   ...basehubProps
 }: PumpProps<Queries>) => {
   // passed to the client to toast
@@ -60,7 +58,8 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
   let isNextjsDraftMode = false;
-  if (!disableNextjsAutoDraftMode) {
+  if (basehubProps.draft === undefined) {
+    // try to auto-detect (only if draft is not explicitly set by the user)
     try {
       const { draftMode } = await import("next/headers");
       isNextjsDraftMode = (await draftMode()).isEnabled;
