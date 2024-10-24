@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.15
+
+### Patch Changes
+
+- remove react as peers; replace Date.now() with performance.now() in prep to nextjs dynamic io
+
 ## 7.5.14
 
 ### Patch Changes
