@@ -22,6 +22,7 @@ type ServerToolbarProps = Parameters<typeof basehub>[0];
 export const ServerToolbar = async ({
   ...basehubProps
 }: ServerToolbarProps) => {
+  "use cache";
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
 
   const enableDraftMode = async ({
