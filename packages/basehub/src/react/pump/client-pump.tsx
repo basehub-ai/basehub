@@ -27,7 +27,7 @@ const clientCache = new Map<
 
 const lastResponseHashCache = new Map<string, string>();
 
-const DEDUPE_TIME_MS = 500;
+const DEDUPE_TIME_MS = 32;
 
 export const ClientPump = <Queries extends PumpQuery[]>({
   children,
@@ -87,7 +87,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
 
         if (clientCache.has(queryCacheKey)) {
           const cached = clientCache.get(queryCacheKey)!;
-          if (Date.now() - cached.start < DEDUPE_TIME_MS) {
+          if (performance.now() - cached.start < DEDUPE_TIME_MS) {
             const response = await cached.response;
             if (!response) return null;
             if (response.newPumpToken) {
@@ -144,7 +144,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
 
         // we quickly set the cache (without awaiting)
         clientCache.set(queryCacheKey, {
-          start: Date.now(),
+          start: performance.now(),
           response: responsePromise,
         });
 

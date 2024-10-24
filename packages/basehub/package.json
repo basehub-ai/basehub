@@ -46,10 +46,6 @@
     "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
     "build:client": "tsup --config tsup-client.config.ts"
   },
-  "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
   "dependencies": {
     "@basehub/genql": "9.0.0-canary.5",
     "@basehub/mutation-api-helpers": "2.0.2",
