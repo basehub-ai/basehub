@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.16
+
+### Patch Changes
+
+- add use cache to server toolbar to fix a weird dynamic io error
+
 ## 7.5.15
 
 ### Patch Changes
