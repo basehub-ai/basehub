@@ -46,7 +46,7 @@ importers:
         version: 9.0.0(eslint@8.52.0)
       eslint-config-turbo:
         specifier: latest
-        version: 1.13.3(eslint@8.52.0)
+        version: 2.2.3(eslint@8.52.0)
       eslint-import-resolver-typescript:
         specifier: ^3.6.1
         version: 3.6.1(@typescript-eslint/parser@6.9.0)(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0)(eslint@8.52.0)
@@ -109,9 +109,6 @@ importers:
       shiki:
         specifier: ^1.17.7
         version: 1.17.7
-      sonner:
-        specifier: 1.4.3
-        version: 1.4.3(react-dom@18.2.0)(react@18.2.0)
       typesense:
         specifier: 1.8.2
         version: 1.8.2(@babel/runtime@7.24.6)
@@ -146,6 +143,9 @@ importers:
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
+      sonner:
+        specifier: 1.5.0
+        version: 1.5.0(react-dom@18.2.0)(react@18.2.0)
       tsconfig:
         specifier: workspace:*
         version: link:../../internal/tsconfig
@@ -1215,17 +1215,6 @@ packages:
       hast-util-to-html: 9.0.3
     dev: false
 
-  /@shikijs/core@1.22.0:
-    resolution: {integrity: sha512-S8sMe4q71TJAW+qG93s5VaiihujRK6rqDFqBnxqvga/3LvqHEnxqBIOPkt//IdXVtHkQWKu4nOQNk0uBGicU7Q==}
-    dependencies:
-      '@shikijs/engine-javascript': 1.22.0
-      '@shikijs/engine-oniguruma': 1.22.0
-      '@shikijs/types': 1.22.0
-      '@shikijs/vscode-textmate': 9.3.0
-      '@types/hast': 3.0.4
-      hast-util-to-html: 9.0.3
-    dev: false
-
   /@shikijs/engine-javascript@1.17.7:
     resolution: {integrity: sha512-wwSf7lKPsm+hiYQdX+1WfOXujtnUG6fnN4rCmExxa4vo+OTmvZ9B1eKauilvol/LHUPrQgW12G3gzem7pY5ckw==}
     dependencies:
@@ -1234,26 +1223,11 @@ packages:
       oniguruma-to-js: 0.4.3
     dev: false
 
-  /@shikijs/engine-javascript@1.22.0:
-    resolution: {integrity: sha512-AeEtF4Gcck2dwBqCFUKYfsCq0s+eEbCEbkUuFou53NZ0sTGnJnJ/05KHQFZxpii5HMXbocV9URYVowOP2wH5kw==}
-    dependencies:
-      '@shikijs/types': 1.22.0
-      '@shikijs/vscode-textmate': 9.3.0
-      oniguruma-to-js: 0.4.3
-    dev: false
-
   /@shikijs/engine-oniguruma@1.17.7:
     resolution: {integrity: sha512-pvSYGnVeEIconU28NEzBXqSQC/GILbuNbAHwMoSfdTBrobKAsV1vq2K4cAgiaW1TJceLV9QMGGh18hi7cCzbVQ==}
     dependencies:
       '@shikijs/types': 1.17.7
       '@shikijs/vscode-textmate': 9.2.2
-    dev: false
-
-  /@shikijs/engine-oniguruma@1.22.0:
-    resolution: {integrity: sha512-5iBVjhu/DYs1HB0BKsRRFipRrD7rqjxlWTj4F2Pf+nQSPqc3kcyqFFeZXnBMzDf0HdqaFVvhDRAGiYNvyLP+Mw==}
-    dependencies:
-      '@shikijs/types': 1.22.0
-      '@shikijs/vscode-textmate': 9.3.0
     dev: false
 
   /@shikijs/transformers@1.17.7:
@@ -1269,19 +1243,8 @@ packages:
       '@types/hast': 3.0.4
     dev: false
 
-  /@shikijs/types@1.22.0:
-    resolution: {integrity: sha512-Fw/Nr7FGFhlQqHfxzZY8Cwtwk5E9nKDUgeLjZgt3UuhcM3yJR9xj3ZGNravZZok8XmEZMiYkSMTPlPkULB8nww==}
-    dependencies:
-      '@shikijs/vscode-textmate': 9.3.0
-      '@types/hast': 3.0.4
-    dev: false
-
   /@shikijs/vscode-textmate@9.2.2:
     resolution: {integrity: sha512-TMp15K+GGYrWlZM8+Lnj9EaHEFmOen0WJBrfa17hF7taDOYthuPPV0GWzfd/9iMij0akS/8Yw2ikquH7uVi/fg==}
-    dev: false
-
-  /@shikijs/vscode-textmate@9.3.0:
-    resolution: {integrity: sha512-jn7/7ky30idSkd/O5yDBfAnVt+JJpepofP/POZ1iMOxK59cOfqIgg/Dj0eFsjOTMw+4ycJN0uhZH/Eb0bs/EUA==}
     dev: false
 
   /@swc/counter@0.1.3:
@@ -2713,13 +2676,13 @@ packages:
       eslint: 8.52.0
     dev: false
 
-  /eslint-config-turbo@1.13.3(eslint@8.52.0):
-    resolution: {integrity: sha512-if/QtwEiWZ5b7Bg8yZBPSvS0TeCG2Zvfa/+XBYANS7uSYucjmW+BBC8enJB0PqpB/YLGGOumeo3x7h1Nuba9iw==}
+  /eslint-config-turbo@2.2.3(eslint@8.52.0):
+    resolution: {integrity: sha512-/zwNU+G2w0HszXzWILdl6/Catt86ejUG7vsFSdpnFzFAAUbbT2TxgoCFvC1fKtm6+SkQsXwkRRe9tFz0aMftpg==}
     peerDependencies:
       eslint: '>6.6.0'
     dependencies:
       eslint: 8.52.0
-      eslint-plugin-turbo: 1.13.3(eslint@8.52.0)
+      eslint-plugin-turbo: 2.2.3(eslint@8.52.0)
     dev: false
 
   /eslint-import-resolver-node@0.3.9:
@@ -2879,8 +2842,8 @@ packages:
       string.prototype.matchall: 4.0.11
     dev: false
 
-  /eslint-plugin-turbo@1.13.3(eslint@8.52.0):
-    resolution: {integrity: sha512-RjmlnqYsEqnJ+U3M3IS5jLJDjWv5NsvReCpsC61n5pJ4JMHTZ/lU0EIoL1ccuL1L5wP0APzdXdByBxERcPQ+Nw==}
+  /eslint-plugin-turbo@2.2.3(eslint@8.52.0):
+    resolution: {integrity: sha512-LHt35VwxthdGVO6hQRfvmFb6ee8/exAzAYWCy4o87Bnp7urltP8qg7xMd4dPSLAhtfnI2xSo1WgeVaR3MeItxw==}
     peerDependencies:
       eslint: '>6.6.0'
     dependencies:
@@ -5717,17 +5680,6 @@ packages:
       '@types/hast': 3.0.4
     dev: false
 
-  /shiki@1.22.0:
-    resolution: {integrity: sha512-/t5LlhNs+UOKQCYBtl5ZsH/Vclz73GIqT2yQsCBygr8L/ppTdmpL4w3kPLoZJbMKVWtoG77Ue1feOjZfDxvMkw==}
-    dependencies:
-      '@shikijs/core': 1.22.0
-      '@shikijs/engine-javascript': 1.22.0
-      '@shikijs/engine-oniguruma': 1.22.0
-      '@shikijs/types': 1.22.0
-      '@shikijs/vscode-textmate': 9.3.0
-      '@types/hast': 3.0.4
-    dev: false
-
   /side-channel@1.0.6:
     resolution: {integrity: sha512-fDW/EZ6Q9RiO8eFG8Hj+7u/oW+XrPTIChwCOM2+th2A6OblDtYYIpve9m+KvI9Z4C9qSEXlaGR6bTEYHReuglA==}
     engines: {node: '>= 0.4'}
@@ -5797,15 +5749,15 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /sonner@1.4.3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-SArYlHbkjqRuLiR0iGY2ZSr09oOrxw081ZZkQPfXrs8aZQLIBOLOdzTYxGJB5yIZ7qL56UEPmrX1YqbODwG0Lw==}
+  /sonner@1.5.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-FBjhG/gnnbN6FY0jaNnqZOMmB73R+5IiyYAw8yBj7L54ER7HB3fOSE5OFiQiE2iXWxeXKvg6fIP4LtVppHEdJA==}
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-    dev: false
+    dev: true
 
   /source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}

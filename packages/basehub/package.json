@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "7.5.17",
+  "version": "7.5.18",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -63,7 +63,6 @@
     "resolve-pkg": "2.0.0",
     "server-only": "^0.0.1",
     "shiki": "^1.17.7",
-    "sonner": "1.4.3",
     "typesense": "1.8.2",
     "zod": "3.22.1"
   },
@@ -77,6 +76,7 @@
     "next": "^13.5.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "sonner": "1.5.0",
     "tsconfig": "workspace:*",
     "tsup": "8.0.2",
     "type-fest": "3.0.0"

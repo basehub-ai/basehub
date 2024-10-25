@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.18
+
+### Patch Changes
+
+- upgrade sonner
+
 ## 7.5.17
 
 ### Patch Changes
