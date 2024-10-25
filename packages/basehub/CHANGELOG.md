@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.17
+
+### Patch Changes
+
+- remove "use cache" from server toolbar as it throws an error if dynamicIO is not enabled, dude
+
 ## 7.5.16
 
 ### Patch Changes
