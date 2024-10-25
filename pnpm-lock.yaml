@@ -109,6 +109,9 @@ importers:
       shiki:
         specifier: ^1.17.7
         version: 1.17.7
+      sonner:
+        specifier: 1.5.0
+        version: 1.5.0(react-dom@18.2.0)(react@18.2.0)
       typesense:
         specifier: 1.8.2
         version: 1.8.2(@babel/runtime@7.24.6)
@@ -143,9 +146,6 @@ importers:
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
-      sonner:
-        specifier: 1.5.0
-        version: 1.5.0(react-dom@18.2.0)(react@18.2.0)
       tsconfig:
         specifier: workspace:*
         version: link:../../internal/tsconfig
@@ -5757,7 +5757,7 @@ packages:
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
-    dev: true
+    dev: false
 
   /source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}

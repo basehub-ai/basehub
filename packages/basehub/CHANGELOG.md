@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.19
+
+### Patch Changes
+
+- bundle sonner
+
 ## 7.5.18
 
 ### Patch Changes
