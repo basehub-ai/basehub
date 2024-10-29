@@ -1,5 +1,23 @@
 # basehub
 
+## 7.5.20-canary.2
+
+### Patch Changes
+
+- more logs
+
+## 7.5.20-canary.1
+
+### Patch Changes
+
+- logs to debug process which keeps running
+
+## 7.5.20-canary.0
+
+### Patch Changes
+
+- Expose cache key generator function
+
 ## 7.5.19
 
 ### Patch Changes

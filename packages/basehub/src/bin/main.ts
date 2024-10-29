@@ -658,9 +658,21 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
 // Handle signals
 ["SIGINT", "SIGTERM", "SIGQUIT"].forEach((signal) => {
   process.on(signal, () => {
+    console.log(`[${process.pid}] Received ${signal} signal`);
     onProcessEndCallbacks.forEach((cb) => cb());
+    console.log(`[${process.pid}] About to exit...`);
     process.exit(0);
+
+    // If we're still alive after process.exit(0), force kill ourselves
+    console.log(
+      `[${process.pid}] Process still alive after exit(), forcing SIGKILL...`
+    );
+    process.kill(process.pid, "SIGKILL");
   });
+});
+
+process.on("exit", () => {
+  console.log(`[${process.pid}] Process actually exiting`);
 });
 
 // Handle uncaught exceptions
@@ -868,6 +880,7 @@ const scheduleNonOverlappingWork = (
   const watchPromise = new Promise<void>((resolve) => {
     const runWatch = async () => {
       while (isWatching) {
+        console.log(`[${process.pid}] Running watch callback...`);
         await callback();
 
         if (isWatching) {

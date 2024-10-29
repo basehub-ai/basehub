@@ -1,5 +1,26 @@
 # playground
 
+## 0.0.162-canary.2
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.20-canary.2
+
+## 0.0.162-canary.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.20-canary.1
+
+## 0.0.162-canary.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.20-canary.0
+
 ## 0.0.161
 
 ### Patch Changes
