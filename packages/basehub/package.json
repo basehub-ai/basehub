@@ -47,7 +47,7 @@
     "build:client": "tsup --config tsup-client.config.ts"
   },
   "dependencies": {
-    "@basehub/genql": "9.0.0-canary.5",
+    "@basehub/genql": "9.0.0-canary.6",
     "@basehub/mutation-api-helpers": "2.0.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@shikijs/transformers": "^1.17.7",
