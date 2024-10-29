@@ -1,5 +1,35 @@
 # basehub
 
+## 7.5.19
+
+### Patch Changes
+
+- bundle sonner
+
+## 7.5.18
+
+### Patch Changes
+
+- upgrade sonner
+
+## 7.5.17
+
+### Patch Changes
+
+- remove "use cache" from server toolbar as it throws an error if dynamicIO is not enabled, dude
+
+## 7.5.16
+
+### Patch Changes
+
+- add use cache to server toolbar to fix a weird dynamic io error
+
+## 7.5.15
+
+### Patch Changes
+
+- remove react as peers; replace Date.now() with performance.now() in prep to nextjs dynamic io
+
 ## 7.5.14
 
 ### Patch Changes

@@ -34,7 +34,7 @@ let pumpToken: string | null = null;
 let spaceID: string | null = null;
 let pusherData: ResponseCache["pusherData"] | null = null;
 
-const DEDUPE_TIME_MS = 500;
+const DEDUPE_TIME_MS = 32;
 
 export type PumpProps<Queries extends Array<PumpQuery>> = {
   children: (
@@ -97,7 +97,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
 
       if (cache.has(cacheKey)) {
         const cached = cache.get(cacheKey)!;
-        if (Date.now() - cached.start < DEDUPE_TIME_MS) {
+        if (performance.now() - cached.start < DEDUPE_TIME_MS) {
           data = (await cached.data) as any;
         }
       }
@@ -133,7 +133,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
             })
           : basehub(basehubProps).query(singleQuery);
         cache.set(cacheKey, {
-          start: Date.now(),
+          start: performance.now(),
           data: dataPromise,
         });
         data = await dataPromise;

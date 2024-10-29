@@ -760,6 +760,15 @@ function hashObject(obj: Record<string, unknown>): string {
 // we limit options to only the ones we want to expose.
 type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean, token?: string }
 
+// we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
+// solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
+export function cacheTagFromQuery(query: QueryGenqlSelection) {
+  const now = performance.now();
+  const result = "basehub-" + hashObject({ ...query, refId: resolvedRef.id });
+  console.log("cacheTagFromQuery", result, performance.now() - now);
+  return result;
+}
+
 /**
  * Create a basehub client.
  *
@@ -783,13 +792,8 @@ export const basehub = (options?: Options) => {
     options = {};
   }
 
-  options.getExtraFetchOptions = async (op, body) => {
+  options.getExtraFetchOptions = async (op, _body, originalRequest) => {
     if (op !== 'query') return {}
-
-    // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
-    // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
-    const queryHash = hashObject({ ...body, refId: resolvedRef.id })
-    const cacheTag = 'basehub-' + queryHash
 
     // don't override if we're in draft mode
     if (${noStore}) return {}
@@ -811,6 +815,7 @@ export const basehub = (options?: Options) => {
     }
 
     if (typeof options?.next === 'undefined') {
+      const cacheTag = cacheTagFromQuery(originalRequest);
       // don't override if revalidation is already being handled by the user
       extra.next = { tags: [cacheTag] };
       extra.headers = {

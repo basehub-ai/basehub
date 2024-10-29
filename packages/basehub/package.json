@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "7.5.14",
+  "version": "7.5.19",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -46,12 +46,8 @@
     "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
     "build:client": "tsup --config tsup-client.config.ts"
   },
-  "peerDependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  },
   "dependencies": {
-    "@basehub/genql": "9.0.0-canary.5",
+    "@basehub/genql": "9.0.0-canary.6",
     "@basehub/mutation-api-helpers": "2.0.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@shikijs/transformers": "^1.17.7",
@@ -67,7 +63,7 @@
     "resolve-pkg": "2.0.0",
     "server-only": "^0.0.1",
     "shiki": "^1.17.7",
-    "sonner": "1.4.3",
+    "sonner": "1.5.0",
     "typesense": "1.8.2",
     "zod": "3.22.1"
   },
