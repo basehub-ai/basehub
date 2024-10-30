@@ -16,6 +16,7 @@ import { z } from "zod";
 import { createHash } from "crypto";
 import { ResolvedRef } from "../common-types";
 import { ensureCrossPlatformTsImport } from "./util/cross-platform-ts-imports";
+import { ensureSingleInstance, storePid } from "./util/ensure-single-instance";
 
 const buildManifestSchema = z.object({
   generatedAt: z.string(),
@@ -35,6 +36,42 @@ export const main = async (
   const now = Date.now();
   let previousResolvedRef: ResolvedRef | null = null;
 
+  const options: Options = {
+    token: args["--token"],
+    prefix: args["--env-prefix"],
+    output: args["--output"],
+    draft: args["--draft"],
+    apiVersion: args["--api-version"],
+    ...(opts?.forceDraft && { draft: true }),
+  };
+
+  const basehubModulePath = resolvePkg("basehub") as string;
+
+  if (!basehubModulePath) {
+    throw new Error(
+      "basehub package not found in node_modules. If this issue persists, please raise an issue on the `basehub-ai/basehub` repository."
+    );
+  }
+
+  const { output } = await getStuffFromEnv({ ...options, previousResolvedRef });
+
+  let shouldAppendToGitIgnore = "";
+  let pathArgs: string[] = [];
+  if (output === "node_modules") {
+    // old default
+    pathArgs = ["node_modules", "basehub", "dist", "generated-client"];
+  } else if (output) {
+    pathArgs = [output];
+  } else {
+    // default
+    pathArgs = [".basehub"];
+    shouldAppendToGitIgnore = ".basehub";
+  }
+
+  const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
+
+  ensureSingleInstance(basehubOutputPath);
+
   async function generateSDK(
     silent: boolean,
     previousSchemaHash: string
@@ -45,20 +82,10 @@ export const main = async (
   }> {
     logIfNotSilent(silent, "🪄 Generating...");
 
-    const options: Options = {
-      token: args["--token"],
-      prefix: args["--env-prefix"],
-      output: args["--output"],
-      draft: args["--draft"],
-      apiVersion: args["--api-version"],
-      ...(opts?.forceDraft && { draft: true }),
-    };
-
     const {
       url,
       headers,
       draft,
-      output,
       gitBranch,
       gitCommitSHA,
       gitBranchDeploymentURL,
@@ -66,29 +93,6 @@ export const main = async (
       newResolvedRefPromise,
       token,
     } = await getStuffFromEnv({ ...options, previousResolvedRef });
-
-    const basehubModulePath = resolvePkg("basehub");
-
-    if (!basehubModulePath) {
-      throw new Error(
-        "basehub package not found in node_modules. If this issue persists, please raise an issue on the `basehub-ai/basehub` repository."
-      );
-    }
-
-    let shouldAppendToGitIgnore = "";
-    let pathArgs: string[] = [];
-    if (output === "node_modules") {
-      // old default
-      pathArgs = ["node_modules", "basehub", "dist", "generated-client"];
-    } else if (output) {
-      pathArgs = [output];
-    } else {
-      // default
-      pathArgs = [".basehub"];
-      shouldAppendToGitIgnore = ".basehub";
-    }
-
-    const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
 
     if (!silent) {
       logInsideBox([
@@ -159,6 +163,8 @@ export const main = async (
       // create the directory again
       fs.mkdirSync(basehubOutputPath, { recursive: true });
     }
+
+    storePid(basehubOutputPath);
 
     const { preventedClientGeneration, schemaHash } = await generate({
       endpoint: url.toString(),
@@ -660,6 +666,12 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
   process.on(signal, () => {
     onProcessEndCallbacks.forEach((cb) => cb());
     process.exit(0);
+
+    // If we're still alive after process.exit(0), force kill ourselves
+    console.log(
+      `[${process.pid}] BaseHub process still alive after exit(), forcing SIGKILL...`
+    );
+    process.kill(process.pid, "SIGKILL");
   });
 });
 
