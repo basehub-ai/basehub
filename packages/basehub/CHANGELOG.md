@@ -1,5 +1,66 @@
 # basehub
 
+## 7.5.20
+
+### Patch Changes
+
+- d670cea: Expose cache key generator function
+- 40d4c90: simulate stuck op
+- 40d4c90: debug: remvove early exit
+- 40d4c90: try to force repro
+- 40d4c90: store pid again after cleaning up the parent dir
+- d670cea: more logs
+- d670cea: logs to debug process which keeps running
+- 40d4c90: kill existing process if found
+
+## 7.5.20-canary.7
+
+### Patch Changes
+
+- store pid again after cleaning up the parent dir
+
+## 7.5.20-canary.6
+
+### Patch Changes
+
+- kill existing process if found
+
+## 7.5.20-canary.5
+
+### Patch Changes
+
+- debug: remvove early exit
+
+## 7.5.20-canary.4
+
+### Patch Changes
+
+- simulate stuck op
+
+## 7.5.20-canary.3
+
+### Patch Changes
+
+- try to force repro
+
+## 7.5.20-canary.2
+
+### Patch Changes
+
+- more logs
+
+## 7.5.20-canary.1
+
+### Patch Changes
+
+- logs to debug process which keeps running
+
+## 7.5.20-canary.0
+
+### Patch Changes
+
+- Expose cache key generator function
+
 ## 7.5.19
 
 ### Patch Changes
