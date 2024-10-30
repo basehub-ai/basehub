@@ -777,7 +777,6 @@ type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 
 export function cacheTagFromQuery(query: QueryGenqlSelection) {
   const now = performance.now();
   const result = "basehub-" + hashObject({ ...query, refId: resolvedRef.id });
-  console.log("cacheTagFromQuery", result, performance.now() - now);
   return result;
 }
 
