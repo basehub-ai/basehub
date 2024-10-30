@@ -796,7 +796,12 @@ export const basehub = (options?: Options) => {
   options.getExtraFetchOptions = async (op, _body, originalRequest) => {
     if (op !== 'query') return {}
 
-    let extra = {};
+    let extra = {
+      headers: {
+        "x-basehub-sdk-build-id": "${sdkBuildId}",
+      },
+    };
+
     let isNextjsDraftMode = false;
     if (options.draft === undefined) {
       // try to auto-detect (only if draft is not explicitly set by the user)
@@ -808,8 +813,13 @@ export const basehub = (options?: Options) => {
       }
     }
 
-    if (isNextjsDraftMode) {
-      extra.headers = { "x-basehub-draft": "true" };
+    const isDraftResolved = ${draft} || isNextjsDraftMode || options.draft === true;
+
+    if (isDraftResolved) {
+      extra.headers = { ...extra.headers, "x-basehub-draft": "true" };
+      // get rid of automatic nextjs caching
+      extra.next = { revalidate: undefined };
+      extra.cache = "no-store";
       // try to get ref from cookies
       try {
         const { cookies } = await import("next/headers");
@@ -826,32 +836,31 @@ export const basehub = (options?: Options) => {
       }
     }
 
-    if (${draft} || isNextjsDraftMode) return extra;
-
+    if (isDraftResolved) return extra;
 
     if (typeof options?.next === 'undefined') {
-      const cacheTag = cacheTagFromQuery(originalRequest);
-      // don't override if revalidation is already being handled by the user
-      extra.next = { tags: [cacheTag] };
-      extra.headers = {
-        ...extra.headers,
-        "x-basehub-sdk-build-id": "${sdkBuildId}",
-        "x-basehub-cache-tag": cacheTag,
-      };
+      let isNextjs = false;
+      try {
+        isNextjs = !!(await import("next/headers"))
+      } catch (error) {
+        // noop, not using nextjs
+      }
+      if (isNextjs) {
+        const cacheTag = cacheTagFromQuery(originalRequest);
+        // don't override if revalidation is already being handled by the user
+        extra.next = { tags: [cacheTag] };
+        extra.headers = {
+          ...extra.headers,
+          "x-basehub-cache-tag": cacheTag,
+        };
+      }
     }
 
     return extra;
   }
 
   return {
-    ...createClient(${
-      draft
-        ? `
-// force revalidate to undefined on purpose as it can't coexist with cache: 'no-store'
-// we use cache: 'no-store' as we're in draft mode. in prod, we won't touch this.
-{ ...options, cache: 'no-store', next: { ...options?.next, revalidate: undefined } }`
-        : "options"
-    }),
+    ...createClient(options),
     raw: createFetcher({ ...options, url, headers }) as <Cast = unknown>(
       gql: GraphqlOperation
     ) => Promise<Cast>,
