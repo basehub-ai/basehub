@@ -11,5 +11,9 @@ export const formatError = (error: unknown): Error => {
     return new Error(JSON.stringify(error, null, 2));
   }
 
-  return new Error(`Unknown error: ${error}`);
+  if (error) {
+    console.error(error);
+  }
+
+  return new Error(`Unknown error. See logs above for details.`);
 };
