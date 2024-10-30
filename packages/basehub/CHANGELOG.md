@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.21
+
+### Patch Changes
+
+- remove log
+
 ## 7.5.20
 
 ### Patch Changes
