@@ -51,6 +51,7 @@ export const main = async (
       output: args["--output"],
       draft: args["--draft"],
       apiVersion: args["--api-version"],
+      ref: args["--ref"],
       ...(opts?.forceDraft && { draft: true }),
     };
 
@@ -264,7 +265,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
 
     // 3. append our basehub function to the end of the file.
     const basehubExport = getBaseHubExport({
-      noStore: draft,
+      draft,
       sdkBuildId,
       resolvedRef,
       gitBranchDeploymentURL,
@@ -678,12 +679,12 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 const getBaseHubExport = ({
-  noStore,
+  draft,
   sdkBuildId,
   resolvedRef,
   gitBranchDeploymentURL,
 }: {
-  noStore: boolean;
+  draft: boolean;
   sdkBuildId: string;
   resolvedRef: ResolvedRef;
   gitBranchDeploymentURL: string | null;
@@ -758,7 +759,7 @@ function hashObject(obj: Record<string, unknown>): string {
 }
 
 // we limit options to only the ones we want to expose.
-type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean, token?: string }
+type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean, token?: string, ref?: string }
 
 // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
 // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
@@ -795,9 +796,7 @@ export const basehub = (options?: Options) => {
   options.getExtraFetchOptions = async (op, _body, originalRequest) => {
     if (op !== 'query') return {}
 
-    // don't override if we're in draft mode
-    if (${noStore}) return {}
-
+    let extra = {};
     let isNextjsDraftMode = false;
     if (options.draft === undefined) {
       // try to auto-detect (only if draft is not explicitly set by the user)
@@ -809,10 +808,26 @@ export const basehub = (options?: Options) => {
       }
     }
 
-    let extra = {};
     if (isNextjsDraftMode) {
       extra.headers = { "x-basehub-draft": "true" };
+      // try to get ref from cookies
+      try {
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+        const ref = cookieStore.get("bshb-preview-ref")?.value;
+        if (ref) {
+          extra.headers = {
+            ...extra.headers,
+            "x-basehub-ref": ref,
+          };
+        }
+      } catch (error) {
+        // noop 
+      }
     }
+
+    if (${draft} || isNextjsDraftMode) return extra;
+
 
     if (typeof options?.next === 'undefined') {
       const cacheTag = cacheTagFromQuery(originalRequest);
@@ -830,7 +845,7 @@ export const basehub = (options?: Options) => {
 
   return {
     ...createClient(${
-      noStore
+      draft
         ? `
 // force revalidate to undefined on purpose as it can't coexist with cache: 'no-store'
 // we use cache: 'no-store' as we're in draft mode. in prod, we won't touch this.

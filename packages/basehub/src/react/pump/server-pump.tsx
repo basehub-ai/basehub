@@ -82,6 +82,20 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   const queriesWithFallback =
     draft && noQueries ? [{ _sys: { id: true } }] : queries;
 
+  if (draft) {
+    // try to get ref from cookies
+    try {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const ref = cookieStore.get("bshb-preview-ref")?.value;
+      if (ref) {
+        headers["x-basehub-ref"] = ref;
+      }
+    } catch (error) {
+      // noop
+    }
+  }
+
   const results: Array<{
     data: QueryResults<Queries>[number] | undefined;
     rawQueryOp: { query: string; variables?: any };
@@ -198,7 +212,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
         pumpToken={pumpToken ?? undefined}
         initialResolvedChildren={resolvedChildren}
         apiVersion={apiVersion}
-        resolvedRef={resolvedRef}
+        previewRef={headers["x-basehub-ref"] || resolvedRef.ref}
       >
         {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
         {/* @ts-ignore */}

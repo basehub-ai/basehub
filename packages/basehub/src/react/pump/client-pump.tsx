@@ -12,7 +12,6 @@ import { replaceSystemAliases } from "../runtime/_aliasing.js";
 import type Pusher from "pusher-js/types/src/core/pusher";
 import { toast, Toaster } from "sonner";
 import type { ResponseCache, PumpState } from "./types";
-import { ResolvedRef } from "../../common-types";
 
 let pusherMounted = false;
 const subscribers = new Set<() => void>(); // we'll call these when pusher tells us to poke
@@ -37,7 +36,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   initialState,
   initialResolvedChildren,
   apiVersion,
-  resolvedRef,
+  previewRef: _previewRef,
 }: {
   children: PumpProps<Queries>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
@@ -46,7 +45,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   initialState: PumpState | undefined;
   initialResolvedChildren?: React.ReactNode;
   apiVersion: string;
-  resolvedRef: ResolvedRef;
+  previewRef: string;
 }) => {
   const pumpTokenRef = React.useRef<string | undefined>(initialPumpToken);
   const [result, setResult] = React.useState<PumpState | undefined>(
@@ -58,7 +57,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   const initialStateRef = React.useRef<PumpState | undefined>(initialState);
   initialStateRef.current = initialState;
 
-  const [ref, setRef] = React.useState(resolvedRef.ref);
+  const [previewRef, setPreviewRef] = React.useState(_previewRef);
 
   /**
    * Query the Draft API.
@@ -79,7 +78,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
         // intentionally not add ref here as we want responseHash to be the same across queries
         const responseHashCacheKey = queryHash;
         // in this case, we're matching for deduplication, and that's why we 100% need the ref and everything that might affect the response
-        const queryCacheKey = queryHash + ref;
+        const queryCacheKey = queryHash + previewRef;
         const lastResponseHash =
           lastResponseHashCache.get(responseHashCacheKey) ||
           initialStateRef.current?.responseHashes?.[index] ||
@@ -106,7 +105,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
             "content-type": "application/json",
             "x-basehub-pump-token": pumpTokenRef.current,
             "x-basehub-api-version": apiVersion,
-            "x-basehub-ref": ref,
+            "x-basehub-ref": previewRef,
             ...(lastResponseHash
               ? { "x-basehub-last-response-hash": lastResponseHash }
               : undefined),
@@ -185,7 +184,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     if (newPumpToken) {
       pumpTokenRef.current = newPumpToken;
     }
-  }, [pumpEndpoint, rawQueries, apiVersion, ref]);
+  }, [pumpEndpoint, rawQueries, apiVersion, previewRef]);
 
   const currentToastRef = React.useRef<string | number | null>(null);
 
@@ -306,7 +305,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
       const url = new URL(window.location.href);
       const previewRef = url.searchParams.get("bshb-preview-ref");
       if (!previewRef) return;
-      setRef(previewRef);
+      setPreviewRef(previewRef);
     }
 
     handleRefChange();
@@ -314,7 +313,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     return () => {
       window.removeEventListener("__bshb_ref_changed", handleRefChange);
     };
-  }, [resolvedRef.ref]);
+  }, []);
 
   const resolvedData = React.useMemo(() => {
     return result?.data.map((r, i) => r ?? initialState?.data?.[i] ?? null);

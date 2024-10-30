@@ -153,14 +153,33 @@ export const ClientToolbar = ({
     effect();
   }, [bshbPreviewToken, getAndSetLatestBranches]);
 
+  const setRefWithEvents = React.useCallback(
+    (ref: string) => {
+      setRef(ref);
+      window.dispatchEvent(new Event("__bshb_ref_changed"));
+      // also set the basehub-ref cookie. httpOnly, secure, sameSite
+      document.cookie = `bshb-preview-ref=${ref}; path=/; SameSite=Strict; Max-Age=${
+        60 * 60 * 24 * 30 * 365 // 1 year
+      }`;
+    },
+    [setRef]
+  );
+
   React.useEffect(() => {
     const url = new URL(window.location.href);
-    const previewRef = url.searchParams.get("bshb-preview-ref");
+    let previewRef = url.searchParams.get("bshb-preview-ref");
+    if (!previewRef) {
+      previewRef =
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("bshb-preview-ref="))
+          ?.split("=")[1] ?? null;
+    }
+
     if (!previewRef) return;
 
-    setRef(previewRef);
-    window.dispatchEvent(new Event("__bshb_ref_changed"));
-  }, []);
+    setRefWithEvents(previewRef);
+  }, [setRefWithEvents]);
 
   React.useLayoutEffect(() => {
     tooltipRef.current?.checkOverflow();
@@ -283,8 +302,7 @@ export const ClientToolbar = ({
               const url = new URL(window.location.href);
               url.searchParams.set("bshb-preview-ref", newRef);
               window.history.replaceState(null, "", url.toString());
-              window.dispatchEvent(new Event("__bshb_ref_changed"));
-              setRef(newRef);
+              setRefWithEvents(newRef);
             }}
             getAndSetLatestBranches={getAndSetLatestBranches}
           />

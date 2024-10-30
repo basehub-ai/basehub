@@ -20,6 +20,7 @@ export type Options = {
    * @deprecated
    */
   token: string | undefined;
+  ref: string | undefined;
   apiVersion: string | undefined;
 };
 
@@ -129,6 +130,7 @@ export const getStuffFromEnv = async (
   }
 
   const ref =
+    options.ref ??
     basehubUrl.searchParams.get("ref") ??
     getEnvVar("REF") ??
     (backwardsCompatURL
@@ -415,7 +417,7 @@ export const getStuffFromEnv = (options) => {
       url: basehubUrl,
       headers: {
         "x-basehub-token": token,
-        "x-basehub-ref": resolvedRef.ref,
+        "x-basehub-ref": options?.ref ?? resolvedRef.ref,
         ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
         ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
         ...(gitBranchDeploymentURL ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL } : {}),
