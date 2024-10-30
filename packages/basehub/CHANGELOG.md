@@ -1,5 +1,35 @@
 # basehub
 
+## 7.5.20-canary.7
+
+### Patch Changes
+
+- store pid again after cleaning up the parent dir
+
+## 7.5.20-canary.6
+
+### Patch Changes
+
+- kill existing process if found
+
+## 7.5.20-canary.5
+
+### Patch Changes
+
+- debug: remvove early exit
+
+## 7.5.20-canary.4
+
+### Patch Changes
+
+- simulate stuck op
+
+## 7.5.20-canary.3
+
+### Patch Changes
+
+- try to force repro
+
 ## 7.5.20-canary.2
 
 ### Patch Changes
