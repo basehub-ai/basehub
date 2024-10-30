@@ -3,6 +3,7 @@
 import { type ReactNode } from "react";
 import GithubSlugger from "github-slugger";
 import { extractTextFromNode } from "./util/heading-id";
+import type { Language } from "../code-block";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -151,7 +152,7 @@ type Handlers = {
   blockquote: (props: { children: ReactNode }) => ReactNode;
   pre: (props: {
     children: ReactNode;
-    language: string;
+    language: Language;
     code: string;
   }) => ReactNode;
   table: (props: { children: ReactNode }) => ReactNode;
@@ -429,7 +430,7 @@ const Node = ({
       const code = node.content?.[0].text ?? "";
       props = {
         children,
-        language: node.attrs?.language ?? "text",
+        language: (node.attrs?.language ?? "text") as Language,
         code,
       } satisfies ExtractPropsForHandler<Handlers["pre"]>;
       break;
