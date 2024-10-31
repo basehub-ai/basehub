@@ -1,1 +1,1 @@
-export { getEventCount, sendEvent } from "./primitive";
+export * from "./primitive";

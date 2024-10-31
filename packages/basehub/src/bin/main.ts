@@ -305,6 +305,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     logIfNotSilent(silent, "📦 Compiling to JavaScript...");
     const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
     const nextToolbarOutDir = path.join(basehubOutputPath, "next-toolbar");
+    const analyticsOutDir = path.join(basehubOutputPath, "analytics");
 
     await esbuild.build({
       entryPoints: [generatedMainExportPath],
@@ -365,6 +366,27 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       );
     }
 
+    await esbuild.build({
+      entryPoints: [
+        path.join(basehubModulePath, "src", "analytics", "index.ts"),
+      ],
+      bundle: true,
+      outdir: analyticsOutDir,
+      minify: false,
+      treeShaking: true,
+      splitting: true,
+      format: "esm",
+      target: ["es2020", "node18"],
+      external: peerDependencies,
+      plugins: [],
+    });
+
+    if (args["--debug"]) {
+      console.log(
+        `[basehub] compiled analytics with esbuild in: ${analyticsOutDir}`
+      );
+    }
+
     /**
      * DTS stuff.
      */
@@ -376,12 +398,17 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       path.join(basehubModulePath, "dts", "src", "next", "toolbar"),
       nextToolbarOutDir
     );
+    copyDirSync(
+      path.join(basehubModulePath, "dts", "src", "analytics"),
+      analyticsOutDir
+    );
 
     if (args["--debug"]) {
       console.log(`[basehub] copied dts for react pump to: ${reactPumpOutDir}`);
       console.log(
         `[basehub] copied dts for next toolbar to: ${nextToolbarOutDir}`
       );
+      console.log(`[basehub] copied dts for analytics to: ${analyticsOutDir}`);
     }
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
@@ -394,7 +421,6 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
         "react-code-block/client",
         "api-transaction",
         "react-search",
-        "analytics",
         "search",
         "next-image",
       ].map((pathsToAlias) => {
@@ -443,6 +469,11 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       const nextToolbarIndexDtsPath = path.join(
         basehubModulePath,
         "next-toolbar.d.ts"
+      );
+      const analyticsIndexJsPath = path.join(basehubModulePath, "analytics.js");
+      const analyticsIndexDtsPath = path.join(
+        basehubModulePath,
+        "analytics.d.ts"
       );
       fs.writeFileSync(
         indexJsPath,
@@ -498,6 +529,24 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
           )}";`
         )
       );
+      fs.writeFileSync(
+        analyticsIndexJsPath,
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(analyticsOutDir, "index.js")
+          )}";`
+        )
+      );
+      fs.writeFileSync(
+        analyticsIndexDtsPath,
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(analyticsOutDir, "index.d.ts")
+          )}";`
+        )
+      );
 
       if (args["--debug"]) {
         console.log(
@@ -508,6 +557,9 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
         );
         console.log(
           `[basehub] aliased next toolbar index.js and index.d.ts to: ${nextToolbarOutDir}`
+        );
+        console.log(
+          `[basehub] aliased analytics index.js and index.d.ts to: ${analyticsOutDir}`
         );
       }
     }

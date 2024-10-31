@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.3
+
+### Patch Changes
+
+- handle new event api
+
 ## 8.0.0-canary.2
 
 ### Patch Changes

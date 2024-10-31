@@ -1,4 +1,11 @@
+// @ts-nocheck
+
 /* eslint-disable turbo/no-undeclared-env-vars */
+import {
+  Scalars,
+  // @ts-ignore
+  // eslint-disable-next-line import/no-unresolved
+} from "../schema";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -9,6 +16,14 @@ if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_ENDPOINT) {
   ANALYTICS_ENDPOINT_URL = process.env.NEXT_PUBLIC_BASEHUB_ANALYTICS_ENDPOINT;
 } else if (process?.env?.BASEHUB_ANALYTICS_ENDPOINT) {
   ANALYTICS_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_ENDPOINT;
+}
+
+let ANALYTICS_V2_ENDPOINT_URL = "https://basehub.com/api/v2/events";
+if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT) {
+  ANALYTICS_V2_ENDPOINT_URL =
+    process.env.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT;
+} else if (process?.env?.BASEHUB_ANALYTICS_V2_ENDPOINT) {
+  ANALYTICS_V2_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_V2_ENDPOINT;
 }
 
 export type AnalyticsParams = {
@@ -52,6 +67,39 @@ export const getEventCount = async <Name extends string | string[]>({
   return (
     typeof name === "string" ? data[0]?.count ?? 0 : data
   ) as Name extends string ? number : { name: string; count: number }[];
+};
+
+type KeysStartingWith<Obj, Prefix extends string> = {
+  [K in keyof Obj]: K extends `${Prefix}${string}` ? K : never;
+}[keyof Obj];
+
+type ExtractEventKey<T extends string> = T extends `${infer Base}:${string}`
+  ? Base
+  : T;
+
+// Get all event key types (bshb_event_*)
+type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
+
+// Map from event key to its schema type
+type EventSchemaMap = {
+  [K in EventKeys]: Scalars[`schema_${K}`];
+};
+
+export const sendEventV2 = async <Key extends `${EventKeys}:${string}`>(
+  key: Key,
+  data: EventSchemaMap[ExtractEventKey<Key>]
+) => {
+  const response = await fetch(ANALYTICS_V2_ENDPOINT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key, data }),
+  });
+
+  const data = (await response.json()) as
+    | { success: true }
+    | { success: false; error: string };
+
+  return data;
 };
 
 export const sendEvent = async ({

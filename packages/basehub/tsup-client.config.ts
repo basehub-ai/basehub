@@ -12,7 +12,6 @@ export default defineConfig((_options: Options) => {
       "react-code-block/client": "./src/react/code-block/client/index.ts",
       "react-search": "./src/react/search/index.ts",
       "api-transaction": "./src/api-transaction.ts",
-      analytics: "./src/analytics/index.ts",
       search: "./src/search/index.ts",
       "next-image": "./src/next/image/index.ts",
     },
