@@ -1,5 +1,0 @@
----
-"basehub": patch
----
-
-postinstall work

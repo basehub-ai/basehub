@@ -1,5 +1,14 @@
 # basehub
 
+## 7.5.22
+
+### Patch Changes
+
+- 750491d: try postinstall
+- 750491d: remove postinstall
+- ce37038: Fix .basehub getting cleared after input changes
+- 750491d: postinstall work
+
 ## 7.5.22-canary.3
 
 ### Patch Changes
