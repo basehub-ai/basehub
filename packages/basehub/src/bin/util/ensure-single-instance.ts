@@ -14,12 +14,14 @@ export function ensureSingleInstance(output: string) {
     }
   }
 
+  if (!fs.existsSync(output)) {
+    fs.mkdirSync(output, { recursive: true });
+  }
+
+  fs.writeFileSync(path.join(output, ".pid"), process.pid.toString());
+
   return () => {
     // cleanup if needed
     fs.unlinkSync(pidFile);
   };
-}
-
-export function storePid(output: string) {
-  fs.writeFileSync(path.join(output, ".pid"), process.pid.toString());
 }

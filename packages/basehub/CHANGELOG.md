@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.22-canary.0
+
+### Patch Changes
+
+- Fix .basehub getting cleared after input changes
+
 ## 7.5.21
 
 ### Patch Changes

@@ -1,0 +1,13 @@
+{
+  "mode": "pre",
+  "tag": "canary",
+  "initialVersions": {
+    "eslint-config-custom": "1.0.0",
+    "tsconfig": "1.0.0",
+    "basehub": "7.5.21",
+    "playground": "0.0.163"
+  },
+  "changesets": [
+    "mean-kiwis-argue"
+  ]
+}

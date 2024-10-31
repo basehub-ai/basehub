@@ -16,7 +16,7 @@ import { z } from "zod";
 import { createHash } from "crypto";
 import { ResolvedRef } from "../common-types";
 import { ensureCrossPlatformTsImport } from "./util/cross-platform-ts-imports";
-import { ensureSingleInstance, storePid } from "./util/ensure-single-instance";
+import { ensureSingleInstance } from "./util/ensure-single-instance";
 
 const buildManifestSchema = z.object({
   generatedAt: z.string(),
@@ -154,17 +154,6 @@ export const main = async (
       )
       .digest("hex")
       .substring(0, 32);
-
-    if (currentBuildManifest?.inputHash !== inputHash) {
-      // remove files and directories recursively under dir but not the dir itself
-      if (fs.existsSync(basehubOutputPath)) {
-        fs.rmdirSync(basehubOutputPath, { recursive: true });
-      }
-      // create the directory again
-      fs.mkdirSync(basehubOutputPath, { recursive: true });
-    }
-
-    storePid(basehubOutputPath);
 
     const { preventedClientGeneration, schemaHash } = await generate({
       endpoint: url.toString(),
