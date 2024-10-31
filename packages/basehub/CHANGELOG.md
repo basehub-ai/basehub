@@ -22,6 +22,39 @@
   * Automatic draftMode detection for Next.js
   * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
 
+## 7.5.22
+
+### Patch Changes
+
+- 750491d: try postinstall
+- 750491d: remove postinstall
+- ce37038: Fix .basehub getting cleared after input changes
+- 750491d: postinstall work
+
+## 7.5.22-canary.3
+
+### Patch Changes
+
+- remove postinstall
+
+## 7.5.22-canary.2
+
+### Patch Changes
+
+- postinstall work
+
+## 7.5.22-canary.1
+
+### Patch Changes
+
+- try postinstall
+
+## 7.5.22-canary.0
+
+### Patch Changes
+
+- Fix .basehub getting cleared after input changes
+
 ## 7.5.21
 
 ### Patch Changes
