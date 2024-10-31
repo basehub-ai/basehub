@@ -1,10 +1,12 @@
-const childProcess = require("child_process");
+import { spawn } from "child_process";
+import path from "path";
+import resolvePkg from "resolve-pkg";
 
 /**
  * Credits: Prisma, https://github.com/prisma/prisma/blob/c4d0c6f928a2ccb036073baf5a36fd5320833554/packages/client/scripts/postinstall.js
  */
 function run(cmd, params, cwd = process.cwd()) {
-  const child = childProcess.spawn(cmd, params, {
+  const child = spawn(cmd, params, {
     stdio: ["pipe", "inherit", "inherit"],
     cwd,
   });
@@ -26,34 +28,23 @@ function run(cmd, params, cwd = process.cwd()) {
   });
 }
 
-/**
- * Credits: Prisma, https://github.com/prisma/prisma/blob/c4d0c6f928a2ccb036073baf5a36fd5320833554/packages/client/scripts/postinstall.js
- */
-function getLocalPackagePath() {
-  try {
-    const packagePath = require.resolve("basehub/package.json");
-    if (packagePath) return require.resolve("basehub");
-  } catch (error) {
-    // not resolved, ignore
-  }
-
-  return null;
-}
-
 async function main() {
   console.log("Running postinstall script...");
 
-  const packagePath = getLocalPackagePath();
+  const packagePath = resolvePkg("basehub");
+  const binPath = path.join(packagePath, "dist", "bin.cjs");
+  console.log("binPath", binPath);
 
   let generated = false;
-  if (packagePath) {
+  if (binPath) {
     try {
-      await run("node", [packagePath]);
+      await run("node", [binPath]);
       generated = true;
 
       return;
     } catch (error) {
       // ignore error (silent fail)
+      console.error(error);
     }
   }
 

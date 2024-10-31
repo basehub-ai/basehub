@@ -1,5 +1,23 @@
 # basehub
 
+## 7.5.22-canary.3
+
+### Patch Changes
+
+- remove postinstall
+
+## 7.5.22-canary.2
+
+### Patch Changes
+
+- postinstall work
+
+## 7.5.22-canary.1
+
+### Patch Changes
+
+- try postinstall
+
 ## 7.5.22-canary.0
 
 ### Patch Changes
