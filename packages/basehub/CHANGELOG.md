@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.2
+
+### Patch Changes
+
+- don't make preview ref cookie same site
+
 ## 8.0.0-canary.1
 
 ### Patch Changes

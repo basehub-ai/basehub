@@ -158,7 +158,7 @@ export const ClientToolbar = ({
       setRef(ref);
       window.dispatchEvent(new Event("__bshb_ref_changed"));
       // also set the basehub-ref cookie. httpOnly, secure, sameSite
-      document.cookie = `bshb-preview-ref=${ref}; path=/; SameSite=Strict; Max-Age=${
+      document.cookie = `bshb-preview-ref=${ref}; path=/; Max-Age=${
         60 * 60 * 24 * 30 * 365 // 1 year
       }`;
     },
