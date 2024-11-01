@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.6
+
+### Patch Changes
+
+- Fix `data` var being declared twice
+
 ## 8.0.0-canary.5
 
 ### Patch Changes

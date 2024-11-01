@@ -1,7 +1,6 @@
-// @ts-nocheck
-
 /* eslint-disable turbo/no-undeclared-env-vars */
 import {
+  // @ts-ignore
   Scalars,
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
@@ -82,6 +81,7 @@ type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
 
 // Map from event key to its schema type
 type EventSchemaMap = {
+  // @ts-ignore
   [K in EventKeys]: Scalars[`schema_${K}`];
 };
 
@@ -95,11 +95,9 @@ export const sendEventV2 = async <Key extends `${EventKeys}:${string}`>(
     body: JSON.stringify({ key, data }),
   });
 
-  const data = (await response.json()) as
+  return (await response.json()) as
     | { success: true }
     | { success: false; error: string };
-
-  return data;
 };
 
 export const sendEvent = async ({
