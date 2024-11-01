@@ -1,5 +1,17 @@
 # basehub
 
+## 8.0.0-canary.5
+
+### Patch Changes
+
+- Add analytics src to files
+
+## 8.0.0-canary.4
+
+### Patch Changes
+
+- linked branches improvements
+
 ## 8.0.0-canary.3
 
 ### Patch Changes

@@ -49,13 +49,10 @@ export const ClientToolbar = ({
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [ref, setRef] = React.useState(resolvedRef.ref);
+  const [isDefaultRefSelected, setIsDefaultRefSelected] = React.useState(true);
   const [latestBranches, setLatestBranches] = React.useState<LatestBranch[]>(
     []
   );
-
-  React.useEffect(() => {
-    setRef(window.localStorage.getItem("bshb-preview-ref") || resolvedRef.ref);
-  }, [resolvedRef.ref]);
 
   const currentMessageTimeout = React.useRef(0);
 
@@ -157,29 +154,40 @@ export const ClientToolbar = ({
     (ref: string) => {
       setRef(ref);
       window.dispatchEvent(new Event("__bshb_ref_changed"));
-      // also set the basehub-ref cookie. httpOnly, secure, sameSite
-      document.cookie = `bshb-preview-ref=${ref}; path=/; Max-Age=${
-        60 * 60 * 24 * 30 * 365 // 1 year
-      }`;
+      previewRefCookieManager.set(ref);
     },
     [setRef]
   );
 
+  /** Load ref from url or cookie. */
   React.useEffect(() => {
     const url = new URL(window.location.href);
     let previewRef = url.searchParams.get("bshb-preview-ref");
     if (!previewRef) {
-      previewRef =
-        document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("bshb-preview-ref="))
-          ?.split("=")[1] ?? null;
+      previewRef = previewRefCookieManager.get();
     }
 
     if (!previewRef) return;
 
     setRefWithEvents(previewRef);
   }, [setRefWithEvents]);
+
+  /** If selected ref is equal to resolvedRef (from build), then we clear the cookie, as this is the default state. */
+  React.useEffect(() => {
+    if (ref === resolvedRef.ref) {
+      previewRefCookieManager.clear();
+      setIsDefaultRefSelected(true);
+    } else {
+      setIsDefaultRefSelected(false);
+    }
+  }, [ref, resolvedRef.ref]);
+
+  /** If the build ref changes and the user was selecting it, we set the ref to the new build ref. */
+  React.useEffect(() => {
+    if (isDefaultRefSelected) {
+      setRef(resolvedRef.ref);
+    }
+  }, [isDefaultRefSelected, resolvedRef.ref]);
 
   React.useLayoutEffect(() => {
     tooltipRef.current?.checkOverflow();
@@ -391,4 +399,23 @@ const EyeIcon = () => {
       />
     </svg>
   );
+};
+
+const previewRefCookieManager = {
+  set: (ref: string) => {
+    document.cookie = `bshb-preview-ref=${ref}; path=/; Max-Age=${
+      60 * 60 * 24 * 30 * 365 // 1 year
+    }`;
+  },
+  clear: () => {
+    document.cookie = `bshb-preview-ref=; path=/; Max-Age=-1`;
+  },
+  get: (): string | null => {
+    return (
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("bshb-preview-ref="))
+        ?.split("=")[1] ?? null
+    );
+  },
 };
