@@ -148,13 +148,17 @@ export const ClientToolbar = ({
     effect();
   }, [getAndSetLatestBranches]);
 
-  const setRefWithEvents = React.useCallback((ref: string) => {
-    _setRef(ref);
-    window.dispatchEvent(
-      new CustomEvent("__bshb_ref_changed", { detail: ref })
-    );
-    previewRefCookieManager.set(ref);
-  }, []);
+  const setRefWithEvents = React.useCallback(
+    (ref: string) => {
+      _setRef(ref);
+      window.dispatchEvent(
+        new CustomEvent("__bshb_ref_changed", { detail: { ref } })
+      );
+      previewRefCookieManager.set(ref);
+      setIsDefaultRefSelected(ref === resolvedRef.ref);
+    },
+    [resolvedRef.ref]
+  );
 
   /** Load ref from url or cookie. */
   React.useEffect(() => {
@@ -174,12 +178,7 @@ export const ClientToolbar = ({
   /** If selected ref is equal to resolvedRef (from build), then we consider this the default state. */
   React.useEffect(() => {
     if (isLoadingRef) return;
-
-    if (ref === resolvedRef.ref) {
-      setIsDefaultRefSelected(true);
-    } else {
-      setIsDefaultRefSelected(false);
-    }
+    setIsDefaultRefSelected(ref === resolvedRef.ref);
   }, [ref, resolvedRef.ref, isLoadingRef]);
 
   /**

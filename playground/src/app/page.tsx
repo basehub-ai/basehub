@@ -2,7 +2,7 @@ import { Pump } from "basehub/react-pump";
 
 export default function HomePage() {
   return (
-    <Pump queries={[{ one: { hola: true } }]}>
+    <Pump queries={[{ home: { text: true } }]}>
       {async ([data]) => {
         "use server";
 
