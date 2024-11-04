@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.10
+
+### Patch Changes
+
+- get latest branches not just in draft mode. enter draft mode automatically when user switches branches
+
 ## 8.0.0-canary.9
 
 ### Patch Changes

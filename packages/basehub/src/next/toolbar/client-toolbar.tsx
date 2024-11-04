@@ -36,7 +36,7 @@ export const ClientToolbar = ({
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
   resolvedRef: ResolvedRef;
-  getLatestBranches: (o: { bshbPreviewToken: string }) => Promise<{
+  getLatestBranches: (o: { bshbPreviewToken: string | undefined }) => Promise<{
     status: number;
     response: LatestBranch[] | { error: string };
   }>;
@@ -120,13 +120,11 @@ export const ClientToolbar = ({
 
   const getAndSetLatestBranches = React.useCallback(async () => {
     let result: LatestBranch[] = [];
-    if (bshbPreviewToken) {
-      const res = await getLatestBranches({ bshbPreviewToken });
-      if (Array.isArray(res.response)) {
-        result = res.response;
-      } else if ("error" in res.response) {
-        console.error(`BaseHub Toolbar Error: ${res.response.error}`);
-      }
+    const res = await getLatestBranches({ bshbPreviewToken });
+    if (Array.isArray(res.response)) {
+      result = res.response;
+    } else if ("error" in res.response) {
+      console.error(`BaseHub Toolbar Error: ${res.response.error}`);
     }
     setLatestBranches(result);
   }, [bshbPreviewToken, getLatestBranches]);
@@ -135,8 +133,6 @@ export const ClientToolbar = ({
    * Get latest branches every 30 seconds (we'll also get 'em on load and when the user hovers the branch switcher)
    */
   React.useEffect(() => {
-    if (!bshbPreviewToken) return;
-
     async function effect() {
       while (true) {
         try {
@@ -150,7 +146,7 @@ export const ClientToolbar = ({
     }
 
     effect();
-  }, [bshbPreviewToken, getAndSetLatestBranches]);
+  }, [getAndSetLatestBranches]);
 
   const setRefWithEvents = React.useCallback((ref: string) => {
     _setRef(ref);
@@ -313,11 +309,20 @@ export const ClientToolbar = ({
             draft={draft}
             apiRref={ref}
             latestBranches={latestBranches}
-            onRefChange={(newRef) => {
+            onRefChange={(newRef, opts) => {
               const url = new URL(window.location.href);
               url.searchParams.set("bshb-preview-ref", newRef);
               window.history.replaceState(null, "", url.toString());
               setRefWithEvents(newRef);
+
+              if (opts.enableDraftMode) {
+                const previewToken =
+                  bshbPreviewToken ?? seekAndStoreBshbPreviewToken();
+                if (!previewToken) {
+                  return displayMessage("Preview token not found");
+                }
+                triggerDraftMode(previewToken);
+              }
             }}
             getAndSetLatestBranches={getAndSetLatestBranches}
           />
@@ -352,7 +357,7 @@ export const ClientToolbar = ({
                   const previewToken =
                     bshbPreviewToken ?? seekAndStoreBshbPreviewToken();
                   if (!previewToken) {
-                    return displayMessage("No preview token found");
+                    return displayMessage("Preview token not found");
                   }
 
                   triggerDraftMode(previewToken);

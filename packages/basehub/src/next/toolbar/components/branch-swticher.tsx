@@ -19,7 +19,7 @@ export const BranchSwitcher = ({
   draft: boolean;
   apiRref: string;
   latestBranches: LatestBranch[];
-  onRefChange: (ref: string) => void;
+  onRefChange: (ref: string, opts: { enableDraftMode: boolean }) => void;
   getAndSetLatestBranches: () => Promise<void>;
 }) => {
   const shadowRef = React.useRef<HTMLSpanElement>(null);
@@ -87,19 +87,20 @@ export const BranchSwitcher = ({
       <Tooltip
         content={
           !isDraftActive
-            ? "Enable draft mode to switch branches"
+            ? "Switch branch and enter draft mode"
             : "Switch branch"
         }
       >
         <select
           ref={selectRef}
           value={apiRref}
-          onChange={(e) => onRefChange(e.target.value)}
+          onChange={(e) =>
+            onRefChange(e.target.value, { enableDraftMode: !isDraftActive })
+          }
           className={s.branchSelect}
           onClick={() => {
             setRefetchLatestBranches(true);
           }}
-          disabled={!isDraftActive}
         >
           {refOptions.map((r) => {
             return (

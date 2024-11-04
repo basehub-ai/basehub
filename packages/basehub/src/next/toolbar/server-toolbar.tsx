@@ -62,7 +62,7 @@ export const ServerToolbar = async ({
   const getLatestBranches = async ({
     bshbPreviewToken,
   }: {
-    bshbPreviewToken: string;
+    bshbPreviewToken: string | undefined;
   }) => {
     "use server";
     try {
@@ -81,7 +81,9 @@ export const ServerToolbar = async ({
         headers: {
           "content-type": "application/json",
           "x-basehub-token": headers["x-basehub-token"],
-          "x-basehub-preview-token": bshbPreviewToken,
+          ...(bshbPreviewToken && {
+            "x-basehub-preview-token": bshbPreviewToken,
+          }),
         },
       });
 
