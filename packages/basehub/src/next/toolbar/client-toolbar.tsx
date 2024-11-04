@@ -48,7 +48,7 @@ export const ClientToolbar = ({
   const tooltipRef = React.useRef<Tooltip>(null);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [ref, setRef] = React.useState(resolvedRef.ref);
+  const [ref, _setRef] = React.useState(resolvedRef.ref);
   const [isDefaultRefSelected, setIsDefaultRefSelected] = React.useState(true);
   const [isLoadingRef, setIsLoadingRef] = React.useState(true);
   const [latestBranches, setLatestBranches] = React.useState<LatestBranch[]>(
@@ -152,14 +152,11 @@ export const ClientToolbar = ({
     effect();
   }, [bshbPreviewToken, getAndSetLatestBranches]);
 
-  const setRefWithEvents = React.useCallback(
-    (ref: string) => {
-      setRef(ref);
-      window.dispatchEvent(new Event("__bshb_ref_changed"));
-      previewRefCookieManager.set(ref);
-    },
-    [setRef]
-  );
+  const setRefWithEvents = React.useCallback((ref: string) => {
+    _setRef(ref);
+    window.dispatchEvent(new Event("__bshb_ref_changed"));
+    previewRefCookieManager.set(ref);
+  }, []);
 
   /** Load ref from url or cookie. */
   React.useEffect(() => {
@@ -193,9 +190,9 @@ export const ClientToolbar = ({
     if (isLoadingRef) return;
 
     if (isDefaultRefSelected) {
-      setRef(resolvedRef.ref);
+      setRefWithEvents(resolvedRef.ref);
     }
-  }, [isDefaultRefSelected, resolvedRef.ref, isLoadingRef]);
+  }, [isDefaultRefSelected, isLoadingRef, resolvedRef.ref, setRefWithEvents]);
 
   /** Position tooltip when message changes. */
   React.useLayoutEffect(() => {
