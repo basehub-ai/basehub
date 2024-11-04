@@ -1,6 +1,5 @@
 import "server-only";
 import { lazy } from "react";
-import type { SetOptional } from "type-fest";
 import { Highlighter, HighlighterProps } from "./highlighter";
 import { Snippet } from "./types";
 export { createCssVariablesTheme } from "shiki";
@@ -9,8 +8,15 @@ import { useId } from "react";
 
 const LazyClientController = lazy(() => import("./client"));
 
+type CodeSnippet = Omit<Snippet, "id"> & {
+  /**
+   * @deprecated we now automatically generate IDs using React's useId hook, so don't use this.
+   */
+  id?: string;
+};
+
 export type CodeBlockProps = {
-  snippets: Array<SetOptional<Snippet, "id">>;
+  snippets: Array<CodeSnippet>;
   theme: HighlighterProps["theme"];
   childrenTop?: React.ReactNode;
   childrenBottom?: React.ReactNode;
@@ -33,10 +39,7 @@ export const CodeBlock = ({
   const groupId = useId();
 
   const snippetsWithIds = snippets.map((s, i) => {
-    return {
-      ...s,
-      id: s.id ?? groupId + "-snippet-" + i,
-    };
+    return { ...s, id: groupId + "-snippet-" + i } satisfies Snippet;
   });
 
   return (

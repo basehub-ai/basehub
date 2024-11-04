@@ -35,5 +35,16 @@ export const getGitEnv = () => {
     process.env.CF_PAGES_URL ||
     null;
 
-  return { gitBranch, gitCommitSHA, gitBranchDeploymentURL };
+  const productionDeploymentURL =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    process.env.URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    null;
+
+  return {
+    gitBranch,
+    gitCommitSHA,
+    gitBranchDeploymentURL,
+    productionDeploymentURL,
+  };
 };

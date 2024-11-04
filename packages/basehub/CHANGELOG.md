@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.23
+
+### Patch Changes
+
+- Fix id in code snippet sometimes being empty
+
 ## 7.5.22
 
 ### Patch Changes

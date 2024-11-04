@@ -92,6 +92,7 @@ export const main = async (
       resolvedRef,
       newResolvedRefPromise,
       token,
+      productionDeploymentURL,
     } = await getStuffFromEnv({ ...options, previousResolvedRef });
 
     if (!silent) {
@@ -263,6 +264,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       sdkBuildId,
       resolvedRef,
       gitBranchDeploymentURL,
+      productionDeploymentURL,
     });
     if (!schemaFileContents.includes(basehubExport)) {
       schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
@@ -683,11 +685,13 @@ const getBaseHubExport = ({
   sdkBuildId,
   resolvedRef,
   gitBranchDeploymentURL,
+  productionDeploymentURL,
 }: {
   noStore: boolean;
   sdkBuildId: string;
   resolvedRef: ResolvedRef;
   gitBranchDeploymentURL: string | null;
+  productionDeploymentURL: string | null;
 }) => `
 export type * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
@@ -696,6 +700,9 @@ export const sdkBuildId = "${sdkBuildId}";
 export const resolvedRef = ${JSON.stringify(resolvedRef)};
 export const gitBranchDeploymentURL = ${
   gitBranchDeploymentURL ? `"${gitBranchDeploymentURL}"` : "null"
+};
+export const productionDeploymentURL = ${
+  productionDeploymentURL ? `"${productionDeploymentURL}"` : "null"
 };
 
 /**

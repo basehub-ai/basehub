@@ -1,5 +1,12 @@
 # playground
 
+## 0.0.165
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.23
+
 ## 0.0.164
 
 ### Patch Changes
