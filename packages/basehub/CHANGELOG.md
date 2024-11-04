@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.7
+
+### Patch Changes
+
+- force schema re-gen on input change
+
 ## 8.0.0-canary.6
 
 ### Patch Changes

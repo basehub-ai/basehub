@@ -156,6 +156,11 @@ export const main = async (
       .digest("hex")
       .substring(0, 32);
 
+    let forceGen = false;
+    if (inputHash !== currentBuildManifest?.inputHash) {
+      forceGen = true;
+    }
+
     const { preventedClientGeneration, schemaHash } = await generate({
       endpoint: url.toString(),
       headers: {
@@ -167,7 +172,7 @@ export const main = async (
       verbose: silent ? false : args["--debug"],
       sortProperties: true,
       silent,
-      previousSchemaHash,
+      previousSchemaHash: forceGen ? undefined : previousSchemaHash,
     });
 
     if (preventedClientGeneration) {
