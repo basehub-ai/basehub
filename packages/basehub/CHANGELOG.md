@@ -52,6 +52,12 @@
   * Automatic draftMode detection for Next.js
   * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
 
+## 7.5.23
+
+### Patch Changes
+
+- Fix id in code snippet sometimes being empty
+
 ## 7.5.22
 
 ### Patch Changes

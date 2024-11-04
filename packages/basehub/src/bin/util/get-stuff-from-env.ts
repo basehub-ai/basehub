@@ -36,6 +36,7 @@ export const getStuffFromEnv = async (
   gitBranch: string | null;
   gitCommitSHA: string | null;
   gitBranchDeploymentURL: string | null;
+  productionDeploymentURL: string | null;
   token: string;
   resolvedRef: ResolvedRef;
   newResolvedRefPromise: Promise<ResolvedRef>;
@@ -179,7 +180,12 @@ export const getStuffFromEnv = async (
   draft = !!draft;
 
   // 3.
-  const { gitBranch, gitCommitSHA, gitBranchDeploymentURL } = getGitEnv();
+  const {
+    gitBranch,
+    gitCommitSHA,
+    gitBranchDeploymentURL,
+    productionDeploymentURL,
+  } = getGitEnv();
 
   const newResolvedRefPromise = resolveRef({
     url: basehubUrl,
@@ -188,6 +194,7 @@ export const getStuffFromEnv = async (
     gitBranch,
     gitCommitSHA,
     gitBranchDeploymentURL,
+    productionDeploymentURL,
     apiVersion,
   });
 
@@ -204,6 +211,7 @@ export const getStuffFromEnv = async (
     resolvedRef,
     newResolvedRefPromise,
     gitBranchDeploymentURL,
+    productionDeploymentURL,
     headers: {
       "x-basehub-token": token,
       "x-basehub-ref": resolvedRef.ref,
@@ -213,6 +221,9 @@ export const getStuffFromEnv = async (
       ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
       ...(gitBranchDeploymentURL
         ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
+        : {}),
+      ...(productionDeploymentURL
+        ? { "x-basehub-production-deployment-url": productionDeploymentURL }
         : {}),
     },
   };
@@ -225,6 +236,7 @@ async function resolveRef({
   gitBranch,
   gitCommitSHA,
   gitBranchDeploymentURL,
+  productionDeploymentURL,
   apiVersion,
 }: {
   url: URL;
@@ -233,6 +245,7 @@ async function resolveRef({
   gitBranch: string | null;
   gitCommitSHA: string | null;
   gitBranchDeploymentURL: string | null;
+  productionDeploymentURL: string | null;
   apiVersion: string | null;
 }) {
   const refResolverEndpoint = getBaseHubAppApiEndpoint(
@@ -251,6 +264,9 @@ async function resolveRef({
       ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
       ...(gitBranchDeploymentURL
         ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
+        : {}),
+      ...(productionDeploymentURL
+        ? { "x-basehub-production-deployment-url": productionDeploymentURL }
         : {}),
     },
     cache: "no-store",
@@ -421,6 +437,7 @@ export const getStuffFromEnv = (options) => {
         ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
         ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
         ...(gitBranchDeploymentURL ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL } : {}),
+        ...(productionDeploymentURL ? { "x-basehub-production-deployment-url": productionDeploymentURL } : {}),
         ...(draft ? { "x-basehub-draft": "true" } : {}),
         ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
       },
