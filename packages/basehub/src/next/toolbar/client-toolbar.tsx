@@ -50,6 +50,7 @@ export const ClientToolbar = ({
   const [loading, setLoading] = React.useState(false);
   const [ref, setRef] = React.useState(resolvedRef.ref);
   const [isDefaultRefSelected, setIsDefaultRefSelected] = React.useState(true);
+  const [isLoadingRef, setIsLoadingRef] = React.useState(true);
   const [latestBranches, setLatestBranches] = React.useState<LatestBranch[]>(
     []
   );
@@ -91,6 +92,7 @@ export const ClientToolbar = ({
   const [hasAutoEnabledDraftOnce, setHasAutoEnabledDraftOnce] =
     React.useState(false);
 
+  /** Auto enable draft mode if the user hasn't disabled it. */
   React.useLayoutEffect(() => {
     if (
       draft ||
@@ -167,6 +169,8 @@ export const ClientToolbar = ({
       previewRef = previewRefCookieManager.get();
     }
 
+    setIsLoadingRef(false);
+
     if (!previewRef) return;
 
     setRefWithEvents(previewRef);
@@ -174,21 +178,26 @@ export const ClientToolbar = ({
 
   /** If selected ref is equal to resolvedRef (from build), then we clear the cookie, as this is the default state. */
   React.useEffect(() => {
+    if (isLoadingRef) return;
+
     if (ref === resolvedRef.ref) {
       previewRefCookieManager.clear();
       setIsDefaultRefSelected(true);
     } else {
       setIsDefaultRefSelected(false);
     }
-  }, [ref, resolvedRef.ref]);
+  }, [ref, resolvedRef.ref, isLoadingRef]);
 
   /** If the build ref changes and the user was selecting it, we set the ref to the new build ref. */
   React.useEffect(() => {
+    if (isLoadingRef) return;
+
     if (isDefaultRefSelected) {
       setRef(resolvedRef.ref);
     }
-  }, [isDefaultRefSelected, resolvedRef.ref]);
+  }, [isDefaultRefSelected, resolvedRef.ref, isLoadingRef]);
 
+  /** Position tooltip when message changes. */
   React.useLayoutEffect(() => {
     tooltipRef.current?.checkOverflow();
   }, [message]);
@@ -268,6 +277,7 @@ export const ClientToolbar = ({
     [toolbarRef, updateToolbarStoredPositionDebounced]
   );
 
+  /** Reposition toolbar when window resizes. */
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
