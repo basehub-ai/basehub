@@ -67,7 +67,11 @@ export const ServerToolbar = async ({
     "use server";
     try {
       const { headers, url, isForcedDraft } = getStuffFromEnv(basehubProps);
-      if ((await draftMode()).isEnabled === false && !isForcedDraft) {
+      if (
+        (await draftMode()).isEnabled === false &&
+        !isForcedDraft &&
+        !bshbPreviewToken
+      ) {
         return { status: 403, response: { error: "Unauthorized" } };
       }
       const appApiEndpoint = getBaseHubAppApiEndpoint(
@@ -83,6 +87,9 @@ export const ServerToolbar = async ({
           "x-basehub-token": headers["x-basehub-token"],
           ...(bshbPreviewToken && {
             "x-basehub-preview-token": bshbPreviewToken,
+          }),
+          ...(isForcedDraft && {
+            "x-basehub-forced-draft": "true",
           }),
         },
       });
