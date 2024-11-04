@@ -25,6 +25,14 @@ if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT) {
   ANALYTICS_V2_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_V2_ENDPOINT;
 }
 
+let QUERY_EVENTS_ENDPOINT_URL = "https://basehub.com/api/v2/events";
+if (process?.env?.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
+  QUERY_EVENTS_ENDPOINT_URL =
+    process.env.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
+} else if (process?.env?.BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
+  QUERY_EVENTS_ENDPOINT_URL = process.env.BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
+}
+
 export type AnalyticsParams = {
   /**
    * The _analyticsKey taken from block of our GraphQL API.
@@ -32,6 +40,7 @@ export type AnalyticsParams = {
   _analyticsKey: string;
 };
 
+/** @deprecated Analytics is deprecated, you should use `getEvents` and consume from an Event Block. */
 export const getEventCount = async <Name extends string | string[]>({
   name,
   _analyticsKey,
@@ -68,6 +77,29 @@ export const getEventCount = async <Name extends string | string[]>({
   ) as Name extends string ? number : { name: string; count: number }[];
 };
 
+/** @deprecated Analytics is deprecated, you should use the Event block with the `sendEventV2` function. */
+export const sendEvent = async ({
+  name,
+  metadata,
+  _analyticsKey,
+}: { name: string; metadata?: Record<string, unknown> } & AnalyticsParams) => {
+  const response = await fetch(ANALYTICS_ENDPOINT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, metadata, key: _analyticsKey }),
+  });
+
+  const data = (await response.json()) as
+    | { success: true }
+    | { success: false; error: string };
+
+  return data;
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Events V2
+ * -----------------------------------------------------------------------------------------------*/
+
 type KeysStartingWith<Obj, Prefix extends string> = {
   [K in keyof Obj]: K extends `${Prefix}${string}` ? K : never;
 }[keyof Obj];
@@ -100,20 +132,60 @@ export const sendEventV2 = async <Key extends `${EventKeys}:${string}`>(
     | { success: false; error: string };
 };
 
-export const sendEvent = async ({
-  name,
-  metadata,
-  _analyticsKey,
-}: { name: string; metadata?: Record<string, unknown> } & AnalyticsParams) => {
-  const response = await fetch(ANALYTICS_ENDPOINT_URL, {
+type GetOptions<K extends EventKeys> =
+  | {
+      type: "table";
+      first: number;
+      skip: number;
+      select?: Record<keyof Scalars[`schema_${K}`], boolean>;
+    }
+  | { type: "time-series" };
+
+// Type for table-based response
+type TableResponse =
+  | {
+      success: true;
+      data: Array<unknown>;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+// Type for time-series response
+type TimeSeriesResponse =
+  | {
+      success: true;
+      data: Array<{ count: number; date: string }>;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+// Table type overload
+export function getEvents<Key extends `${EventKeys}:${string}`>(
+  key: Key,
+  options: Extract<GetOptions<ExtractEventKey<Key>>, { type: "table" }>
+): Promise<TableResponse>;
+
+// Time-series type overload
+export function getEvents<Key extends `${EventKeys}:${string}`>(
+  key: Key,
+  options: Extract<GetOptions<ExtractEventKey<Key>>, { type: "time-series" }>
+): Promise<TimeSeriesResponse>;
+
+export async function getEvents<Key extends `${EventKeys}:${string}`>(
+  key: Key,
+  options: GetOptions<ExtractEventKey<Key>>
+): Promise<
+  { success: true; data: Array<unknown> } | { success: false; error: string }
+> {
+  const response = await fetch(QUERY_EVENTS_ENDPOINT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, metadata, key: _analyticsKey }),
+    body: JSON.stringify({ key, options }),
   });
 
-  const data = (await response.json()) as
-    | { success: true }
-    | { success: false; error: string };
-
-  return data;
-};
+  return await response.json();
+}
