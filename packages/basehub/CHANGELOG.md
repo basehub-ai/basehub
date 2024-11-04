@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.8
+
+### Patch Changes
+
+- Fix clearing up cookie when selected ref is default
+
 ## 8.0.0-canary.7
 
 ### Patch Changes
