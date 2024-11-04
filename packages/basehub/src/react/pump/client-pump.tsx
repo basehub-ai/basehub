@@ -301,14 +301,13 @@ export const ClientPump = <Queries extends PumpQuery[]>({
    * Subscribe to ref changes
    */
   React.useEffect(() => {
-    function handleRefChange() {
-      const url = new URL(window.location.href);
-      const previewRef = url.searchParams.get("bshb-preview-ref");
+    function handleRefChange(e: Event) {
+      if (e instanceof CustomEvent === false) return;
+      const previewRef = e.detail.ref;
       if (!previewRef) return;
       setPreviewRef(previewRef);
     }
 
-    handleRefChange();
     window.addEventListener("__bshb_ref_changed", handleRefChange);
     return () => {
       window.removeEventListener("__bshb_ref_changed", handleRefChange);

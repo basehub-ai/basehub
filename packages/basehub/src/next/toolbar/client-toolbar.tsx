@@ -150,7 +150,9 @@ export const ClientToolbar = ({
 
   const setRefWithEvents = React.useCallback((ref: string) => {
     _setRef(ref);
-    window.dispatchEvent(new Event("__bshb_ref_changed"));
+    window.dispatchEvent(
+      new CustomEvent("__bshb_ref_changed", { detail: ref })
+    );
     previewRefCookieManager.set(ref);
   }, []);
 
@@ -169,24 +171,30 @@ export const ClientToolbar = ({
     setRefWithEvents(previewRef);
   }, [setRefWithEvents]);
 
-  /** If selected ref is equal to resolvedRef (from build), then we clear the cookie, as this is the default state. */
+  /** If selected ref is equal to resolvedRef (from build), then we consider this the default state. */
   React.useEffect(() => {
     if (isLoadingRef) return;
 
     if (ref === resolvedRef.ref) {
-      previewRefCookieManager.clear();
       setIsDefaultRefSelected(true);
     } else {
       setIsDefaultRefSelected(false);
     }
   }, [ref, resolvedRef.ref, isLoadingRef]);
 
-  /** If the build ref changes and the user was selecting it, we set the ref to the new build ref. */
+  /**
+   * If the build ref changes and the user was selecting it, we set the ref to the new build ref.
+   * We also clear the cookie, as this is the default state.
+   */
   React.useEffect(() => {
     if (isLoadingRef) return;
 
     if (isDefaultRefSelected) {
       setRefWithEvents(resolvedRef.ref);
+      previewRefCookieManager.clear();
+      const url = new URL(window.location.href);
+      url.searchParams.delete("bshb-preview-ref");
+      window.history.replaceState(null, "", url.toString());
     }
   }, [isDefaultRefSelected, isLoadingRef, resolvedRef.ref, setRefWithEvents]);
 
