@@ -97,7 +97,11 @@ export const ClientConditionalRenderer = ({
     }
   }, [revalidateTags]);
 
-  if (!bshbPreviewToken || !hasRendered || typeof document === "undefined") {
+  if (
+    (!bshbPreviewToken && !isForcedDraft) ||
+    !hasRendered ||
+    typeof document === "undefined"
+  ) {
     return null;
   }
   const Portal = createPortal(

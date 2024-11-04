@@ -30,23 +30,23 @@ export const ServerToolbar = async ({
     bshbPreviewToken: string;
   }) => {
     "use server";
-    const { headers, url } = getStuffFromEnv(basehubProps);
-    const appApiEndpoint = getBaseHubAppApiEndpoint(
-      url,
-      "/api/nextjs/preview-auth"
-    );
-
-    const res = await fetch(appApiEndpoint, {
-      cache: "no-store",
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-basehub-token": headers["x-basehub-token"],
-      },
-      body: JSON.stringify({ bshbPreview: bshbPreviewToken }),
-    });
-
     try {
+      const { headers, url } = getStuffFromEnv(basehubProps);
+      const appApiEndpoint = getBaseHubAppApiEndpoint(
+        url,
+        "/api/nextjs/preview-auth"
+      );
+
+      const res = await fetch(appApiEndpoint, {
+        cache: "no-store",
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-basehub-token": headers["x-basehub-token"],
+        },
+        body: JSON.stringify({ bshbPreview: bshbPreviewToken }),
+      });
+
       const responseIsJson = res.headers.get("content-type")?.includes("json");
       if (!responseIsJson) {
         return { status: 400, response: { error: "Bad request" } };
@@ -65,23 +65,26 @@ export const ServerToolbar = async ({
     bshbPreviewToken: string;
   }) => {
     "use server";
-    const { headers, url } = getStuffFromEnv(basehubProps);
-    const appApiEndpoint = getBaseHubAppApiEndpoint(
-      url,
-      "/api/nextjs/latest-branches"
-    );
-
-    const res = await fetch(appApiEndpoint, {
-      cache: "no-store",
-      method: "GET",
-      headers: {
-        "content-type": "application/json",
-        "x-basehub-token": headers["x-basehub-token"],
-        "x-basehub-preview-token": bshbPreviewToken,
-      },
-    });
-
     try {
+      const { headers, url, isForcedDraft } = getStuffFromEnv(basehubProps);
+      if ((await draftMode()).isEnabled === false && !isForcedDraft) {
+        return { status: 403, response: { error: "Unauthorized" } };
+      }
+      const appApiEndpoint = getBaseHubAppApiEndpoint(
+        url,
+        "/api/nextjs/latest-branches"
+      );
+
+      const res = await fetch(appApiEndpoint, {
+        cache: "no-store",
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+          "x-basehub-token": headers["x-basehub-token"],
+          "x-basehub-preview-token": bshbPreviewToken,
+        },
+      });
+
       const responseIsJson = res.headers.get("content-type")?.includes("json");
       if (!responseIsJson) {
         return { status: 400, response: { error: "Bad request" } };
