@@ -17,22 +17,6 @@ if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_ENDPOINT) {
   ANALYTICS_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_ENDPOINT;
 }
 
-let ANALYTICS_V2_ENDPOINT_URL = "https://basehub.com/api/v2/events";
-if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT) {
-  ANALYTICS_V2_ENDPOINT_URL =
-    process.env.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT;
-} else if (process?.env?.BASEHUB_ANALYTICS_V2_ENDPOINT) {
-  ANALYTICS_V2_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_V2_ENDPOINT;
-}
-
-let QUERY_EVENTS_ENDPOINT_URL = "https://basehub.com/api/v2/events/query";
-if (process?.env?.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
-  QUERY_EVENTS_ENDPOINT_URL =
-    process.env.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
-} else if (process?.env?.BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
-  QUERY_EVENTS_ENDPOINT_URL = process.env.BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
-}
-
 export type AnalyticsParams = {
   /**
    * The _analyticsKey taken from block of our GraphQL API.
@@ -100,6 +84,22 @@ export const sendEvent = async ({
  * Events V2
  * -----------------------------------------------------------------------------------------------*/
 
+let ANALYTICS_V2_ENDPOINT_URL = "https://basehub.com/api/v2/events";
+if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT) {
+  ANALYTICS_V2_ENDPOINT_URL =
+    process.env.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT;
+} else if (process?.env?.BASEHUB_ANALYTICS_V2_ENDPOINT) {
+  ANALYTICS_V2_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_V2_ENDPOINT;
+}
+
+let QUERY_EVENTS_ENDPOINT_URL = "https://basehub.com/api/v2/events/query";
+if (process?.env?.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
+  QUERY_EVENTS_ENDPOINT_URL =
+    process.env.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
+} else if (process?.env?.BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
+  QUERY_EVENTS_ENDPOINT_URL = process.env.BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
+}
+
 type KeysStartingWith<Obj, Prefix extends string> = {
   [K in keyof Obj]: K extends `${Prefix}${string}` ? K : never;
 }[keyof Obj];
@@ -132,7 +132,7 @@ export const sendEventV2 = async <Key extends `${EventKeys}:${string}`>(
     | { success: false; error: string };
 };
 
-type GetOptions<K extends EventKeys> =
+type GetOptions<K extends string> =
   | {
       type: "table";
       first: number;
@@ -184,7 +184,7 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
   const response = await fetch(QUERY_EVENTS_ENDPOINT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, options }),
+    body: JSON.stringify({ key, ...options }),
   });
 
   return await response.json();
