@@ -137,7 +137,7 @@ type GetOptions<K extends string> =
       type: "table";
       first: number;
       skip: number;
-      select?: Record<keyof Scalars[`schema_${K}`], boolean>;
+      select?: Partial<Record<keyof Scalars[`schema_${K}`], boolean>>;
     }
   | { type: "time-series" };
 
