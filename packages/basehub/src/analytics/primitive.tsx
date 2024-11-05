@@ -169,7 +169,7 @@ type GetOptions<K extends string> =
 type TableResponse<T extends object> =
   | {
       success: true;
-      data: Array<{ date: string; value: Partial<T> }>;
+      data: Array<{ date: string } & Partial<T>>;
     }
   | {
       success: false;
@@ -214,12 +214,17 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
 
     const parsed = await response.json();
     if (parsed.success) {
-      const data = parsed.data as { date: string; value: string }[];
+      const data = parsed.data as Array<
+        | { sys_date: string; value: string }
+        | ({ sys_date: string } & Record<string, unknown>)
+      >;
       return {
         success: true,
-        data: data.map(({ date, value }) => ({
-          date,
-          value: JSON.parse(value),
+        data: data.map(({ sys_date, ...rest }) => ({
+          date: sys_date,
+          ...("value" in rest && typeof rest.value === "string"
+            ? JSON.parse(rest.value)
+            : rest),
         })),
       };
     }
