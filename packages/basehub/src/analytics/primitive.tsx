@@ -132,20 +132,44 @@ export const sendEventV2 = async <Key extends `${EventKeys}:${string}`>(
     | { success: false; error: string };
 };
 
+type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I
+) => void
+  ? I
+  : never;
+
+type MapScalarTypeToFilters<T extends Record<string, any>> = Partial<{
+  [K in keyof T]: T[K] extends UnionToIntersection<T[K]>
+    ? { eq: NonNullable<T[K]> }
+    : T[K] extends string
+    ? { eq: string } | { regex: string | RegExp } | { contains: string }
+    : T[K] extends number
+    ? { gt: number; lt: number }
+    : T[K] extends boolean
+    ? boolean
+    : { eq: NonNullable<T[K]> };
+}>;
+
+type MapScalarTypeToOrder<T extends Record<string, any>> = {
+  [K in keyof T & string]: `${K}__ASC` | `${K}__DESC`;
+}[keyof T & string];
+
 type GetOptions<K extends string> =
   | {
       type: "table";
       first: number;
       skip: number;
+      filter?: MapScalarTypeToFilters<Scalars[`schema_${K}`]>;
+      orderBy?: MapScalarTypeToOrder<Scalars[`schema_${K}`]>;
       select?: Partial<Record<keyof Scalars[`schema_${K}`], boolean>>;
     }
   | { type: "time-series" };
 
 // Type for table-based response
-type TableResponse<T> =
+type TableResponse<T extends object> =
   | {
       success: true;
-      data: Array<T>;
+      data: Array<{ date: string; value: Partial<T> }>;
     }
   | {
       success: false;
