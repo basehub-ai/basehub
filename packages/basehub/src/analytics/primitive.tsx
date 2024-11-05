@@ -142,10 +142,10 @@ type GetOptions<K extends string> =
   | { type: "time-series" };
 
 // Type for table-based response
-type TableResponse =
+type TableResponse<T> =
   | {
       success: true;
-      data: Array<unknown>;
+      data: Array<T>;
     }
   | {
       success: false;
@@ -167,7 +167,7 @@ type TimeSeriesResponse =
 export function getEvents<Key extends `${EventKeys}:${string}`>(
   key: Key,
   options: Extract<GetOptions<ExtractEventKey<Key>>, { type: "table" }>
-): Promise<TableResponse>;
+): Promise<TableResponse<EventSchemaMap[ExtractEventKey<Key>]>>;
 
 // Time-series type overload
 export function getEvents<Key extends `${EventKeys}:${string}`>(
@@ -181,11 +181,27 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
 ): Promise<
   { success: true; data: Array<unknown> } | { success: false; error: string }
 > {
-  const response = await fetch(QUERY_EVENTS_ENDPOINT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, ...options }),
-  });
+  if (options.type === "table") {
+    const response = await fetch(QUERY_EVENTS_ENDPOINT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, ...options }),
+    });
 
-  return await response.json();
+    const parsed = await response.json();
+    if (parsed.success) {
+      const data = parsed.data as { date: string; value: string }[];
+      return {
+        success: true,
+        data: data.map(({ date, value }) => ({
+          date,
+          value: JSON.parse(value),
+        })),
+      };
+    }
+
+    return parsed;
+  } else {
+    return { success: false, error: "Time-series not implemented yet" };
+  }
 }
