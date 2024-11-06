@@ -154,22 +154,31 @@ type MapScalarTypeToOrder<T extends Record<string, any>> = {
   [K in keyof T & string]: `${K}__ASC` | `${K}__DESC`;
 }[keyof T & string];
 
-type GetOptions<K extends string> =
+type GetOptions<
+  K extends string,
+  Select extends
+    | Partial<Record<keyof Scalars[`schema_${K}`], boolean>>
+    | undefined = undefined,
+> =
   | {
       type: "table";
       first: number;
       skip: number;
       filter?: MapScalarTypeToFilters<Scalars[`schema_${K}`]>;
       orderBy?: MapScalarTypeToOrder<Scalars[`schema_${K}`]>;
-      select?: Partial<Record<keyof Scalars[`schema_${K}`], boolean>>;
+      select?: Select;
     }
   | { type: "time-series" };
 
 // Type for table-based response
-type TableResponse<T extends object> =
+type TableResponse<
+  K extends string,
+  T extends Record<keyof Scalars[`schema_${K}`], unknown>,
+  Select extends Partial<Record<keyof Scalars[`schema_${K}`], boolean>>,
+> =
   | {
       success: true;
-      data: Array<{ date: string } & Partial<T>>;
+      data: Array<{ date: string } & Pick<T, keyof Select>>;
     }
   | {
       success: false;
@@ -188,10 +197,15 @@ type TimeSeriesResponse =
     };
 
 // Table type overload
-export function getEvents<Key extends `${EventKeys}:${string}`>(
+export function getEvents<
+  Key extends `${EventKeys}:${string}`,
+  Select extends Partial<
+    Record<keyof Scalars[`schema_${ExtractEventKey<Key>}`], boolean>
+  >,
+>(
   key: Key,
-  options: Extract<GetOptions<ExtractEventKey<Key>>, { type: "table" }>
-): Promise<TableResponse<EventSchemaMap[ExtractEventKey<Key>]>>;
+  options: Extract<GetOptions<ExtractEventKey<Key>, Select>, { type: "table" }>
+): Promise<TableResponse<Key, EventSchemaMap[ExtractEventKey<Key>], Select>>;
 
 // Time-series type overload
 export function getEvents<Key extends `${EventKeys}:${string}`>(
