@@ -5,7 +5,6 @@ import {
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../schema";
-
 /* -------------------------------------------------------------------------------------------------
  * Client
  * -----------------------------------------------------------------------------------------------*/
@@ -140,14 +139,31 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
 
 type MapScalarTypeToFilters<T extends Record<string, any>> = Partial<{
   [K in keyof T]: T[K] extends UnionToIntersection<T[K]>
-    ? { eq: NonNullable<T[K]> }
-    : T[K] extends string
-    ? { eq: string } | { regex: string | RegExp } | { contains: string }
-    : T[K] extends number
-    ? { gt: number; lt: number }
-    : T[K] extends boolean
-    ? boolean
-    : { eq: NonNullable<T[K]> };
+    ? T[K] extends string
+      ?
+          | { eq: string }
+          | { notEq: string }
+          | { regex: string }
+          | { contains: string }
+          | { exists: boolean }
+          | { startsWith: string }
+          | { endsWith: string }
+      : T[K] extends number
+      ?
+          | { gt: number; lt?: number }
+          | { lt: number; gt?: number }
+          | { eq: number }
+          | { exists: boolean }
+      : T[K] extends boolean
+      ? { exists: boolean } | { eq: boolean }
+      : // else case: literals
+        | { eq: NonNullable<T[K]> }
+          | { notEq: NonNullable<T[K]> }
+          | { exists: boolean }
+    : // unions (same as literals)
+      | { eq: NonNullable<T[K]> }
+        | { notEq: NonNullable<T[K]> }
+        | { exists: boolean };
 }>;
 
 type MapScalarTypeToOrder<T extends Record<string, any>> = {
