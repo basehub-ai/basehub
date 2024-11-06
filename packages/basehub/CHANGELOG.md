@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.17
+
+### Patch Changes
+
+- event types and some branch switcher styles
+
 ## 8.0.0-canary.16
 
 ### Patch Changes
