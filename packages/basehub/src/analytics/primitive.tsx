@@ -116,10 +116,15 @@ type EventSchemaMap = {
   [K in EventKeys]: Scalars[`schema_${K}`];
 };
 
+type Args<Key extends string> =
+  EventSchemaMap[ExtractEventKey<Key>] extends never
+    ? [Key]
+    : [Key, EventSchemaMap[ExtractEventKey<Key>]];
+
 export const sendEventV2 = async <Key extends `${EventKeys}:${string}`>(
-  key: Key,
-  data: EventSchemaMap[ExtractEventKey<Key>]
+  ...args: Args<Key>
 ) => {
+  const [key, data] = args;
   const response = await fetch(ANALYTICS_V2_ENDPOINT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
