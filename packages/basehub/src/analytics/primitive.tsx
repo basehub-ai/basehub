@@ -136,6 +136,17 @@ export const sendEventV2 = async <Key extends `${EventKeys}:${string}`>(
     | { success: false; error: string };
 };
 
+type EventQueryData =
+  | ({
+      id: string;
+      sys_date: string;
+    } & Record<string, unknown>)
+  | {
+      id: string;
+      sys_date: string;
+      value: string;
+    };
+
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
   k: infer I
 ) => void
@@ -199,7 +210,7 @@ type TableResponse<
 > =
   | {
       success: true;
-      data: Array<{ date: string } & Pick<T, keyof Select>>;
+      data: Array<{ date: string; id: string } & Pick<T, keyof Select>>;
     }
   | {
       success: false;
@@ -249,14 +260,12 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
 
     const parsed = await response.json();
     if (parsed.success) {
-      const data = parsed.data as Array<
-        | { sys_date: string; value: string }
-        | ({ sys_date: string } & Record<string, unknown>)
-      >;
+      const data = parsed.data as EventQueryData[];
       return {
         success: true,
-        data: data.map(({ sys_date, ...rest }) => ({
+        data: data.map(({ sys_date, id, ...rest }) => ({
           date: sys_date,
+          id,
           ...("value" in rest && typeof rest.value === "string"
             ? JSON.parse(rest.value)
             : rest),
