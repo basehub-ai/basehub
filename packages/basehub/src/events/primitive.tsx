@@ -63,7 +63,7 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
   });
 
   return (await response.json()) as
-    | { success: true }
+    | { success: true; eventId: string }
     | { success: false; error: string };
 };
 
@@ -238,16 +238,17 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
 
 export async function updateEvent<Key extends `${EventKeys}:${string}`>(
   key: Key,
+  id: string,
   data: Partial<NullableEventSchemaMap[ExtractEventKey<Key>]>
 ) {
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, data, type: "update" }),
+    body: JSON.stringify({ key, data, type: "update", id }),
   });
 
   return (await response.json()) as
-    | { success: true }
+    | { success: true; eventId: string }
     | { success: false; error: string };
 }
 
