@@ -14,6 +14,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:internal/eslint-config-custom
+      pkg-pr-new:
+        specifier: ^0.0.30
+        version: 0.0.30
       prettier:
         specifier: 3.0.3
         version: 3.0.3
