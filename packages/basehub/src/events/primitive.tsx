@@ -43,6 +43,7 @@ type EventSchemaMap = {
 };
 
 type NullableEventSchemaMap = {
+  // @ts-ignore
   [K in EventKeys]: Scalars[`schema_${K}`] | null;
 };
 
