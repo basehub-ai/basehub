@@ -256,10 +256,13 @@ export async function deleteEvent<Key extends `${EventKeys}:${string}`>(
   key: Key,
   ids: [string, ...string[]]
 ) {
-  const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
+  const url = new URL(EVENTS_V2_ENDPOINT_URL);
+  url.searchParams.append("key", key);
+  url.searchParams.append("ids", JSON.stringify(ids));
+
+  const response = await fetch(url.toString(), {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, ids }),
   });
 
   return (await response.json()) as
