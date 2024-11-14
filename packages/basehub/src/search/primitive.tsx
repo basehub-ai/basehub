@@ -320,7 +320,7 @@ export const askAi = async <Document extends Record<string, unknown>>(
           return {
             question,
             answer,
-            key: `${rawResult.conversation?.conversation_id}-${i}`,
+            key: `${rawResult.conversation?.conversation_id}-${i / 2}`,
           };
         })
         .filter(

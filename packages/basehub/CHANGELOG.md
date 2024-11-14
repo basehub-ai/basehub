@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.25
+
+### Patch Changes
+
+- add key to history items
+
 ## 7.5.24
 
 ### Patch Changes
