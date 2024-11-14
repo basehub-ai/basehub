@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.24
+
+### Patch Changes
+
+- add ask ai primitive
+
 ## 7.5.23
 
 ### Patch Changes
