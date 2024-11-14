@@ -204,6 +204,7 @@ export type AskAiResult<Doc = Record<string, unknown>> = SearchResult<Doc> & {
     id: string;
     answer: string;
     history: {
+      key: string;
       question: string;
       answer: string;
     }[];
@@ -214,7 +215,7 @@ export const askAi = async <Document extends Record<string, unknown>>(
   _searchKey: string | null,
   q: string,
   opts: SearchOptions
-): Promise<SearchResult<Document>> => {
+): Promise<AskAiResult<Document>> => {
   if (!_searchKey) throw new Error("Not enabled");
   const { collectionName, valid } = decodeKey(_searchKey);
   if (!valid) throw new Error("Invalid _searchKey");
@@ -316,9 +317,16 @@ export const askAi = async <Document extends Record<string, unknown>>(
           if (!question) return null;
           const answer = rawConversationHistory[i + 1]?.assistant;
           if (!answer) return null;
-          return { question, answer };
+          return {
+            question,
+            answer,
+            key: `${rawResult.conversation?.conversation_id}-${i}`,
+          };
         })
-        .filter((h): h is { question: string; answer: string } => h !== null),
+        .filter(
+          (h): h is AskAiResult<Document>["conversation"]["history"][number] =>
+            !!h
+        ),
     },
   };
 
