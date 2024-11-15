@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.27
+
+### Patch Changes
+
+- Fix type error
+
 ## 7.5.26
 
 ### Patch Changes

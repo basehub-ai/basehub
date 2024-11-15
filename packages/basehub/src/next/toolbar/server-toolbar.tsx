@@ -142,7 +142,7 @@ export const ServerToolbar = async ({
     }
 
     const response = await res.json();
-    const tags = response.tags;
+    const tags = response;
     if (!tags || !Array.isArray(tags)) {
       return { success: false };
     }
