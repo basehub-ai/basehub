@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.26
+
+### Patch Changes
+
+- Add manual revalidation for pending tags
+
 ## 7.5.25
 
 ### Patch Changes

@@ -20,6 +20,7 @@ export const ClientToolbar = ({
   seekAndStoreBshbPreviewToken,
   resolvedRef,
   getLatestBranches,
+  humanRevalidatePendingTags,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -40,6 +41,10 @@ export const ClientToolbar = ({
     status: number;
     response: LatestBranch[] | { error: string };
   }>;
+  humanRevalidatePendingTags: (o: {
+    bshbPreviewToken: string;
+    ref: string;
+  }) => Promise<{ success: boolean }>;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
@@ -161,6 +166,17 @@ export const ClientToolbar = ({
     setRef(previewRef);
     window.dispatchEvent(new Event("__bshb_ref_changed"));
   }, []);
+
+  // human revalidate pending tags
+  React.useEffect(() => {
+    if (!bshbPreviewToken) return;
+    if (!ref) return;
+    if (isForcedDraft) return;
+
+    humanRevalidatePendingTags({ bshbPreviewToken, ref }).catch(() => {
+      // ignore
+    });
+  }, [bshbPreviewToken, humanRevalidatePendingTags, ref, isForcedDraft]);
 
   React.useLayoutEffect(() => {
     tooltipRef.current?.checkOverflow();

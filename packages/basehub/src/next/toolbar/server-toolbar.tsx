@@ -110,6 +110,46 @@ export const ServerToolbar = async ({
     return { success: true };
   };
 
+  // used by a client that's authenticated to the toolbar
+  // sort of as a fallback to the headless browser's revalidation failing
+  const humanRevalidatePendingTags = async ({
+    bshbPreviewToken,
+    ref,
+  }: {
+    bshbPreviewToken: string;
+    ref: string;
+  }) => {
+    "use server";
+    const { headers, url } = getStuffFromEnv(basehubProps);
+    const appApiEndpoint = getBaseHubAppApiEndpoint(
+      url,
+      "/api/nextjs/pending-tags"
+    );
+
+    const res = await fetch(appApiEndpoint, {
+      cache: "no-store",
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+        "x-basehub-token": headers["x-basehub-token"],
+        "x-basehub-preview-token": bshbPreviewToken,
+        "x-basehub-ref": ref,
+      },
+    });
+
+    if (res.status !== 200) {
+      return { success: false };
+    }
+
+    const response = await res.json();
+    const tags = response.tags;
+    if (!tags || !Array.isArray(tags)) {
+      return { success: false };
+    }
+
+    return await revalidateTags({ tags });
+  };
+
   return (
     <LazyClientConditionalRenderer
       draft={(await draftMode()).isEnabled}
@@ -119,6 +159,7 @@ export const ServerToolbar = async ({
       revalidateTags={revalidateTags}
       getLatestBranches={getLatestBranches}
       resolvedRef={resolvedRef}
+      humanRevalidatePendingTags={humanRevalidatePendingTags}
     />
   );
 };
