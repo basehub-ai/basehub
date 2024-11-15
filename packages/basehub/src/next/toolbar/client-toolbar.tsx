@@ -168,10 +168,13 @@ export const ClientToolbar = ({
   }, []);
 
   // human revalidate pending tags
+  const lastHumanRevalidatedRef = React.useRef<string | null>(null);
   React.useEffect(() => {
     if (!bshbPreviewToken) return;
     if (!ref) return;
     if (isForcedDraft) return;
+    if (lastHumanRevalidatedRef.current === ref) return;
+    lastHumanRevalidatedRef.current = ref;
 
     humanRevalidatePendingTags({ bshbPreviewToken, ref }).catch(() => {
       // ignore

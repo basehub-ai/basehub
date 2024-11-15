@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.28
+
+### Patch Changes
+
+- fix potential infinite loop
+
 ## 7.5.27
 
 ### Patch Changes
