@@ -78,15 +78,15 @@ type EventQueryData =
       value: string;
     };
 
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-  k: infer I
-) => void
+type UnionToIntersection<U> = (
+  NonNullable<U> extends any ? (k: U) => void : never
+) extends (k: infer I) => void
   ? I
   : never;
 
 type MapScalarTypeToFilters<T extends Record<string, any>> = Partial<{
-  [K in keyof T]: T[K] extends UnionToIntersection<T[K]>
-    ? T[K] extends string
+  [K in keyof T]: NonNullable<T[K]> extends UnionToIntersection<T[K]>
+    ? NonNullable<T[K]> extends string
       ?
           | { eq: string }
           | { notEq: string }
@@ -95,14 +95,16 @@ type MapScalarTypeToFilters<T extends Record<string, any>> = Partial<{
           | { exists: boolean }
           | { startsWith: string }
           | { endsWith: string }
-      : T[K] extends number
+      : NonNullable<T[K]> extends number
       ?
           | { gt: number; lt?: number }
           | { lt: number; gt?: number }
           | { eq: number }
           | { exists: boolean }
-      : T[K] extends boolean
+      : NonNullable<T[K]> extends boolean
       ? { exists: boolean } | { eq: boolean }
+      : NonNullable<T[K]> extends Array<string>
+      ? { includes: NonNullable<T[K]>[number] } | { exists: boolean }
       : // else case: literals
         | { eq: NonNullable<T[K]> }
           | { notEq: NonNullable<T[K]> }
