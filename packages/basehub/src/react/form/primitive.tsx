@@ -233,14 +233,15 @@ const FieldNode = ({
   components?: Partial<Handlers>;
   disableDefaultComponents?: boolean;
 }) => {
-  const Handler =
-    components?.[field.type] ?? disableDefaultComponents
-      ? () => <></>
-      : defaultHandlers[field.type];
+  let Handler: Handlers[keyof Handlers] | undefined;
+  if (components) {
+    Handler = components[field.type];
+  }
 
-  if (!Handler) {
-    console.warn(`No Handler found for field type ${field.type}`);
-    return <></>;
+  if (!Handler && !disableDefaultComponents) {
+    Handler = defaultHandlers[field.type];
+  } else if (!Handler) {
+    Handler = () => <></>;
   }
 
   // @ts-expect-error
