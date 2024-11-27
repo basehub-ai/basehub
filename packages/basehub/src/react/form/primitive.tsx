@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
+import { sendEvent, updateEvent } from "../../events";
 
 export type Field = {
   id: string;
@@ -48,14 +49,61 @@ export type FormProps = {
   content?: Field[];
   components?: Partial<Handlers>;
   disableDefaultComponents?: boolean;
-};
+  key: string;
+  children?: ReactNode;
+} & (
+  | {
+      type?: "send";
+    }
+  | {
+      type: "update";
+      id: string;
+    }
+);
 
 export const Form = (props: FormProps): ReactNode => {
-  const value = props.content as Field[] | undefined;
+  const fields = props.content as Field[] | undefined;
 
   return (
-    <form>
-      {value?.map((node, index) => {
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+        const formattedData: Record<string, unknown> = {};
+
+        fields?.forEach((field) => {
+          const key = field.name;
+          const value = formData.get(key);
+          switch (field.type) {
+            case "checkbox":
+              formattedData[key] = value === "on";
+              break;
+            case "select":
+              formattedData[key] = String(value).split(",");
+            case "radio":
+              formattedData[key] = value;
+              break;
+            case "date":
+            case "datetime":
+              formattedData[key] = new Date(value as string).toISOString();
+              break;
+            case "number":
+              formattedData[key] = Number(value);
+              break;
+            default:
+              formattedData[key] = value;
+              break;
+          }
+        });
+        if (props.type === "update") {
+          updateEvent(props.key as any, props.id, formattedData);
+        } else {
+          sendEvent(props.key as any, formattedData);
+        }
+      }}
+    >
+      {fields?.map((node, index) => {
         return (
           <FieldNode
             field={node}
@@ -65,6 +113,7 @@ export const Form = (props: FormProps): ReactNode => {
           />
         );
       })}
+      {props.children ?? <button type="submit">Submit</button>}
     </form>
   );
 };
