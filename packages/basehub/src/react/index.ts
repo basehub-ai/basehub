@@ -7,8 +7,7 @@ export {
 } from "./rich-text/primitive";
 
 export {
-  FormBuilder,
-  createFormBuilderWithDefaultComponents,
-  type FormBuilderProps,
-  type HandlerProps as FormBuilderHandlerProps,
+  Form,
+  type FormProps,
+  type HandlerProps as FormHandlerProps,
 } from "./form/primitive";

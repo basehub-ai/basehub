@@ -44,17 +44,17 @@ export type HandlerProps<Key extends keyof Handlers> = ExtractPropsForHandler<
 type CustomBlockBase = { readonly __typename: string };
 export type CustomBlocksBase = readonly CustomBlockBase[];
 
-export type FormBuilderProps = {
+export type FormProps = {
   content?: Field[];
   components?: Partial<Handlers>;
   disableDefaultComponents?: boolean;
 };
 
-export const FormBuilder = (props: FormBuilderProps): ReactNode => {
+export const Form = (props: FormProps): ReactNode => {
   const value = props.content as Field[] | undefined;
 
   return (
-    <>
+    <form>
       {value?.map((node, index) => {
         return (
           <FieldNode
@@ -65,7 +65,7 @@ export const FormBuilder = (props: FormBuilderProps): ReactNode => {
           />
         );
       })}
-    </>
+    </form>
   );
 };
 
@@ -197,19 +197,3 @@ const FieldNode = ({
   // @ts-expect-error
   return <Handler {...field} />;
 };
-
-export function createFormBuilderWithDefaultComponents(
-  defaultComponents: FormBuilderProps["components"]
-) {
-  return (props: FormBuilderProps): ReactNode => {
-    return (
-      <FormBuilder
-        {...props}
-        components={{
-          ...defaultComponents,
-          ...(props.components as any),
-        }}
-      />
-    );
-  };
-}
