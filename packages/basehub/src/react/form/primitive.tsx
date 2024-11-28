@@ -19,6 +19,7 @@ export type Field = {
   | { type: "datetime" }
   | { type: "email" }
   | { type: "checkbox" }
+  | { type: "hidden" }
   | { type: "select"; options: string[]; multiple: boolean }
   | { type: "radio"; options: string[]; multiple: boolean }
 );
@@ -33,6 +34,7 @@ type Handlers = {
   checkbox: (props: Extract<Field, { type: "checkbox" }>) => ReactNode;
   select: (props: Extract<Field, { type: "select" }>) => ReactNode;
   radio: (props: Extract<Field, { type: "radio" }>) => ReactNode;
+  hidden: (props: Extract<Field, { type: "hidden" }>) => ReactNode;
 };
 
 type ExtractPropsForHandler<Handler extends (props: any) => ReactNode> =
@@ -222,6 +224,7 @@ const defaultHandlers: Handlers = {
       {props.helpText && <small>{props.helpText}</small>}
     </fieldset>
   ),
+  hidden: (props) => <input id={props.name} name={props.name} type="hidden" />,
 };
 
 const FieldNode = ({
