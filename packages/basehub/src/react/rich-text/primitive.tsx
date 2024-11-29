@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import GithubSlugger from "github-slugger";
 import { extractTextFromNode } from "./util/heading-id";
 import type { Language } from "../code-block";

@@ -8,6 +8,7 @@ export default defineConfig((_options: Options) => {
     dts: true,
     entry: {
       "react-rich-text": "./src/react/rich-text/index.ts",
+      "react-form": "./src/react/form/index.ts",
       "react-code-block/index": "./src/react/code-block/index.ts",
       "react-code-block/client": "./src/react/code-block/client/index.ts",
       "react-search": "./src/react/search/index.ts",

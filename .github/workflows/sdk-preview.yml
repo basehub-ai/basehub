@@ -1,7 +1,7 @@
 name: Publish SDK Preview
 on:
   pull_request:
-    branches: [main]
+    branches: [main, jb/v8]
 
 jobs:
   build:

@@ -28,6 +28,8 @@
     "src/events",
     "react-rich-text.js",
     "react-rich-text.d.ts",
+    "react-form.js",
+    "react-form.d.ts",
     "react-code-block",
     "react-search.js",
     "react-search.d.ts",
