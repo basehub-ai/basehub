@@ -48,23 +48,24 @@ type CustomBlockBase = { readonly __typename: string };
 export type CustomBlocksBase = readonly CustomBlockBase[];
 
 export type FormProps = {
-  content?: Field[];
+  schema: Field[];
   components?: Partial<Handlers>;
   disableDefaultComponents?: boolean;
-  key: string;
   children?: ReactNode;
-} & (
-  | {
-      type?: "send";
-    }
-  | {
-      type: "update";
-      id: string;
-    }
-);
+  action:
+    | {
+        type: "send";
+        ingestKey: string;
+      }
+    | {
+        type: "update";
+        adminKey: string;
+        eventId: string;
+      };
+};
 
-export const Form = (props: FormProps): ReactNode => {
-  const fields = props.content as Field[] | undefined;
+export const unstable_Form = (props: FormProps): ReactNode => {
+  const fields = props.schema as Field[] | undefined;
 
   return (
     <form
@@ -98,10 +99,14 @@ export const Form = (props: FormProps): ReactNode => {
               break;
           }
         });
-        if (props.type === "update") {
-          updateEvent(props.key as any, props.id, formattedData);
+        if (props.action.type === "update") {
+          updateEvent(
+            props.action.adminKey as any,
+            props.action.eventId,
+            formattedData
+          );
         } else {
-          sendEvent(props.key as any, formattedData);
+          sendEvent(props.action.ingestKey as any, formattedData);
         }
       }}
     >
@@ -123,9 +128,9 @@ export const Form = (props: FormProps): ReactNode => {
 const defaultHandlers: Handlers = {
   text: (props) => (
     <div>
-      <label htmlFor={props.name}>{props.label}</label>
+      <label htmlFor={props.id}>{props.label}</label>
       <input
-        id={props.name}
+        id={props.id}
         name={props.name}
         type="text"
         defaultValue={props.defaultValue}
@@ -136,9 +141,9 @@ const defaultHandlers: Handlers = {
   ),
   number: (props) => (
     <div>
-      <label htmlFor={props.name}>{props.label}</label>
+      <label htmlFor={props.id}>{props.label}</label>
       <input
-        id={props.name}
+        id={props.id}
         name={props.name}
         type="number"
         defaultValue={props.defaultValue}
@@ -149,30 +154,30 @@ const defaultHandlers: Handlers = {
   ),
   file: (props) => (
     <div>
-      <label htmlFor={props.name}>{props.label}</label>
-      <input id={props.name} name={props.name} type="file" />
+      <label htmlFor={props.id}>{props.label}</label>
+      <input id={props.id} name={props.name} type="file" />
       {props.helpText && <small>{props.helpText}</small>}
     </div>
   ),
   date: (props) => (
     <div>
-      <label htmlFor={props.name}>{props.label}</label>
-      <input id={props.name} name={props.name} type="date" />
+      <label htmlFor={props.id}>{props.label}</label>
+      <input id={props.id} name={props.name} type="date" />
       {props.helpText && <small>{props.helpText}</small>}
     </div>
   ),
   datetime: (props) => (
     <div>
-      <label htmlFor={props.name}>{props.label}</label>
-      <input id={props.name} name={props.name} type="datetime-local" />
+      <label htmlFor={props.id}>{props.label}</label>
+      <input id={props.id} name={props.name} type="datetime-local" />
       {props.helpText && <small>{props.helpText}</small>}
     </div>
   ),
   email: (props) => (
     <div>
-      <label htmlFor={props.name}>{props.label}</label>
+      <label htmlFor={props.id}>{props.label}</label>
       <input
-        id={props.name}
+        id={props.id}
         name={props.name}
         type="email"
         defaultValue={props.defaultValue}
@@ -183,9 +188,9 @@ const defaultHandlers: Handlers = {
   ),
   checkbox: (props) => (
     <div>
-      <label htmlFor={props.name}>{props.label}</label>
+      <label htmlFor={props.id}>{props.label}</label>
       <input
-        id={props.name}
+        id={props.id}
         name={props.name}
         type="checkbox"
         defaultChecked={props.defaultValue === "true"}
@@ -195,8 +200,8 @@ const defaultHandlers: Handlers = {
   ),
   select: (props) => (
     <div>
-      <label htmlFor={props.name}>{props.label}</label>
-      <select id={props.name} name={props.name} multiple={props.multiple}>
+      <label htmlFor={props.id}>{props.label}</label>
+      <select id={props.id} name={props.name} multiple={props.multiple}>
         {props.options.map((option) => (
           <option key={option} value={option}>
             {option}
@@ -224,7 +229,7 @@ const defaultHandlers: Handlers = {
       {props.helpText && <small>{props.helpText}</small>}
     </fieldset>
   ),
-  hidden: (props) => <input id={props.name} name={props.name} type="hidden" />,
+  hidden: (props) => <input id={props.id} name={props.name} type="hidden" />,
 };
 
 const FieldNode = ({
