@@ -1,7 +1,5 @@
 name: Publish SDK Preview
-on:
-  pull_request:
-    branches: [main, jb/v8]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -23,4 +21,4 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: pnpx pkg-pr-new publish './packages/basehub' --comment=update
+      - run: pnpx pkg-pr-new publish './packages/basehub' --comment=off
