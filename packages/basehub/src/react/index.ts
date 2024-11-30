@@ -7,7 +7,7 @@ export {
 } from "./rich-text/primitive";
 
 export {
-  Form,
+  Form as unstable_Form,
   type FormProps,
   type HandlerProps as FormHandlerProps,
 } from "./form/primitive";

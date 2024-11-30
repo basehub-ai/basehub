@@ -64,7 +64,7 @@ export type FormProps = {
       };
 };
 
-export const unstable_Form = (props: FormProps): ReactNode => {
+export const Form = (props: FormProps): ReactNode => {
   const fields = props.schema as Field[] | undefined;
 
   return (
