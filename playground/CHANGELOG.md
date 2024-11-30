@@ -2,6 +2,43 @@
 
 ## 0.0.164-canary.17
 
+## 0.0.170
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.28
+
+## 0.0.169
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.27
+
+## 0.0.168
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.26
+
+## 0.0.167
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.25
+
+## 0.0.166
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.24
+
+## 0.0.165
+
 ### Patch Changes
 
 - Updated dependencies

@@ -192,6 +192,148 @@ export const search = async <Document extends Record<string, unknown>>(
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * Ask Ai
+ * -----------------------------------------------------------------------------------------------*/
+
+export type AskAiOptions = {
+  conversationId?: string;
+};
+
+export type AskAiResult<Doc = Record<string, unknown>> = SearchResult<Doc> & {
+  conversation: {
+    id: string;
+    answer: string;
+    history: {
+      key: string;
+      question: string;
+      answer: string;
+    }[];
+  };
+};
+
+export const askAi = async <Document extends Record<string, unknown>>(
+  _searchKey: string | null,
+  q: string,
+  opts: SearchOptions
+): Promise<AskAiResult<Document>> => {
+  if (!_searchKey) throw new Error("Not enabled");
+  const { collectionName, valid } = decodeKey(_searchKey);
+  if (!valid) throw new Error("Invalid _searchKey");
+  const client = getSearchClient(_searchKey);
+  if (!client) throw new Error("Couldn't get search client");
+
+  const options: Record<string, unknown> = {
+    q,
+    conversation: true,
+    conversation_model_id: "conv-model-1",
+    queryBy: ["__embedding"],
+    excludeFields: ["__embedding"],
+  };
+  Object.entries(opts).forEach(([key, value]) => {
+    options[camelToSnake(key)] = value;
+  });
+
+  const rawResult = await client
+    .collections(collectionName)
+    .documents()
+    .search(options);
+
+  if (!rawResult.conversation) {
+    throw new Error("Ask AI failed: conversation wasn't found in response.");
+  }
+
+  const rawConversationHistory = (rawResult.conversation
+    .conversation_history as unknown as undefined) ?? [
+    { user: q },
+    { assistant: rawResult.conversation.answer },
+  ];
+
+  const newResult: AskAiResult<Document> = {
+    empty: !rawResult.found,
+    found: rawResult.found,
+    outOf: rawResult.out_of,
+    page: rawResult.page,
+    searchTimeMs: rawResult.search_time_ms,
+    hits:
+      rawResult.hits?.map((hit) => {
+        const document = deFlatten(hit.document) as Document & BaseDoc;
+        const highlightRecord = {} as Record<string, Highlight>;
+        const highlights =
+          hit.highlights?.map((highlight) => {
+            const fieldPath = highlight.field as string;
+
+            const cast: Highlight = {
+              fieldPath,
+              fieldValue: get(document, fieldPath) as unknown,
+              indices: highlight.indices ?? [],
+              matchedTokens: highlight.matched_tokens,
+              snippet: highlight.snippet,
+              snippets: highlight.snippets ?? [],
+              value: highlight.value,
+            };
+
+            highlightRecord[highlight.field as string] = cast;
+
+            return cast;
+          }) ?? [];
+
+        const _key = getHitKey(hit);
+
+        const _getField = (fieldPath: string) => {
+          return get(document, fieldPath) as unknown;
+        };
+
+        const fullHit: Hit<Document> = {
+          _key,
+          curated: hit.curated ?? false,
+          document,
+          highlight: highlightRecord,
+          highlights,
+          textMatch: hit.text_match,
+          _getField,
+          _getFieldHighlight: () => null,
+        };
+
+        fullHit._getFieldHighlight = (
+          fieldPath: string,
+          fallbackFieldPaths?: string[]
+        ) => {
+          return _getFieldHighlightImpl({
+            fieldPath,
+            fallbackFieldPaths,
+            includeFallback: true,
+            hit: fullHit,
+          });
+        };
+
+        return fullHit;
+      }) ?? [],
+    conversation: {
+      answer: rawResult.conversation.answer,
+      id: rawResult.conversation.conversation_id,
+      history: rawConversationHistory
+        .map((h, i) => {
+          const question = h.user;
+          if (!question) return null;
+          const answer = rawConversationHistory[i + 1]?.assistant;
+          if (!answer) return null;
+          return {
+            question,
+            answer,
+            key: `${rawResult.conversation?.conversation_id}-${i / 2}`,
+          };
+        })
+        .filter(
+          (h): h is AskAiResult<Document>["conversation"]["history"][number] =>
+            !!h
+        ),
+    },
+  };
+
+  return newResult;
+};
+
+/* -------------------------------------------------------------------------------------------------
  * Utils
  * -----------------------------------------------------------------------------------------------*/
 

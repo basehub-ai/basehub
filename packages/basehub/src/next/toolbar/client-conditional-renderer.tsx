@@ -17,6 +17,7 @@ export const ClientConditionalRenderer = ({
   revalidateTags,
   resolvedRef,
   getLatestBranches,
+  humanRevalidatePendingTags,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -29,6 +30,10 @@ export const ClientConditionalRenderer = ({
     status: number;
     response: LatestBranch[] | { error: string };
   }>;
+  humanRevalidatePendingTags: (o: {
+    bshbPreviewToken: string;
+    ref: string;
+  }) => Promise<{ success: boolean }>;
   resolvedRef: ResolvedRef;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
@@ -115,6 +120,7 @@ export const ClientConditionalRenderer = ({
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
       resolvedRef={resolvedRef}
       getLatestBranches={getLatestBranches}
+      humanRevalidatePendingTags={humanRevalidatePendingTags}
     />,
     document.body
   );

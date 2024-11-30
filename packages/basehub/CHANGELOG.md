@@ -112,6 +112,36 @@
   * Automatic draftMode detection for Next.js
   * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
 
+## 7.5.28
+
+### Patch Changes
+
+- fix potential infinite loop
+
+## 7.5.27
+
+### Patch Changes
+
+- Fix type error
+
+## 7.5.26
+
+### Patch Changes
+
+- Add manual revalidation for pending tags
+
+## 7.5.25
+
+### Patch Changes
+
+- add key to history items
+
+## 7.5.24
+
+### Patch Changes
+
+- add ask ai primitive
+
 ## 7.5.23
 
 ### Patch Changes
