@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { sendEvent, updateEvent } from "../../events";
 
+// this needs to match our BSHBEventSchema scalar type so that it _just works_
 export type Field = {
   id: string;
   name: string;
@@ -64,7 +65,7 @@ export type FormProps = {
       };
 };
 
-export const Form = (props: FormProps): ReactNode => {
+export const unstable_Form = (props: FormProps): ReactNode => {
   const fields = props.schema as Field[] | undefined;
 
   return (
