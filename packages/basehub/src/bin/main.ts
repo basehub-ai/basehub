@@ -424,6 +424,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       // alias react-rich-text and other packages to the generated client for better import experience
       [
         "react-rich-text",
+        "react-form",
         "react-code-block/index",
         "react-code-block/client",
         "api-transaction",
