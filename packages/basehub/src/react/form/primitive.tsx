@@ -1,6 +1,7 @@
+"use client";
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import type { ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { sendEvent, updateEvent } from "../../events";
 
 // this needs to match our BSHBEventSchema scalar type so that it _just works_
@@ -81,56 +82,62 @@ export const unstable_Form = ({
 }: FormProps): ReactNode => {
   const fields = schema as Field[] | undefined;
 
-  return (
-    <form
-      {...rest}
-      onSubmit={(e) => {
-        e.preventDefault();
-        const form = e.target as HTMLFormElement;
-        const formData = new FormData(form);
-        const formattedData: Record<string, unknown> = {};
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const form = e.target as HTMLFormElement;
+      const formData = new FormData(form);
+      const formattedData: Record<string, unknown> = {};
 
-        fields?.forEach((field) => {
-          const key = field.name;
-          const value = formData.get(key);
-          switch (field.type) {
-            case "checkbox":
-              formattedData[key] = value === "on";
-              break;
-            case "select":
-              formattedData[key] = String(value).split(",");
-            case "radio":
-              formattedData[key] = value;
-              break;
-            case "date":
-            case "datetime":
-              formattedData[key] = new Date(value as string).toISOString();
-              break;
-            case "number":
-              formattedData[key] = Number(value);
-              break;
-            default:
-              formattedData[key] = value;
-              break;
-          }
-        });
-        if (action.type === "update") {
-          updateEvent(action.adminKey as any, action.eventId, formattedData);
-        } else {
-          sendEvent(action.ingestKey as any, formattedData);
+      fields?.forEach((field) => {
+        const key = field.name;
+        const value = formData.get(key);
+        switch (field.type) {
+          case "checkbox":
+            formattedData[key] = value === "on";
+            break;
+          case "select":
+            formattedData[key] = String(value).split(",");
+            break;
+          case "radio":
+            formattedData[key] = value;
+            break;
+          case "date":
+          case "datetime":
+            formattedData[key] = new Date(value as string).toISOString();
+            break;
+          case "number":
+            formattedData[key] = Number(value);
+            break;
+          default:
+            formattedData[key] = value;
         }
-      }}
-    >
-      {fields?.map((node, index) => {
-        return (
-          <FieldNode
-            field={node}
-            key={index}
-            components={components}
-            disableDefaultComponents={disableDefaultComponents}
-          />
+      });
+
+      if (action.type === "update") {
+        await updateEvent(
+          action.adminKey as any,
+          action.eventId,
+          formattedData
         );
-      })}
+      } else {
+        await sendEvent(action.ingestKey as any, formattedData);
+      }
+    },
+    [action, fields]
+  );
+
+  return (
+    <form {...rest} onSubmit={handleSubmit}>
+      {fields?.map((node, index) => (
+        <FieldNode
+          field={node}
+          key={index}
+          components={components}
+          disableDefaultComponents={disableDefaultComponents}
+        />
+      ))}
       {children ?? <button type="submit">Submit</button>}
     </form>
   );
@@ -252,17 +259,11 @@ const FieldNode = ({
   components?: Partial<Handlers>;
   disableDefaultComponents?: boolean;
 }) => {
-  let Handler: Handlers[keyof Handlers] | undefined;
-  if (components) {
-    Handler = components[field.type];
-  }
+  const Handler: Handlers[keyof Handlers] | undefined =
+    components?.[field.type] ??
+    (!disableDefaultComponents ? defaultHandlers[field.type] : undefined) ??
+    (() => <></>);
 
-  if (!Handler && !disableDefaultComponents) {
-    Handler = defaultHandlers[field.type];
-  } else if (!Handler) {
-    Handler = () => <></>;
-  }
-
-  // @ts-expect-error
+  // @ts-expect-error Distinctive union breaks with type inference
   return <Handler {...field} />;
 };
