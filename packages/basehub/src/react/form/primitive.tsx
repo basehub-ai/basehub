@@ -63,13 +63,27 @@ export type FormProps = {
         adminKey: string;
         eventId: string;
       };
-};
+} & Omit<
+  React.DetailedHTMLProps<
+    React.FormHTMLAttributes<HTMLFormElement>,
+    HTMLFormElement
+  >,
+  "action" | "onSubmit" | "children"
+>;
 
-export const unstable_Form = (props: FormProps): ReactNode => {
-  const fields = props.schema as Field[] | undefined;
+export const unstable_Form = ({
+  schema,
+  components,
+  disableDefaultComponents,
+  children,
+  action,
+  ...rest
+}: FormProps): ReactNode => {
+  const fields = schema as Field[] | undefined;
 
   return (
     <form
+      {...rest}
       onSubmit={(e) => {
         e.preventDefault();
         const form = e.target as HTMLFormElement;
@@ -100,14 +114,10 @@ export const unstable_Form = (props: FormProps): ReactNode => {
               break;
           }
         });
-        if (props.action.type === "update") {
-          updateEvent(
-            props.action.adminKey as any,
-            props.action.eventId,
-            formattedData
-          );
+        if (action.type === "update") {
+          updateEvent(action.adminKey as any, action.eventId, formattedData);
         } else {
-          sendEvent(props.action.ingestKey as any, formattedData);
+          sendEvent(action.ingestKey as any, formattedData);
         }
       }}
     >
@@ -116,12 +126,12 @@ export const unstable_Form = (props: FormProps): ReactNode => {
           <FieldNode
             field={node}
             key={index}
-            components={props.components}
-            disableDefaultComponents={props.disableDefaultComponents}
+            components={components}
+            disableDefaultComponents={disableDefaultComponents}
           />
         );
       })}
-      {props.children ?? <button type="submit">Submit</button>}
+      {children ?? <button type="submit">Submit</button>}
     </form>
   );
 };
