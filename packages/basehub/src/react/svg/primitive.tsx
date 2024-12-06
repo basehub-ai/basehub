@@ -33,10 +33,10 @@ const DEFAULT_COMPONENTS: ComponentsOverride = {
 };
 
 export const SVG = ({
-  children,
+  content,
   components = DEFAULT_COMPONENTS,
 }: {
-  children: string;
+  content: string;
   components?: Partial<ComponentsOverride>;
 }) => {
   // Merge default components with custom ones
@@ -84,18 +84,25 @@ export const SVG = ({
           const name = attr.name.replace(/-([a-z])/g, (g) =>
             (g?.[1] as string).toUpperCase()
           );
+
+          if (name === "class") {
+            props.className = attr.value as JSX.IntrinsicElements[typeof tag];
+            return;
+          }
+
           props[name] = attr.value as JSX.IntrinsicElements[typeof tag];
         });
 
         // Convert children
-        const _children = Array.from(node.childNodes)
+        const children = Array.from(node.childNodes)
+          // .map((child) => <React.Fragment>{convertNode(child as Element)}</React.Fragment>)
           .map((child) => convertNode(child as Element))
           .filter(Boolean);
 
         // Return the React element
-        if (_children.length === 0) return Component(props);
+        if (children.length === 0) return Component(props);
 
-        return Component({ ...props, children: _children });
+        return Component({ ...props, children });
       };
 
       return convertNode(svgElement);
@@ -106,7 +113,7 @@ export const SVG = ({
   };
 
   // Return the parsed and rendered SVG
-  const renderedSvg = parseAndRenderSVG(children);
+  const renderedSvg = parseAndRenderSVG(content);
   if (!renderedSvg) return null;
 
   return renderedSvg;
