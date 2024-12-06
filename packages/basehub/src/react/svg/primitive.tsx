@@ -32,6 +32,27 @@ const DEFAULT_COMPONENTS: ComponentsOverride = {
   text: (props) => <text {...props} />,
 };
 
+// Helper function to convert style string to React style object
+const parseStyleString = (styleString: string): React.CSSProperties => {
+  return styleString
+    .split(";")
+    .filter((style) => style.trim() !== "")
+    .reduce((styleObj, style) => {
+      const [property, value] = style.split(":").map((s) => s.trim());
+      if (property && value) {
+        // Convert CSS property names to camelCase
+        const camelCaseProperty = property.replace(/-([a-z])/g, (_, letter) =>
+          letter.toUpperCase()
+        );
+
+        // Special handling for numeric values
+        (styleObj as any)[camelCaseProperty] =
+          /^\d+(\.\d+)?(px|em|rem|%)?$/.test(value) ? parseFloat(value) : value;
+      }
+      return styleObj;
+    }, {} as React.CSSProperties);
+};
+
 export const SVG = ({
   content,
   components = DEFAULT_COMPONENTS,
@@ -84,9 +105,17 @@ export const SVG = ({
           const name = attr.name.replace(/-([a-z])/g, (g) =>
             (g?.[1] as string).toUpperCase()
           );
+          const attributeValue =
+            attr.value as JSX.IntrinsicElements[typeof tag];
 
           if (name === "class") {
-            props.className = attr.value as JSX.IntrinsicElements[typeof tag];
+            props.className = attributeValue;
+            return;
+          }
+
+          // Special handling for style attribute
+          if (name === "style") {
+            props[name] = parseStyleString(attributeValue as string) as any;
             return;
           }
 
@@ -95,7 +124,6 @@ export const SVG = ({
 
         // Convert children
         const children = Array.from(node.childNodes)
-          // .map((child) => <React.Fragment>{convertNode(child as Element)}</React.Fragment>)
           .map((child) => convertNode(child as Element))
           .filter(Boolean);
 
