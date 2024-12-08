@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import GithubSlugger from "github-slugger";
 import { extractTextFromNode } from "./util/heading-id";
+import type { Language } from "../code-block";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -13,11 +14,7 @@ interface Attrs {
 const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
 type Mark =
-  | { type: "bold" | "italic" | "underline" | "strike" | "kbd" }
-  | {
-      type: "code";
-      attrs: { isInline?: boolean; language: string; code: string };
-    }
+  | { type: "bold" | "italic" | "underline" | "strike" | "kbd" | "code" }
   | { type: "link"; attrs: { href: string; target: string; class: string } }
   | { type: "basehub-inline-block"; attrs: { id: string } };
 
@@ -117,12 +114,7 @@ type Handlers = {
   em: (props: { children: ReactNode }) => ReactNode;
   s: (props: { children: ReactNode }) => ReactNode;
   kbd: (props: { children: ReactNode }) => ReactNode;
-  code: (props: {
-    children: ReactNode;
-    isInline: boolean;
-    language: string;
-    code: string;
-  }) => ReactNode;
+  code: (props: { children: ReactNode }) => ReactNode;
   a: (props: {
     children: ReactNode;
     href: string;
@@ -160,7 +152,7 @@ type Handlers = {
   blockquote: (props: { children: ReactNode }) => ReactNode;
   pre: (props: {
     children: ReactNode;
-    language: string;
+    language: Language;
     code: string;
   }) => ReactNode;
   table: (props: { children: ReactNode }) => ReactNode;
@@ -256,17 +248,7 @@ const defaultHandlers: Handlers = {
   em: ({ children }) => <em>{children}</em>,
   s: ({ children }) => <s>{children}</s>,
   kbd: ({ children }) => <kbd>{children}</kbd>,
-  code: ({ children, isInline, language }) => {
-    return (
-      <code
-        {...(isInline === false
-          ? { "data-language": language, className: `language-${language}` }
-          : {})}
-      >
-        {children}
-      </code>
-    );
-  },
+  code: ({ children }) => <code>{children}</code>,
   ol: ({ children }) => <ol>{children}</ol>,
   ul: ({ children }) => <ul>{children}</ul>,
   li: ({ children, ...rest }) => {
@@ -332,7 +314,6 @@ const Node = ({
   node,
   components,
   blocks,
-  parent,
   slugger,
   disableDefaultComponents,
 }: {
@@ -367,16 +348,7 @@ const Node = ({
       props = { children } satisfies ExtractPropsForHandler<Handlers["p"]>;
       break;
     case "text":
-      const forceCodeMark = parent?.type === "codeBlock";
       const clonedMarks = [...(node.marks ?? [])];
-      if (forceCodeMark && !clonedMarks.some((mark) => mark.type === "code")) {
-        const language = parent?.attrs?.language ?? "text";
-        const code = parent.content?.[0].text ?? "";
-        clonedMarks.push({
-          type: "code",
-          attrs: { isInline: false, language, code },
-        } satisfies Mark);
-      }
       Handler = ({ children }: { children?: ReactNode }) => (
         <Marks
           marks={clonedMarks}
@@ -458,7 +430,7 @@ const Node = ({
       const code = node.content?.[0].text ?? "";
       props = {
         children,
-        language: node.attrs?.language ?? "text",
+        language: (node.attrs?.language ?? "text") as Language,
         code,
       } satisfies ExtractPropsForHandler<Handlers["pre"]>;
       break;
@@ -650,9 +622,6 @@ const Marks = ({
         (disableDefaultComponents ? () => <></> : defaultHandlers.code);
       props = {
         children,
-        isInline: mark.attrs.isInline ?? true,
-        language: mark.attrs.language ?? "text",
-        code: mark.attrs.code ?? "",
       } satisfies ExtractPropsForHandler<Handlers["code"]>;
       break;
     case "underline":
