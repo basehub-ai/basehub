@@ -374,9 +374,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     }
 
     await esbuild.build({
-      entryPoints: [
-        path.join(basehubModulePath, "src", "events", "index.ts"),
-      ],
+      entryPoints: [path.join(basehubModulePath, "src", "events", "index.ts")],
       bundle: true,
       outdir: analyticsOutDir,
       minify: false,
@@ -423,6 +421,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     if (output !== "node_modules") {
       // alias react-rich-text and other packages to the generated client for better import experience
       [
+        "react-svg",
         "react-rich-text",
         "react-form",
         "react-code-block/index",
@@ -479,10 +478,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
         "next-toolbar.d.ts"
       );
       const analyticsIndexJsPath = path.join(basehubModulePath, "events.js");
-      const analyticsIndexDtsPath = path.join(
-        basehubModulePath,
-        "events.d.ts"
-      );
+      const analyticsIndexDtsPath = path.join(basehubModulePath, "events.d.ts");
       fs.writeFileSync(
         indexJsPath,
         ensureCrossPlatformTsImport(
