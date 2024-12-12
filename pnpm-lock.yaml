@@ -95,10 +95,10 @@ importers:
         specifier: ^4.0.8
         version: 4.0.8
       lodash.get:
-        specifier: 4.4.2
+        specifier: ^4.4.2
         version: 4.4.2
       pusher-js:
-        specifier: 8.3.0
+        specifier: ^8.3.0
         version: 8.3.0
       resolve-pkg:
         specifier: 2.0.0
@@ -107,16 +107,16 @@ importers:
         specifier: ^0.0.1
         version: 0.0.1
       shiki:
-        specifier: ^1.24.2
+        specifier: ^1.17.7
         version: 1.24.2
       sonner:
-        specifier: 1.7.1
+        specifier: ^1.7.1
         version: 1.7.1(react-dom@18.2.0)(react@18.2.0)
       typesense:
-        specifier: 1.8.2
+        specifier: ^1.8.2
         version: 1.8.2(@babel/runtime@7.24.6)
       zod:
-        specifier: 3.22.1
+        specifier: ^3.22.1
         version: 3.22.1
     devDependencies:
       '@types/lodash.debounce':
