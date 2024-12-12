@@ -35,7 +35,10 @@ Expected origin to be one of:
           !param.startsWith("width=") &&
           !param.startsWith("quality=") &&
           !param.startsWith("w=") &&
-          !param.startsWith("q=")
+          !param.startsWith("q=") &&
+          // also strip height because next.js doesn't need it
+          !param.startsWith("h=") &&
+          !param.startsWith("height=")
         );
       });
       let newParams = [...filteredParams, ...params].join(",");
@@ -58,6 +61,9 @@ Expected origin to be one of:
     if (url.searchParams.has("format") === false) {
       url.searchParams.set("format", "auto");
     }
+    // also strip height because next.js doesn't need it
+    url.searchParams.delete("height");
+    url.searchParams.delete("h");
   }
 
   // pass old origin to new origin
