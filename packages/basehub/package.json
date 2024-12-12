@@ -58,14 +58,14 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.0",
     "lodash.debounce": "^4.0.8",
-    "lodash.get": "4.4.2",
-    "pusher-js": "8.3.0",
+    "lodash.get": "^4.4.2",
+    "pusher-js": "^8.3.0",
     "resolve-pkg": "2.0.0",
     "server-only": "^0.0.1",
     "shiki": "^1.17.7",
-    "sonner": "1.5.0",
-    "typesense": "1.8.2",
-    "zod": "3.22.1"
+    "sonner": "^1.7.1",
+    "typesense": "^1.8.2",
+    "zod": "^3.22.1"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.9",
