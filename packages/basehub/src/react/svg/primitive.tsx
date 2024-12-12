@@ -124,7 +124,11 @@ export const SVG = ({
 
         // Convert children
         const children = Array.from(node.childNodes)
-          .map((child) => convertNode(child as Element))
+          .map((child, index) => (
+            <React.Fragment key={index}>
+              {convertNode(child as Element)}
+            </React.Fragment>
+          ))
           .filter(Boolean);
 
         // Return the React element
