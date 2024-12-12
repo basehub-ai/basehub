@@ -1,6 +1,5 @@
 import * as React from "react";
 import * as z from "zod";
-
 import { DOMParser } from "xmldom";
 
 const svgComponentSchema = z.union([
@@ -13,23 +12,58 @@ const svgComponentSchema = z.union([
   z.literal("polyline"),
   z.literal("polygon"),
   z.literal("text"),
+  z.literal("filter"),
+  z.literal("feFlood"),
+  z.literal("feColorMatrix"),
+  z.literal("feOffset"),
+  z.literal("feGaussianBlur"),
+  z.literal("feBlend"),
+  z.literal("mask"),
+  z.literal("defs"),
 ]);
+
 type SvgComponent = z.infer<typeof svgComponentSchema>;
 
 type ComponentsOverride = {
-  [K in SvgComponent]: (props: JSX.IntrinsicElements[K]) => React.ReactNode;
+  [K in SvgComponent]: (props: JSX.IntrinsicElements[K]) => React.ReactElement;
 };
 
 const DEFAULT_COMPONENTS: ComponentsOverride = {
-  svg: (props) => <svg {...props} />,
-  path: (props) => <path {...props} />,
-  circle: (props) => <circle {...props} />,
-  rect: (props) => <rect {...props} />,
-  g: (props) => <g {...props} />,
-  line: (props) => <line {...props} />,
-  polyline: (props) => <polyline {...props} />,
-  polygon: (props) => <polygon {...props} />,
-  text: (props) => <text {...props} />,
+  svg: (props) => React.createElement("svg", props),
+  path: (props) => React.createElement("path", props),
+  circle: (props) => React.createElement("circle", props),
+  rect: (props) => React.createElement("rect", props),
+  g: (props) => React.createElement("g", props),
+  line: (props) => React.createElement("line", props),
+  polyline: (props) => React.createElement("polyline", props),
+  polygon: (props) => React.createElement("polygon", props),
+  text: (props) => React.createElement("text", props),
+  filter: (props) => React.createElement("filter", props),
+  feFlood: (props) => React.createElement("feFlood", props),
+  feColorMatrix: (props) => React.createElement("feColorMatrix", props),
+  feOffset: (props) => React.createElement("feOffset", props),
+  feGaussianBlur: (props) => React.createElement("feGaussianBlur", props),
+  feBlend: (props) => React.createElement("feBlend", props),
+  mask: (props) => React.createElement("mask", props),
+  defs: (props) => React.createElement("defs", props),
+};
+
+const sanitizeSVGString = (svgString: string): string => {
+  // Remove any XML declaration
+  let sanitized = svgString.replace(/<\?xml.*\?>\s*/g, "");
+
+  // Ensure self-closing tags are properly formatted
+  sanitized = sanitized.replace(/\s*\/\s*>/g, "/>");
+
+  // Add namespace if missing
+  if (!sanitized.includes('xmlns="http://www.w3.org/2000/svg"')) {
+    sanitized = sanitized.replace(
+      /<svg/,
+      '<svg xmlns="http://www.w3.org/2000/svg"'
+    );
+  }
+
+  return sanitized;
 };
 
 // Helper function to convert style string to React style object
@@ -65,12 +99,24 @@ export const SVG = ({
 
   const parseAndRenderSVG = (svgString: string) => {
     try {
+      // Sanitize the SVG string first
+      const sanitizedSvgString = sanitizeSVGString(svgString);
+
       // Create a DOM parser
       const parser =
         typeof window !== "undefined"
           ? new DOMParser()
           : new (require("xmldom").DOMParser)();
-      const doc = parser.parseFromString(svgString, "image/svg+xml");
+
+      // Parse with error handling
+      const doc = parser.parseFromString(sanitizedSvgString, "image/svg+xml");
+
+      // Check for parsing errors
+      const parseErrors = doc.getElementsByTagName("parsererror");
+      if (parseErrors.length > 0) {
+        throw new Error(`XML Parsing Error: ${parseErrors[0].textContent}`);
+      }
+
       const svgElement = doc.documentElement;
 
       // Recursive function to convert DOM nodes to React elements
@@ -86,7 +132,7 @@ export const SVG = ({
         }
 
         // Get the tag name and convert to lowercase
-        const tagName = node.tagName?.toLowerCase();
+        const tagName = node.tagName;
 
         // Skip if not a valid tag
         if (!tagName) return null;
@@ -131,15 +177,17 @@ export const SVG = ({
           ))
           .filter(Boolean);
 
-        // Return the React element
-        if (children.length === 0) return Component(props);
+        if (typeof Component !== "function") return null;
 
-        return Component({ ...props, children });
+        // Return the React element
+        return children.length === 0
+          ? Component(props)
+          : Component({ ...props, children });
       };
 
       return convertNode(svgElement);
     } catch (error) {
-      console.error("Error parsing SVG:", error);
+      console.error("SVG Parsing Error:", error);
       return null;
     }
   };
@@ -148,5 +196,5 @@ export const SVG = ({
   const renderedSvg = parseAndRenderSVG(content);
   if (!renderedSvg) return null;
 
-  return renderedSvg;
+  return renderedSvg as React.ReactElement;
 };
