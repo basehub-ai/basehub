@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.29
+
+### Patch Changes
+
+- Strip out height in BaseHubImage, as next/image doesn't require it
+
 ## 7.5.28
 
 ### Patch Changes
