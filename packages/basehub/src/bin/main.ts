@@ -424,6 +424,7 @@ import type { RichTextNode, RichTextTocNode } from './api-transaction';
     if (output !== "node_modules") {
       // alias react-rich-text and other packages to the generated client for better import experience
       [
+        "react-svg",
         "react-rich-text",
         "react-form",
         "react-code-block/index",
