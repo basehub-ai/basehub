@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.31
+
+### Patch Changes
+
+- rollback shiki version
+
 ## 7.5.30
 
 ### Patch Changes
