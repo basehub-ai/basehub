@@ -1,6 +1,6 @@
-import { Node } from "../primitive";
+import { RichTextNode } from "@basehub/mutation-api-helpers";
 
-export function extractTextFromNode(node?: Node) {
+export function extractTextFromNode(node?: RichTextNode) {
   let textContent = "";
 
   node?.content?.forEach((child) => {

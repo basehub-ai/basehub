@@ -261,7 +261,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
 
       // add import for Transaction at the start of the file
       schemaFileContents +=
-        "\nimport type { Transaction } from './api-transaction';\nimport type { TransactionStatusGenqlSelection } from './schema';\n";
+        "\nimport type { Transaction, RichTextNode, RichTextTocNode } from './api-transaction';\nimport type { TransactionStatusGenqlSelection } from './schema';\n";
     }
 
     // 3. append our basehub function to the end of the file.
@@ -374,9 +374,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     }
 
     await esbuild.build({
-      entryPoints: [
-        path.join(basehubModulePath, "src", "events", "index.ts"),
-      ],
+      entryPoints: [path.join(basehubModulePath, "src", "events", "index.ts")],
       bundle: true,
       outdir: analyticsOutDir,
       minify: false,
@@ -479,10 +477,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
         "next-toolbar.d.ts"
       );
       const analyticsIndexJsPath = path.join(basehubModulePath, "events.js");
-      const analyticsIndexDtsPath = path.join(
-        basehubModulePath,
-        "events.d.ts"
-      );
+      const analyticsIndexDtsPath = path.join(basehubModulePath, "events.d.ts");
       fs.writeFileSync(
         indexJsPath,
         ensureCrossPlatformTsImport(

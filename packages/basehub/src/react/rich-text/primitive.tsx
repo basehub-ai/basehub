@@ -4,109 +4,17 @@ import type { ReactNode } from "react";
 import GithubSlugger from "github-slugger";
 import { extractTextFromNode } from "./util/heading-id";
 import type { Language } from "../code-block";
+import type {
+  RichTextNode,
+  RichTextTocNode,
+  Mark,
+} from "@basehub/mutation-api-helpers";
 
 const isDev = process.env.NODE_ENV === "development";
 
-interface Attrs {
-  readonly [attr: string]: any;
-}
-
 const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
-type Mark =
-  | { type: "bold" | "italic" | "underline" | "strike" | "kbd" | "code" }
-  | { type: "link"; attrs: { href: string; target: string; class: string } }
-  | { type: "basehub-inline-block"; attrs: { id: string } };
-
 type Marks = Array<Mark>;
-
-export type Node =
-  | {
-      type:
-        | "paragraph"
-        | "bulletList"
-        | "listItem"
-        | "taskList"
-        | "blockquote"
-        | "table"
-        | "tableRow"
-        | "tableBody";
-      attrs?: Attrs;
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "text";
-      text: string;
-      attrs?: Attrs;
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "codeBlock";
-      attrs: {
-        language?: string;
-      };
-      text: string;
-      marks?: Array<Mark>;
-      content?: [{ type: "text"; text: string }];
-    }
-  | {
-      type: "orderedList";
-      attrs?: { start: number };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "taskItem";
-      attrs?: { checked: boolean };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "heading";
-      attrs: { level: number };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "horizontalRule";
-      content?: Array<Node>;
-    }
-  | {
-      type: "hardBreak";
-      content?: Array<Node>;
-    }
-  | {
-      type: "image";
-      attrs: {
-        src: string;
-        alt?: string;
-        width?: number;
-        height?: number;
-        caption?: string;
-      };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "video";
-      attrs: { src: string; width?: number; height?: number; caption?: string };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "tableCell" | "tableHeader" | "tableFooter";
-      attrs: { colspan: number; rowspan: number };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "basehub-block";
-      attrs: { id: string };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    };
 
 type Handlers = {
   p: (props: { children: ReactNode }) => ReactNode;
@@ -199,7 +107,7 @@ type MarkHandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
 export type RichTextProps<
   CustomBlocks extends CustomBlocksBase = readonly any[],
 > = {
-  content?: Node[];
+  content?: RichTextNode[];
   /**
    * @deprecated Use `content` instead.
    */
@@ -216,7 +124,7 @@ export const RichText = <
 >(
   props: RichTextProps<CustomBlocks>
 ): ReactNode => {
-  const value = (props.content ?? props.children) as Node[] | undefined;
+  const value = (props.content ?? props.children) as RichTextNode[] | undefined;
   const slugger = new GithubSlugger();
 
   return (
@@ -317,10 +225,10 @@ const Node = ({
   slugger,
   disableDefaultComponents,
 }: {
-  node: Node;
+  node: RichTextNode;
   components?: Partial<Handlers>;
   blocks?: readonly CustomBlockBase[];
-  parent?: Node;
+  parent?: RichTextNode;
   slugger: GithubSlugger;
   disableDefaultComponents?: boolean;
 }) => {
@@ -723,3 +631,35 @@ export function createRichTextWithDefaultComponents(
     );
   };
 }
+
+/* -------------------------------------------------------------------------------------------------
+ * TOC
+ * -----------------------------------------------------------------------------------------------*/
+
+type TocHandlers = Pick<Handlers, "ol" | "p" | "a">;
+
+export type TocProps = {
+  content?: RichTextTocNode[];
+  components?: Partial<TocHandlers>;
+  disableDefaultComponents?: boolean;
+};
+
+export const TOC = (props: TocProps): ReactNode => {
+  const slugger = new GithubSlugger();
+
+  return (
+    <>
+      {props.content?.map((node, index) => {
+        return (
+          <Node
+            node={node as RichTextNode}
+            key={index}
+            components={props.components}
+            slugger={slugger}
+            disableDefaultComponents={props.disableDefaultComponents}
+          />
+        );
+      })}
+    </>
+  );
+};

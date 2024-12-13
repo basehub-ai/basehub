@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.18
+
+### Patch Changes
+
+- type rich text content and toc, introduce <TOC />
+
 ## 8.0.0-canary.17
 
 ### Patch Changes
@@ -111,6 +117,7 @@
 
   * Automatic draftMode detection for Next.js
   * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
+
 ## 7.5.30
 
 ### Patch Changes
