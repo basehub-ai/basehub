@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.25
+
+### Patch Changes
+
+- fix rich text and pump return types
+
 ## 8.0.0-canary.24
 
 ### Patch Changes

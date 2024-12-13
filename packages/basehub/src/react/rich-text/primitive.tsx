@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import GithubSlugger from "github-slugger";
 import { extractTextFromNode } from "./util/heading-id";
 import type { Language } from "../code-block";
@@ -123,7 +123,7 @@ export const RichText = <
   CustomBlocks extends CustomBlocksBase = readonly any[],
 >(
   props: RichTextProps<CustomBlocks>
-): ReactNode => {
+): JSX.Element => {
   const value = (props.content ?? props.children) as RichTextNode[] | undefined;
   const slugger = new GithubSlugger();
 
@@ -619,7 +619,7 @@ export function createRichTextWithDefaultComponents(
 ) {
   return <CustomBlocks extends CustomBlocksBase = readonly any[]>(
     props: RichTextProps<CustomBlocks>
-  ): ReactNode => {
+  ): JSX.Element => {
     return (
       <RichText<CustomBlocks>
         {...props}
@@ -638,7 +638,7 @@ export function createRichTextWithDefaultComponents(
 
 type TocHandlers = Pick<Handlers, "ol" | "p" | "a">;
 
-export type TocProps = {
+export type TOCProps = {
   content?: RichTextTocNode[];
   /**
    * @deprecated Use `content` instead.
@@ -648,7 +648,7 @@ export type TocProps = {
   disableDefaultComponents?: boolean;
 };
 
-export const TOC = (props: TocProps): ReactNode => {
+export const TOC = (props: TOCProps): JSX.Element => {
   const slugger = new GithubSlugger();
 
   const value = (props.content ?? props.children) as RichTextTocNode[];
