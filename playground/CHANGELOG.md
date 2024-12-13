@@ -1,5 +1,12 @@
 # playground
 
+## 0.0.164-canary.20
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.20
+
 ## 0.0.164-canary.19
 
 ## 0.0.173

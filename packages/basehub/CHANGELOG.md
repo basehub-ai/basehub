@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.20
+
+### Patch Changes
+
+- rollback shiki
+
 ## 8.0.0-canary.19
 
 ### Patch Changes
