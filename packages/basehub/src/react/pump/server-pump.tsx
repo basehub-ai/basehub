@@ -52,7 +52,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   children,
   queries,
   ...basehubProps
-}: PumpProps<Queries>) => {
+}: PumpProps<Queries>): Promise<React.JSX.Element> => {
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];

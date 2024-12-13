@@ -190,6 +190,7 @@ export const main = async (
     }
 
     const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
+    const generatedSchemaPath = path.join(basehubOutputPath, "schema.ts");
 
     // We'll patch some things from the generated code.
     let schemaFileContents = fs.readFileSync(generatedMainExportPath, "utf-8");
@@ -258,7 +259,6 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     },
 >`
       );
-
       // add import for Transaction at the start of the file
       schemaFileContents +=
         "\nimport type { Transaction } from './api-transaction';\nimport type { TransactionStatusGenqlSelection } from './schema';\n";
@@ -278,6 +278,12 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
 
     // 4. write the file back.
     fs.writeFileSync(generatedMainExportPath, schemaFileContents);
+    fs.appendFileSync(
+      generatedSchemaPath,
+      `
+import type { RichTextNode, RichTextTocNode } from './api-transaction';
+`
+    );
 
     // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
     const peerDependencies = [
@@ -396,17 +402,14 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
      * DTS stuff.
      */
     copyDirSync(
-      path.join(basehubModulePath, "dts", "src", "react", "pump"),
+      path.join(basehubModulePath, "dts", "react", "pump"),
       reactPumpOutDir
     );
     copyDirSync(
-      path.join(basehubModulePath, "dts", "src", "next", "toolbar"),
+      path.join(basehubModulePath, "dts", "next", "toolbar"),
       nextToolbarOutDir
     );
-    copyDirSync(
-      path.join(basehubModulePath, "dts", "src", "events"),
-      analyticsOutDir
-    );
+    copyDirSync(path.join(basehubModulePath, "dts", "events"), analyticsOutDir);
 
     if (args["--debug"]) {
       console.log(`[basehub] copied dts for react pump to: ${reactPumpOutDir}`);

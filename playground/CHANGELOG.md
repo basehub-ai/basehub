@@ -1,6 +1,80 @@
 # playground
 
+## 0.0.164-canary.25
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.25
+
+## 0.0.164-canary.24
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.24
+
+## 0.0.164-canary.23
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.23
+
+## 0.0.164-canary.22
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.22
+
+## 0.0.164-canary.21
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.21
+
+## 0.0.164-canary.20
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.20
+
+## 0.0.164-canary.19
+
+## 0.0.173
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.19
+
+## 0.0.164-canary.18
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.18
+
 ## 0.0.164-canary.17
+
+- basehub@7.5.31
+
+## 0.0.172
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.30
+
+## 0.0.171
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@7.5.29
 
 ## 0.0.170
 

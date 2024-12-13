@@ -1,1 +1,2 @@
-export * from "../../playground/.basehub/react-pump/index.d.ts";
+/* eslint-disable import/no-unresolved */
+export * from "./dist/generated-client/react-pump";

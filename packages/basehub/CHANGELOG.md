@@ -1,5 +1,53 @@
 # basehub
 
+## 8.0.0-canary.25
+
+### Patch Changes
+
+- fix rich text and pump return types
+
+## 8.0.0-canary.24
+
+### Patch Changes
+
+- FIX
+
+## 8.0.0-canary.23
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.22
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.21
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.20
+
+### Patch Changes
+
+- rollback shiki
+
+## 8.0.0-canary.19
+
+### Patch Changes
+
+- fix dts thing?
+
+## 8.0.0-canary.18
+
+### Patch Changes
+
+- type rich text content and toc, introduce <TOC />
+
 ## 8.0.0-canary.17
 
 ### Patch Changes
@@ -111,6 +159,24 @@
 
   * Automatic draftMode detection for Next.js
   * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
+
+## 7.5.31
+
+### Patch Changes
+
+- rollback shiki version
+
+## 7.5.30
+
+### Patch Changes
+
+- upgrade sonner
+
+## 7.5.29
+
+### Patch Changes
+
+- Strip out height in BaseHubImage, as next/image doesn't require it
 
 ## 7.5.28
 
