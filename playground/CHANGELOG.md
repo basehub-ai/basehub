@@ -2,6 +2,8 @@
 
 ## 0.0.164-canary.19
 
+## 0.0.173
+
 ### Patch Changes
 
 - Updated dependencies
@@ -15,6 +17,8 @@
   - basehub@8.0.0-canary.18
 
 ## 0.0.164-canary.17
+
+- basehub@7.5.31
 
 ## 0.0.172
 

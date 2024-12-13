@@ -124,6 +124,12 @@
   * Automatic draftMode detection for Next.js
   * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
 
+## 7.5.31
+
+### Patch Changes
+
+- rollback shiki version
+
 ## 7.5.30
 
 ### Patch Changes
