@@ -89,12 +89,19 @@ const parseStyleString = (styleString: string): React.CSSProperties => {
 };
 
 export const SVG = ({
-  content,
+  content: _content,
+  children,
   components = DEFAULT_COMPONENTS,
 }: {
   content: string;
+  /**
+   * @deprecated Use `content` instead.
+   */
+  children?: string;
   components?: Partial<ComponentsOverride>;
 }) => {
+  const content = _content ?? children;
+
   // Merge default components with custom ones
   const finalComponents = { ...DEFAULT_COMPONENTS, ...components };
 
