@@ -640,6 +640,10 @@ type TocHandlers = Pick<Handlers, "ol" | "p" | "a">;
 
 export type TocProps = {
   content?: RichTextTocNode[];
+  /**
+   * @deprecated Use `content` instead.
+   */
+  children?: unknown;
   components?: Partial<TocHandlers>;
   disableDefaultComponents?: boolean;
 };
@@ -647,9 +651,11 @@ export type TocProps = {
 export const TOC = (props: TocProps): ReactNode => {
   const slugger = new GithubSlugger();
 
+  const value = (props.content ?? props.children) as RichTextTocNode[];
+
   return (
     <>
-      {props.content?.map((node, index) => {
+      {value?.map((node, index) => {
         return (
           <Node
             node={node as RichTextNode}
