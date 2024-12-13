@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.19
+
+### Patch Changes
+
+- fix dts thing?
+
 ## 8.0.0-canary.18
 
 ### Patch Changes

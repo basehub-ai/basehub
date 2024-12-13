@@ -396,17 +396,14 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
      * DTS stuff.
      */
     copyDirSync(
-      path.join(basehubModulePath, "dts", "src", "react", "pump"),
+      path.join(basehubModulePath, "dts", "react", "pump"),
       reactPumpOutDir
     );
     copyDirSync(
-      path.join(basehubModulePath, "dts", "src", "next", "toolbar"),
+      path.join(basehubModulePath, "dts", "next", "toolbar"),
       nextToolbarOutDir
     );
-    copyDirSync(
-      path.join(basehubModulePath, "dts", "src", "events"),
-      analyticsOutDir
-    );
+    copyDirSync(path.join(basehubModulePath, "dts", "events"), analyticsOutDir);
 
     if (args["--debug"]) {
       console.log(`[basehub] copied dts for react pump to: ${reactPumpOutDir}`);
