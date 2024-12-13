@@ -111,6 +111,17 @@
 
   * Automatic draftMode detection for Next.js
   * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
+## 7.5.30
+
+### Patch Changes
+
+- upgrade sonner
+
+## 7.5.29
+
+### Patch Changes
+
+- Strip out height in BaseHubImage, as next/image doesn't require it
 
 ## 7.5.28
 
