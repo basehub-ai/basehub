@@ -21,7 +21,7 @@ export const supportedSvgTags = [
   "mask",
   "defs",
 ] as const;
-export const svgComponentSchema = z.enum(supportedSvgTags);
+const svgComponentSchema = z.enum(supportedSvgTags);
 
 type SvgComponent = z.infer<typeof svgComponentSchema>;
 
