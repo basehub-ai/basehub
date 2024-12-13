@@ -2,25 +2,26 @@ import * as React from "react";
 import * as z from "zod";
 import { DOMParser } from "xmldom";
 
-const svgComponentSchema = z.union([
-  z.literal("svg"),
-  z.literal("path"),
-  z.literal("circle"),
-  z.literal("rect"),
-  z.literal("g"),
-  z.literal("line"),
-  z.literal("polyline"),
-  z.literal("polygon"),
-  z.literal("text"),
-  z.literal("filter"),
-  z.literal("feFlood"),
-  z.literal("feColorMatrix"),
-  z.literal("feOffset"),
-  z.literal("feGaussianBlur"),
-  z.literal("feBlend"),
-  z.literal("mask"),
-  z.literal("defs"),
-]);
+export const supportedSvgTags = [
+  "svg",
+  "path",
+  "circle",
+  "rect",
+  "g",
+  "line",
+  "polyline",
+  "polygon",
+  "text",
+  "filter",
+  "feFlood",
+  "feColorMatrix",
+  "feOffset",
+  "feGaussianBlur",
+  "feBlend",
+  "mask",
+  "defs",
+] as const;
+export const svgComponentSchema = z.enum(supportedSvgTags);
 
 type SvgComponent = z.infer<typeof svgComponentSchema>;
 
@@ -147,12 +148,19 @@ export const SVG = ({
         // Convert attributes to props
         const props: Record<string, JSX.IntrinsicElements[typeof tag]> = {};
         Array.from(node.attributes || []).forEach((attr) => {
-          // Convert kebab-case to camelCase for React
+          const attributeValue =
+            attr.value as JSX.IntrinsicElements[typeof tag];
+
+          // Skip data attributes from camel-casing
+          if (attr.name.startsWith("data-")) {
+            props[attr.name] = attributeValue;
+            return;
+          }
+
+          // Convert kebab-case to camelCase for React, excluding data-attributes
           const name = attr.name.replace(/-([a-z])/g, (g) =>
             (g?.[1] as string).toUpperCase()
           );
-          const attributeValue =
-            attr.value as JSX.IntrinsicElements[typeof tag];
 
           if (name === "class") {
             props.className = attributeValue;
