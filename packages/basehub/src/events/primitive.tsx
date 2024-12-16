@@ -135,7 +135,7 @@ type GetOptions<
     }
   | {
       type: "time-series";
-      range?: "day" | "week" | "month" | "year" | "allTime";
+      range?: "day" | "week" | "month" | "year" | "all-time";
     };
 
 // Type for table-based response
