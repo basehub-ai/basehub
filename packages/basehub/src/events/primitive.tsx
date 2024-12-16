@@ -157,7 +157,7 @@ type TableResponse<
 type TimeSeriesResponse =
   | {
       success: true;
-      data: Array<{ count: number; label: string }>;
+      data: number;
     }
   | {
       success: false;
@@ -185,7 +185,7 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
   key: Key,
   options: GetOptions<ExtractEventKey<Key>>
 ): Promise<
-  { success: true; data: Array<unknown> } | { success: false; error: string }
+  { success: true; data: unknown } | { success: false; error: string }
 > {
   if (options.type === "table") {
     const response = await fetch(QUERY_EVENTS_ENDPOINT_URL, {
