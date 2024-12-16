@@ -157,7 +157,7 @@ type TableResponse<
 type TimeSeriesResponse =
   | {
       success: true;
-      data: Array<{ count: number; date: string }>;
+      data: Array<{ count: number; label: string }>;
     }
   | {
       success: false;
@@ -220,21 +220,7 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
       headers: { "Content-Type": "application/json" },
     });
 
-    const data = (await response.json()) as
-      | {
-          success: true;
-          data: {
-            count: number;
-            label: string;
-          }[];
-        }
-      | {
-          code: number;
-          success: false;
-          error: string;
-        };
-
-    return data;
+    return (await response.json()) as TimeSeriesResponse;
   }
 }
 
