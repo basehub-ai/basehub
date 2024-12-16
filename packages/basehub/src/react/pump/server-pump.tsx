@@ -1,4 +1,5 @@
 import * as React from "react";
+import type { JSX } from "react";
 import type { ResponseCache } from "./types";
 import {
   // @ts-ignore
@@ -52,7 +53,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   children,
   queries,
   ...basehubProps
-}: PumpProps<Queries>): Promise<React.JSX.Element> => {
+}: PumpProps<Queries>): Promise<JSX.Element> => {
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
@@ -237,7 +238,7 @@ export const createPump = <
   return (
     props: Omit<PumpProps<Query>, "queries"> &
       (Params extends void ? unknown : { params: Params })
-  ) => {
+  ): JSX.Element => {
     // Dynamically call query function based on whether query is a function and params are provided
     const queryResult =
       typeof queries === "function" ? queries((props as any).params) : queries;
