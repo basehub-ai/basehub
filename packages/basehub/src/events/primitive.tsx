@@ -5,6 +5,14 @@ import {
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../schema";
+import {
+  // @ts-ignore
+  resolvedRef,
+  // @ts-ignore
+  // eslint-disable-next-line import/no-unresolved
+} from "../index";
+import type { ResolvedRef } from "../common-types";
+
 /* -------------------------------------------------------------------------------------------------
  * Client
  * -----------------------------------------------------------------------------------------------*/
@@ -56,10 +64,23 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
   ...args: Args<Key>
 ) => {
   const [key, data] = args;
+  const parsedResolvedRef = resolvedRef as ResolvedRef;
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, data, type: "create" }),
+    body: JSON.stringify({
+      key,
+      data,
+      type: "create",
+      commitId:
+        parsedResolvedRef.type === "commit"
+          ? parsedResolvedRef.id
+          : parsedResolvedRef.headCommitId,
+      branch:
+        parsedResolvedRef.type === "branch"
+          ? parsedResolvedRef.name
+          : undefined,
+    }),
   });
 
   return (await response.json()) as
