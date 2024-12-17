@@ -73,10 +73,11 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     basehubProps.draft = true;
   }
 
-  const { headers, url, draft } = getStuffFromEnv(basehubProps);
+  const { headers, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
   const apiVersion = headers["x-basehub-api-version"];
-  const pumpEndpoint = getBaseHubAppApiEndpoint(url, "/api/pump");
+  const pumpEndpoint =
+    "https://g3fm7a6lw63j3iyki5rzvlf2l40ckpnx.lambda-url.us-east-1.on.aws/";
 
   const noQueries = queries.length === 0;
 
@@ -247,21 +248,21 @@ export const createPump = <
   };
 };
 
-function getBaseHubAppApiEndpoint(url: URL, pathname: string) {
-  let origin: string;
-  switch (true) {
-    case url.origin.includes("api.basehub.com"):
-      origin = "https://basehub.com" + pathname + url.search + url.hash;
-      break;
-    case url.origin.includes("api.bshb.dev"):
-      origin = "https://basehub.dev" + pathname + url.search + url.hash;
-      break;
-    case url.origin.includes("localhost:3001"):
-      origin = "http://localhost:3000" + pathname + url.search + url.hash;
-      break;
-    default:
-      origin = url.origin + pathname + url.search + url.hash;
-  }
+// function getBaseHubAppApiEndpoint(url: URL, pathname: string) {
+//   let origin: string;
+//   switch (true) {
+//     case url.origin.includes("api.basehub.com"):
+//       origin = "https://basehub.com" + pathname + url.search + url.hash;
+//       break;
+//     case url.origin.includes("api.bshb.dev"):
+//       origin = "https://basehub.dev" + pathname + url.search + url.hash;
+//       break;
+//     case url.origin.includes("localhost:3001"):
+//       origin = "http://localhost:3000" + pathname + url.search + url.hash;
+//       break;
+//     default:
+//       origin = url.origin + pathname + url.search + url.hash;
+//   }
 
-  return origin;
-}
+//   return origin;
+// }
