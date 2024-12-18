@@ -38,8 +38,8 @@ type InternalLinkProps<
   T extends BaseCustomBlock,
   K extends T["__typename"],
 > = CommonLinkProps & {
-  internalLink:  Omit<Extract<T, { __typename: K }>, '_id' | '_sys'>;
-}
+  internalLink: Omit<Extract<T, { __typename: K }>, "_id" | "_sys">;
+};
 
 // External link props
 type ExternalLinkProps = CommonLinkProps & {
@@ -80,9 +80,11 @@ type Handlers = {
   s: (props: { children: ReactNode }) => ReactNode;
   kbd: (props: { children: ReactNode }) => ReactNode;
   code: (props: { children: ReactNode }) => ReactNode;
-  a: (props: ExternalLinkProps  & {
-    internalLink: undefined | InternalLinkProps<BaseCustomBlock, any>;
-  }) => ReactNode;
+  a: (
+    props: ExternalLinkProps & {
+      internalLink: undefined | InternalLinkProps<BaseCustomBlock, any>;
+    }
+  ) => ReactNode;
   ol: (props: { children: ReactNode }) => ReactNode;
   ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
   li: (
@@ -161,7 +163,7 @@ type MarkHandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
 type HandlerLinkMapping<Blocks extends CustomBlocksBase> = {
   [K in Blocks[number]["__typename"]]: CommonLinkProps & {
     internalLink: Extract<Blocks[number], { __typename: K }>;
-  } 
+  };
 };
 
 type LinkHandlerMapping<
@@ -219,10 +221,12 @@ export const RichText = <
 };
 
 const defaultHandlers: Handlers = {
-  a: ((props: ExternalLinkProps & { internalLink: undefined | InternalLinkProps<BaseCustomBlock, any> }) => {
-    return (
-      <a {...props}/>
-    )
+  a: ((
+    props: ExternalLinkProps & {
+      internalLink: undefined | InternalLinkProps<BaseCustomBlock, any>;
+    }
+  ) => {
+    return <a {...props} />;
   }) as Handlers["a"],
   p: ({ children }) => <p>{children}</p>,
   b: ({ children }) => <b>{children}</b>,
@@ -611,65 +615,65 @@ const Marks = ({
         (disableDefaultComponents ? () => <></> : defaultHandlers.s);
       props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
       break;
-      case "link": {
-        if (mark.attrs.type === "internal") {
-          const block = blocks?.find((block: any) => {
-            const typename = block?.__typename as string | undefined;
-            const keysLength = Object.keys(block).length;
-            const id = block?._id ?? block?._sys?.id;
-            if (typeof id !== "string" && (!typename || keysLength > 1)) {
-              if (isDev) {
-                console.warn(
-                  `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.\nReceived ${JSON.stringify(
-                    block,
-                    null,
-                    2
-                  )}.`
-                );
-              }
-              return false;
+    case "link": {
+      if (mark.attrs.type === "internal") {
+        const block = blocks?.find((block: any) => {
+          const typename = block?.__typename as string | undefined;
+          const keysLength = Object.keys(block).length;
+          const id = block?._id ?? block?._sys?.id;
+          if (typeof id !== "string" && (!typename || keysLength > 1)) {
+            if (isDev) {
+              console.warn(
+                `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.\nReceived ${JSON.stringify(
+                  block,
+                  null,
+                  2
+                )}.`
+              );
             }
-            return (
-              id ===
-              (mark.attrs as LinkAttributes & { type: "internal" }).targetId
-            );
-          });
-          
-          if (!block) {
-            // Fallback to regular link if block not found
-            props = {
-              children,
-              target: mark.attrs.target,
-              href: mark.attrs.href || "",
-              internalLink: undefined
-            };
-            break;
+            return false;
           }
-      
-          // Remove _id and _sys from the block type
+          return (
+            id ===
+            (mark.attrs as LinkAttributes & { type: "internal" }).targetId
+          );
+        });
+
+        if (!block) {
+          // Fallback to regular link if block not found
           props = {
             children,
+            target: mark.attrs.target,
             href: mark.attrs.href || "",
-            target: mark.attrs.target,
-            internalLink: block,
-          } as InternalLinkProps<BaseCustomBlock, string>;
-        } else {
-          props = {
-            children,
-            href: mark.attrs.href,
-            target: mark.attrs.target,
             internalLink: undefined,
-            rel:
-              mark.attrs.target?.toLowerCase() === "_blank"
-                ? "noopener noreferrer"
-                : undefined,
           };
+          break;
         }
-        Handler =
-          components?.a ??
-          (disableDefaultComponents ? () => <></> : defaultHandlers.a);
-        break;
+
+        // Remove _id and _sys from the block type
+        props = {
+          children,
+          href: mark.attrs.href || "",
+          target: mark.attrs.target,
+          internalLink: block,
+        } as InternalLinkProps<BaseCustomBlock, string>;
+      } else {
+        props = {
+          children,
+          href: mark.attrs.href,
+          target: mark.attrs.target,
+          internalLink: undefined,
+          rel:
+            mark.attrs.target?.toLowerCase() === "_blank"
+              ? "noopener noreferrer"
+              : undefined,
+        };
       }
+      Handler =
+        components?.a ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.a);
+      break;
+    }
     case "basehub-inline-block": {
       const block = blocks?.find((block: any) => {
         const typename = block?.__typename as string | undefined;
