@@ -41,6 +41,7 @@ export const main = async (
     prefix: args["--env-prefix"],
     output: args["--output"],
     draft: args["--draft"],
+    ref: args["--ref"],
     apiVersion: args["--api-version"],
     ...(opts?.forceDraft && { draft: true }),
   };
@@ -156,6 +157,11 @@ export const main = async (
       .digest("hex")
       .substring(0, 32);
 
+    let forceGen = false;
+    if (inputHash !== currentBuildManifest?.inputHash) {
+      forceGen = true;
+    }
+
     const { preventedClientGeneration, schemaHash } = await generate({
       endpoint: url.toString(),
       headers: {
@@ -167,7 +173,7 @@ export const main = async (
       verbose: silent ? false : args["--debug"],
       sortProperties: true,
       silent,
-      previousSchemaHash,
+      previousSchemaHash: forceGen ? undefined : previousSchemaHash,
     });
 
     if (preventedClientGeneration) {
@@ -184,6 +190,7 @@ export const main = async (
     }
 
     const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
+    const generatedSchemaPath = path.join(basehubOutputPath, "schema.ts");
 
     // We'll patch some things from the generated code.
     let schemaFileContents = fs.readFileSync(generatedMainExportPath, "utf-8");
@@ -252,7 +259,6 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     },
 >`
       );
-
       // add import for Transaction at the start of the file
       schemaFileContents +=
         "\nimport type { Transaction } from './api-transaction';\nimport type { TransactionStatusGenqlSelection } from './schema';\n";
@@ -260,7 +266,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
 
     // 3. append our basehub function to the end of the file.
     const basehubExport = getBaseHubExport({
-      noStore: draft,
+      draft,
       sdkBuildId,
       resolvedRef,
       gitBranchDeploymentURL,
@@ -272,6 +278,12 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
 
     // 4. write the file back.
     fs.writeFileSync(generatedMainExportPath, schemaFileContents);
+    fs.appendFileSync(
+      generatedSchemaPath,
+      `
+import type { RichTextNode, RichTextTocNode } from './api-transaction';
+`
+    );
 
     // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
     const peerDependencies = [
@@ -306,6 +318,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     logIfNotSilent(silent, "📦 Compiling to JavaScript...");
     const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
     const nextToolbarOutDir = path.join(basehubOutputPath, "next-toolbar");
+    const analyticsOutDir = path.join(basehubOutputPath, "events");
 
     await esbuild.build({
       entryPoints: [generatedMainExportPath],
@@ -366,6 +379,25 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       );
     }
 
+    await esbuild.build({
+      entryPoints: [path.join(basehubModulePath, "src", "events", "index.ts")],
+      bundle: true,
+      outdir: analyticsOutDir,
+      minify: false,
+      treeShaking: true,
+      splitting: true,
+      format: "esm",
+      target: ["es2020", "node18"],
+      external: peerDependencies,
+      plugins: [],
+    });
+
+    if (args["--debug"]) {
+      console.log(
+        `[basehub] compiled events with esbuild in: ${analyticsOutDir}`
+      );
+    }
+
     /**
      * DTS stuff.
      */
@@ -377,12 +409,17 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
       path.join(basehubModulePath, "dts", "src", "next", "toolbar"),
       nextToolbarOutDir
     );
+    copyDirSync(
+      path.join(basehubModulePath, "dts", "src", "events"),
+      analyticsOutDir
+    );
 
     if (args["--debug"]) {
       console.log(`[basehub] copied dts for react pump to: ${reactPumpOutDir}`);
       console.log(
         `[basehub] copied dts for next toolbar to: ${nextToolbarOutDir}`
       );
+      console.log(`[basehub] copied dts for events to: ${analyticsOutDir}`);
     }
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
@@ -390,12 +427,13 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
     if (output !== "node_modules") {
       // alias react-rich-text and other packages to the generated client for better import experience
       [
+        "react-svg",
         "react-rich-text",
+        "react-form",
         "react-code-block/index",
         "react-code-block/client",
         "api-transaction",
         "react-search",
-        "analytics",
         "search",
         "next-image",
       ].map((pathsToAlias) => {
@@ -445,6 +483,8 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
         basehubModulePath,
         "next-toolbar.d.ts"
       );
+      const analyticsIndexJsPath = path.join(basehubModulePath, "events.js");
+      const analyticsIndexDtsPath = path.join(basehubModulePath, "events.d.ts");
       fs.writeFileSync(
         indexJsPath,
         ensureCrossPlatformTsImport(
@@ -499,6 +539,24 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
           )}";`
         )
       );
+      fs.writeFileSync(
+        analyticsIndexJsPath,
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(analyticsOutDir, "index.js")
+          )}";`
+        )
+      );
+      fs.writeFileSync(
+        analyticsIndexDtsPath,
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(analyticsOutDir, "index.d.ts")
+          )}";`
+        )
+      );
 
       if (args["--debug"]) {
         console.log(
@@ -509,6 +567,9 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAwaitable"> &
         );
         console.log(
           `[basehub] aliased next toolbar index.js and index.d.ts to: ${nextToolbarOutDir}`
+        );
+        console.log(
+          `[basehub] aliased events index.js and index.d.ts to: ${analyticsOutDir}`
         );
       }
     }
@@ -681,13 +742,13 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 const getBaseHubExport = ({
-  noStore,
+  draft,
   sdkBuildId,
   resolvedRef,
   gitBranchDeploymentURL,
   productionDeploymentURL,
 }: {
-  noStore: boolean;
+  draft: boolean;
   sdkBuildId: string;
   resolvedRef: ResolvedRef;
   gitBranchDeploymentURL: string | null;
@@ -766,7 +827,7 @@ function hashObject(obj: Record<string, unknown>): string {
 }
 
 // we limit options to only the ones we want to expose.
-type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean, token?: string }
+type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 'fetch' | 'fetcher' | 'headers' | 'integrity' | 'keepalive' | 'mode' | 'redirect' | 'referrer' | 'referrerPolicy' | 'window'> & { draft?: boolean, token?: string, ref?: string }
 
 // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
 // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
@@ -799,28 +860,74 @@ export const basehub = (options?: Options) => {
     options = {};
   }
 
-  options.getExtraFetchOptions = (op, _body, originalRequest) => {
+  options.getExtraFetchOptions = async (op, _body, originalRequest) => {
     if (op !== 'query') return {}
 
-    // don't override if we're in draft mode
-    if (${noStore}) return {}
+    let extra = {
+      headers: {
+        "x-basehub-sdk-build-id": "${sdkBuildId}",
+      },
+    };
 
-    // don't override if revalidation is already being handled by the user
-    if (typeof options?.next !== 'undefined') return {}
+    let isNextjsDraftMode = false;
+    if (options.draft === undefined) {
+      // try to auto-detect (only if draft is not explicitly set by the user)
+      try {
+        const { draftMode } = await import("next/headers");
+        isNextjsDraftMode = (await draftMode()).isEnabled;
+      } catch (error) {
+        // noop, not using nextjs
+      }
+    }
 
-    const cacheTag = cacheTagFromQuery(originalRequest)
-    return { next: { tags: [cacheTag] }, headers: { 'x-basehub-sdk-build-id': "${sdkBuildId}", 'x-basehub-cache-tag': cacheTag }}
+    const isDraftResolved = ${draft} || isNextjsDraftMode || options.draft === true;
+
+    if (isDraftResolved) {
+      extra.headers = { ...extra.headers, "x-basehub-draft": "true" };
+      // get rid of automatic nextjs caching
+      extra.next = { revalidate: undefined };
+      extra.cache = "no-store";
+      // try to get ref from cookies
+      try {
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+        const ref = cookieStore.get("bshb-preview-ref")?.value;
+        if (ref) {
+          extra.headers = {
+            ...extra.headers,
+            "x-basehub-ref": ref,
+          };
+        }
+      } catch (error) {
+        // noop 
+      }
+    }
+
+    if (isDraftResolved) return extra;
+
+    if (typeof options?.next === 'undefined') {
+      let isNextjs = false;
+      try {
+        isNextjs = !!(await import("next/headers"))
+      } catch (error) {
+        // noop, not using nextjs
+      }
+      if (isNextjs) {
+        const cacheTag = cacheTagFromQuery(originalRequest);
+        // don't override if revalidation is already being handled by the user
+        extra.next = { tags: [cacheTag] };
+        extra.headers = {
+          ...extra.headers,
+          "x-basehub-cache-tag": cacheTag,
+        };
+      }
+    }
+
+    return extra;
   }
 
   return {
-    ...createClient(${
-      noStore
-        ? `
-// force revalidate to undefined on purpose as it can't coexist with cache: 'no-store'
-// we use cache: 'no-store' as we're in draft mode. in prod, we won't touch this.
-{ ...options, cache: 'no-store', next: { ...options?.next, revalidate: undefined } }`
-        : "options"
-    }),
+    ...createClient(options),
     raw: createFetcher({ ...options, url, headers }) as <Cast = unknown>(
       gql: GraphqlOperation
     ) => Promise<Cast>,

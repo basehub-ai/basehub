@@ -26,7 +26,7 @@ export const ClientConditionalRenderer = ({
   }) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
   revalidateTags: (o: { tags: string[] }) => Promise<{ success: boolean }>;
-  getLatestBranches: (o: { bshbPreviewToken: string }) => Promise<{
+  getLatestBranches: (o: { bshbPreviewToken: string | undefined }) => Promise<{
     status: number;
     response: LatestBranch[] | { error: string };
   }>;
@@ -102,7 +102,11 @@ export const ClientConditionalRenderer = ({
     }
   }, [revalidateTags]);
 
-  if (!bshbPreviewToken || !hasRendered || typeof document === "undefined") {
+  if (
+    (!bshbPreviewToken && !isForcedDraft) ||
+    !hasRendered ||
+    typeof document === "undefined"
+  ) {
     return null;
   }
   const Portal = createPortal(
