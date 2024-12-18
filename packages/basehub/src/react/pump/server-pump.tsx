@@ -1,4 +1,5 @@
 import * as React from "react";
+import type { JSX } from "react";
 import type { ResponseCache } from "./types";
 import {
   // @ts-ignore
@@ -41,7 +42,6 @@ export type PumpProps<Queries extends Array<PumpQuery>> = {
     data: QueryResults<Queries>
   ) => React.ReactNode | Promise<React.ReactNode>;
   queries: [...Queries]; // Tuple type for better type inference
-  disableNextjsAutoDraftMode?: boolean;
 } & Parameters<typeof basehub>[0];
 
 // Utility type to infer result types from an array of queries
@@ -52,15 +52,15 @@ export type QueryResults<Queries extends Array<PumpQuery>> = {
 export const Pump = async <Queries extends Array<PumpQuery>>({
   children,
   queries,
-  disableNextjsAutoDraftMode,
   ...basehubProps
-}: PumpProps<Queries>) => {
+}: PumpProps<Queries>): Promise<JSX.Element> => {
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
   let isNextjsDraftMode = false;
-  if (!disableNextjsAutoDraftMode) {
+  if (basehubProps.draft === undefined) {
+    // try to auto-detect (only if draft is not explicitly set by the user)
     try {
       const { draftMode } = await import("next/headers");
       isNextjsDraftMode = (await draftMode()).isEnabled;
@@ -73,15 +73,29 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     basehubProps.draft = true;
   }
 
-  const { headers, url, draft } = getStuffFromEnv(basehubProps);
+  const { headers, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
   const apiVersion = headers["x-basehub-api-version"];
-  const pumpEndpoint = getBaseHubAppApiEndpoint(url, "/api/pump");
+  const pumpEndpoint = "https://aws.basehub.com/pump";
 
   const noQueries = queries.length === 0;
 
   const queriesWithFallback =
     draft && noQueries ? [{ _sys: { id: true } }] : queries;
+
+  if (draft) {
+    // try to get ref from cookies
+    try {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const ref = cookieStore.get("bshb-preview-ref")?.value;
+      if (ref) {
+        headers["x-basehub-ref"] = ref;
+      }
+    } catch (error) {
+      // noop
+    }
+  }
 
   const results: Array<{
     data: QueryResults<Queries>[number] | undefined;
@@ -199,7 +213,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
         pumpToken={pumpToken ?? undefined}
         initialResolvedChildren={resolvedChildren}
         apiVersion={apiVersion}
-        resolvedRef={resolvedRef}
+        previewRef={headers["x-basehub-ref"] || resolvedRef.ref}
       >
         {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
         {/* @ts-ignore */}
@@ -224,7 +238,7 @@ export const createPump = <
   return (
     props: Omit<PumpProps<Query>, "queries"> &
       (Params extends void ? unknown : { params: Params })
-  ) => {
+  ): JSX.Element => {
     // Dynamically call query function based on whether query is a function and params are provided
     const queryResult =
       typeof queries === "function" ? queries((props as any).params) : queries;
