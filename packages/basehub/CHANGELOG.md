@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.29
+
+### Patch Changes
+
+- pass pump-token and last-response-hash via query params to improve preflight caching
+
 ## 8.0.0-canary.28
 
 ### Patch Changes
