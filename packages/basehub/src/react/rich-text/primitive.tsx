@@ -12,13 +12,61 @@ interface Attrs {
 
 const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
+
+type BaseCustomBlock = {
+  __typename: string;
+  _id?: string;
+  _sys?: { id: string };
+};
+
+// --------------------------------------------
+// Links
+// --------------------------------------------
+
+// Common props for all links
+type CommonLinkProps = {
+  children: ReactNode;
+  href: string;
+  target?: string;
+  rel?: string;
+};
+
+// Internal link props
+type InternalLinkProps<
+  T extends BaseCustomBlock,
+  K extends T["__typename"],
+> = CommonLinkProps & {
+  internalLink:  Omit<Extract<T, { __typename: K }>, '_id' | '_sys'>;
+}
+
+// External link props
+type ExternalLinkProps = CommonLinkProps & {
+  internalLink: undefined;
+};
+
+type LinkAttributes = {
+  href: string;
+  target?: string;
+} & (
+  | {
+      type: "link";
+    }
+  | {
+      type: "internal";
+      targetId: string;
+    }
+);
+
+// --------------------------------------------
+// Marks
+// --------------------------------------------
 type Mark =
   | { type: "bold" | "italic" | "underline" | "strike" | "kbd" }
   | {
       type: "code";
       attrs: { isInline?: boolean; language: string; code: string };
     }
-  | { type: "link"; attrs: { href: string; target: string; class: string } }
+  | { type: "link"; attrs: LinkAttributes }
   | { type: "basehub-inline-block"; attrs: { id: string } };
 
 type Marks = Array<Mark>;
@@ -123,11 +171,8 @@ type Handlers = {
     language: string;
     code: string;
   }) => ReactNode;
-  a: (props: {
-    children: ReactNode;
-    href: string;
-    target?: string;
-    rel?: string;
+  a: (props: ExternalLinkProps  & {
+    internalLink: undefined | InternalLinkProps<BaseCustomBlock, any>;
   }) => ReactNode;
   ol: (props: { children: ReactNode }) => ReactNode;
   ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
@@ -204,6 +249,22 @@ type MarkHandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
   ) => ReactNode;
 };
 
+type HandlerLinkMapping<Blocks extends CustomBlocksBase> = {
+  [K in Blocks[number]["__typename"]]: CommonLinkProps & {
+    internalLink: Extract<Blocks[number], { __typename: K }>;
+  } 
+};
+
+type LinkHandlerMapping<
+  CustomBlocks extends CustomBlocksBase = readonly any[],
+> = {
+  a: (
+    props:
+      | ExternalLinkProps
+      | HandlerLinkMapping<CustomBlocks>[keyof HandlerLinkMapping<CustomBlocks>]
+  ) => ReactNode;
+};
+
 export type RichTextProps<
   CustomBlocks extends CustomBlocksBase = readonly any[],
 > = {
@@ -214,7 +275,10 @@ export type RichTextProps<
   children?: unknown;
   blocks?: CustomBlocks;
   components?: Partial<
-    Handlers & HandlerMapping<CustomBlocks> & MarkHandlerMapping<CustomBlocks>
+    Handlers &
+      HandlerMapping<CustomBlocks> &
+      MarkHandlerMapping<CustomBlocks> &
+      LinkHandlerMapping<CustomBlocks>
   >;
   disableDefaultComponents?: boolean;
 };
@@ -246,11 +310,11 @@ export const RichText = <
 };
 
 const defaultHandlers: Handlers = {
-  a: ({ children, href, ...rest }) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
+  a: ((props: ExternalLinkProps & { internalLink: undefined | InternalLinkProps<BaseCustomBlock, any> }) => {
+    return (
+      <a {...props}/>
+    )
+  }) as Handlers["a"],
   p: ({ children }) => <p>{children}</p>,
   b: ({ children }) => <b>{children}</b>,
   em: ({ children }) => <em>{children}</em>,
@@ -661,20 +725,65 @@ const Marks = ({
         (disableDefaultComponents ? () => <></> : defaultHandlers.s);
       props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
       break;
-    case "link":
-      Handler =
-        components?.a ??
-        (disableDefaultComponents ? () => <></> : defaultHandlers.a);
-      props = {
-        children,
-        href: mark.attrs.href,
-        target: mark.attrs.target,
-        rel:
-          mark.attrs.target?.toLowerCase() === "_blank"
-            ? "noopener noreferer"
-            : undefined,
-      } satisfies ExtractPropsForHandler<Handlers["a"]>;
-      break;
+      case "link": {
+        if (mark.attrs.type === "internal") {
+          const block = blocks?.find((block: any) => {
+            const typename = block?.__typename as string | undefined;
+            const keysLength = Object.keys(block).length;
+            const id = block?._id ?? block?._sys?.id;
+            if (typeof id !== "string" && (!typename || keysLength > 1)) {
+              if (isDev) {
+                console.warn(
+                  `BaseHub RichText Error: make sure you send through the _id and the __typename for all custom blocks.\nReceived ${JSON.stringify(
+                    block,
+                    null,
+                    2
+                  )}.`
+                );
+              }
+              return false;
+            }
+            return (
+              id ===
+              (mark.attrs as LinkAttributes & { type: "internal" }).targetId
+            );
+          });
+          
+          if (!block) {
+            // Fallback to regular link if block not found
+            props = {
+              children,
+              target: mark.attrs.target,
+              href: mark.attrs.href || "",
+              internalLink: undefined
+            };
+            break;
+          }
+      
+          // Remove _id and _sys from the block type
+          props = {
+            children,
+            href: mark.attrs.href || "",
+            target: mark.attrs.target,
+            internalLink: block,
+          } as InternalLinkProps<BaseCustomBlock, string>;
+        } else {
+          props = {
+            children,
+            href: mark.attrs.href,
+            target: mark.attrs.target,
+            internalLink: undefined,
+            rel:
+              mark.attrs.target?.toLowerCase() === "_blank"
+                ? "noopener noreferrer"
+                : undefined,
+          };
+        }
+        Handler =
+          components?.a ??
+          (disableDefaultComponents ? () => <></> : defaultHandlers.a);
+        break;
+      }
     case "basehub-inline-block": {
       const block = blocks?.find((block: any) => {
         const typename = block?.__typename as string | undefined;
