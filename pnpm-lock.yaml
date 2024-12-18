@@ -71,7 +71,7 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.2.20)(react@18.2.0)
       '@shikijs/transformers':
-        specifier: ^1.17.7
+        specifier: 1.17.7
         version: 1.17.7
       arg:
         specifier: 5.0.1
@@ -95,10 +95,10 @@ importers:
         specifier: ^4.0.8
         version: 4.0.8
       lodash.get:
-        specifier: 4.4.2
+        specifier: ^4.4.2
         version: 4.4.2
       pusher-js:
-        specifier: 8.3.0
+        specifier: ^8.3.0
         version: 8.3.0
       resolve-pkg:
         specifier: 2.0.0
@@ -107,16 +107,16 @@ importers:
         specifier: ^0.0.1
         version: 0.0.1
       shiki:
-        specifier: ^1.17.7
+        specifier: 1.17.7
         version: 1.17.7
       sonner:
-        specifier: 1.5.0
-        version: 1.5.0(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^1.7.1
+        version: 1.7.1(react-dom@18.2.0)(react@18.2.0)
       typesense:
-        specifier: 1.8.2
+        specifier: ^1.8.2
         version: 1.8.2(@babel/runtime@7.24.6)
       zod:
-        specifier: 3.22.1
+        specifier: ^3.22.1
         version: 3.22.1
     devDependencies:
       '@types/lodash.debounce':
@@ -1210,7 +1210,7 @@ packages:
       '@shikijs/engine-javascript': 1.17.7
       '@shikijs/engine-oniguruma': 1.17.7
       '@shikijs/types': 1.17.7
-      '@shikijs/vscode-textmate': 9.2.2
+      '@shikijs/vscode-textmate': 9.3.1
       '@types/hast': 3.0.4
       hast-util-to-html: 9.0.3
     dev: false
@@ -1219,7 +1219,7 @@ packages:
     resolution: {integrity: sha512-wwSf7lKPsm+hiYQdX+1WfOXujtnUG6fnN4rCmExxa4vo+OTmvZ9B1eKauilvol/LHUPrQgW12G3gzem7pY5ckw==}
     dependencies:
       '@shikijs/types': 1.17.7
-      '@shikijs/vscode-textmate': 9.2.2
+      '@shikijs/vscode-textmate': 9.3.1
       oniguruma-to-js: 0.4.3
     dev: false
 
@@ -1227,7 +1227,7 @@ packages:
     resolution: {integrity: sha512-pvSYGnVeEIconU28NEzBXqSQC/GILbuNbAHwMoSfdTBrobKAsV1vq2K4cAgiaW1TJceLV9QMGGh18hi7cCzbVQ==}
     dependencies:
       '@shikijs/types': 1.17.7
-      '@shikijs/vscode-textmate': 9.2.2
+      '@shikijs/vscode-textmate': 9.3.1
     dev: false
 
   /@shikijs/transformers@1.17.7:
@@ -1239,12 +1239,12 @@ packages:
   /@shikijs/types@1.17.7:
     resolution: {integrity: sha512-+qA4UyhWLH2q4EFd+0z4K7GpERDU+c+CN2XYD3sC+zjvAr5iuwD1nToXZMt1YODshjkEGEDV86G7j66bKjqDdg==}
     dependencies:
-      '@shikijs/vscode-textmate': 9.2.2
+      '@shikijs/vscode-textmate': 9.3.1
       '@types/hast': 3.0.4
     dev: false
 
-  /@shikijs/vscode-textmate@9.2.2:
-    resolution: {integrity: sha512-TMp15K+GGYrWlZM8+Lnj9EaHEFmOen0WJBrfa17hF7taDOYthuPPV0GWzfd/9iMij0akS/8Yw2ikquH7uVi/fg==}
+  /@shikijs/vscode-textmate@9.3.1:
+    resolution: {integrity: sha512-79QfK1393x9Ho60QFyLti+QfdJzRQCVLFb97kOIV7Eo9vQU/roINgk7m24uv0a7AUvN//RDH36FLjjK48v0s9g==}
     dev: false
 
   /@swc/counter@0.1.3:
@@ -4658,7 +4658,7 @@ packages:
   /oniguruma-to-js@0.4.3:
     resolution: {integrity: sha512-X0jWUcAlxORhOqqBREgPMgnshB7ZGYszBNspP+tS9hPD3l13CdaXcHbgImoHUHlrvGx/7AvFEkTRhAGYh+jzjQ==}
     dependencies:
-      regex: 4.3.2
+      regex: 4.4.0
     dev: false
 
   /opener@1.5.2:
@@ -5423,8 +5423,8 @@ packages:
   /regenerator-runtime@0.14.1:
     resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
 
-  /regex@4.3.2:
-    resolution: {integrity: sha512-kK/AA3A9K6q2js89+VMymcboLOlF5lZRCYJv3gzszXFHBr6kO6qLGzbm+UIugBEV8SMMKCTR59txoY6ctRHYVw==}
+  /regex@4.4.0:
+    resolution: {integrity: sha512-uCUSuobNVeqUupowbdZub6ggI5/JZkYyJdDogddJr60L764oxC2pMZov1fQ3wM9bdyzUILDG+Sqx6NAKAz9rKQ==}
     dev: false
 
   /regexp.prototype.flags@1.5.2:
@@ -5676,7 +5676,7 @@ packages:
       '@shikijs/engine-javascript': 1.17.7
       '@shikijs/engine-oniguruma': 1.17.7
       '@shikijs/types': 1.17.7
-      '@shikijs/vscode-textmate': 9.2.2
+      '@shikijs/vscode-textmate': 9.3.1
       '@types/hast': 3.0.4
     dev: false
 
@@ -5749,11 +5749,11 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /sonner@1.5.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-FBjhG/gnnbN6FY0jaNnqZOMmB73R+5IiyYAw8yBj7L54ER7HB3fOSE5OFiQiE2iXWxeXKvg6fIP4LtVppHEdJA==}
+  /sonner@1.7.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-b6LHBfH32SoVasRFECrdY8p8s7hXPDn3OHUFbZZbiB1ctLS9Gdh6rpX2dVrpQA0kiL5jcRzDDldwwLkSKk3+QQ==}
     peerDependencies:
-      react: ^18.0.0
-      react-dom: ^18.0.0
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
     dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)

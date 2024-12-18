@@ -1,5 +1,23 @@
 # basehub
 
+## 7.5.31
+
+### Patch Changes
+
+- rollback shiki version
+
+## 7.5.30
+
+### Patch Changes
+
+- upgrade sonner
+
+## 7.5.29
+
+### Patch Changes
+
+- Strip out height in BaseHubImage, as next/image doesn't require it
+
 ## 7.5.28
 
 ### Patch Changes
