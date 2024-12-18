@@ -58,6 +58,8 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   initialStateRef.current = initialState;
 
   const [previewRef, setPreviewRef] = React.useState(_previewRef);
+  const previewRefRef = React.useRef(previewRef);
+  previewRefRef.current = previewRef;
 
   /**
    * Query the Draft API.
@@ -98,17 +100,19 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           }
         }
 
-        const responsePromise = fetch(pumpEndpoint, {
+        const pumpUrl = new URL(pumpEndpoint);
+        pumpUrl.searchParams.set("pump-token", pumpTokenRef.current);
+        if (lastResponseHash) {
+          pumpUrl.searchParams.set("last-response-hash", lastResponseHash);
+        }
+
+        const responsePromise = fetch(pumpUrl.toString(), {
           cache: "no-store",
           method: "POST",
           headers: {
             "content-type": "application/json",
-            "x-basehub-pump-token": pumpTokenRef.current,
             "x-basehub-api-version": apiVersion,
             "x-basehub-ref": previewRef,
-            ...(lastResponseHash
-              ? { "x-basehub-last-response-hash": lastResponseHash }
-              : undefined),
           },
           body: JSON.stringify(rawQueryOp),
         })
@@ -285,8 +289,16 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     const channel = pusher.subscribe(pusherChannelKey);
     channel.bind(
       "poke",
-      (message?: Partial<{ mutatedEntryTypes: string[] }>) => {
-        if (message?.mutatedEntryTypes?.includes("block")) {
+      (
+        message?: Partial<{
+          mutatedEntryTypes: string[];
+          branch: string | undefined;
+        }>
+      ) => {
+        if (
+          message?.mutatedEntryTypes?.includes("block") &&
+          message.branch === previewRefRef.current
+        ) {
           subscribers.forEach((sub) => sub());
         }
       }
