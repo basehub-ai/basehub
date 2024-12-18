@@ -100,13 +100,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
           }
         }
 
-        const pumpUrl = new URL(pumpEndpoint);
-        pumpUrl.searchParams.set("pump-token", pumpTokenRef.current);
-        if (lastResponseHash) {
-          pumpUrl.searchParams.set("last-response-hash", lastResponseHash);
-        }
-
-        const responsePromise = fetch(pumpUrl.toString(), {
+        const responsePromise = fetch(pumpEndpoint, {
           cache: "no-store",
           method: "POST",
           headers: {
@@ -114,7 +108,11 @@ export const ClientPump = <Queries extends PumpQuery[]>({
             "x-basehub-api-version": apiVersion,
             "x-basehub-ref": previewRef,
           },
-          body: JSON.stringify(rawQueryOp),
+          body: JSON.stringify({
+            ...rawQueryOp,
+            pumpToken: pumpTokenRef.current,
+            lastResponseHash,
+          }),
         })
           .then(async (response) => {
             const {
