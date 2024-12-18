@@ -59,18 +59,6 @@ type LinkAttributes = {
     }
 );
 
-// --------------------------------------------
-// Marks
-// --------------------------------------------
-type Mark =
-  | { type: "bold" | "italic" | "underline" | "strike" | "kbd" }
-  | {
-      type: "code";
-      attrs: { isInline?: boolean; language: string; code: string };
-    }
-  | { type: "link"; attrs: LinkAttributes }
-  | { type: "basehub-inline-block"; attrs: { id: string } };
-
 type Marks = Array<Mark>;
 
 type Handlers = {
@@ -616,6 +604,7 @@ const Marks = ({
       props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
       break;
     case "link": {
+      // @ts-ignore
       if (mark.attrs.type === "internal") {
         const block = blocks?.find((block: any) => {
           const typename = block?.__typename as string | undefined;
@@ -635,6 +624,8 @@ const Marks = ({
           }
           return (
             id ===
+      // @ts-ignore
+
             (mark.attrs as LinkAttributes & { type: "internal" }).targetId
           );
         });
