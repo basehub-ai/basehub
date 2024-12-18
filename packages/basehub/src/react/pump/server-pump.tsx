@@ -73,10 +73,10 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     basehubProps.draft = true;
   }
 
-  const { headers, url, draft } = getStuffFromEnv(basehubProps);
+  const { headers, draft } = getStuffFromEnv(basehubProps);
   const token = headers["x-basehub-token"];
   const apiVersion = headers["x-basehub-api-version"];
-  const pumpEndpoint = getBaseHubAppApiEndpoint(url, "/api/pump");
+  const pumpEndpoint = "https://aws.basehub.com/pump";
 
   const noQueries = queries.length === 0;
 

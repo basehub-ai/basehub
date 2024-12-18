@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.28
+
+### Patch Changes
+
+- event fixes
+
 ## 8.0.0-canary.27
 
 ### Patch Changes
