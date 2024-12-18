@@ -1,4 +1,8 @@
 import { Transaction as FullTransaction } from "@basehub/mutation-api-helpers";
+export type {
+  RichTextNode,
+  RichTextTocNode,
+} from "@basehub/mutation-api-helpers";
 
 export type Transaction =
   | FullTransaction["operations"]

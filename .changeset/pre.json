@@ -1,0 +1,41 @@
+{
+  "mode": "pre",
+  "tag": "canary",
+  "initialVersions": {
+    "eslint-config-custom": "1.0.0",
+    "tsconfig": "1.0.0",
+    "basehub": "7.5.21",
+    "playground": "0.0.163"
+  },
+  "changesets": [
+    "clever-ligers-whisper",
+    "cold-beds-work",
+    "dirty-falcons-rhyme",
+    "dirty-lobsters-collect",
+    "dry-timers-poke",
+    "eleven-donuts-yell",
+    "fluffy-sloths-admire",
+    "good-worms-jam",
+    "great-flies-wonder",
+    "khaki-ghosts-call",
+    "lovely-carrots-bathe",
+    "lucky-eyes-ring",
+    "mean-panthers-give",
+    "modern-tools-repeat",
+    "nasty-bananas-ring",
+    "nasty-insects-teach",
+    "neat-dingos-push",
+    "new-avocados-repeat",
+    "odd-elephants-heal",
+    "orange-bottles-give",
+    "perfect-cougars-shout",
+    "popular-pots-help",
+    "quick-experts-complain",
+    "short-spiders-taste",
+    "sixty-yaks-add",
+    "small-planes-sort",
+    "small-walls-act",
+    "stale-seahorses-decide",
+    "tame-otters-shake"
+  ]
+}

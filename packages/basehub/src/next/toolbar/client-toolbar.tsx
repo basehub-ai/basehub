@@ -37,7 +37,7 @@ export const ClientToolbar = ({
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
   resolvedRef: ResolvedRef;
-  getLatestBranches: (o: { bshbPreviewToken: string }) => Promise<{
+  getLatestBranches: (o: { bshbPreviewToken: string | undefined }) => Promise<{
     status: number;
     response: LatestBranch[] | { error: string };
   }>;
@@ -53,14 +53,12 @@ export const ClientToolbar = ({
   const tooltipRef = React.useRef<Tooltip>(null);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [ref, setRef] = React.useState(resolvedRef.ref);
+  const [ref, _setRef] = React.useState(resolvedRef.ref);
+  const [isDefaultRefSelected, setIsDefaultRefSelected] = React.useState(true);
+  const [isLoadingRef, setIsLoadingRef] = React.useState(true);
   const [latestBranches, setLatestBranches] = React.useState<LatestBranch[]>(
     []
   );
-
-  React.useEffect(() => {
-    setRef(window.localStorage.getItem("bshb-preview-ref") || resolvedRef.ref);
-  }, [resolvedRef.ref]);
 
   const currentMessageTimeout = React.useRef(0);
 
@@ -99,6 +97,7 @@ export const ClientToolbar = ({
   const [hasAutoEnabledDraftOnce, setHasAutoEnabledDraftOnce] =
     React.useState(false);
 
+  /** Auto enable draft mode if the user hasn't disabled it. */
   React.useLayoutEffect(() => {
     if (
       draft ||
@@ -126,13 +125,11 @@ export const ClientToolbar = ({
 
   const getAndSetLatestBranches = React.useCallback(async () => {
     let result: LatestBranch[] = [];
-    if (bshbPreviewToken) {
-      const res = await getLatestBranches({ bshbPreviewToken });
-      if (Array.isArray(res.response)) {
-        result = res.response;
-      } else if ("error" in res.response) {
-        console.error(`BaseHub Toolbar Error: ${res.response.error}`);
-      }
+    const res = await getLatestBranches({ bshbPreviewToken });
+    if (Array.isArray(res.response)) {
+      result = res.response;
+    } else if ("error" in res.response) {
+      console.error(`BaseHub Toolbar Error: ${res.response.error}`);
     }
     setLatestBranches(result);
   }, [bshbPreviewToken, getLatestBranches]);
@@ -141,8 +138,6 @@ export const ClientToolbar = ({
    * Get latest branches every 30 seconds (we'll also get 'em on load and when the user hovers the branch switcher)
    */
   React.useEffect(() => {
-    if (!bshbPreviewToken) return;
-
     async function effect() {
       while (true) {
         try {
@@ -156,31 +151,73 @@ export const ClientToolbar = ({
     }
 
     effect();
-  }, [bshbPreviewToken, getAndSetLatestBranches]);
+  }, [getAndSetLatestBranches]);
 
+  const setRefWithEvents = React.useCallback(
+    (ref: string) => {
+      _setRef(ref);
+      window.dispatchEvent(
+        new CustomEvent("__bshb_ref_changed", { detail: { ref } })
+      );
+      previewRefCookieManager.set(ref);
+      setIsDefaultRefSelected(ref === resolvedRef.ref);
+    },
+    [resolvedRef.ref]
+  );
+
+  /** Load ref from url or cookie. */
   React.useEffect(() => {
     const url = new URL(window.location.href);
-    const previewRef = url.searchParams.get("bshb-preview-ref");
+    let previewRef = url.searchParams.get("bshb-preview-ref");
+    if (!previewRef) {
+      previewRef = previewRefCookieManager.get();
+    }
+
+    setIsLoadingRef(false);
+
     if (!previewRef) return;
 
-    setRef(previewRef);
-    window.dispatchEvent(new Event("__bshb_ref_changed"));
-  }, []);
+    setRefWithEvents(previewRef);
+  }, [setRefWithEvents]);
 
-  // human revalidate pending tags
-  const lastHumanRevalidatedRef = React.useRef<string | null>(null);
+  /** If selected ref is equal to resolvedRef (from build), then we consider this the default state. */
   React.useEffect(() => {
-    if (!bshbPreviewToken) return;
-    if (!ref) return;
-    if (isForcedDraft) return;
-    if (lastHumanRevalidatedRef.current === ref) return;
-    lastHumanRevalidatedRef.current = ref;
+    if (isLoadingRef) return;
+    setIsDefaultRefSelected(ref === resolvedRef.ref);
+  }, [ref, resolvedRef.ref, isLoadingRef]);
 
-    humanRevalidatePendingTags({ bshbPreviewToken, ref }).catch(() => {
-      // ignore
-    });
-  }, [bshbPreviewToken, humanRevalidatePendingTags, ref, isForcedDraft]);
+  /**
+   * If the build ref changes and the user was selecting it, we set the ref to the new build ref.
+   * We also clear the cookie, as this is the default state.
+   */
+  React.useEffect(() => {
+    if (isLoadingRef) return;
 
+    if (isDefaultRefSelected) {
+      setRefWithEvents(resolvedRef.ref);
+      previewRefCookieManager.clear();
+      const url = new URL(window.location.href);
+      url.searchParams.delete("bshb-preview-ref");
+      window.history.replaceState(null, "", url.toString());
+    }
+  }, [isDefaultRefSelected, isLoadingRef, resolvedRef.ref, setRefWithEvents]);
+
+    // human revalidate pending tags
+    const lastHumanRevalidatedRef = React.useRef<string | null>(null);
+    React.useEffect(() => {
+      if (!bshbPreviewToken) return;
+      if (!ref) return;
+      if (isForcedDraft) return;
+      if (lastHumanRevalidatedRef.current === ref) return;
+      lastHumanRevalidatedRef.current = ref;
+  
+      humanRevalidatePendingTags({ bshbPreviewToken, ref }).catch(() => {
+        // ignore
+      });
+    }, [bshbPreviewToken, humanRevalidatePendingTags, ref, isForcedDraft]);
+  
+
+  /** Position tooltip when message changes. */
   React.useLayoutEffect(() => {
     tooltipRef.current?.checkOverflow();
   }, [message]);
@@ -260,6 +297,7 @@ export const ClientToolbar = ({
     [toolbarRef, updateToolbarStoredPositionDebounced]
   );
 
+  /** Reposition toolbar when window resizes. */
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -298,12 +336,20 @@ export const ClientToolbar = ({
             draft={draft}
             apiRref={ref}
             latestBranches={latestBranches}
-            onRefChange={(newRef) => {
+            onRefChange={(newRef, opts) => {
               const url = new URL(window.location.href);
               url.searchParams.set("bshb-preview-ref", newRef);
               window.history.replaceState(null, "", url.toString());
-              window.dispatchEvent(new Event("__bshb_ref_changed"));
-              setRef(newRef);
+              setRefWithEvents(newRef);
+
+              if (opts.enableDraftMode) {
+                const previewToken =
+                  bshbPreviewToken ?? seekAndStoreBshbPreviewToken();
+                if (!previewToken) {
+                  return displayMessage("Preview token not found");
+                }
+                triggerDraftMode(previewToken);
+              }
             }}
             getAndSetLatestBranches={getAndSetLatestBranches}
           />
@@ -338,7 +384,7 @@ export const ClientToolbar = ({
                   const previewToken =
                     bshbPreviewToken ?? seekAndStoreBshbPreviewToken();
                   if (!previewToken) {
-                    return displayMessage("No preview token found");
+                    return displayMessage("Preview token not found");
                   }
 
                   triggerDraftMode(previewToken);
@@ -392,4 +438,23 @@ const EyeIcon = () => {
       />
     </svg>
   );
+};
+
+const previewRefCookieManager = {
+  set: (ref: string) => {
+    document.cookie = `bshb-preview-ref=${ref}; path=/; Max-Age=${
+      60 * 60 * 24 * 30 * 365 // 1 year
+    }`;
+  },
+  clear: () => {
+    document.cookie = `bshb-preview-ref=; path=/; Max-Age=-1`;
+  },
+  get: (): string | null => {
+    return (
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("bshb-preview-ref="))
+        ?.split("=")[1] ?? null
+    );
+  },
 };

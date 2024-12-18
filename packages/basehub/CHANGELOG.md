@@ -1,5 +1,183 @@
 # basehub
 
+## 8.0.0-canary.28
+
+### Patch Changes
+
+- event fixes
+
+## 8.0.0-canary.27
+
+### Patch Changes
+
+- types fix
+
+## 8.0.0-canary.26
+
+### Patch Changes
+
+- svg
+
+## 8.0.0-canary.25
+
+### Patch Changes
+
+- fix rich text and pump return types
+
+## 8.0.0-canary.24
+
+### Patch Changes
+
+- FIX
+
+## 8.0.0-canary.23
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.22
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.21
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.20
+
+### Patch Changes
+
+- rollback shiki
+
+## 8.0.0-canary.19
+
+### Patch Changes
+
+- fix dts thing?
+
+## 8.0.0-canary.18
+
+### Patch Changes
+
+- type rich text content and toc, introduce <TOC />
+
+## 8.0.0-canary.17
+
+### Patch Changes
+
+- event types and some branch switcher styles
+
+## 8.0.0-canary.16
+
+### Patch Changes
+
+- event types
+
+## 8.0.0-canary.15
+
+### Patch Changes
+
+- events stuff
+
+## 8.0.0-canary.14
+
+### Patch Changes
+
+- improve
+
+## 8.0.0-canary.13
+
+### Patch Changes
+
+- Fix!
+
+## 8.0.0-canary.12
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.11
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.10
+
+### Patch Changes
+
+- get latest branches not just in draft mode. enter draft mode automatically when user switches branches
+
+## 8.0.0-canary.9
+
+### Patch Changes
+
+- fixes
+
+## 8.0.0-canary.8
+
+### Patch Changes
+
+- Fix clearing up cookie when selected ref is default
+
+## 8.0.0-canary.7
+
+### Patch Changes
+
+- force schema re-gen on input change
+
+## 8.0.0-canary.6
+
+### Patch Changes
+
+- Fix `data` var being declared twice
+
+## 8.0.0-canary.5
+
+### Patch Changes
+
+- Add analytics src to files
+
+## 8.0.0-canary.4
+
+### Patch Changes
+
+- linked branches improvements
+
+## 8.0.0-canary.3
+
+### Patch Changes
+
+- handle new event api
+
+## 8.0.0-canary.2
+
+### Patch Changes
+
+- don't make preview ref cookie same site
+
+## 8.0.0-canary.1
+
+### Patch Changes
+
+- Correctly type languages prop
+
+## 8.0.0-canary.0
+
+### Major Changes
+
+- - Renamed `language` to `lang` in the `<CodeBlock />` component, to better match BaseHub's GraphQL API types.
+  - In the `<RichText />` component, we made inline code be overridable just via `code`, and the full width code block be overridable via `pre`. Previously, code blocks passed both via `pre` and via `code` (in the latter case, with `isInline` set to `false`), which was quite confusing.
+
+  * Automatic draftMode detection for Next.js
+  * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
+
 ## 7.5.31
 
 ### Patch Changes

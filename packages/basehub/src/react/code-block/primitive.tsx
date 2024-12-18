@@ -45,7 +45,7 @@ export const CodeBlock = ({
   return (
     <LazyClientController
       snippets={snippetsWithIds.map((s) => {
-        return { id: s.id, lang: s.lang, label: s.label };
+        return { id: s.id, language: s.language, label: s.label };
       })}
       storeSnippetSelection={!disableLocalStorageSelection}
       groupId={groupId}
@@ -56,7 +56,7 @@ export const CodeBlock = ({
           // @ts-ignore
           <Highlighter
             key={snippet.id}
-            lang={snippet.lang}
+            lang={snippet.language}
             theme={theme}
             id={snippet.id}
             components={components}

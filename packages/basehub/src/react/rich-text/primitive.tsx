@@ -1,14 +1,16 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { type ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import GithubSlugger from "github-slugger";
 import { extractTextFromNode } from "./util/heading-id";
+import type { Language } from "../code-block";
+import type {
+  RichTextNode,
+  RichTextTocNode,
+  Mark,
+} from "@basehub/mutation-api-helpers";
 
 const isDev = process.env.NODE_ENV === "development";
-
-interface Attrs {
-  readonly [attr: string]: any;
-}
 
 const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
@@ -71,106 +73,13 @@ type Mark =
 
 type Marks = Array<Mark>;
 
-export type Node =
-  | {
-      type:
-        | "paragraph"
-        | "bulletList"
-        | "listItem"
-        | "taskList"
-        | "blockquote"
-        | "table"
-        | "tableRow"
-        | "tableBody";
-      attrs?: Attrs;
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "text";
-      text: string;
-      attrs?: Attrs;
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "codeBlock";
-      attrs: {
-        language?: string;
-      };
-      text: string;
-      marks?: Array<Mark>;
-      content?: [{ type: "text"; text: string }];
-    }
-  | {
-      type: "orderedList";
-      attrs?: { start: number };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "taskItem";
-      attrs?: { checked: boolean };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "heading";
-      attrs: { level: number };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "horizontalRule";
-      content?: Array<Node>;
-    }
-  | {
-      type: "hardBreak";
-      content?: Array<Node>;
-    }
-  | {
-      type: "image";
-      attrs: {
-        src: string;
-        alt?: string;
-        width?: number;
-        height?: number;
-        caption?: string;
-      };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "video";
-      attrs: { src: string; width?: number; height?: number; caption?: string };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "tableCell" | "tableHeader" | "tableFooter";
-      attrs: { colspan: number; rowspan: number };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    }
-  | {
-      type: "basehub-block";
-      attrs: { id: string };
-      marks?: Array<Mark>;
-      content?: Array<Node>;
-    };
-
 type Handlers = {
   p: (props: { children: ReactNode }) => ReactNode;
   b: (props: { children: ReactNode }) => ReactNode;
   em: (props: { children: ReactNode }) => ReactNode;
   s: (props: { children: ReactNode }) => ReactNode;
   kbd: (props: { children: ReactNode }) => ReactNode;
-  code: (props: {
-    children: ReactNode;
-    isInline: boolean;
-    language: string;
-    code: string;
-  }) => ReactNode;
+  code: (props: { children: ReactNode }) => ReactNode;
   a: (props: ExternalLinkProps  & {
     internalLink: undefined | InternalLinkProps<BaseCustomBlock, any>;
   }) => ReactNode;
@@ -205,7 +114,7 @@ type Handlers = {
   blockquote: (props: { children: ReactNode }) => ReactNode;
   pre: (props: {
     children: ReactNode;
-    language: string;
+    language: Language;
     code: string;
   }) => ReactNode;
   table: (props: { children: ReactNode }) => ReactNode;
@@ -268,7 +177,7 @@ type LinkHandlerMapping<
 export type RichTextProps<
   CustomBlocks extends CustomBlocksBase = readonly any[],
 > = {
-  content?: Node[];
+  content?: RichTextNode[];
   /**
    * @deprecated Use `content` instead.
    */
@@ -287,8 +196,8 @@ export const RichText = <
   CustomBlocks extends CustomBlocksBase = readonly any[],
 >(
   props: RichTextProps<CustomBlocks>
-): ReactNode => {
-  const value = (props.content ?? props.children) as Node[] | undefined;
+): JSX.Element => {
+  const value = (props.content ?? props.children) as RichTextNode[] | undefined;
   const slugger = new GithubSlugger();
 
   return (
@@ -320,17 +229,7 @@ const defaultHandlers: Handlers = {
   em: ({ children }) => <em>{children}</em>,
   s: ({ children }) => <s>{children}</s>,
   kbd: ({ children }) => <kbd>{children}</kbd>,
-  code: ({ children, isInline, language }) => {
-    return (
-      <code
-        {...(isInline === false
-          ? { "data-language": language, className: `language-${language}` }
-          : {})}
-      >
-        {children}
-      </code>
-    );
-  },
+  code: ({ children }) => <code>{children}</code>,
   ol: ({ children }) => <ol>{children}</ol>,
   ul: ({ children }) => <ul>{children}</ul>,
   li: ({ children, ...rest }) => {
@@ -396,14 +295,13 @@ const Node = ({
   node,
   components,
   blocks,
-  parent,
   slugger,
   disableDefaultComponents,
 }: {
-  node: Node;
+  node: RichTextNode;
   components?: Partial<Handlers>;
   blocks?: readonly CustomBlockBase[];
-  parent?: Node;
+  parent?: RichTextNode;
   slugger: GithubSlugger;
   disableDefaultComponents?: boolean;
 }) => {
@@ -431,16 +329,7 @@ const Node = ({
       props = { children } satisfies ExtractPropsForHandler<Handlers["p"]>;
       break;
     case "text":
-      const forceCodeMark = parent?.type === "codeBlock";
       const clonedMarks = [...(node.marks ?? [])];
-      if (forceCodeMark && !clonedMarks.some((mark) => mark.type === "code")) {
-        const language = parent?.attrs?.language ?? "text";
-        const code = parent.content?.[0].text ?? "";
-        clonedMarks.push({
-          type: "code",
-          attrs: { isInline: false, language, code },
-        } satisfies Mark);
-      }
       Handler = ({ children }: { children?: ReactNode }) => (
         <Marks
           marks={clonedMarks}
@@ -522,7 +411,7 @@ const Node = ({
       const code = node.content?.[0].text ?? "";
       props = {
         children,
-        language: node.attrs?.language ?? "text",
+        language: (node.attrs?.language ?? "text") as Language,
         code,
       } satisfies ExtractPropsForHandler<Handlers["pre"]>;
       break;
@@ -714,9 +603,6 @@ const Marks = ({
         (disableDefaultComponents ? () => <></> : defaultHandlers.code);
       props = {
         children,
-        isInline: mark.attrs.isInline ?? true,
-        language: mark.attrs.language ?? "text",
-        code: mark.attrs.code ?? "",
       } satisfies ExtractPropsForHandler<Handlers["code"]>;
       break;
     case "underline":
@@ -851,7 +737,7 @@ export function createRichTextWithDefaultComponents(
 ) {
   return <CustomBlocks extends CustomBlocksBase = readonly any[]>(
     props: RichTextProps<CustomBlocks>
-  ): ReactNode => {
+  ): JSX.Element => {
     return (
       <RichText<CustomBlocks>
         {...props}
@@ -863,3 +749,41 @@ export function createRichTextWithDefaultComponents(
     );
   };
 }
+
+/* -------------------------------------------------------------------------------------------------
+ * TOC
+ * -----------------------------------------------------------------------------------------------*/
+
+type TocHandlers = Pick<Handlers, "ol" | "p" | "a">;
+
+export type TOCProps = {
+  content?: RichTextTocNode[];
+  /**
+   * @deprecated Use `content` instead.
+   */
+  children?: unknown;
+  components?: Partial<TocHandlers>;
+  disableDefaultComponents?: boolean;
+};
+
+export const TOC = (props: TOCProps): JSX.Element => {
+  const slugger = new GithubSlugger();
+
+  const value = (props.content ?? props.children) as RichTextTocNode[];
+
+  return (
+    <>
+      {value?.map((node, index) => {
+        return (
+          <Node
+            node={node as RichTextNode}
+            key={index}
+            components={props.components}
+            slugger={slugger}
+            disableDefaultComponents={props.disableDefaultComponents}
+          />
+        );
+      })}
+    </>
+  );
+};

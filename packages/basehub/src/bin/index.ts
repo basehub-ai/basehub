@@ -52,6 +52,7 @@ const args = arg(
     // types
     "--output": String,
     "--token": String,
+    "--ref": String,
     "--env-prefix": String,
     "--banner": String,
     "--version": Boolean,
@@ -63,6 +64,7 @@ const args = arg(
     // aliases
     "-o": "--output",
     "-t": "--token",
+    "-r": "--ref",
     "-ep": "--env-prefix",
     "-b": "--banner",
     "-v": "--version",
