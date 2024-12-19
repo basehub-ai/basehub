@@ -282,6 +282,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAsync"> & {
       generatedSchemaPath,
       `
 import type { RichTextNode, RichTextTocNode } from './api-transaction';
+import type { Language } from './react-code-block';
 `
     );
 
@@ -595,9 +596,10 @@ import type { RichTextNode, RichTextTocNode } from './api-transaction';
       if (gitIgnorePath && fs.existsSync(gitIgnorePath)) {
         const gitIgnoreContents = fs.readFileSync(gitIgnorePath, "utf-8");
         if (!gitIgnoreContents.includes(shouldAppendToGitIgnore)) {
+          const separator = gitIgnoreContents.endsWith("\n") ? "\n" : "\n\n";
           fs.appendFileSync(
             gitIgnorePath,
-            `\n\n# BaseHub\n${shouldAppendToGitIgnore}`
+            `${separator}# BaseHub\n${shouldAppendToGitIgnore}`
           );
           logIfNotSilent(
             silent,
