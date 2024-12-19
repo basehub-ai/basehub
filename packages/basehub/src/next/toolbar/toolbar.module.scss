@@ -59,13 +59,14 @@
 }
 
 .root {
+  --font-family: Inter, Segoe UI, Roboto, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji, sans-serif;
   border-radius: 6px;
   height: 36px;
   color: white;
   display: flex;
   border: 1px solid #303030;
-  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-family: var(--font-family);
 
   &[data-draft-active="true"] {
     border-color: #ff6c02;
@@ -272,7 +273,6 @@
   background: none;
   border: none;
   font-weight: 500;
-  font-family: inherit;
   font-size: 16px;
   padding-right: 8px;
   padding-bottom: 0px;
@@ -287,6 +287,18 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   opacity: 1;
+  font-family: var(--font-family);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.branchSelectIcon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0;
+  pointer-events: none;
 }
 
 @keyframes in {

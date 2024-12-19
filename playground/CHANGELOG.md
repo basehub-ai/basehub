@@ -1,18 +1,130 @@
 # playground
 
-## 0.0.174
+## 0.0.164-canary.34
 
 ### Patch Changes
 
 - Updated dependencies
-  - basehub@7.5.32
+  - basehub@8.0.0-canary.34
+
+## 0.0.164-canary.33
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [f023e53]
+  - basehub@8.0.0-canary.33
+
+## 0.0.164-canary.32
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.32
+
+## 0.0.164-canary.31
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.31
+
+## 0.0.164-canary.30
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.30
+
+## 0.0.164-canary.29
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.29
+
+## 0.0.164-canary.28
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.28
+
+## 0.0.164-canary.27
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.27
+
+## 0.0.164-canary.26
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.26
+
+## 0.0.164-canary.25
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.25
+
+## 0.0.164-canary.24
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.24
+
+## 0.0.164-canary.23
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.23
+
+## 0.0.164-canary.22
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.22
+
+## 0.0.164-canary.21
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.21
+
+## 0.0.164-canary.20
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.20
+
+## 0.0.164-canary.19
 
 ## 0.0.173
 
 ### Patch Changes
 
 - Updated dependencies
-  - basehub@7.5.31
+  - basehub@8.0.0-canary.19
+
+## 0.0.164-canary.18
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.18
+
+## 0.0.164-canary.17
+
+- basehub@7.5.31
 
 ## 0.0.172
 
@@ -68,7 +180,105 @@
 ### Patch Changes
 
 - Updated dependencies
-  - basehub@7.5.23
+  - basehub@8.0.0-canary.17
+
+## 0.0.164-canary.16
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.16
+
+## 0.0.164-canary.15
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.15
+
+## 0.0.164-canary.14
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.14
+
+## 0.0.164-canary.13
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.13
+
+## 0.0.164-canary.12
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.12
+
+## 0.0.164-canary.11
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.11
+
+## 0.0.164-canary.10
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.10
+
+## 0.0.164-canary.9
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.9
+
+## 0.0.164-canary.8
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.8
+
+## 0.0.164-canary.7
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.7
+
+## 0.0.164-canary.6
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.6
+
+## 0.0.164-canary.5
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.5
+
+## 0.0.164-canary.4
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.4
+
+## 0.0.164-canary.3
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.0.0-canary.3
 
 ## 0.0.164
 
@@ -92,21 +302,21 @@
 ### Patch Changes
 
 - Updated dependencies
-  - basehub@7.5.22-canary.2
+  - basehub@8.0.0-canary.2
 
 ## 0.0.164-canary.1
 
 ### Patch Changes
 
 - Updated dependencies
-  - basehub@7.5.22-canary.1
+  - basehub@8.0.0-canary.1
 
 ## 0.0.164-canary.0
 
 ### Patch Changes
 
 - Updated dependencies
-  - basehub@7.5.22-canary.0
+  - basehub@8.0.0-canary.0
 
 ## 0.0.163
 
@@ -1230,8 +1440,6 @@
 
 - Updated dependencies
   - basehub@4.0.16-canary.0
-
-<<<<<<< HEAD
 
 ## 0.0.83-next.0
 

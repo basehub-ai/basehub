@@ -15,6 +15,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.22.0",
     "eslint-config-custom": "workspace:*",
+    "pkg-pr-new": "^0.0.30",
     "prettier": "3.0.3",
     "turbo": "1.10.12",
     "type-fest": "^3.0.0",
