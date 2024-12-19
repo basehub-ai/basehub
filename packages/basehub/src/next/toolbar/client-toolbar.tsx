@@ -370,6 +370,7 @@ export const ClientToolbar = ({
             ref={ref}
             resolvedRef={resolvedRef}
             triggerDraftMode={triggerDraftModeBound}
+            isDraftModeEnabled={isForcedDraft || draft}
           />
 
           {/* draft mode button */}
@@ -422,10 +423,12 @@ const AutoEnterDraftModeOnPathChangeIfRefIsNotDefault = ({
   ref,
   resolvedRef,
   triggerDraftMode,
+  isDraftModeEnabled,
 }: {
   ref: string;
   resolvedRef: ResolvedRef;
   triggerDraftMode: () => void;
+  isDraftModeEnabled: boolean;
 }) => {
   const pathname = usePathname();
   const [initialPathname, setInitialPathname] = React.useState(pathname);
@@ -436,14 +439,26 @@ const AutoEnterDraftModeOnPathChangeIfRefIsNotDefault = ({
   }, [pathname, initialPathname]);
 
   React.useEffect(() => {
+    if (isDraftModeEnabled) return;
     if (initialPathname === pathname) {
       // ignore the first render/pathname
       return;
     }
     if (ref !== resolvedRef.ref) {
       triggerDraftMode();
+      // also add ?bshb-preview-ref=... to the url
+      const url = new URL(window.location.href);
+      url.searchParams.set("bshb-preview-ref", ref);
+      window.history.replaceState(null, "", url.toString());
     }
-  }, [ref, resolvedRef.ref, triggerDraftMode, pathname, initialPathname]);
+  }, [
+    isDraftModeEnabled,
+    ref,
+    resolvedRef.ref,
+    triggerDraftMode,
+    pathname,
+    initialPathname,
+  ]);
 
   return null;
 };
