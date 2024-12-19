@@ -244,13 +244,13 @@ export const main = async (
         "mutation<R extends MutationGenqlSelection>",
         `mutation<
 R extends Omit<MutationGenqlSelection, "transaction" | "transactionAsync"> & {
-      transaction?: {
+      transaction?: TransactionStatusGenqlSelection & {
         __args: Omit<
           NonNullable<MutationGenqlSelection["transaction"]>["__args"],
           "data"
         > & { data: Transaction | string };
       };
-      transactionAsync?: TransactionStatusGenqlSelection & {
+      transactionAsync?: {
         __args: Omit<
           NonNullable<MutationGenqlSelection["transactionAsync"]>["__args"],
           "data"
