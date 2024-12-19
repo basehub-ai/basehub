@@ -1,5 +1,12 @@
 # basehub
 
+## 8.0.0-canary.33
+
+### Patch Changes
+
+- toolbar improvements
+- f023e53: fix type
+
 ## 8.0.0-canary.32
 
 ### Patch Changes

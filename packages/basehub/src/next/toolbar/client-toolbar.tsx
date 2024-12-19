@@ -6,6 +6,7 @@ import { Tooltip } from "./components/tooltip";
 import { DragHandle } from "./components/drag-handle";
 import { BranchSwitcher, LatestBranch } from "./components/branch-swticher";
 import debounce from "lodash.debounce";
+import { usePathname } from "next/navigation";
 import { ResolvedRef } from "../../common-types";
 
 const TOOLBAR_POSITION_STORAGE_KEY = "bshb_toolbar_pos";
@@ -94,6 +95,19 @@ export const ClientToolbar = ({
     [enableDraftMode, displayMessage]
   );
 
+  const triggerDraftModeBound = React.useCallback(() => {
+    const previewToken = bshbPreviewToken ?? seekAndStoreBshbPreviewToken();
+    if (!previewToken) {
+      return displayMessage("Preview token not found");
+    }
+    triggerDraftMode(previewToken);
+  }, [
+    bshbPreviewToken,
+    displayMessage,
+    seekAndStoreBshbPreviewToken,
+    triggerDraftMode,
+  ]);
+
   const [hasAutoEnabledDraftOnce, setHasAutoEnabledDraftOnce] =
     React.useState(false);
 
@@ -156,9 +170,9 @@ export const ClientToolbar = ({
   const setRefWithEvents = React.useCallback(
     (ref: string) => {
       _setRef(ref);
-      window.dispatchEvent(
-        new CustomEvent("__bshb_ref_changed", { detail: { ref } })
-      );
+      // @ts-ignore
+      window.__bshb_ref = ref;
+      window.dispatchEvent(new CustomEvent("__bshb_ref_changed"));
       previewRefCookieManager.set(ref);
       setIsDefaultRefSelected(ref === resolvedRef.ref);
     },
@@ -202,20 +216,19 @@ export const ClientToolbar = ({
     }
   }, [isDefaultRefSelected, isLoadingRef, resolvedRef.ref, setRefWithEvents]);
 
-    // human revalidate pending tags
-    const lastHumanRevalidatedRef = React.useRef<string | null>(null);
-    React.useEffect(() => {
-      if (!bshbPreviewToken) return;
-      if (!ref) return;
-      if (isForcedDraft) return;
-      if (lastHumanRevalidatedRef.current === ref) return;
-      lastHumanRevalidatedRef.current = ref;
-  
-      humanRevalidatePendingTags({ bshbPreviewToken, ref }).catch(() => {
-        // ignore
-      });
-    }, [bshbPreviewToken, humanRevalidatePendingTags, ref, isForcedDraft]);
-  
+  // human revalidate pending tags
+  const lastHumanRevalidatedRef = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (!bshbPreviewToken) return;
+    if (!ref) return;
+    if (isForcedDraft) return;
+    if (lastHumanRevalidatedRef.current === ref) return;
+    lastHumanRevalidatedRef.current = ref;
+
+    humanRevalidatePendingTags({ bshbPreviewToken, ref }).catch(() => {
+      // ignore
+    });
+  }, [bshbPreviewToken, humanRevalidatePendingTags, ref, isForcedDraft]);
 
   /** Position tooltip when message changes. */
   React.useLayoutEffect(() => {
@@ -353,6 +366,11 @@ export const ClientToolbar = ({
             }}
             getAndSetLatestBranches={getAndSetLatestBranches}
           />
+          <AutoEnterDraftModeOnPathChangeIfRefIsNotDefault
+            ref={ref}
+            resolvedRef={resolvedRef}
+            triggerDraftMode={triggerDraftModeBound}
+          />
 
           {/* draft mode button */}
           <Tooltip
@@ -398,6 +416,36 @@ export const ClientToolbar = ({
       </DragHandle>
     </div>
   );
+};
+
+const AutoEnterDraftModeOnPathChangeIfRefIsNotDefault = ({
+  ref,
+  resolvedRef,
+  triggerDraftMode,
+}: {
+  ref: string;
+  resolvedRef: ResolvedRef;
+  triggerDraftMode: () => void;
+}) => {
+  const pathname = usePathname();
+  const [initialPathname, setInitialPathname] = React.useState(pathname);
+
+  React.useEffect(() => {
+    if (initialPathname) return;
+    setInitialPathname(pathname);
+  }, [pathname, initialPathname]);
+
+  React.useEffect(() => {
+    if (initialPathname === pathname) {
+      // ignore the first render/pathname
+      return;
+    }
+    if (ref !== resolvedRef.ref) {
+      triggerDraftMode();
+    }
+  }, [ref, resolvedRef.ref, triggerDraftMode, pathname, initialPathname]);
+
+  return null;
 };
 
 const EyeDashedIcon = () => {

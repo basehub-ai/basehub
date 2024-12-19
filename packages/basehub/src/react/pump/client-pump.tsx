@@ -311,13 +311,15 @@ export const ClientPump = <Queries extends PumpQuery[]>({
    * Subscribe to ref changes
    */
   React.useEffect(() => {
-    function handleRefChange(e: Event) {
-      if (e instanceof CustomEvent === false) return;
-      const previewRef = e.detail.ref;
-      if (!previewRef) return;
+    function handleRefChange() {
+      const previewRef =
+        // @ts-ignore
+        window.__bshb_ref;
+      if (!previewRef || typeof previewRef !== "string") return;
       setPreviewRef(previewRef);
     }
 
+    handleRefChange();
     window.addEventListener("__bshb_ref_changed", handleRefChange);
     return () => {
       window.removeEventListener("__bshb_ref_changed", handleRefChange);
