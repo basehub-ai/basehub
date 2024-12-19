@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.31
+
+### Patch Changes
+
+- upgrade mutation api helpers
+
 ## 8.0.0-canary.30
 
 ### Patch Changes
