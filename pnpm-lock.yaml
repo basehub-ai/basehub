@@ -68,8 +68,8 @@ importers:
         specifier: 9.0.0-canary.9
         version: 9.0.0-canary.9
       '@basehub/mutation-api-helpers':
-        specifier: 2.0.4
-        version: 2.0.4
+        specifier: 2.0.7
+        version: 2.0.7
       '@radix-ui/react-slot':
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.2.20)(react@18.2.0)
@@ -269,8 +269,8 @@ packages:
       - enquirer
     dev: false
 
-  /@basehub/mutation-api-helpers@2.0.4:
-    resolution: {integrity: sha512-pvFIUUMSLRxRqyuXUeiHSnBLys9SvL+OGJeg2uDDfRkGBnTX+k4kexbA1Ze/5UAa/O+jiJJffOvyliBhIuw3Zg==}
+  /@basehub/mutation-api-helpers@2.0.7:
+    resolution: {integrity: sha512-i2WRtQnAkQ1Lowkwl6tkMIQ42AfZ2qs71zR/JYV6wxvl52011sXTMdf8V8jn/X/SZf7M4rR4KU9Bj8FA0DJPBA==}
     dev: false
 
   /@changesets/apply-release-plan@6.1.4:
