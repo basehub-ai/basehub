@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "7.5.31",
+  "version": "7.5.32",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",

@@ -100,7 +100,7 @@ export type Node =
     }
   | {
       type: "tableCell" | "tableHeader" | "tableFooter";
-      attrs: { colspan: number; rowspan: number };
+      attrs: { colspan: number; rowspan: number; colwidth?: null | number[] };
       marks?: Array<Mark>;
       content?: Array<Node>;
     }
@@ -169,11 +169,13 @@ type Handlers = {
     children: ReactNode;
     colspan: number;
     rowspan: number;
+    colwidth?: number[];
   }) => ReactNode;
   th: (props: {
     children: ReactNode;
     colspan: number;
     rowspan: number;
+    colwidth?: number[];
   }) => ReactNode;
   thead: (props: { children: ReactNode }) => ReactNode;
   tbody: (props: { children: ReactNode }) => ReactNode;
@@ -499,6 +501,7 @@ const Node = ({
         children,
         colspan: node.attrs.colspan,
         rowspan: node.attrs.rowspan,
+        colwidth: node.attrs.colwidth ?? undefined,
       } satisfies ExtractPropsForHandler<Handlers["td"]>;
       break;
     case "tableHeader":
@@ -509,6 +512,7 @@ const Node = ({
         children,
         colspan: node.attrs.colspan,
         rowspan: node.attrs.rowspan,
+        colwidth: node.attrs.colwidth ?? undefined,
       } satisfies ExtractPropsForHandler<Handlers["th"]>;
       break;
     case "tableFooter":

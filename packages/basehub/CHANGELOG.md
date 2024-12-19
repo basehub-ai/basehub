@@ -1,5 +1,11 @@
 # basehub
 
+## 7.5.32
+
+### Patch Changes
+
+- Add colwidth props to td and th
+
 ## 7.5.31
 
 ### Patch Changes
