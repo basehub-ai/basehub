@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as z from "zod";
-import { DOMParser } from "xmldom";
+import { DOMParser, Element as XMLElement } from "@xmldom/xmldom";
 
 export const supportedSvgTags = [
   "svg",
@@ -18,6 +18,7 @@ export const supportedSvgTags = [
   "feOffset",
   "feGaussianBlur",
   "feBlend",
+  "feComposite",
   "mask",
   "defs",
 ] as const;
@@ -42,6 +43,7 @@ const DEFAULT_COMPONENTS: ComponentsOverride = {
   filter: (props) => React.createElement("filter", props),
   feFlood: (props) => React.createElement("feFlood", props),
   feColorMatrix: (props) => React.createElement("feColorMatrix", props),
+  feComposite: (props) => React.createElement("feComposite", props),
   feOffset: (props) => React.createElement("feOffset", props),
   feGaussianBlur: (props) => React.createElement("feGaussianBlur", props),
   feBlend: (props) => React.createElement("feBlend", props),
@@ -67,7 +69,6 @@ const sanitizeSVGString = (svgString: string): string => {
   return sanitized;
 };
 
-// Helper function to convert style string to React style object
 const parseStyleString = (styleString: string): React.CSSProperties => {
   return styleString
     .split(";")
@@ -75,12 +76,9 @@ const parseStyleString = (styleString: string): React.CSSProperties => {
     .reduce((styleObj, style) => {
       const [property, value] = style.split(":").map((s) => s.trim());
       if (property && value) {
-        // Convert CSS property names to camelCase
         const camelCaseProperty = property.replace(/-([a-z])/g, (_, letter) =>
           letter.toUpperCase()
         );
-
-        // Special handling for numeric values
         (styleObj as any)[camelCaseProperty] =
           /^\d+(\.\d+)?(px|em|rem|%)?$/.test(value) ? parseFloat(value) : value;
       }
@@ -102,114 +100,85 @@ export const SVG = ({
 }) => {
   const content = _content ?? children;
 
-  // Merge default components with custom ones
-  const finalComponents = { ...DEFAULT_COMPONENTS, ...components };
-
-  const parseAndRenderSVG = (svgString: string) => {
+  const parseAndRenderSVG = React.useMemo(() => {
     try {
-      // Sanitize the SVG string first
-      const sanitizedSvgString = sanitizeSVGString(svgString);
+      const sanitizedSvgString = sanitizeSVGString(content);
 
-      // Create a DOM parser
-      const parser =
-        typeof window !== "undefined"
-          ? new DOMParser()
-          : new (require("xmldom").DOMParser)();
+      const doc = new DOMParser().parseFromString(
+        sanitizedSvgString,
+        "image/svg+xml"
+      );
 
-      // Parse with error handling
-      const doc = parser.parseFromString(sanitizedSvgString, "image/svg+xml");
-
-      // Check for parsing errors
       const parseErrors = doc.getElementsByTagName("parsererror");
       if (parseErrors.length > 0) {
-        throw new Error(`XML Parsing Error: ${parseErrors[0].textContent}`);
+        throw new Error(`XML Parsing Error: ${parseErrors[0]?.textContent}`);
       }
 
       const svgElement = doc.documentElement;
 
-      // Recursive function to convert DOM nodes to React elements
-      const convertNode = (node: Element): React.ReactNode => {
-        // Skip text nodes that only contain whitespace
+      const convertNode = (node: XMLElement | Element): React.ReactNode => {
         if (node.nodeType === 3 && !node.nodeValue?.trim()) {
           return null;
         }
 
-        // For text nodes, return the text content
         if (node.nodeType === 3) {
           return node.nodeValue;
         }
 
-        // Get the tag name and convert to lowercase
         const tagName = node.tagName;
-
-        // Skip if not a valid tag
         if (!tagName) return null;
-        const parsedTagName = svgComponentSchema.safeParse(tagName);
 
-        // Get the component for this tag
+        const parsedTagName = svgComponentSchema.safeParse(tagName);
         const tag = parsedTagName.success
           ? parsedTagName.data
           : (tagName as SvgComponent);
-        const Component = finalComponents[tag];
+        const Component = components[tag] || DEFAULT_COMPONENTS[tag];
 
-        // Convert attributes to props
-        const props: Record<string, JSX.IntrinsicElements[typeof tag]> = {};
-        Array.from(node.attributes || []).forEach((attr) => {
-          const attributeValue =
-            attr.value as JSX.IntrinsicElements[typeof tag];
-
-          // Skip data attributes from camel-casing
+        const props: Record<string, any> = {};
+        const attributes = Array.prototype.slice.call(node.attributes || []);
+        attributes.forEach((attr: any) => {
           if (attr.name.startsWith("data-")) {
-            props[attr.name] = attributeValue;
+            props[attr.name] = attr.value;
             return;
           }
 
-          // Convert kebab-case to camelCase for React, excluding data-attributes
-          const name = attr.name.replace(/-([a-z])/g, (g) =>
+          const name = attr.name.replace(/-([a-z])/g, (g: string[]) =>
             (g?.[1] as string).toUpperCase()
           );
 
           if (name === "class") {
-            props.className = attributeValue;
-            return;
+            props.className = attr.value;
+          } else if (name === "style") {
+            props[name] = parseStyleString(attr.value);
+          } else {
+            props[name] = attr.value;
           }
-
-          // Special handling for style attribute
-          if (name === "style") {
-            props[name] = parseStyleString(attributeValue as string) as any;
-            return;
-          }
-
-          props[name] = attr.value as JSX.IntrinsicElements[typeof tag];
         });
 
-        // Convert children
-        const children = Array.from(node.childNodes)
-          .map((child, index) => (
-            <React.Fragment key={index}>
-              {convertNode(child as Element)}
-            </React.Fragment>
+        const children = Array.prototype.slice
+          .call(node.childNodes)
+          .map((child: any, index) => (
+            <React.Fragment key={index}>{convertNode(child)}</React.Fragment>
           ))
           .filter(Boolean);
 
         if (typeof Component !== "function") return null;
 
-        // Return the React element
         return children.length === 0
           ? Component(props)
           : Component({ ...props, children });
       };
+
+      if (!svgElement) return null;
 
       return convertNode(svgElement);
     } catch (error) {
       console.error("SVG Parsing Error:", error);
       return null;
     }
-  };
+  }, [content, components]);
 
-  // Return the parsed and rendered SVG
-  const renderedSvg = parseAndRenderSVG(content);
-  if (!renderedSvg) return null;
+  if (!parseAndRenderSVG) return null;
 
-  return renderedSvg as React.ReactElement;
+  return parseAndRenderSVG as React.ReactElement;
 };
