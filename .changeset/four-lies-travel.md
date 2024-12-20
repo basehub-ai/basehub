@@ -1,0 +1,5 @@
+---
+"basehub": patch
+---
+
+toolbar improvements

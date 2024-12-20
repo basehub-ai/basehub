@@ -10,5 +10,6 @@ export type ResolvedRef = { ref: string } & (
       name: string;
       git?: { branch?: string | null };
       createSuggestedBranchLink?: string;
+      headCommitId?: string | null;
     }
 );
