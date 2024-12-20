@@ -16,10 +16,12 @@
     "eslint-config-custom": "workspace:*",
     "graphql": "^16.8.1",
     "next": "^14.2.3",
+    "pusher-js": "8.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-tweet": "^3.1.1",
-    "sharp": "^0.32.0"
+    "sharp": "^0.32.0",
+    "sonner": "1.5.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "13.4.16",
