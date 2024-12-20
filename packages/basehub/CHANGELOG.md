@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.36
+
+### Patch Changes
+
+- svg update
+
 ## 8.0.0-canary.35
 
 ### Patch Changes
