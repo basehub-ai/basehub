@@ -95,19 +95,6 @@ export const ClientToolbar = ({
     [enableDraftMode, displayMessage]
   );
 
-  const triggerDraftModeBound = React.useCallback(() => {
-    const previewToken = bshbPreviewToken ?? seekAndStoreBshbPreviewToken();
-    if (!previewToken) {
-      return displayMessage("Preview token not found");
-    }
-    triggerDraftMode(previewToken);
-  }, [
-    bshbPreviewToken,
-    displayMessage,
-    seekAndStoreBshbPreviewToken,
-    triggerDraftMode,
-  ]);
-
   const [hasAutoEnabledDraftOnce, setHasAutoEnabledDraftOnce] =
     React.useState(false);
 
@@ -366,10 +353,9 @@ export const ClientToolbar = ({
             }}
             getAndSetLatestBranches={getAndSetLatestBranches}
           />
-          <AutoEnterDraftModeOnPathChangeIfRefIsNotDefault
+          <AutoAddRefToUrlOnPathChangeIfRefIsNotDefault
             ref={ref}
             resolvedRef={resolvedRef}
-            triggerDraftMode={triggerDraftModeBound}
             isDraftModeEnabled={isForcedDraft || draft}
           />
 
@@ -419,15 +405,13 @@ export const ClientToolbar = ({
   );
 };
 
-const AutoEnterDraftModeOnPathChangeIfRefIsNotDefault = ({
+const AutoAddRefToUrlOnPathChangeIfRefIsNotDefault = ({
   ref,
   resolvedRef,
-  triggerDraftMode,
   isDraftModeEnabled,
 }: {
   ref: string;
   resolvedRef: ResolvedRef;
-  triggerDraftMode: () => void;
   isDraftModeEnabled: boolean;
 }) => {
   const pathname = usePathname();
@@ -445,20 +429,12 @@ const AutoEnterDraftModeOnPathChangeIfRefIsNotDefault = ({
       return;
     }
     if (ref !== resolvedRef.ref) {
-      triggerDraftMode();
       // also add ?bshb-preview-ref=... to the url
       const url = new URL(window.location.href);
       url.searchParams.set("bshb-preview-ref", ref);
       window.history.replaceState(null, "", url.toString());
     }
-  }, [
-    isDraftModeEnabled,
-    ref,
-    resolvedRef.ref,
-    triggerDraftMode,
-    pathname,
-    initialPathname,
-  ]);
+  }, [isDraftModeEnabled, ref, resolvedRef.ref, pathname, initialPathname]);
 
   return null;
 };
