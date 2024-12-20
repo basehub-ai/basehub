@@ -101,6 +101,8 @@ export const SVG = ({
   const content = _content ?? children;
 
   const parseAndRenderSVG = React.useMemo(() => {
+    const finalComponents = { ...DEFAULT_COMPONENTS, ...components };
+
     try {
       const sanitizedSvgString = sanitizeSVGString(content);
 
@@ -132,7 +134,7 @@ export const SVG = ({
         const tag = parsedTagName.success
           ? parsedTagName.data
           : (tagName as SvgComponent);
-        const Component = components[tag] || DEFAULT_COMPONENTS[tag];
+        const Component = finalComponents[tag] || DEFAULT_COMPONENTS[tag];
 
         const props: Record<string, any> = {};
         const attributes = Array.prototype.slice.call(node.attributes || []);
