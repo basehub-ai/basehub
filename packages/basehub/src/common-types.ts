@@ -1,4 +1,4 @@
-export type ResolvedRef = { ref: string } & (
+export type ResolvedRef = { ref: string; repoHash: string } & (
   | {
       type: "commit";
       id: string;

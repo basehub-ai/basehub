@@ -893,7 +893,7 @@ export const basehub = (options?: Options) => {
       try {
         const { cookies } = await import("next/headers");
         const cookieStore = await cookies();
-        const ref = cookieStore.get("bshb-preview-ref")?.value;
+        const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)?.value;
         if (ref) {
           extra.headers = {
             ...extra.headers,

@@ -95,6 +95,29 @@ export const ClientToolbar = ({
     [enableDraftMode, displayMessage]
   );
 
+  const bshbPreviewRefCookieName = `bshb-preview-ref-${resolvedRef.repoHash}`;
+  const previewRefCookieManager = React.useMemo(
+    () => ({
+      set: (ref: string) => {
+        document.cookie = `${bshbPreviewRefCookieName}=${ref}; path=/; Max-Age=${
+          60 * 60 * 24 * 30 * 365 // 1 year
+        }`;
+      },
+      clear: () => {
+        document.cookie = `${bshbPreviewRefCookieName}=; path=/; Max-Age=-1`;
+      },
+      get: (): string | null => {
+        return (
+          document.cookie
+            .split("; ")
+            .find((row) => row.startsWith(bshbPreviewRefCookieName))
+            ?.split("=")[1] ?? null
+        );
+      },
+    }),
+    [bshbPreviewRefCookieName]
+  );
+
   const [hasAutoEnabledDraftOnce, setHasAutoEnabledDraftOnce] =
     React.useState(false);
 
@@ -163,7 +186,7 @@ export const ClientToolbar = ({
       previewRefCookieManager.set(ref);
       setIsDefaultRefSelected(ref === resolvedRef.ref);
     },
-    [resolvedRef.ref]
+    [previewRefCookieManager, resolvedRef.ref]
   );
 
   /** Load ref from url or cookie. */
@@ -179,7 +202,7 @@ export const ClientToolbar = ({
     if (!previewRef) return;
 
     setRefWithEvents(previewRef);
-  }, [setRefWithEvents]);
+  }, [previewRefCookieManager, setRefWithEvents, resolvedRef.repoHash]);
 
   /** If selected ref is equal to resolvedRef (from build), then we consider this the default state. */
   React.useEffect(() => {
@@ -201,7 +224,13 @@ export const ClientToolbar = ({
       url.searchParams.delete("bshb-preview-ref");
       window.history.replaceState(null, "", url.toString());
     }
-  }, [isDefaultRefSelected, isLoadingRef, resolvedRef.ref, setRefWithEvents]);
+  }, [
+    isDefaultRefSelected,
+    isLoadingRef,
+    previewRefCookieManager,
+    resolvedRef.ref,
+    setRefWithEvents,
+  ]);
 
   // human revalidate pending tags
   const lastHumanRevalidatedRef = React.useRef<string | null>(null);
@@ -477,23 +506,4 @@ const EyeIcon = () => {
       />
     </svg>
   );
-};
-
-const previewRefCookieManager = {
-  set: (ref: string) => {
-    document.cookie = `bshb-preview-ref=${ref}; path=/; Max-Age=${
-      60 * 60 * 24 * 30 * 365 // 1 year
-    }`;
-  },
-  clear: () => {
-    document.cookie = `bshb-preview-ref=; path=/; Max-Age=-1`;
-  },
-  get: (): string | null => {
-    return (
-      document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("bshb-preview-ref="))
-        ?.split("=")[1] ?? null
-    );
-  },
 };

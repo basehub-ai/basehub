@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.37
+
+### Patch Changes
+
+- scope cookie per repo hash
+
 ## 8.0.0-canary.36
 
 ### Patch Changes

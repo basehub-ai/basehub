@@ -88,7 +88,8 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      const ref = cookieStore.get("bshb-preview-ref")?.value;
+      const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
+        ?.value;
       if (ref) {
         headers["x-basehub-ref"] = ref;
       }
