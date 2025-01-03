@@ -110,10 +110,10 @@ export function unstable_Form<T extends `${EventKeys}:${string}`>({
         await updateEvent(
           action.adminKey as any,
           action.eventId,
-          parsedResult?.data
+          parsedResult?.data as any
         );
       } else {
-        await sendEvent(action.ingestKey as any, parsedResult?.data);
+        await sendEvent(action.ingestKey as any, parsedResult?.data as any);
       }
     },
     [action, fields]
