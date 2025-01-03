@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.40
+
+### Patch Changes
+
+- parseFormData
+
 ## 8.0.0-canary.39
 
 ### Patch Changes
