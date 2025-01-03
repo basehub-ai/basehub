@@ -58,13 +58,10 @@ type SchemaToType<T extends Field[]> = {
   [K in T[number] as K["name"]]: FieldTypeToValueType<K>;
 };
 
-export function parseFormData<Schema extends Field[]>({
-  schema,
-  formData,
-}: {
-  schema: Schema;
-  formData: FormData;
-}): SchemaToType<Schema> {
+export function parseFormData<Schema extends Field[]>(
+  schema: Schema,
+  formData: FormData
+): SchemaToType<Schema> {
   const formattedData: Record<string, unknown> = {};
   const errors: Record<string, string> = {};
 
@@ -236,32 +233,7 @@ export const unstable_Form = ({
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const formData = new FormData(form);
-      const formattedData: Record<string, unknown> = {};
-
-      fields?.forEach((field) => {
-        const key = field.name;
-        const value = formData.get(key);
-        switch (field.type) {
-          case "checkbox":
-            formattedData[key] = value === "on";
-            break;
-          case "select":
-            formattedData[key] = String(value).split(",");
-            break;
-          case "radio":
-            formattedData[key] = value;
-            break;
-          case "date":
-          case "datetime":
-            formattedData[key] = new Date(value as string).toISOString();
-            break;
-          case "number":
-            formattedData[key] = Number(value);
-            break;
-          default:
-            formattedData[key] = value;
-        }
-      });
+      const formattedData = fields ? parseFormData(fields, formData) : undefined;
 
       if (action.type === "update") {
         await updateEvent(
