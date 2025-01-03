@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.42
+
+### Patch Changes
+
+- type nit
+
 ## 8.0.0-canary.41
 
 ### Patch Changes

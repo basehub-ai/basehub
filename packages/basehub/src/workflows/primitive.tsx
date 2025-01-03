@@ -47,7 +47,7 @@ export const authenticateWebhook = async <
    * The signature of the incoming webhook request—you get this via request.headers["x-basehub-webhook-signature"]
    * This should be a hex-encoded HMAC SHA-256 hash of the request body
    */
-  signature: string;
+  signature: string | null | Headers;
   /**
    * The secret used for verifying the incoming webhook request—you get this via the BaseHub API
    * This secret should never be exposed in requests or responses
@@ -58,6 +58,13 @@ export const authenticateWebhook = async <
   | { success: false; error: string }
 > => {
   try {
+    if (signature && typeof signature === "object") {
+      signature = signature.get("x-basehub-webhook-signature");
+    }
+    if (!signature) {
+      return { success: false, error: "Signature is required" };
+    }
+
     // Handle different body types
     let rawBody: string;
     let parsedBody: unknown;
