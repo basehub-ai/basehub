@@ -15,6 +15,7 @@ export type Field = {
   helpText?: string;
 } & (
   | { type: "text" }
+  | { type: "textarea" }
   | { type: "number" }
   | { type: "file" }
   | { type: "date" }
@@ -26,8 +27,72 @@ export type Field = {
   | { type: "radio"; options: string[]; multiple: boolean }
 );
 
+// PARSE FORM DATA HELPER ------------------------------------------------------------------------
+
+type FieldTypeToValueType<T extends Field> = T extends {
+  type: "text" | "email" | "hidden" | "textarea";
+}
+  ? string
+  : T extends { type: "number" }
+  ? number
+  : T extends { type: "checkbox" }
+  ? boolean
+  : T extends { type: "date" | "datetime" }
+  ? string
+  : T extends { type: "file" }
+  ? File
+  : T extends { type: "select" | "radio" }
+  ? T["multiple"] extends true
+    ? string[]
+    : string
+  : never;
+
+type SchemaToType<T extends Field[]> = {
+  [K in T[number] as K["name"]]: FieldTypeToValueType<K>;
+};
+
+export function parseFormData<Schema extends Field[]>({
+  schema,
+  formData,
+}: {
+  schema: Schema;
+  formData: FormData;
+}): SchemaToType<Schema> {
+  const formattedData: Record<string, unknown> = {};
+
+  schema?.forEach((field) => {
+    const key = field.name;
+    const value = formData.get(key);
+    switch (field.type) {
+      case "checkbox":
+        formattedData[key] = value === "on";
+        break;
+      case "select":
+        formattedData[key] = String(value).split(",");
+        break;
+      case "radio":
+        formattedData[key] = value;
+        break;
+      case "date":
+      case "datetime":
+        formattedData[key] = new Date(value as string).toISOString();
+        break;
+      case "number":
+        formattedData[key] = Number(value);
+        break;
+      default:
+        formattedData[key] = value;
+    }
+  });
+
+  return formattedData as SchemaToType<Schema>;
+}
+
+// FORM COMPONENT ------------------------------------------------------------------------
+
 type Handlers = {
   text: (props: Extract<Field, { type: "text" }>) => ReactNode;
+  textarea: (props: Extract<Field, { type: "textarea" }>) => ReactNode;
   number: (props: Extract<Field, { type: "number" }>) => ReactNode;
   file: (props: Extract<Field, { type: "file" }>) => ReactNode;
   date: (props: Extract<Field, { type: "date" }>) => ReactNode;
@@ -151,6 +216,18 @@ const defaultHandlers: Handlers = {
         id={props.id}
         name={props.name}
         type="text"
+        defaultValue={props.defaultValue}
+        placeholder={props.placeholder}
+      />
+      {props.helpText && <small>{props.helpText}</small>}
+    </div>
+  ),
+  textarea: (props) => (
+    <div>
+      <label htmlFor={props.id}>{props.label}</label>
+      <textarea
+        id={props.id}
+        name={props.name}
         defaultValue={props.defaultValue}
         placeholder={props.placeholder}
       />
