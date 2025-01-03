@@ -35,6 +35,7 @@ export const ClientToolbar = ({
   }>;
   disableDraftMode: () => Promise<void>;
   bshbPreviewToken: string | undefined;
+  bshbPreviewLSName: string;
   shouldAutoEnableDraft: boolean | undefined;
   seekAndStoreBshbPreviewToken: (type?: "url-only") => string | undefined;
   resolvedRef: ResolvedRef;

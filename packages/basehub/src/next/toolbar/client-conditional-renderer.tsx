@@ -42,6 +42,7 @@ export const ClientConditionalRenderer = ({
     setHasRendered(true);
   }, []);
 
+  const bshbPreviewLSName = `bshb-preview-${resolvedRef.repoHash}`;
   const seekAndStoreBshbPreviewToken = React.useCallback(
     (type?: "url-only") => {
       if (typeof window === "undefined") return;
@@ -50,16 +51,16 @@ export const ClientConditionalRenderer = ({
       const bshbPreviewToken = urlParams.get("bshb-preview");
 
       if (bshbPreviewToken) {
-        window.localStorage.setItem("bshb-preview", bshbPreviewToken);
+        window.localStorage.setItem(bshbPreviewLSName, bshbPreviewToken);
         return bshbPreviewToken;
       }
 
       if (type === "url-only") return;
 
-      const fromStorage = window.localStorage.getItem("bshb-preview");
+      const fromStorage = window.localStorage.getItem(bshbPreviewLSName);
       if (fromStorage) return fromStorage;
     },
-    []
+    [bshbPreviewLSName]
   );
 
   const [bshbPreviewToken, setBshbPreviewToken] = React.useState<
@@ -121,6 +122,7 @@ export const ClientConditionalRenderer = ({
       resolvedRef={resolvedRef}
       getLatestBranches={getLatestBranches}
       humanRevalidatePendingTags={humanRevalidatePendingTags}
+      bshbPreviewLSName={bshbPreviewLSName}
     />,
     document.body
   );
