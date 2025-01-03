@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.38
+
+### Patch Changes
+
+- store preview tokens based on repo hash
+
 ## 8.0.0-canary.37
 
 ### Patch Changes
