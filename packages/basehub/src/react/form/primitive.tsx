@@ -239,10 +239,10 @@ export const unstable_Form = ({
         await updateEvent(
           action.adminKey as any,
           action.eventId,
-          formattedData
+          formattedData as any
         );
       } else {
-        await sendEvent(action.ingestKey as any, formattedData);
+        await sendEvent(action.ingestKey as any, formattedData as any);
       }
     },
     [action, fields]
