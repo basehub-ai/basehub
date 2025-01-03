@@ -320,6 +320,7 @@ import type { Language } from './react-code-block';
     const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
     const nextToolbarOutDir = path.join(basehubOutputPath, "next-toolbar");
     const analyticsOutDir = path.join(basehubOutputPath, "events");
+    const workflowsOutDir = path.join(basehubOutputPath, "workflows");
 
     await esbuild.build({
       entryPoints: [generatedMainExportPath],
@@ -414,6 +415,10 @@ import type { Language } from './react-code-block';
       path.join(basehubModulePath, "dts", "src", "events"),
       analyticsOutDir
     );
+    copyDirSync(
+      path.join(basehubModulePath, "dts", "src", "workflows"),
+      workflowsOutDir
+    );
 
     if (args["--debug"]) {
       console.log(`[basehub] copied dts for react pump to: ${reactPumpOutDir}`);
@@ -421,6 +426,7 @@ import type { Language } from './react-code-block';
         `[basehub] copied dts for next toolbar to: ${nextToolbarOutDir}`
       );
       console.log(`[basehub] copied dts for events to: ${analyticsOutDir}`);
+      console.log(`[basehub] copied dts for workflows to: ${workflowsOutDir}`);
     }
 
     appendGeneratedCodeBanner(basehubOutputPath, args["--banner"]);
@@ -486,6 +492,11 @@ import type { Language } from './react-code-block';
       );
       const analyticsIndexJsPath = path.join(basehubModulePath, "events.js");
       const analyticsIndexDtsPath = path.join(basehubModulePath, "events.d.ts");
+      const workflowsIndexJsPath = path.join(basehubModulePath, "workflows.js");
+      const workflowsIndexDtsPath = path.join(
+        basehubModulePath,
+        "workflows.d.ts"
+      );
       fs.writeFileSync(
         indexJsPath,
         ensureCrossPlatformTsImport(
@@ -558,6 +569,24 @@ import type { Language } from './react-code-block';
           )}";`
         )
       );
+      fs.writeFileSync(
+        workflowsIndexJsPath,
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(workflowsOutDir, "index.js")
+          )}";`
+        )
+      );
+      fs.writeFileSync(
+        workflowsIndexDtsPath,
+        ensureCrossPlatformTsImport(
+          `export * from "${path.relative(
+            basehubModulePath,
+            path.join(workflowsOutDir, "index.d.ts")
+          )}";`
+        )
+      );
 
       if (args["--debug"]) {
         console.log(
@@ -571,6 +600,9 @@ import type { Language } from './react-code-block';
         );
         console.log(
           `[basehub] aliased events index.js and index.d.ts to: ${analyticsOutDir}`
+        );
+        console.log(
+          `[basehub] aliased workflows index.js and index.d.ts to: ${workflowsOutDir}`
         );
       }
     }

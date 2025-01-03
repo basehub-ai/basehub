@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.41
+
+### Patch Changes
+
+- auth webhooks
+
 ## 8.0.0-canary.40
 
 ### Patch Changes

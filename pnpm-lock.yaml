@@ -65,8 +65,8 @@ importers:
   packages/basehub:
     dependencies:
       '@basehub/genql':
-        specifier: 9.0.0-canary.9
-        version: 9.0.0-canary.9
+        specifier: 9.0.0-canary.10
+        version: 9.0.0-canary.10
       '@basehub/mutation-api-helpers':
         specifier: 2.0.7
         version: 2.0.7
@@ -245,8 +245,8 @@ packages:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  /@basehub/genql@9.0.0-canary.9:
-    resolution: {integrity: sha512-kn/NDPXOxO/GAbORDvpLNozLE9tmPtHwW/5YzCMH8RltAbJz9DOH2TmTEvFb+zrkchZPGLkxjM+j892f0pUyaQ==}
+  /@basehub/genql@9.0.0-canary.10:
+    resolution: {integrity: sha512-YdYWfKEsUsgEGvvKvt7H/9469cPeXJODrTKCdmt6OPEtY71Mpa9vg1mqALleiHkVinBeFHr+IEhbqIi5eYYL6w==}
     dependencies:
       '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.1)
       '@graphql-tools/load': 7.8.14(graphql@16.8.1)
