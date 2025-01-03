@@ -8,7 +8,7 @@ import {
   Scalars,
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
-} from "../schema";
+} from "../../schema";
 
 // this needs to match our BSHBEventSchema scalar type so that it _just works_
 export type Field = {
