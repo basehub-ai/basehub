@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.39
+
+### Patch Changes
+
+- fix textarea type
+
 ## 8.0.0-canary.38
 
 ### Patch Changes

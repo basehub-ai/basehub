@@ -15,6 +15,7 @@ export type Field = {
   helpText?: string;
 } & (
   | { type: "text" }
+  | { type: "textarea" }
   | { type: "number" }
   | { type: "file" }
   | { type: "date" }
@@ -28,6 +29,7 @@ export type Field = {
 
 type Handlers = {
   text: (props: Extract<Field, { type: "text" }>) => ReactNode;
+  textarea: (props: Extract<Field, { type: "textarea" }>) => ReactNode;
   number: (props: Extract<Field, { type: "number" }>) => ReactNode;
   file: (props: Extract<Field, { type: "file" }>) => ReactNode;
   date: (props: Extract<Field, { type: "date" }>) => ReactNode;
@@ -151,6 +153,18 @@ const defaultHandlers: Handlers = {
         id={props.id}
         name={props.name}
         type="text"
+        defaultValue={props.defaultValue}
+        placeholder={props.placeholder}
+      />
+      {props.helpText && <small>{props.helpText}</small>}
+    </div>
+  ),
+  textarea: (props) => (
+    <div>
+      <label htmlFor={props.id}>{props.label}</label>
+      <textarea
+        id={props.id}
+        name={props.name}
         defaultValue={props.defaultValue}
         placeholder={props.placeholder}
       />

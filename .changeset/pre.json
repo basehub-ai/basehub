@@ -8,6 +8,7 @@
     "playground": "0.0.163"
   },
   "changesets": [
+    "clean-guests-design",
     "clever-ligers-whisper",
     "cold-beds-work",
     "dirty-falcons-rhyme",
