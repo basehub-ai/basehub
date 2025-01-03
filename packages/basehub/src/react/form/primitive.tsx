@@ -93,20 +93,27 @@ export function unstable_Form<T extends `${EventKeys}:${string}`>({
       const form = e.target as HTMLFormElement;
       const formData = new FormData(form);
 
+      const parserKey =
+        action.type === "update" ? action.adminKey : action.ingestKey;
+      const parsedResult = fields
+        ? parseFormData(parserKey, fields, formData)
+        : undefined;
+      if (parsedResult?.success === false) {
+        throw new Error(
+          Object.entries(parsedResult.errors)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join("\n")
+        );
+      }
+
       if (action.type === "update") {
-        const formattedData = fields
-          ? parseFormData(action.adminKey, fields, formData)
-          : undefined;
         await updateEvent(
           action.adminKey as any,
           action.eventId,
-          formattedData as any
+          parsedResult?.data
         );
       } else {
-        const formattedData = fields
-          ? parseFormData(action.ingestKey, fields, formData)
-          : undefined;
-        await sendEvent(action.ingestKey as any, formattedData as any);
+        await sendEvent(action.ingestKey as any, parsedResult?.data);
       }
     },
     [action, fields]

@@ -281,17 +281,16 @@ export async function deleteEvent<Key extends `${EventKeys}:${string}`>(
 }
 
 // PARSE FORM DATA HELPER ------------------------------------------------------------------------
-export class FormValidationError extends Error {
-  constructor(public fields: Record<string, string>) {
-    super("Form validation failed");
-    this.name = "FormValidationError";
-  }
-}
+type SafeReturn<T> = { success: true; data: T } | { success: false; errors: Record<string, string> };
 
 export function parseFormData<
   Key extends `${EventKeys}:${string}`,
   Schema extends Field[],
->(key: Key, schema: Schema, formData: FormData): EventSchemaMap[Key] {
+>(
+  key: Key,
+  schema: Schema,
+  formData: FormData
+): SafeReturn<EventSchemaMap[Key]> {
   const formattedData: Record<string, unknown> = {};
   const errors: Record<string, string> = {};
 
@@ -392,8 +391,8 @@ export function parseFormData<
   });
 
   if (Object.keys(errors).length > 0) {
-    throw new FormValidationError(errors);
+    return { success: false, errors };
   }
 
-  return formattedData as EventSchemaMap[Key];
+  return { data: formattedData as EventSchemaMap[Key], success: true };
 }
