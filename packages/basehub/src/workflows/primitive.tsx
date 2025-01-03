@@ -5,7 +5,6 @@ import {
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../schema";
-import crypto from "crypto";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -31,7 +30,7 @@ type WorkflowSchemaMap = {
 export const authenticateWebhook = async <
   Key extends `${WorkflowKeys}:${string}`,
 >({
-  secret,
+  secret: _secret,
   body,
   signature,
 }: {
@@ -63,6 +62,14 @@ export const authenticateWebhook = async <
     }
     if (!signature) {
       return { success: false, error: "Signature is required" };
+    }
+
+    let secret: string | undefined = _secret;
+    if (_secret.startsWith("bshb_workflow")) {
+      secret = _secret.split(":")[1];
+    }
+    if (typeof secret !== "string") {
+      return { success: false, error: "Invalid secret" };
     }
 
     // Handle different body types
@@ -131,12 +138,14 @@ export const authenticateWebhook = async <
       payload: parsedBody as WorkflowSchemaMap[ExtractWorkflowKey<Key>],
     };
   } catch (error) {
+    let message =
+      error instanceof Error ? error.message : "Signature verification failed";
+    if (message === "Unexpected end of JSON input") {
+      message = "Invalid body";
+    }
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Signature verification failed",
+      error: message,
     };
   }
 };

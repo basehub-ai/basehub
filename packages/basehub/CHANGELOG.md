@@ -1,5 +1,17 @@
 # basehub
 
+## 8.0.0-canary.45
+
+### Patch Changes
+
+- fix secret parsing
+
+## 8.0.0-canary.44
+
+### Patch Changes
+
+- fix
+
 ## 8.0.0-canary.43
 
 ### Patch Changes
