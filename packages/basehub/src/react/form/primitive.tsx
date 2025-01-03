@@ -27,6 +27,8 @@ export type Field = {
   | { type: "radio"; options: string[]; multiple: boolean }
 );
 
+// FORM COMPONENT ------------------------------------------------------------------------
+
 type Handlers = {
   text: (props: Extract<Field, { type: "text" }>) => ReactNode;
   textarea: (props: Extract<Field, { type: "textarea" }>) => ReactNode;
@@ -51,7 +53,7 @@ export type HandlerProps<Key extends keyof Handlers> = ExtractPropsForHandler<
 type CustomBlockBase = { readonly __typename: string };
 export type CustomBlocksBase = readonly CustomBlockBase[];
 
-export type FormProps = {
+export type FormProps<Key extends string> = {
   schema: Field[];
   components?: Partial<Handlers>;
   disableDefaultComponents?: boolean;
@@ -59,11 +61,11 @@ export type FormProps = {
   action:
     | {
         type: "send";
-        ingestKey: string;
+        ingestKey: Key;
       }
     | {
         type: "update";
-        adminKey: string;
+        adminKey: Key;
         eventId: string;
       };
 } & Omit<
@@ -74,14 +76,14 @@ export type FormProps = {
   "action" | "onSubmit" | "children"
 >;
 
-export const unstable_Form = ({
+export function unstable_Form<T extends string>({
   schema,
   components,
   disableDefaultComponents,
   children,
   action,
   ...rest
-}: FormProps): ReactNode => {
+}: FormProps<T>): ReactNode {
   const fields = schema as Field[] | undefined;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -143,7 +145,7 @@ export const unstable_Form = ({
       {children ?? <button type="submit">Submit</button>}
     </form>
   );
-};
+}
 
 const defaultHandlers: Handlers = {
   text: (props) => (
