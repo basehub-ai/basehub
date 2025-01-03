@@ -2,8 +2,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, type ReactNode } from "react";
-import { sendEvent, updateEvent } from "../../events";
-import { EventKeys, EventSchemaMap } from "../../common-types";
+import { EventKeys, parseFormData, sendEvent, updateEvent } from "../../events";
 
 // this needs to match our BSHBEventSchema scalar type so that it _just works_
 export type Field = {
@@ -27,125 +26,6 @@ export type Field = {
   | { type: "select"; options: string[]; multiple: boolean }
   | { type: "radio"; options: string[]; multiple: boolean }
 );
-
-// PARSE FORM DATA HELPER ------------------------------------------------------------------------
-
-export class FormValidationError extends Error {
-  constructor(public fields: Record<string, string>) {
-    super("Form validation failed");
-    this.name = "FormValidationError";
-  }
-}
-
-export function parseFormData<
-  Key extends `${EventKeys}:${string}`,
-  Schema extends Field[],
->(key: Key, schema: Schema, formData: FormData): EventSchemaMap[Key] {
-  const formattedData: Record<string, unknown> = {};
-  const errors: Record<string, string> = {};
-
-  schema.forEach((field) => {
-    const key = field.name;
-
-    // Handle multiple values (like multiple select or checkboxes)
-    if ((field.type === "select" || field.type === "radio") && field.multiple) {
-      const values = formData.getAll(key).filter(Boolean);
-
-      if (field.required && values.length === 0) {
-        errors[key] = `${field.label || key} is required`;
-      }
-
-      formattedData[key] = values.map(String);
-      return;
-    }
-
-    const value = formData.get(key);
-
-    // Required field validation
-    if (field.required && (value === null || value === "")) {
-      errors[key] = `${field.label || key} is required`;
-      return;
-    }
-
-    // Handle empty optional fields
-    if (value === null || value === "") {
-      formattedData[key] = field.defaultValue ?? null;
-      return;
-    }
-
-    try {
-      switch (field.type) {
-        case "checkbox":
-          formattedData[key] = value === "on" || value === "true";
-          break;
-
-        case "email": {
-          const email = String(value);
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(email)) {
-            errors[key] = `${field.label || key} must be a valid email address`;
-          }
-          formattedData[key] = email;
-          break;
-        }
-
-        case "select":
-        case "radio": {
-          const stringValue = String(value);
-          if (field.options && !field.options.includes(stringValue)) {
-            errors[key] = `${
-              field.label || key
-            } must be one of the available options`;
-          }
-          formattedData[key] = stringValue;
-          break;
-        }
-
-        case "date":
-        case "datetime": {
-          const date = new Date(value as string);
-          if (isNaN(date.getTime())) {
-            errors[key] = `${field.label || key} must be a valid date`;
-            break;
-          }
-          formattedData[key] = date.toISOString();
-          break;
-        }
-
-        case "number": {
-          const num = Number(value);
-          if (isNaN(num)) {
-            errors[key] = `${field.label || key} must be a valid number`;
-            break;
-          }
-          formattedData[key] = num;
-          break;
-        }
-
-        case "file": {
-          const file = value as File;
-          if (!(file instanceof File)) {
-            errors[key] = `${field.label || key} must be a valid file`;
-            break;
-          }
-          formattedData[key] = file;
-          break;
-        }
-
-        default:
-          formattedData[key] = String(value);
-      }
-    } catch (error) {
-      errors[key] = `Invalid value for ${field.label || key}`;
-    }
-  });
-
-  if (Object.keys(errors).length > 0) {
-    throw new FormValidationError(errors);
-  }
-
-  return formattedData as EventSchemaMap[Key];
-}
 
 // FORM COMPONENT ------------------------------------------------------------------------
 

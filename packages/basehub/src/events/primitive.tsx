@@ -11,7 +11,8 @@ import {
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../index";
-import type { EventKeys, EventSchemaMap, ResolvedRef } from "../common-types";
+import type { ResolvedRef } from "../common-types";
+import { Field } from "../react/form/primitive";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -33,10 +34,22 @@ if (process?.env?.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
   QUERY_EVENTS_ENDPOINT_URL = process.env.BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
 }
 
+type KeysStartingWith<Obj, Prefix extends string> = {
+  [K in keyof Obj]: K extends `${Prefix}${string}` ? K : never;
+}[keyof Obj];
+
 type ExtractEventKey<T extends string> = T extends `${infer Base}:${string}`
   ? Base
   : T;
 
+// Get all event key types (bshb_event_*)
+export type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
+
+// Map from event key to its schema type
+type EventSchemaMap = {
+  // @ts-ignore
+  [K in EventKeys]: Scalars[`schema_${K}`];
+};
 
 type NullableEventSchemaMap = {
   // @ts-ignore
@@ -265,4 +278,122 @@ export async function deleteEvent<Key extends `${EventKeys}:${string}`>(
   return (await response.json()) as
     | { success: true }
     | { success: false; error: string };
+}
+
+// PARSE FORM DATA HELPER ------------------------------------------------------------------------
+export class FormValidationError extends Error {
+  constructor(public fields: Record<string, string>) {
+    super("Form validation failed");
+    this.name = "FormValidationError";
+  }
+}
+
+export function parseFormData<
+  Key extends `${EventKeys}:${string}`,
+  Schema extends Field[],
+>(key: Key, schema: Schema, formData: FormData): EventSchemaMap[Key] {
+  const formattedData: Record<string, unknown> = {};
+  const errors: Record<string, string> = {};
+
+  schema.forEach((field) => {
+    const key = field.name;
+
+    // Handle multiple values (like multiple select or checkboxes)
+    if ((field.type === "select" || field.type === "radio") && field.multiple) {
+      const values = formData.getAll(key).filter(Boolean);
+
+      if (field.required && values.length === 0) {
+        errors[key] = `${field.label || key} is required`;
+      }
+
+      formattedData[key] = values.map(String);
+      return;
+    }
+
+    const value = formData.get(key);
+
+    // Required field validation
+    if (field.required && (value === null || value === "")) {
+      errors[key] = `${field.label || key} is required`;
+      return;
+    }
+
+    // Handle empty optional fields
+    if (value === null || value === "") {
+      formattedData[key] = field.defaultValue ?? null;
+      return;
+    }
+
+    try {
+      switch (field.type) {
+        case "checkbox":
+          formattedData[key] = value === "on" || value === "true";
+          break;
+
+        case "email": {
+          const email = String(value);
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            errors[key] = `${field.label || key} must be a valid email address`;
+          }
+          formattedData[key] = email;
+          break;
+        }
+
+        case "select":
+        case "radio": {
+          const stringValue = String(value);
+          if (field.options && !field.options.includes(stringValue)) {
+            errors[key] = `${
+              field.label || key
+            } must be one of the available options`;
+          }
+          formattedData[key] = stringValue;
+          break;
+        }
+
+        case "date":
+        case "datetime": {
+          const date = new Date(value as string);
+          if (isNaN(date.getTime())) {
+            errors[key] = `${field.label || key} must be a valid date`;
+            break;
+          }
+          formattedData[key] = date.toISOString();
+          break;
+        }
+
+        case "number": {
+          const num = Number(value);
+          if (isNaN(num)) {
+            errors[key] = `${field.label || key} must be a valid number`;
+            break;
+          }
+          formattedData[key] = num;
+          break;
+        }
+
+        case "file": {
+          const file = value as File;
+          if (!(file instanceof File)) {
+            errors[key] = `${field.label || key} must be a valid file`;
+            break;
+          }
+          formattedData[key] = file;
+          break;
+        }
+
+        default:
+          formattedData[key] = String(value);
+      }
+    } catch (error) {
+      errors[key] = `Invalid value for ${field.label || key}`;
+    }
+  });
+
+  if (Object.keys(errors).length > 0) {
+    throw new FormValidationError(errors);
+  }
+
+  return formattedData as EventSchemaMap[Key];
 }
