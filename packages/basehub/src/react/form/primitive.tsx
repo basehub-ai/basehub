@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, type ReactNode } from "react";
 import { sendEvent, updateEvent } from "../../events";
+import { Scalars } from "../../../dist/generated-client/schema";
 
 // this needs to match our BSHBEventSchema scalar type so that it _just works_
 export type Field = {
@@ -36,32 +37,23 @@ export class FormValidationError extends Error {
   }
 }
 
-type FieldTypeToValueType<T extends Field> = T extends {
-  type: "text" | "email" | "hidden" | "textarea";
-}
-  ? string
-  : T extends { type: "number" }
-  ? number
-  : T extends { type: "checkbox" }
-  ? boolean
-  : T extends { type: "date" | "datetime" }
-  ? string
-  : T extends { type: "file" }
-  ? File
-  : T extends { type: "select" | "radio" }
-  ? T["multiple"] extends true
-    ? string[]
-    : string
-  : never;
-
-type SchemaToType<T extends Field[]> = {
-  [K in T[number] as K["name"]]: FieldTypeToValueType<K>;
+// Map from event key to its schema type
+type EventSchemaMap = {
+  // @ts-ignore
+  [K in EventKeys]: Scalars[`schema_${K}`];
 };
 
-export function parseFormData<Schema extends Field[]>(
-  schema: Schema,
-  formData: FormData
-): SchemaToType<Schema> {
+type KeysStartingWith<Obj, Prefix extends string> = {
+  [K in keyof Obj]: K extends `${Prefix}${string}` ? K : never;
+}[keyof Obj];
+
+// Get all event key types (bshb_event_*)
+type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
+
+export function parseFormData<
+  Key extends `${EventKeys}:${string}`,
+  Schema extends Field[],
+>(key: Key, schema: Schema, formData: FormData): EventSchemaMap[Key] {
   const formattedData: Record<string, unknown> = {};
   const errors: Record<string, string> = {};
 
@@ -165,7 +157,7 @@ export function parseFormData<Schema extends Field[]>(
     throw new FormValidationError(errors);
   }
 
-  return formattedData as SchemaToType<Schema>;
+  return formattedData as EventSchemaMap[Key];
 }
 
 // FORM COMPONENT ------------------------------------------------------------------------
@@ -194,7 +186,7 @@ export type HandlerProps<Key extends keyof Handlers> = ExtractPropsForHandler<
 type CustomBlockBase = { readonly __typename: string };
 export type CustomBlocksBase = readonly CustomBlockBase[];
 
-export type FormProps = {
+export type FormProps<Key extends `${EventKeys}:${string}`> = {
   schema: Field[];
   components?: Partial<Handlers>;
   disableDefaultComponents?: boolean;
@@ -202,11 +194,11 @@ export type FormProps = {
   action:
     | {
         type: "send";
-        ingestKey: string;
+        ingestKey: Key;
       }
     | {
         type: "update";
-        adminKey: string;
+        adminKey: Key;
         eventId: string;
       };
 } & Omit<
@@ -217,14 +209,14 @@ export type FormProps = {
   "action" | "onSubmit" | "children"
 >;
 
-export const unstable_Form = ({
+export function unstable_Form<T extends `${EventKeys}:${string}`>({
   schema,
   components,
   disableDefaultComponents,
   children,
   action,
   ...rest
-}: FormProps): ReactNode => {
+}: FormProps<T>): ReactNode {
   const fields = schema as Field[] | undefined;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -233,15 +225,20 @@ export const unstable_Form = ({
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const formData = new FormData(form);
-      const formattedData = fields ? parseFormData(fields, formData) : undefined;
 
       if (action.type === "update") {
+        const formattedData = fields
+          ? parseFormData(action.adminKey, fields, formData)
+          : undefined;
         await updateEvent(
           action.adminKey as any,
           action.eventId,
           formattedData as any
         );
       } else {
+        const formattedData = fields
+          ? parseFormData(action.ingestKey, fields, formData)
+          : undefined;
         await sendEvent(action.ingestKey as any, formattedData as any);
       }
     },
@@ -261,7 +258,7 @@ export const unstable_Form = ({
       {children ?? <button type="submit">Submit</button>}
     </form>
   );
-};
+}
 
 const defaultHandlers: Handlers = {
   text: (props) => (
