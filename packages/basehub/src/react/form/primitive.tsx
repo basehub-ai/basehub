@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, type ReactNode } from "react";
-import { EventKeys, parseFormData, sendEvent, updateEvent } from "../../events";
+import { sendEvent, updateEvent } from "../../events";
 
 // this needs to match our BSHBEventSchema scalar type so that it _just works_
 export type Field = {
@@ -53,7 +53,7 @@ export type HandlerProps<Key extends keyof Handlers> = ExtractPropsForHandler<
 type CustomBlockBase = { readonly __typename: string };
 export type CustomBlocksBase = readonly CustomBlockBase[];
 
-export type FormProps<Key extends `${EventKeys}:${string}`> = {
+export type FormProps<Key extends string> = {
   schema: Field[];
   components?: Partial<Handlers>;
   disableDefaultComponents?: boolean;
@@ -76,7 +76,7 @@ export type FormProps<Key extends `${EventKeys}:${string}`> = {
   "action" | "onSubmit" | "children"
 >;
 
-export function unstable_Form<T extends `${EventKeys}:${string}`>({
+export function unstable_Form<T extends string>({
   schema,
   components,
   disableDefaultComponents,
@@ -92,28 +92,41 @@ export function unstable_Form<T extends `${EventKeys}:${string}`>({
       e.preventDefault();
       const form = e.target as HTMLFormElement;
       const formData = new FormData(form);
+      const formattedData: Record<string, unknown> = {};
 
-      const parserKey =
-        action.type === "update" ? action.adminKey : action.ingestKey;
-      const parsedResult = fields
-        ? parseFormData(parserKey, fields, formData)
-        : undefined;
-      if (parsedResult?.success === false) {
-        throw new Error(
-          Object.entries(parsedResult.errors)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join("\n")
-        );
-      }
+      fields?.forEach((field) => {
+        const key = field.name;
+        const value = formData.get(key);
+        switch (field.type) {
+          case "checkbox":
+            formattedData[key] = value === "on";
+            break;
+          case "select":
+            formattedData[key] = String(value).split(",");
+            break;
+          case "radio":
+            formattedData[key] = value;
+            break;
+          case "date":
+          case "datetime":
+            formattedData[key] = new Date(value as string).toISOString();
+            break;
+          case "number":
+            formattedData[key] = Number(value);
+            break;
+          default:
+            formattedData[key] = value;
+        }
+      });
 
       if (action.type === "update") {
         await updateEvent(
           action.adminKey as any,
           action.eventId,
-          parsedResult?.data as any
+          formattedData
         );
       } else {
-        await sendEvent(action.ingestKey as any, parsedResult?.data as any);
+        await sendEvent(action.ingestKey as any, formattedData);
       }
     },
     [action, fields]

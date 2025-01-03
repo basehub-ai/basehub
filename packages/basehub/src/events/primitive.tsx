@@ -12,7 +12,7 @@ import {
   // eslint-disable-next-line import/no-unresolved
 } from "../index";
 import type { ResolvedRef } from "../common-types";
-import { Field } from "../react/form/primitive";
+import type { Field } from "../react/form/primitive";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
