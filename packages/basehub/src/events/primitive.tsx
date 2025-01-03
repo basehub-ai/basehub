@@ -281,7 +281,9 @@ export async function deleteEvent<Key extends `${EventKeys}:${string}`>(
 }
 
 // PARSE FORM DATA HELPER ------------------------------------------------------------------------
-type SafeReturn<T> = { success: true; data: T } | { success: false; errors: Record<string, string> };
+type SafeReturn<T> =
+  | { success: true; data: T }
+  | { success: false; errors: Record<string, string> };
 
 export function parseFormData<
   Key extends `${EventKeys}:${string}`,
@@ -290,7 +292,7 @@ export function parseFormData<
   key: Key,
   schema: Schema,
   formData: FormData
-): SafeReturn<EventSchemaMap[Key]> {
+): SafeReturn<EventSchemaMap[ExtractEventKey<Key>]> {
   const formattedData: Record<string, unknown> = {};
   const errors: Record<string, string> = {};
 
@@ -394,5 +396,8 @@ export function parseFormData<
     return { success: false, errors };
   }
 
-  return { data: formattedData as EventSchemaMap[Key], success: true };
+  return {
+    data: formattedData as EventSchemaMap[ExtractEventKey<Key>],
+    success: true,
+  };
 }
