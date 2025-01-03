@@ -344,7 +344,7 @@ export function parseFormData<
         case "select":
         case "radio": {
           const stringValue = String(value);
-          if (field.options && !field.options.includes(stringValue)) {
+          if (field.options.length && !field.options.includes(stringValue)) {
             errors[key] = `${
               field.label || key
             } must be one of the available options`;
