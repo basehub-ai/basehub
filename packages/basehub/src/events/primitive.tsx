@@ -11,7 +11,7 @@ import {
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
 } from "../index";
-import type { ResolvedRef } from "../common-types";
+import type { EventKeys, EventSchemaMap, ResolvedRef } from "../common-types";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -33,22 +33,10 @@ if (process?.env?.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
   QUERY_EVENTS_ENDPOINT_URL = process.env.BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
 }
 
-type KeysStartingWith<Obj, Prefix extends string> = {
-  [K in keyof Obj]: K extends `${Prefix}${string}` ? K : never;
-}[keyof Obj];
-
 type ExtractEventKey<T extends string> = T extends `${infer Base}:${string}`
   ? Base
   : T;
 
-// Get all event key types (bshb_event_*)
-type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
-
-// Map from event key to its schema type
-type EventSchemaMap = {
-  // @ts-ignore
-  [K in EventKeys]: Scalars[`schema_${K}`];
-};
 
 type NullableEventSchemaMap = {
   // @ts-ignore

@@ -3,12 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, type ReactNode } from "react";
 import { sendEvent, updateEvent } from "../../events";
-import {
-  // @ts-ignore
-  Scalars,
-  // @ts-ignore
-  // eslint-disable-next-line import/no-unresolved
-} from "../../schema";
+import { EventKeys, EventSchemaMap } from "../../common-types";
 
 // this needs to match our BSHBEventSchema scalar type so that it _just works_
 export type Field = {
@@ -41,19 +36,6 @@ export class FormValidationError extends Error {
     this.name = "FormValidationError";
   }
 }
-
-// Map from event key to its schema type
-type EventSchemaMap = {
-  // @ts-ignore
-  [K in EventKeys]: Scalars[`schema_${K}`];
-};
-
-type KeysStartingWith<Obj, Prefix extends string> = {
-  [K in keyof Obj]: K extends `${Prefix}${string}` ? K : never;
-}[keyof Obj];
-
-// Get all event key types (bshb_event_*)
-type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
 
 export function parseFormData<
   Key extends `${EventKeys}:${string}`,
