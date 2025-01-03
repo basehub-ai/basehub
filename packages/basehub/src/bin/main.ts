@@ -400,6 +400,26 @@ import type { Language } from './react-code-block';
       );
     }
 
+    await esbuild.build({
+      entryPoints: [
+        path.join(basehubModulePath, "src", "workflows", "index.ts"),
+      ],
+      bundle: true,
+      outdir: workflowsOutDir,
+      minify: false,
+      treeShaking: true,
+      splitting: true,
+      format: "esm",
+      target: ["es2020", "node18"],
+      external: peerDependencies,
+    });
+
+    if (args["--debug"]) {
+      console.log(
+        `[basehub] compiled workflows with esbuild in: ${workflowsOutDir}`
+      );
+    }
+
     /**
      * DTS stuff.
      */

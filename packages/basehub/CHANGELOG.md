@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.43
+
+### Patch Changes
+
+- fix workflows bundle
+
 ## 8.0.0-canary.42
 
 ### Patch Changes
