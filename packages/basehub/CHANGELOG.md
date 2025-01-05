@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.0-canary.46
+
+### Patch Changes
+
+- make first and skip non required
+
 ## 8.0.0-canary.45
 
 ### Patch Changes

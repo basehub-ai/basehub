@@ -149,8 +149,8 @@ type GetOptions<
 > =
   | {
       type: "table";
-      first: number;
-      skip: number;
+      first?: number;
+      skip?: number;
       filter?: MapScalarTypeToFilters<Scalars[`schema_${K}`]>;
       orderBy?: MapScalarTypeToOrder<Scalars[`schema_${K}`]>;
       select?: Select;
