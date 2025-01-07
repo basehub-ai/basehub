@@ -56,7 +56,7 @@ export const DragHandle = React.forwardRef(
       // disable drag on pointer up
       if (!isDragging) {
         hasDragged.current = false;
-        return
+        return;
       }
 
       const handlePointerUp = () => {
@@ -75,9 +75,18 @@ export const DragHandle = React.forwardRef(
         draggable
         className={`${s.dragHandle} ${isDragging ? s.dragging : ""}`}
         onPointerDown={(e) => {
-          e.stopPropagation();
+          if (
+            e.target instanceof HTMLElement &&
+            (e.target.nodeName.toLowerCase() === "select" ||
+              e.target.closest("select"))
+          ) {
+            // prevent weird safari bug where pointerdown is fired on the select element
+            return;
+          }
           const handle = e.currentTarget as HTMLSpanElement | null;
           if (!handle) return;
+          e.stopPropagation();
+          e.preventDefault();
           initialPointer.current = { x: e.clientX, y: e.clientY };
           const rect = handle.getBoundingClientRect();
           initialToolbar.current.x = rect.left;

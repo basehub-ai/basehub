@@ -1,10 +1,354 @@
 # basehub
 
-## 7.5.32
+## 8.0.0
+
+### Major Changes
+
+**Full release notes** in our [documentation](https://docs.basehub.com/api-reference/javascript-sdk/release-notes/version-8).
+
+- f1c32d5: - Renamed `lang` to `language` in the `<CodeBlock />` component, to better match `<RichText />`'s types.
+
+  - In the `<RichText />` component, we made inline code be overridable just via `code`, and the full width code block be overridable via `pre`. Previously, code blocks passed both via `pre` and via `code` (in the latter case, with `isInline` set to `false`), which was quite confusing.
+
+  * Automatic draftMode detection for Next.js
+  * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
 
 ### Patch Changes
 
-- Add colwidth props to td and th
+- db17479: fix textarea type
+- f6a1685: handle new event api
+- 05f26ba: Fix clearing up cookie when selected ref is default
+- 93d1a5a: fix
+- 4271b78: fix
+- 5d2245d: fixes
+- 5a2657e: Fix `data` var being declared twice
+- 35b5a74: make first and skip non required
+- d430bcd: fix dts thing?
+- 6d93473:
+- 0873e07: toolbar improvements
+- 57ee55c: type nit
+- b786ade: force schema re-gen on input change
+- 41570ca: improve
+- 0e96912: fix workflows bundle
+- f023e53: fix type
+- 1ca9e59: fix
+- 4271b78: FIX
+- f1c32d5: Correctly type languages prop
+- e718f69: types fix
+- ac475da: upgrade mutation api helpers
+- 93d1a5a: fix
+- 2bc571c: fix
+- 015f4b3: get latest branches not just in draft mode. enter draft mode automatically when user switches branches
+- a8910b6: fix rich text and pump return types
+- 3f80523: event fixes
+- 68d7438: store preview tokens based on repo hash
+- fdb291e: event types
+- 8566bcd: Add analytics src to files
+- 40c12e1: event types and some branch switcher styles
+- 12b0d31: events stuff
+- cff208c: don't make preview ref cookie same site
+- cd437f3: type rich text content and toc, introduce <TOC />
+- 2bc571c: fix secret parsing
+- bc2d03b: scope cookie per repo hash
+- 42ab5ea: rollback shiki
+- 6a87ca4:
+- f4f817c: svg
+- 0b04431: Fix!
+- 4271b78: fix
+- a0d9673: fix
+- 8566bcd: linked branches improvements
+- 4271b78: fix
+- 2575277: pass pump-token and last-response-hash via query params to improve preflight caching
+- 7c31138: parseFormData
+- 15c81f2: svg update
+- 32275ed: auth webhooks
+
+## 8.0.0-canary.46
+
+### Patch Changes
+
+- make first and skip non required
+
+## 8.0.0-canary.45
+
+### Patch Changes
+
+- fix secret parsing
+
+## 8.0.0-canary.44
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.43
+
+### Patch Changes
+
+- fix workflows bundle
+
+## 8.0.0-canary.42
+
+### Patch Changes
+
+- type nit
+
+## 8.0.0-canary.41
+
+### Patch Changes
+
+- auth webhooks
+
+## 8.0.0-canary.40
+
+### Patch Changes
+
+- parseFormData
+
+## 8.0.0-canary.39
+
+### Patch Changes
+
+- fix textarea type
+
+## 8.0.0-canary.38
+
+### Patch Changes
+
+- store preview tokens based on repo hash
+
+## 8.0.0-canary.37
+
+### Patch Changes
+
+- scope cookie per repo hash
+
+## 8.0.0-canary.36
+
+### Patch Changes
+
+- svg update
+
+## 8.0.0-canary.35
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.34
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.33
+
+### Patch Changes
+
+- toolbar improvements
+- f023e53: fix type
+
+## 8.0.0-canary.32
+
+### Patch Changes
+
+-
+
+## 8.0.0-canary.31
+
+### Patch Changes
+
+- upgrade mutation api helpers
+
+## 8.0.0-canary.30
+
+### Patch Changes
+
+-
+
+## 8.0.0-canary.29
+
+### Patch Changes
+
+- pass pump-token and last-response-hash via query params to improve preflight caching
+
+## 8.0.0-canary.28
+
+### Patch Changes
+
+- event fixes
+
+## 8.0.0-canary.27
+
+### Patch Changes
+
+- types fix
+
+## 8.0.0-canary.26
+
+### Patch Changes
+
+- svg
+
+## 8.0.0-canary.25
+
+### Patch Changes
+
+- fix rich text and pump return types
+
+## 8.0.0-canary.24
+
+### Patch Changes
+
+- FIX
+
+## 8.0.0-canary.23
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.22
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.21
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.20
+
+### Patch Changes
+
+- rollback shiki
+
+## 8.0.0-canary.19
+
+### Patch Changes
+
+- fix dts thing?
+
+## 8.0.0-canary.18
+
+### Patch Changes
+
+- type rich text content and toc, introduce <TOC />
+
+## 8.0.0-canary.17
+
+### Patch Changes
+
+- event types and some branch switcher styles
+
+## 8.0.0-canary.16
+
+### Patch Changes
+
+- event types
+
+## 8.0.0-canary.15
+
+### Patch Changes
+
+- events stuff
+
+## 8.0.0-canary.14
+
+### Patch Changes
+
+- improve
+
+## 8.0.0-canary.13
+
+### Patch Changes
+
+- Fix!
+
+## 8.0.0-canary.12
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.11
+
+### Patch Changes
+
+- fix
+
+## 8.0.0-canary.10
+
+### Patch Changes
+
+- get latest branches not just in draft mode. enter draft mode automatically when user switches branches
+
+## 8.0.0-canary.9
+
+### Patch Changes
+
+- fixes
+
+## 8.0.0-canary.8
+
+### Patch Changes
+
+- Fix clearing up cookie when selected ref is default
+
+## 8.0.0-canary.7
+
+### Patch Changes
+
+- force schema re-gen on input change
+
+## 8.0.0-canary.6
+
+### Patch Changes
+
+- Fix `data` var being declared twice
+
+## 8.0.0-canary.5
+
+### Patch Changes
+
+- Add analytics src to files
+
+## 8.0.0-canary.4
+
+### Patch Changes
+
+- linked branches improvements
+
+## 8.0.0-canary.3
+
+### Patch Changes
+
+- handle new event api
+
+## 8.0.0-canary.2
+
+### Patch Changes
+
+- don't make preview ref cookie same site
+
+## 8.0.0-canary.1
+
+### Patch Changes
+
+- Correctly type languages prop
+
+## 8.0.0-canary.0
+
+### Major Changes
+
+- - Renamed `language` to `lang` in the `<CodeBlock />` component, to better match BaseHub's GraphQL API types.
+  - In the `<RichText />` component, we made inline code be overridable just via `code`, and the full width code block be overridable via `pre`. Previously, code blocks passed both via `pre` and via `code` (in the latter case, with `isInline` set to `false`), which was quite confusing.
+
+  * Automatic draftMode detection for Next.js
+  * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
 
 ## 7.5.31
 

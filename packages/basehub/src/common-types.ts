@@ -1,4 +1,4 @@
-export type ResolvedRef = { ref: string } & (
+export type ResolvedRef = { ref: string; repoHash: string } & (
   | {
       type: "commit";
       id: string;
@@ -10,5 +10,6 @@ export type ResolvedRef = { ref: string } & (
       name: string;
       git?: { branch?: string | null };
       createSuggestedBranchLink?: string;
+      headCommitId?: string | null;
     }
 );
