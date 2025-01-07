@@ -1,5 +1,68 @@
 # basehub
 
+## 8.0.0
+
+### Major Changes
+
+**Full release notes** in our [documentation](https://docs.basehub.com/api-reference/javascript-sdk/release-notes/version-8).
+
+- f1c32d5: - Renamed `lang` to `language` in the `<CodeBlock />` component, to better match `<RichText />`'s types.
+
+  - In the `<RichText />` component, we made inline code be overridable just via `code`, and the full width code block be overridable via `pre`. Previously, code blocks passed both via `pre` and via `code` (in the latter case, with `isInline` set to `false`), which was quite confusing.
+
+  * Automatic draftMode detection for Next.js
+  * We now preserve the ref (branch) selection in cookies, so that server-side request query the correct ref
+
+### Patch Changes
+
+- db17479: fix textarea type
+- f6a1685: handle new event api
+- 05f26ba: Fix clearing up cookie when selected ref is default
+- 93d1a5a: fix
+- 4271b78: fix
+- 5d2245d: fixes
+- 5a2657e: Fix `data` var being declared twice
+- 35b5a74: make first and skip non required
+- d430bcd: fix dts thing?
+- 6d93473:
+- 0873e07: toolbar improvements
+- 57ee55c: type nit
+- b786ade: force schema re-gen on input change
+- 41570ca: improve
+- 0e96912: fix workflows bundle
+- f023e53: fix type
+- 1ca9e59: fix
+- 4271b78: FIX
+- f1c32d5: Correctly type languages prop
+- e718f69: types fix
+- ac475da: upgrade mutation api helpers
+- 93d1a5a: fix
+- 2bc571c: fix
+- 015f4b3: get latest branches not just in draft mode. enter draft mode automatically when user switches branches
+- a8910b6: fix rich text and pump return types
+- 3f80523: event fixes
+- 68d7438: store preview tokens based on repo hash
+- fdb291e: event types
+- 8566bcd: Add analytics src to files
+- 40c12e1: event types and some branch switcher styles
+- 12b0d31: events stuff
+- cff208c: don't make preview ref cookie same site
+- cd437f3: type rich text content and toc, introduce <TOC />
+- 2bc571c: fix secret parsing
+- bc2d03b: scope cookie per repo hash
+- 42ab5ea: rollback shiki
+- 6a87ca4:
+- f4f817c: svg
+- 0b04431: Fix!
+- 4271b78: fix
+- a0d9673: fix
+- 8566bcd: linked branches improvements
+- 4271b78: fix
+- 2575277: pass pump-token and last-response-hash via query params to improve preflight caching
+- 7c31138: parseFormData
+- 15c81f2: svg update
+- 32275ed: auth webhooks
+
 ## 8.0.0-canary.46
 
 ### Patch Changes

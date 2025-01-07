@@ -1,5 +1,0 @@
----
-"basehub": patch
----
-
-svg update
