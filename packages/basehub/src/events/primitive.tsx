@@ -44,6 +44,8 @@ type ExtractEventKey<T extends string> = T extends `${infer Base}:${string}`
 
 // Get all event key types (bshb_event_*)
 export type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
+export type EventSchema<Key extends `${EventKeys}:${string}`> =
+  EventSchemaMap[ExtractEventKey<Key>];
 
 // Map from event key to its schema type
 type EventSchemaMap = {

@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.1
+
+### Patch Changes
+
+- Expose EventSchema typescript util
+
 ## 8.0.0
 
 ### Major Changes
