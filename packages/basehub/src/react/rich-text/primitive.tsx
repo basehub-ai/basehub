@@ -38,12 +38,12 @@ type InternalLinkProps<
   T extends BaseCustomBlock,
   K extends T["__typename"],
 > = CommonLinkProps & {
-  internalLink: Omit<Extract<T, { __typename: K }>, "_id" | "_sys">;
+  internal: Omit<Extract<T, { __typename: K }>, "_id" | "_sys">;
 };
 
 // External link props
 type ExternalLinkProps = CommonLinkProps & {
-  internalLink: undefined;
+  internal: undefined;
 };
 
 type LinkAttributes = {
@@ -70,7 +70,7 @@ type Handlers = {
   code: (props: { children: ReactNode }) => ReactNode;
   a: (
     props: ExternalLinkProps & {
-      internalLink: undefined | InternalLinkProps<BaseCustomBlock, any>;
+      internal: undefined | InternalLinkProps<BaseCustomBlock, any>;
     }
   ) => ReactNode;
   ol: (props: { children: ReactNode }) => ReactNode;
@@ -152,7 +152,7 @@ type MarkHandlerMapping<Blocks extends CustomBlocksBase = readonly any[]> = {
 
 type HandlerLinkMapping<Blocks extends CustomBlocksBase> = {
   [K in Blocks[number]["__typename"]]: CommonLinkProps & {
-    internalLink: Extract<Blocks[number], { __typename: K }>;
+    internal: Extract<Blocks[number], { __typename: K }>;
   };
 };
 
@@ -213,7 +213,7 @@ export const RichText = <
 const defaultHandlers: Handlers = {
   a: ((
     props: ExternalLinkProps & {
-      internalLink: undefined | InternalLinkProps<BaseCustomBlock, any>;
+      internal: undefined | InternalLinkProps<BaseCustomBlock, any>;
     }
   ) => {
     return <a {...props} />;
@@ -640,7 +640,7 @@ const Marks = ({
             children,
             target: mark.attrs.target,
             href: mark.attrs.href || "",
-            internalLink: undefined,
+            internal: undefined,
           };
           break;
         }
@@ -650,14 +650,14 @@ const Marks = ({
           children,
           href: mark.attrs.href || "",
           target: mark.attrs.target,
-          internalLink: block,
+          internal: block,
         } as InternalLinkProps<BaseCustomBlock, string>;
       } else {
         props = {
           children,
           href: mark.attrs.href,
           target: mark.attrs.target,
-          internalLink: undefined,
+          internal: undefined,
           rel:
             mark.attrs.target?.toLowerCase() === "_blank"
               ? "noopener noreferrer"
