@@ -21,6 +21,8 @@ export const supportedSvgTags = [
   "feComposite",
   "mask",
   "defs",
+  "linearGradient",
+  "stop",
 ] as const;
 const svgComponentSchema = z.enum(supportedSvgTags);
 
@@ -49,20 +51,41 @@ const DEFAULT_COMPONENTS: ComponentsOverride = {
   feBlend: (props) => React.createElement("feBlend", props),
   mask: (props) => React.createElement("mask", props),
   defs: (props) => React.createElement("defs", props),
+  linearGradient: (props) => React.createElement("linearGradient", props),
+  stop: (props) => React.createElement("stop", props),
+};
+
+const XML_NAMESPACE_MAPPING: Record<string, string> = {
+  "xmlns:xlink": "xmlnsXlink",
+  "xlink:href": "xlinkHref",
+  "xml:space": "xmlSpace",
+  "xlink:title": "xlinkTitle",
+  "xlink:role": "xlinkRole",
+  "xlink:arcrole": "xlinkArcrole",
+  "xlink:show": "xlinkShow",
+  "xlink:actuate": "xlinkActuate",
+  "xmlns:xml": "xmlnsXml",
+  "xmlns:ev": "xmlnsEv",
+  href: "href",
+  preserveAspectRatio: "preserveAspectRatio",
 };
 
 const sanitizeSVGString = (svgString: string): string => {
-  // Remove any XML declaration
   let sanitized = svgString.replace(/<\?xml.*\?>\s*/g, "");
-
-  // Ensure self-closing tags are properly formatted
   sanitized = sanitized.replace(/\s*\/\s*>/g, "/>");
 
-  // Add namespace if missing
   if (!sanitized.includes('xmlns="http://www.w3.org/2000/svg"')) {
     sanitized = sanitized.replace(
       /<svg/,
       '<svg xmlns="http://www.w3.org/2000/svg"'
+    );
+  }
+
+  // Ensure xlink namespace is present if xlink attributes are used
+  if (sanitized.includes("xlink:") && !sanitized.includes("xmlns:xlink")) {
+    sanitized = sanitized.replace(
+      /<svg/,
+      '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
     );
   }
 
@@ -85,6 +108,8 @@ const parseStyleString = (styleString: string): React.CSSProperties => {
       return styleObj;
     }, {} as React.CSSProperties);
 };
+
+/* COMPONENT */
 
 export const SVG = ({
   content: _content,
@@ -119,33 +144,55 @@ export const SVG = ({
       const svgElement = doc.documentElement;
 
       const convertNode = (node: XMLElement | Element): React.ReactNode => {
-        if (node.nodeType === 3 && !node.nodeValue?.trim()) {
-          return null;
-        }
-
+        // Handle text nodes
         if (node.nodeType === 3) {
-          return node.nodeValue;
+          const text = node.nodeValue?.trim();
+          return text ? text : null;
         }
 
         const tagName = node.tagName;
         if (!tagName) return null;
 
+        // Check if the tag is supported
         const parsedTagName = svgComponentSchema.safeParse(tagName);
-        const tag = parsedTagName.success
-          ? parsedTagName.data
-          : (tagName as SvgComponent);
+        if (!parsedTagName.success) {
+          console.warn(`Unsupported SVG tag: ${tagName}`);
+          return null;
+        }
+
+        const tag = parsedTagName.data;
         const Component = finalComponents[tag] || DEFAULT_COMPONENTS[tag];
 
+        if (!Component) {
+          console.warn(`No component found for tag: ${tag}`);
+          return null;
+        }
+
+        // Build props
         const props: Record<string, any> = {};
-        const attributes = Array.prototype.slice.call(node.attributes || []);
-        attributes.forEach((attr: any) => {
+        const attributes = Array.from((node.attributes as NamedNodeMap) || []);
+
+        attributes.forEach((attr: Attr) => {
+          if (!attr) return;
+
           if (attr.name.startsWith("data-")) {
             props[attr.name] = attr.value;
             return;
           }
 
-          const name = attr.name.replace(/-([a-z])/g, (g: string[]) =>
-            (g?.[1] as string).toUpperCase()
+          // Check for XML namespace attributes
+          if (attr.name in XML_NAMESPACE_MAPPING) {
+            const mappedName =
+              XML_NAMESPACE_MAPPING[
+                attr.name as keyof typeof XML_NAMESPACE_MAPPING
+              ];
+
+            if (mappedName) props[mappedName] = attr.value;
+            return;
+          }
+
+          const name = attr.name.replace(/-([a-z])/g, (substring: string) =>
+            substring[1] ? substring[1].toUpperCase() : ""
           );
 
           if (name === "class") {
@@ -157,18 +204,17 @@ export const SVG = ({
           }
         });
 
-        const children = Array.prototype.slice
-          .call(node.childNodes)
+        // Handle children
+        const children = Array.from(node.childNodes as NodeListOf<ChildNode>)
           .map((child: any, index) => (
             <React.Fragment key={index}>{convertNode(child)}</React.Fragment>
           ))
           .filter(Boolean);
 
-        if (typeof Component !== "function") return null;
-
-        return children.length === 0
-          ? Component(props)
-          : Component({ ...props, children });
+        // Create the component with children if they exist
+        return children.length > 0
+          ? React.createElement(tag, props, children)
+          : React.createElement(tag, props);
       };
 
       if (!svgElement) return null;
