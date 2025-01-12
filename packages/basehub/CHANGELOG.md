@@ -1,5 +1,11 @@
 # basehub
 
+## 8.0.3
+
+### Patch Changes
+
+- prefix internal Language with B\_, so B_Language
+
 ## 8.0.2
 
 ### Patch Changes

@@ -282,7 +282,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAsync"> & {
       generatedSchemaPath,
       `
 import type { RichTextNode, RichTextTocNode } from './api-transaction';
-import type { Language } from './react-code-block';
+import type { Language as B_Language } from './react-code-block';
 `
     );
 
