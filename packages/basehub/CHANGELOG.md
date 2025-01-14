@@ -1,5 +1,12 @@
 # basehub
 
+## 8.0.4
+
+### Patch Changes
+
+- e1aff54: - Rename SVG -> Icon
+  - Fix custom components in Icon
+
 ## 8.0.3
 
 ### Patch Changes
