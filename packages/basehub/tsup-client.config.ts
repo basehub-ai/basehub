@@ -7,8 +7,7 @@ export default defineConfig((_options: Options) => {
     minify: false,
     dts: true,
     entry: {
-      "react-svg": "./src/react/icon/index.ts",
-      "react-icon": "./src/react/icon/index.ts",
+      "react-svg": "./src/react/svg/index.ts",
       "react-rich-text": "./src/react/rich-text/index.ts",
       "react-form": "./src/react/form/index.ts",
       "react-code-block/index": "./src/react/code-block/index.ts",
