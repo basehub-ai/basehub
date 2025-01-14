@@ -110,8 +110,7 @@ const parseStyleString = (styleString: string): React.CSSProperties => {
 };
 
 /* COMPONENT */
-
-export const SVG = ({
+export const Icon = ({
   content: _content,
   children,
   components = DEFAULT_COMPONENTS,
@@ -212,9 +211,11 @@ export const SVG = ({
           .filter(Boolean);
 
         // Create the component with children if they exist
-        return children.length > 0
-          ? React.createElement(tag, props, children)
-          : React.createElement(tag, props);
+        return children.length > 0 ? (
+          <Component {...props}>{children}</Component>
+        ) : (
+          <Component {...props} />
+        );
       };
 
       if (!svgElement) return null;
@@ -229,4 +230,30 @@ export const SVG = ({
   if (!parseAndRenderSVG) return null;
 
   return parseAndRenderSVG as React.ReactElement;
+};
+
+interface SVGProps {
+  content: string;
+  /**
+   * @deprecated Use `content` instead.
+   */
+  children?: string;
+  components?: Partial<ComponentsOverride>;
+}
+
+/**
+ * @deprecated Use the `Icon` component instead.
+ */
+export const SVG: React.FC<SVGProps> = ({
+  content: _content,
+  children,
+  components = DEFAULT_COMPONENTS,
+}) => {
+  console.warn(
+    "Warning: The SVG component is deprecated and will be removed in the next major version. Please use the Icon component instead."
+  );
+
+  const content = _content ?? children;
+
+  return <Icon content={content} components={components} />;
 };
