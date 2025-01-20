@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.0
+
+### Minor Changes
+
+- Detect next.js and don't dynamic import if not the case
+
 ## 8.0.4
 
 ### Patch Changes

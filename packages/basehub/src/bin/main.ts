@@ -54,6 +54,13 @@ export const main = async (
     );
   }
 
+  let isNextjs = false;
+  try {
+    isNextjs = resolvePkg("next") !== undefined;
+  } catch (err) {
+    isNextjs = false;
+  }
+
   const { output } = await getStuffFromEnv({ ...options, previousResolvedRef });
 
   let shouldAppendToGitIgnore = "";
@@ -271,6 +278,7 @@ R extends Omit<MutationGenqlSelection, "transaction" | "transactionAsync"> & {
       resolvedRef,
       gitBranchDeploymentURL,
       productionDeploymentURL,
+      isNextjs,
     });
     if (!schemaFileContents.includes(basehubExport)) {
       schemaFileContents = schemaFileContents.concat(`\n${basehubExport}`);
@@ -801,12 +809,14 @@ const getBaseHubExport = ({
   resolvedRef,
   gitBranchDeploymentURL,
   productionDeploymentURL,
+  isNextjs,
 }: {
   draft: boolean;
   sdkBuildId: string;
   resolvedRef: ResolvedRef;
   gitBranchDeploymentURL: string | null;
   productionDeploymentURL: string | null;
+  isNextjs: boolean;
 }) => `
 export type * from "@basehub/mutation-api-helpers";
 import { createFetcher } from "./runtime";
@@ -819,6 +829,7 @@ export const gitBranchDeploymentURL = ${
 export const productionDeploymentURL = ${
   productionDeploymentURL ? `"${productionDeploymentURL}"` : "null"
 };
+export const isNextjs = ${isNextjs};
 
 /**
  * Returns a hash code from an object
@@ -924,57 +935,78 @@ export const basehub = (options?: Options) => {
     };
 
     let isNextjsDraftMode = false;
-    if (options.draft === undefined) {
-      // try to auto-detect (only if draft is not explicitly set by the user)
-      try {
-        const { draftMode } = await import("next/headers");
-        isNextjsDraftMode = (await draftMode()).isEnabled;
-      } catch (error) {
-        // noop, not using nextjs
+
+    ${
+      isNextjs
+        ? `
+      if (options.draft === undefined) {
+        // try to auto-detect (only if draft is not explicitly set by the user)
+        try {
+          const { draftMode } = await import("next/headers");
+          isNextjsDraftMode = (await draftMode()).isEnabled;
+        } catch (error) {
+          // noop, not using nextjs
+        }
       }
+
+`
+        : ""
     }
 
     const isDraftResolved = ${draft} || isNextjsDraftMode || options.draft === true;
 
     if (isDraftResolved) {
       extra.headers = { ...extra.headers, "x-basehub-draft": "true" };
-      // get rid of automatic nextjs caching
-      extra.next = { revalidate: undefined };
-      extra.cache = "no-store";
-      // try to get ref from cookies
-      try {
-        const { cookies } = await import("next/headers");
-        const cookieStore = await cookies();
-        const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)?.value;
-        if (ref) {
-          extra.headers = {
-            ...extra.headers,
-            "x-basehub-ref": ref,
-          };
+
+      ${
+        isNextjs
+          ? `
+        // get rid of automatic nextjs caching
+        extra.next = { revalidate: undefined };
+        extra.cache = "no-store";
+        // try to get ref from cookies
+        try {
+          const { cookies } = await import("next/headers");
+          const cookieStore = await cookies();
+          const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)?.value;
+          if (ref) {
+            extra.headers = {
+              ...extra.headers,
+              "x-basehub-ref": ref,
+            };
+          }
+        } catch (error) {
+          // noop 
         }
-      } catch (error) {
-        // noop 
+`
+          : ""
       }
     }
 
     if (isDraftResolved) return extra;
 
-    if (typeof options?.next === 'undefined') {
-      let isNextjs = false;
-      try {
-        isNextjs = !!(await import("next/headers"))
-      } catch (error) {
-        // noop, not using nextjs
+    ${
+      isNextjs
+        ? `
+      if (typeof options?.next === 'undefined') {
+        let isNextjs = false;
+        try {
+          isNextjs = !!(await import("next/headers"))
+        } catch (error) {
+          // noop, not using nextjs
+        }
+        if (isNextjs) {
+          const cacheTag = cacheTagFromQuery(originalRequest);
+          // don't override if revalidation is already being handled by the user
+          extra.next = { tags: [cacheTag] };
+          extra.headers = {
+            ...extra.headers,
+            "x-basehub-cache-tag": cacheTag,
+          };
+        }
       }
-      if (isNextjs) {
-        const cacheTag = cacheTagFromQuery(originalRequest);
-        // don't override if revalidation is already being handled by the user
-        extra.next = { tags: [cacheTag] };
-        extra.headers = {
-          ...extra.headers,
-          "x-basehub-cache-tag": cacheTag,
-        };
-      }
+      `
+        : ""
     }
 
     return extra;

@@ -14,6 +14,8 @@ import {
   getStuffFromEnv,
   // @ts-ignore
   resolvedRef,
+  // @ts-ignore
+  isNextjs,
 } from "../index";
 
 export { PumpQuery };
@@ -58,19 +60,21 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
-  let isNextjsDraftMode = false;
-  if (basehubProps.draft === undefined) {
-    // try to auto-detect (only if draft is not explicitly set by the user)
-    try {
-      const { draftMode } = await import("next/headers");
-      isNextjsDraftMode = (await draftMode()).isEnabled;
-    } catch (error) {
-      // noop, not using nextjs
+  if (isNextjs) {
+    let isNextjsDraftMode = false;
+    if (basehubProps.draft === undefined) {
+      // try to auto-detect (only if draft is not explicitly set by the user)
+      try {
+        const { draftMode } = await import("next/headers");
+        isNextjsDraftMode = (await draftMode()).isEnabled;
+      } catch (error) {
+        // noop, not using nextjs
+      }
     }
-  }
 
-  if (isNextjsDraftMode && basehubProps.draft === undefined) {
-    basehubProps.draft = true;
+    if (isNextjsDraftMode && basehubProps.draft === undefined) {
+      basehubProps.draft = true;
+    }
   }
 
   const { headers, draft } = getStuffFromEnv(basehubProps);
@@ -85,16 +89,18 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
 
   if (draft) {
     // try to get ref from cookies
-    try {
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
-        ?.value;
-      if (ref) {
-        headers["x-basehub-ref"] = ref;
+    if (isNextjs) {
+      try {
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+        const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
+          ?.value;
+        if (ref) {
+          headers["x-basehub-ref"] = ref;
+        }
+      } catch (error) {
+        // noop
       }
-    } catch (error) {
-      // noop
     }
   }
 
