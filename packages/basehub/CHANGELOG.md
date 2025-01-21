@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.1
+
+### Patch Changes
+
+- Expose EventArgs typescript util
+
 ## 8.1.0
 
 ### Minor Changes
