@@ -58,13 +58,13 @@ type NullableEventSchemaMap = {
   [K in EventKeys]: Scalars[`schema_${K}`] | null;
 };
 
-type Args<Key extends string> =
+export type EventArgs<Key extends string> =
   EventSchemaMap[ExtractEventKey<Key>] extends never
     ? [Key]
     : [Key, EventSchemaMap[ExtractEventKey<Key>]];
 
 export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
-  ...args: Args<Key>
+  ...args: EventArgs<Key>
 ) => {
   const [key, data] = args;
   const parsedResolvedRef = resolvedRef as ResolvedRef;
