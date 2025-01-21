@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.1
+
+### Patch Changes
+
+- 899753c: Exposing events args type
+
 ## 8.1.0
 
 ### Minor Changes
