@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.3
+
+### Patch Changes
+
+- expose react-icon
+
 ## 8.1.2
 
 ### Patch Changes
