@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DOMParser, Element as XMLElement } from "@xmldom/xmldom";
+import { DOMParser, Element as XMLElement, Document } from "@xmldom/xmldom";
 
 export const supportedSvgTags = [
   "svg",
@@ -109,7 +109,7 @@ const parseStyleString = (styleString: string): React.CSSProperties => {
     }, {} as React.CSSProperties);
 };
 
-const SVG_CACHE = createLRUCache<string, React.ReactElement>(50);
+const SVG_CACHE = createLRUCache<string, Document>(50);
 
 /* COMPONENT */
 export const Icon = ({
@@ -126,29 +126,25 @@ export const Icon = ({
 }) => {
   const content = _content ?? children;
 
-  // Create LRU cache for parsed SVGs
-  const cacheKey =
-    content + (components ? JSON.stringify(sortObject(components)) : "");
-  const cachedResult = SVG_CACHE.get(cacheKey);
-
-  if (cachedResult) {
-    return cachedResult;
-  }
-
   let parseAndRenderSVG = null;
   const finalComponents = { ...DEFAULT_COMPONENTS, ...components };
 
   try {
-    const sanitizedSvgString = sanitizeSVGString(content);
+    let doc = SVG_CACHE.get(content);
+    if (!doc) {
+      const sanitizedSvgString = sanitizeSVGString(content);
 
-    const doc = new DOMParser().parseFromString(
-      sanitizedSvgString,
-      "image/svg+xml"
-    );
+      doc = new DOMParser().parseFromString(
+        sanitizedSvgString,
+        "image/svg+xml"
+      );
 
-    const parseErrors = doc.getElementsByTagName("parsererror");
-    if (parseErrors.length > 0) {
-      throw new Error(`XML Parsing Error: ${parseErrors[0]?.textContent}`);
+      const parseErrors = doc.getElementsByTagName("parsererror");
+      if (parseErrors.length > 0) {
+        throw new Error(`XML Parsing Error: ${parseErrors[0]?.textContent}`);
+      }
+
+      SVG_CACHE.set(content, doc);
     }
 
     const svgElement = doc.documentElement;
@@ -239,7 +235,6 @@ export const Icon = ({
   if (!parseAndRenderSVG) return null;
 
   const result = parseAndRenderSVG as React.ReactElement;
-  SVG_CACHE.set(cacheKey, result);
   return result;
 };
 
@@ -308,15 +303,3 @@ function createLRUCache<K, V>(maxSize: number = 10) {
     },
   };
 }
-
-const sortObject = (obj: Record<string, any>) => {
-  const sortedObj: Record<string, any> = {};
-
-  Object.keys(obj)
-    .sort()
-    .forEach((key) => {
-      sortedObj[key] = obj[key];
-    });
-
-  return sortedObj;
-};
