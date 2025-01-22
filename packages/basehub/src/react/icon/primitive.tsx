@@ -115,7 +115,7 @@ const SVG_CACHE = createLRUCache<string, React.ReactElement>(50);
 export const Icon = ({
   content: _content,
   children,
-  components = DEFAULT_COMPONENTS,
+  components,
 }: {
   content: string;
   /**
@@ -127,7 +127,8 @@ export const Icon = ({
   const content = _content ?? children;
 
   // Create LRU cache for parsed SVGs
-  const cacheKey = content + JSON.stringify(components);
+  const cacheKey =
+    content + (components ? JSON.stringify(sortObject(components)) : "");
   const cachedResult = SVG_CACHE.get(cacheKey);
 
   if (cachedResult) {
@@ -307,3 +308,15 @@ function createLRUCache<K, V>(maxSize: number = 10) {
     },
   };
 }
+
+const sortObject = (obj: Record<string, any>) => {
+  const sortedObj: Record<string, any> = {};
+
+  Object.keys(obj)
+    .sort()
+    .forEach((key) => {
+      sortedObj[key] = obj[key];
+    });
+
+  return sortedObj;
+};
