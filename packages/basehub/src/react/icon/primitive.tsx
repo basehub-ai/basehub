@@ -23,6 +23,7 @@ export const supportedSvgTags = [
   "defs",
   "linearGradient",
   "stop",
+  "clipPath",
 ] as const;
 const svgComponentSchema = z.enum(supportedSvgTags);
 
@@ -53,6 +54,7 @@ const DEFAULT_COMPONENTS: ComponentsOverride = {
   defs: (props) => React.createElement("defs", props),
   linearGradient: (props) => React.createElement("linearGradient", props),
   stop: (props) => React.createElement("stop", props),
+  clipPath: (props) => React.createElement("clipPath", props),
 };
 
 const XML_NAMESPACE_MAPPING: Record<string, string> = {
@@ -124,108 +126,107 @@ export const Icon = ({
 }) => {
   const content = _content ?? children;
 
-  const parseAndRenderSVG = React.useMemo(() => {
-    const finalComponents = { ...DEFAULT_COMPONENTS, ...components };
+  let parseAndRenderSVG = null;
+  const finalComponents = { ...DEFAULT_COMPONENTS, ...components };
 
-    try {
-      const sanitizedSvgString = sanitizeSVGString(content);
+  try {
+    const sanitizedSvgString = sanitizeSVGString(content);
 
-      const doc = new DOMParser().parseFromString(
-        sanitizedSvgString,
-        "image/svg+xml"
-      );
+    const doc = new DOMParser().parseFromString(
+      sanitizedSvgString,
+      "image/svg+xml"
+    );
 
-      const parseErrors = doc.getElementsByTagName("parsererror");
-      if (parseErrors.length > 0) {
-        throw new Error(`XML Parsing Error: ${parseErrors[0]?.textContent}`);
+    const parseErrors = doc.getElementsByTagName("parsererror");
+    if (parseErrors.length > 0) {
+      throw new Error(`XML Parsing Error: ${parseErrors[0]?.textContent}`);
+    }
+
+    const svgElement = doc.documentElement;
+
+    const convertNode = (node: XMLElement | Element): React.ReactNode => {
+      // Handle text nodes
+      if (node.nodeType === 3) {
+        const text = node.nodeValue?.trim();
+        return text ? text : null;
       }
 
-      const svgElement = doc.documentElement;
+      const tagName = node.tagName;
+      if (!tagName) return null;
 
-      const convertNode = (node: XMLElement | Element): React.ReactNode => {
-        // Handle text nodes
-        if (node.nodeType === 3) {
-          const text = node.nodeValue?.trim();
-          return text ? text : null;
+      // Check if the tag is supported
+      const parsedTagName = svgComponentSchema.safeParse(tagName);
+      if (!parsedTagName.success) {
+        console.warn(`Unsupported SVG tag: ${tagName}`);
+        return null;
+      }
+
+      const tag = parsedTagName.data;
+      const Component = finalComponents[tag] || DEFAULT_COMPONENTS[tag];
+
+      if (!Component) {
+        console.warn(`No component found for tag: ${tag}`);
+        return null;
+      }
+
+      // Build props
+      const props: Record<string, any> = {};
+      const attributes = Array.from((node.attributes as NamedNodeMap) || []);
+
+      attributes.forEach((attr: Attr) => {
+        if (!attr) return;
+
+        if (attr.name.startsWith("data-")) {
+          props[attr.name] = attr.value;
+          return;
         }
 
-        const tagName = node.tagName;
-        if (!tagName) return null;
+        // Check for XML namespace attributes
+        if (attr.name in XML_NAMESPACE_MAPPING) {
+          const mappedName =
+            XML_NAMESPACE_MAPPING[
+              attr.name as keyof typeof XML_NAMESPACE_MAPPING
+            ];
 
-        // Check if the tag is supported
-        const parsedTagName = svgComponentSchema.safeParse(tagName);
-        if (!parsedTagName.success) {
-          console.warn(`Unsupported SVG tag: ${tagName}`);
-          return null;
+          if (mappedName) props[mappedName] = attr.value;
+          return;
         }
 
-        const tag = parsedTagName.data;
-        const Component = finalComponents[tag] || DEFAULT_COMPONENTS[tag];
-
-        if (!Component) {
-          console.warn(`No component found for tag: ${tag}`);
-          return null;
-        }
-
-        // Build props
-        const props: Record<string, any> = {};
-        const attributes = Array.from((node.attributes as NamedNodeMap) || []);
-
-        attributes.forEach((attr: Attr) => {
-          if (!attr) return;
-
-          if (attr.name.startsWith("data-")) {
-            props[attr.name] = attr.value;
-            return;
-          }
-
-          // Check for XML namespace attributes
-          if (attr.name in XML_NAMESPACE_MAPPING) {
-            const mappedName =
-              XML_NAMESPACE_MAPPING[
-                attr.name as keyof typeof XML_NAMESPACE_MAPPING
-              ];
-
-            if (mappedName) props[mappedName] = attr.value;
-            return;
-          }
-
-          const name = attr.name.replace(/-([a-z])/g, (substring: string) =>
-            substring[1] ? substring[1].toUpperCase() : ""
-          );
-
-          if (name === "class") {
-            props.className = attr.value;
-          } else if (name === "style") {
-            props[name] = parseStyleString(attr.value);
-          } else {
-            props[name] = attr.value;
-          }
-        });
-
-        // Handle children
-        const children = Array.from(node.childNodes as NodeListOf<ChildNode>)
-          .map((child: any, index) => (
-            <React.Fragment key={index}>{convertNode(child)}</React.Fragment>
-          ))
-          .filter(Boolean);
-
-        // Create the component with children if they exist
-        return children.length > 0 ? (
-          <Component {...props}>{children}</Component>
-        ) : (
-          <Component {...props} />
+        const name = attr.name.replace(/-([a-z])/g, (substring: string) =>
+          substring[1] ? substring[1].toUpperCase() : ""
         );
-      };
 
-      if (!svgElement) return null;
+        if (name === "class") {
+          props.className = attr.value;
+        } else if (name === "style") {
+          props[name] = parseStyleString(attr.value);
+        } else {
+          props[name] = attr.value;
+        }
+      });
 
-      return convertNode(svgElement);
-    } catch (error) {
-      console.error("SVG Parsing Error:", error);
-      return null;
-    }
-  }, [content, components]);
+      // Handle children
+      const children = Array.from(node.childNodes as NodeListOf<ChildNode>)
+        .map((child: any, index) => (
+          <React.Fragment key={index}>{convertNode(child)}</React.Fragment>
+        ))
+        .filter(Boolean);
+
+      // Create the component with children if they exist
+      return children.length > 0 ? (
+        <Component {...props}>{children}</Component>
+      ) : (
+        <Component {...props} />
+      );
+    };
+
+    if (!svgElement) return null;
+
+    parseAndRenderSVG = convertNode(svgElement);
+  } catch (error) {
+    console.error("SVG Parsing Error:", error);
+    parseAndRenderSVG = null;
+  }
 
   if (!parseAndRenderSVG) return null;
 
