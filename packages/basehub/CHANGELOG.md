@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.2
+
+### Patch Changes
+
+- Remove toasts w sonner as they're putting <section> elements in the dom
+
 ## 8.1.1
 
 ### Patch Changes

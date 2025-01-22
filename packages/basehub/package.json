@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "8.1.1",
+  "version": "8.1.2",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -72,7 +72,6 @@
     "resolve-pkg": "2.0.0",
     "server-only": "^0.0.1",
     "shiki": "1.17.7",
-    "sonner": "^1.7.1",
     "typesense": "^1.8.2",
     "zod": "^3.22.1"
   },

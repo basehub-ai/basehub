@@ -10,7 +10,6 @@ import {
 // eslint-disable-next-line import/no-unresolved
 import { replaceSystemAliases } from "../runtime/_aliasing.js";
 import type Pusher from "pusher-js/types/src/core/pusher";
-import { toast, Toaster } from "sonner";
 import type { ResponseCache, PumpState } from "./types";
 
 let pusherMounted = false;
@@ -137,10 +136,11 @@ export const ClientPump = <Queries extends PumpQuery[]>({
             } as ResponseCache & { changed: boolean };
           })
           .catch((err: unknown) => {
-            console.error(err);
-            toast.error(
-              "Error fetching data from the BaseHub Draft API. Check the console for more information, or contact support@basehub.com for help."
-            );
+            console.error(`Error fetching data from the BaseHub Draft API:
+              
+${JSON.stringify(err, null, 2)}
+              
+Contact support@basehub.com for help.`);
           });
 
         // we quickly set the cache (without awaiting)
@@ -194,42 +194,13 @@ export const ClientPump = <Queries extends PumpQuery[]>({
    * Surface errors.
    */
   React.useEffect(() => {
-    if (currentToastRef.current) {
-      // first, dismiss current.
-      toast.dismiss(currentToastRef.current);
-    }
-
     if (!result?.errors) return;
     const mainError = result.errors[0]?.[0];
     if (!mainError) return;
-
-    currentToastRef.current = toast.error(
-      <div style={{ lineHeight: 1.3 }}>
-        Error fetching data from the BaseHub Draft API:
-        {mainError.message}
-        {mainError.path ? (
-          <>
-            {" "}
-            at <ToastInlineCode>{mainError.path?.join(".")}</ToastInlineCode>
-          </>
-        ) : (
-          ""
-        )}
-        <p
-          style={{
-            opacity: 0.7,
-            fontSize: "0.85em",
-            margin: 0,
-            marginTop: "0.25em",
-          }}
-        >
-          Check if that block is defined in your BaseHub Repo.
-        </p>
-      </div>,
-      {
-        dismissible: true,
-        duration: Infinity,
-      }
+    console.error(
+      `Error fetching data from the BaseHub Draft API: ${mainError.message}${
+        mainError.path ? ` at ${mainError.path.join(".")}` : ""
+      }`
     );
   }, [result?.errors]);
 
@@ -356,26 +327,5 @@ export const ClientPump = <Queries extends PumpQuery[]>({
     }
   }, [children, resolvedData]);
 
-  return (
-    <>
-      {resolvedChildren ?? initialResolvedChildren}
-      <Toaster closeButton />
-    </>
-  );
-};
-
-const ToastInlineCode = (props: { children: React.ReactNode }) => {
-  return (
-    <code
-      style={{
-        background: "#dddddd",
-        color: "red",
-        padding: "0.1em 0.3em",
-        border: "1px solid #c2c2c2",
-        borderRadius: "4px",
-      }}
-    >
-      {props.children}
-    </code>
-  );
+  return resolvedChildren ?? initialResolvedChildren;
 };
