@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as z from "zod";
 import { DOMParser, Element as XMLElement } from "@xmldom/xmldom";
 
 export const supportedSvgTags = [
@@ -25,9 +24,8 @@ export const supportedSvgTags = [
   "stop",
   "clipPath",
 ] as const;
-const svgComponentSchema = z.enum(supportedSvgTags);
 
-type SvgComponent = z.infer<typeof svgComponentSchema>;
+type SvgComponent = (typeof supportedSvgTags)[number];
 
 type ComponentsOverride = {
   [K in SvgComponent]: (props: JSX.IntrinsicElements[K]) => React.ReactElement;
@@ -111,6 +109,8 @@ const parseStyleString = (styleString: string): React.CSSProperties => {
     }, {} as React.CSSProperties);
 };
 
+const SVG_CACHE = createLRUCache<string, React.ReactElement>(50);
+
 /* COMPONENT */
 export const Icon = ({
   content: _content,
@@ -125,6 +125,14 @@ export const Icon = ({
   components?: Partial<ComponentsOverride>;
 }) => {
   const content = _content ?? children;
+
+  // Create LRU cache for parsed SVGs
+  const cacheKey = content + JSON.stringify(components);
+  const cachedResult = SVG_CACHE.get(cacheKey);
+
+  if (cachedResult) {
+    return cachedResult;
+  }
 
   let parseAndRenderSVG = null;
   const finalComponents = { ...DEFAULT_COMPONENTS, ...components };
@@ -155,13 +163,12 @@ export const Icon = ({
       if (!tagName) return null;
 
       // Check if the tag is supported
-      const parsedTagName = svgComponentSchema.safeParse(tagName);
-      if (!parsedTagName.success) {
+      if (!supportedSvgTags.includes(tagName.toLowerCase() as any)) {
         console.warn(`Unsupported SVG tag: ${tagName}`);
         return null;
       }
 
-      const tag = parsedTagName.data;
+      const tag = tagName.toLowerCase() as SvgComponent;
       const Component = finalComponents[tag] || DEFAULT_COMPONENTS[tag];
 
       if (!Component) {
@@ -230,7 +237,9 @@ export const Icon = ({
 
   if (!parseAndRenderSVG) return null;
 
-  return parseAndRenderSVG as React.ReactElement;
+  const result = parseAndRenderSVG as React.ReactElement;
+  SVG_CACHE.set(cacheKey, result);
+  return result;
 };
 
 interface SVGProps {
@@ -258,3 +267,43 @@ export const SVG: React.FC<SVGProps> = ({
 
   return <Icon content={content} components={components} />;
 };
+
+function createLRUCache<K, V>(maxSize: number = 10) {
+  if (maxSize < 1) throw new Error("LRU cache max size must be greater than 0");
+
+  const cache = new Map<K, V>();
+
+  return {
+    get: (key: K): V | undefined => {
+      if (!cache.has(key)) return undefined;
+
+      // Refresh key as most recently used
+      const value = cache.get(key)!;
+      cache.delete(key);
+      cache.set(key, value);
+      return value;
+    },
+
+    set: (key: K, value: V): void => {
+      if (cache.has(key)) {
+        // Delete to update insertion order
+        cache.delete(key);
+      } else if (cache.size >= maxSize) {
+        // Remove least recently used (first item in Map)
+        const lruKey = cache.keys().next().value;
+        if (lruKey) cache.delete(lruKey);
+      }
+      cache.set(key, value);
+    },
+
+    has: (key: K): boolean => cache.has(key),
+
+    delete: (key: K): boolean => cache.delete(key),
+
+    clear: (): void => cache.clear(),
+
+    get size(): number {
+      return cache.size;
+    },
+  };
+}
