@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.6
+
+### Patch Changes
+
+- ffa7672: Add support for 'radialGradient' and 'pattern' SVG tags in Icon component
+
 ## 8.1.5
 
 ### Patch Changes
