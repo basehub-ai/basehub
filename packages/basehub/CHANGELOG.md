@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.4
+
+### Patch Changes
+
+- 3336198: Add support for 'clipPath' SVG tag and remove <icon/> hooks in favour of a internal cache
+
 ## 8.1.3
 
 ### Patch Changes
