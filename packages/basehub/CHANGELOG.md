@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.5
+
+### Patch Changes
+
+- 33bc281: Fix icon component to remove unnecessary tagName conversion to lowercase.
+
 ## 8.1.4
 
 ### Patch Changes
