@@ -160,12 +160,12 @@ export const Icon = ({
       if (!tagName) return null;
 
       // Check if the tag is supported
-      if (!supportedSvgTags.includes(tagName.toLowerCase() as any)) {
+      if (!supportedSvgTags.includes(tagName as any)) {
         console.warn(`Unsupported SVG tag: ${tagName}`);
         return null;
       }
 
-      const tag = tagName.toLowerCase() as SvgComponent;
+      const tag = tagName as SvgComponent;
       const Component = finalComponents[tag] || DEFAULT_COMPONENTS[tag];
 
       if (!Component) {
