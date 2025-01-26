@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.7
+
+### Patch Changes
+
+- remove server-only from code block
+
 ## 8.1.6
 
 ### Patch Changes
