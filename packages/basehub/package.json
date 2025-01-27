@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "8.1.7",
+  "version": "8.1.9",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -50,7 +50,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "emit-dts": "tsc --project tsconfig.dts-only.json",
+    "emit-dts": "tsc --project tsconfig.dts-only.json && dts-bundle-generator --inline-declare-externals --external-inlines @basehub/mutation-api-helpers --no-check -o dts/src/api-transaction.d.ts src/api-transaction.ts && node scripts/fix-api-transaction-types.mjs",
     "dev": "pnpm emit-dts && pnpm build --watch",
     "build": "pnpm build:bin && pnpm build:client",
     "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
@@ -58,7 +58,6 @@
   },
   "dependencies": {
     "@basehub/genql": "9.0.0-canary.10",
-    "@basehub/mutation-api-helpers": "2.0.7",
     "@radix-ui/react-slot": "^1.1.0",
     "@shikijs/transformers": "1.17.7",
     "@xmldom/xmldom": "^0.9.6",
@@ -78,12 +77,14 @@
     "zod": "^3.22.1"
   },
   "devDependencies": {
+    "@basehub/mutation-api-helpers": "2.0.7",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.get": "4.4.9",
     "@types/node": "18.13.0",
     "@types/react": "18.2.20",
     "@types/react-dom": "18.2.7",
     "esbuild-scss-modules-plugin": "^1.1.1",
+    "dts-bundle-generator": "^9.5.1",
     "next": "^13.5.3",
     "pkg-pr-new": "^0.0.30",
     "react": "18.2.0",

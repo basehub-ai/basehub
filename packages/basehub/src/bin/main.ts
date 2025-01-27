@@ -299,7 +299,6 @@ import type { Language as B_Language } from './react-code-block';
       "react",
       "react-dom",
       "../index",
-      "@basehub/mutation-api-helpers",
       "next",
       "../runtime/_aliasing.js",
     ];
@@ -818,7 +817,7 @@ const getBaseHubExport = ({
   productionDeploymentURL: string | null;
   isNextjs: boolean;
 }) => `
-export type * from "@basehub/mutation-api-helpers";
+export type * from "basehub/api-transaction";
 import { createFetcher } from "./runtime";
 
 export const sdkBuildId = "${sdkBuildId}";

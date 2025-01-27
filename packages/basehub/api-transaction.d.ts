@@ -1,1 +1,1 @@
-export * from "./dist/api-transaction";
+export * from "./dts/src/api-transaction";

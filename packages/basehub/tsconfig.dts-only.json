@@ -19,6 +19,7 @@
     "tsup-bin.config.ts",
     "tsup-client.config.ts",
     "../../playground",
-    ".basehub"
+    ".basehub",
+    "src/api-transaction.ts"
   ]
 }

@@ -1,3 +1,4 @@
+import "server-only";
 import { lazy } from "react";
 import { Highlighter, HighlighterProps } from "./highlighter";
 import { Snippet } from "./types";

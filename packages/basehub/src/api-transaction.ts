@@ -1,12 +1,14 @@
-import { Transaction as FullTransaction } from "@basehub/mutation-api-helpers";
+import { Transaction } from "@basehub/mutation-api-helpers";
 export type {
   RichTextNode,
   RichTextTocNode,
 } from "@basehub/mutation-api-helpers";
 
-export type Transaction =
-  | FullTransaction["operations"]
-  | FullTransaction["operations"][number];
+export type Transaction2 =
+  | Transaction["operations"]
+  | Transaction["operations"][number];
+
+export type { Transaction2 as Transaction };
 
 export type {
   CreateOp,

@@ -1,4 +1,4 @@
-import { RichTextNode } from "@basehub/mutation-api-helpers";
+import { RichTextNode } from "../../../../dts/src/api-transaction";
 
 export function extractTextFromNode(node?: RichTextNode) {
   let textContent = "";
@@ -8,7 +8,7 @@ export function extractTextFromNode(node?: RichTextNode) {
       textContent += child.text;
     }
     if ("content" in child && child.content) {
-      extractTextFromNode(child);
+      textContent += extractTextFromNode(child);
     }
   });
 

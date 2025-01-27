@@ -8,7 +8,7 @@ import type {
   RichTextNode,
   RichTextTocNode,
   Mark,
-} from "@basehub/mutation-api-helpers";
+} from "../../../dts/src/api-transaction";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -628,7 +628,7 @@ const Marks = ({
           }
           return (
             id ===
-      // @ts-ignore
+            // @ts-ignore
 
             (mark.attrs as LinkAttributes & { type: "internal" }).targetId
           );

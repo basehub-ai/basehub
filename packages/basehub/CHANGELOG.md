@@ -1,5 +1,17 @@
 # basehub
 
+## 8.1.9
+
+### Patch Changes
+
+- bring back import "server-only"; in code block
+
+## 8.1.8
+
+### Patch Changes
+
+- inline types from @basehub/mutation-api-helpers
+
 ## 8.1.7
 
 ### Patch Changes
