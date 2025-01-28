@@ -66,6 +66,7 @@ type Handlers = {
   b: (props: { children: ReactNode }) => ReactNode;
   em: (props: { children: ReactNode }) => ReactNode;
   s: (props: { children: ReactNode }) => ReactNode;
+  u: (props: { children: ReactNode }) => ReactNode;
   kbd: (props: { children: ReactNode }) => ReactNode;
   code: (props: { children: ReactNode }) => ReactNode;
   a: (
@@ -222,6 +223,7 @@ const defaultHandlers: Handlers = {
   b: ({ children }) => <b>{children}</b>,
   em: ({ children }) => <em>{children}</em>,
   s: ({ children }) => <s>{children}</s>,
+  u: ({ children }) => <u>{children}</u>,
   kbd: ({ children }) => <kbd>{children}</kbd>,
   code: ({ children }) => <code>{children}</code>,
   ol: ({ children }) => <ol>{children}</ol>,
@@ -603,9 +605,9 @@ const Marks = ({
       break;
     case "underline":
       Handler =
-        components?.s ??
+        components?.u ??
         (disableDefaultComponents ? () => <></> : defaultHandlers.s);
-      props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
+      props = { children } satisfies ExtractPropsForHandler<Handlers["u"]>;
       break;
     case "link": {
       // @ts-ignore
