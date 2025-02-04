@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.11
+
+### Patch Changes
+
+- fix "fn components cannot have string refs" error
+
 ## 8.1.10
 
 ### Patch Changes
