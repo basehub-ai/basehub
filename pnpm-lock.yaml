@@ -49,7 +49,7 @@ importers:
         version: 9.0.0(eslint@8.52.0)
       eslint-config-turbo:
         specifier: latest
-        version: 2.3.3(eslint@8.52.0)
+        version: 2.4.0(eslint@8.52.0)(turbo@1.10.12)
       eslint-import-resolver-typescript:
         specifier: ^3.6.1
         version: 3.6.1(@typescript-eslint/parser@6.9.0(eslint@8.52.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0)(eslint@8.52.0)
@@ -120,8 +120,8 @@ importers:
         version: 3.22.1
     devDependencies:
       '@basehub/mutation-api-helpers':
-        specifier: 2.0.9
-        version: 2.0.9
+        specifier: 2.0.10
+        version: 2.0.10
       '@types/lodash.debounce':
         specifier: ^4.0.9
         version: 4.0.9
@@ -235,8 +235,8 @@ packages:
   '@basehub/genql@9.0.0-canary.10':
     resolution: {integrity: sha512-YdYWfKEsUsgEGvvKvt7H/9469cPeXJODrTKCdmt6OPEtY71Mpa9vg1mqALleiHkVinBeFHr+IEhbqIi5eYYL6w==}
 
-  '@basehub/mutation-api-helpers@2.0.9':
-    resolution: {integrity: sha512-dtV2nkXyrDKEcTdaW+FH4bxXaoKGscQ+6MxlFubFuXtDZjXcK5DVq75Om0SWeSSrZvGLI9nVgZ3KoT/JXyauiA==}
+  '@basehub/mutation-api-helpers@2.0.10':
+    resolution: {integrity: sha512-vuBteH6XOheg8ycEJ4pGB9z+jN63JjHQVeDsdT0Y8fDV8KTfq+mELrpaUHhTXKkk83MnVD0H3bjdq7gCjsUb6Q==}
 
   '@changesets/apply-release-plan@6.1.4':
     resolution: {integrity: sha512-FMpKF1fRlJyCZVYHr3CbinpZZ+6MwvOtWUuO8uo+svcATEoc1zRDcj23pAurJ2TZ/uVz1wFHH6K3NlACy0PLew==}
@@ -1633,10 +1633,11 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-config-turbo@2.3.3:
-    resolution: {integrity: sha512-cM9wSBYowQIrjx2MPCzFE6jTnG4vpTPJKZ/O+Ps3CqrmGK/wtNOsY6WHGMwLtKY/nNbgRahAJH6jGVF6k2coOg==}
+  eslint-config-turbo@2.4.0:
+    resolution: {integrity: sha512-AiRdy83iwyG4+iMSxXQGUbEClxkGxSlXYH8E2a+0972ao75OWnlDBiiuLMOzDpJubR+QVGC4zonn29AIFCSbFw==}
     peerDependencies:
       eslint: '>6.6.0'
+      turbo: '>2.0.0'
 
   eslint-import-resolver-node@0.3.9:
     resolution: {integrity: sha512-WFj2isz22JahUv+B788TlO3N6zL3nNJGU8CcZbPZvVEkBPaJdCV4vy5wyghty5ROFbCRnm132v8BScu5/1BQ8g==}
@@ -1697,10 +1698,11 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-turbo@2.3.3:
-    resolution: {integrity: sha512-j8UEA0Z+NNCsjZep9G5u5soDQHcXq/x4amrwulk6eHF1U91H2qAjp5I4jQcvJewmccCJbVp734PkHHTRnosjpg==}
+  eslint-plugin-turbo@2.4.0:
+    resolution: {integrity: sha512-qCgoRi/OTc1VMxab7+sdKiV1xlkY4qjK9sM+kS7+WogrB1DxLguJSQXvk4HA13SD5VmJsq+8FYOw5q4EUk6Ixg==}
     peerDependencies:
       eslint: '>6.6.0'
+      turbo: '>2.0.0'
 
   eslint-scope@7.2.2:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
@@ -2339,6 +2341,7 @@ packages:
 
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
+    deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
 
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
@@ -3935,7 +3938,7 @@ snapshots:
     transitivePeerDependencies:
       - enquirer
 
-  '@basehub/mutation-api-helpers@2.0.9': {}
+  '@basehub/mutation-api-helpers@2.0.10': {}
 
   '@changesets/apply-release-plan@6.1.4':
     dependencies:
@@ -5475,10 +5478,11 @@ snapshots:
     dependencies:
       eslint: 8.52.0
 
-  eslint-config-turbo@2.3.3(eslint@8.52.0):
+  eslint-config-turbo@2.4.0(eslint@8.52.0)(turbo@1.10.12):
     dependencies:
       eslint: 8.52.0
-      eslint-plugin-turbo: 2.3.3(eslint@8.52.0)
+      eslint-plugin-turbo: 2.4.0(eslint@8.52.0)(turbo@1.10.12)
+      turbo: 1.10.12
 
   eslint-import-resolver-node@0.3.9:
     dependencies:
@@ -5587,10 +5591,11 @@ snapshots:
       semver: 6.3.1
       string.prototype.matchall: 4.0.11
 
-  eslint-plugin-turbo@2.3.3(eslint@8.52.0):
+  eslint-plugin-turbo@2.4.0(eslint@8.52.0)(turbo@1.10.12):
     dependencies:
       dotenv: 16.0.3
       eslint: 8.52.0
+      turbo: 1.10.12
 
   eslint-scope@7.2.2:
     dependencies:

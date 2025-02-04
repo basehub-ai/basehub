@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.12
+
+### Patch Changes
+
+- upgrade types
+
 ## 8.1.11
 
 ### Patch Changes
