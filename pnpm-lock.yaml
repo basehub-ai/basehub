@@ -120,8 +120,8 @@ importers:
         version: 3.22.1
     devDependencies:
       '@basehub/mutation-api-helpers':
-        specifier: 2.0.7
-        version: 2.0.7
+        specifier: 2.0.9
+        version: 2.0.9
       '@types/lodash.debounce':
         specifier: ^4.0.9
         version: 4.0.9
@@ -235,8 +235,8 @@ packages:
   '@basehub/genql@9.0.0-canary.10':
     resolution: {integrity: sha512-YdYWfKEsUsgEGvvKvt7H/9469cPeXJODrTKCdmt6OPEtY71Mpa9vg1mqALleiHkVinBeFHr+IEhbqIi5eYYL6w==}
 
-  '@basehub/mutation-api-helpers@2.0.7':
-    resolution: {integrity: sha512-i2WRtQnAkQ1Lowkwl6tkMIQ42AfZ2qs71zR/JYV6wxvl52011sXTMdf8V8jn/X/SZf7M4rR4KU9Bj8FA0DJPBA==}
+  '@basehub/mutation-api-helpers@2.0.9':
+    resolution: {integrity: sha512-dtV2nkXyrDKEcTdaW+FH4bxXaoKGscQ+6MxlFubFuXtDZjXcK5DVq75Om0SWeSSrZvGLI9nVgZ3KoT/JXyauiA==}
 
   '@changesets/apply-release-plan@6.1.4':
     resolution: {integrity: sha512-FMpKF1fRlJyCZVYHr3CbinpZZ+6MwvOtWUuO8uo+svcATEoc1zRDcj23pAurJ2TZ/uVz1wFHH6K3NlACy0PLew==}
@@ -3935,7 +3935,7 @@ snapshots:
     transitivePeerDependencies:
       - enquirer
 
-  '@basehub/mutation-api-helpers@2.0.7': {}
+  '@basehub/mutation-api-helpers@2.0.9': {}
 
   '@changesets/apply-release-plan@6.1.4':
     dependencies:

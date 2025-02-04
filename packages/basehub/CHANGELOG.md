@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.10
+
+### Patch Changes
+
+- upgrade mutation helpers
+
 ## 8.1.9
 
 ### Patch Changes

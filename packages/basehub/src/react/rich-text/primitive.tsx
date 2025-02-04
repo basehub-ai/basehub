@@ -638,8 +638,8 @@ const Marks = ({
           // Fallback to regular link if block not found
           props = {
             children,
-            target: mark.attrs.target,
-            href: mark.attrs.href || "",
+            href: "#",
+            target: mark.attrs.target ?? undefined,
             internal: undefined,
           };
           break;
@@ -648,15 +648,15 @@ const Marks = ({
         // Remove _id and _sys from the block type
         props = {
           children,
-          href: mark.attrs.href || "",
-          target: mark.attrs.target,
+          href: "#",
+          target: mark.attrs.target ?? undefined,
           internal: block,
         } as InternalLinkProps<BaseCustomBlock, string>;
       } else {
         props = {
           children,
           href: mark.attrs.href,
-          target: mark.attrs.target,
+          target: mark.attrs.target ?? undefined,
           internal: undefined,
           rel:
             mark.attrs.target?.toLowerCase() === "_blank"
