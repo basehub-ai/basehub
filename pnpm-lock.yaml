@@ -94,12 +94,6 @@ importers:
       hast-util-to-jsx-runtime:
         specifier: ^2.3.0
         version: 2.3.0
-      lodash.debounce:
-        specifier: ^4.0.8
-        version: 4.0.8
-      lodash.get:
-        specifier: ^4.4.2
-        version: 4.4.2
       pusher-js:
         specifier: ^8.3.0
         version: 8.3.0
@@ -2333,12 +2327,6 @@ packages:
 
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
-
-  lodash.debounce@4.0.8:
-    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
-
-  lodash.get@4.4.2:
-    resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
 
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
@@ -6255,10 +6243,6 @@ snapshots:
       p-locate: 5.0.0
 
   lodash.camelcase@4.3.0: {}
-
-  lodash.debounce@4.0.8: {}
-
-  lodash.get@4.4.2: {}
 
   lodash.memoize@4.1.2: {}
 

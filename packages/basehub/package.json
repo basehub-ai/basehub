@@ -67,8 +67,6 @@
     "esbuild-plugin-d.ts": "1.2.3",
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.0",
-    "lodash.debounce": "^4.0.8",
-    "lodash.get": "^4.4.2",
     "pusher-js": "^8.3.0",
     "resolve-pkg": "2.0.0",
     "server-only": "^0.0.1",

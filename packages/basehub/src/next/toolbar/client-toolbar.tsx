@@ -5,7 +5,7 @@ import s from "./toolbar.module.scss";
 import { Tooltip } from "./components/tooltip";
 import { DragHandle } from "./components/drag-handle";
 import { BranchSwitcher, LatestBranch } from "./components/branch-swticher";
-import debounce from "lodash.debounce";
+import { debounce } from "../../_util/lodash.debounce";
 import { usePathname } from "next/navigation";
 import { ResolvedRef } from "../../common-types";
 
