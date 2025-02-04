@@ -21,7 +21,6 @@ export const ClientToolbar = ({
   seekAndStoreBshbPreviewToken,
   resolvedRef,
   getLatestBranches,
-  humanRevalidatePendingTags,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -55,7 +54,7 @@ export const ClientToolbar = ({
   const tooltipRef = React.useRef<Tooltip>(null);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [ref, _setRef] = React.useState(resolvedRef.ref);
+  const [previewRef, _setPreviewRef] = React.useState(resolvedRef.ref);
   const [isDefaultRefSelected, setIsDefaultRefSelected] = React.useState(true);
   const [isLoadingRef, setIsLoadingRef] = React.useState(true);
   const [latestBranches, setLatestBranches] = React.useState<LatestBranch[]>(
@@ -180,7 +179,7 @@ export const ClientToolbar = ({
 
   const setRefWithEvents = React.useCallback(
     (ref: string) => {
-      _setRef(ref);
+      _setPreviewRef(ref);
       // @ts-ignore
       window.__bshb_ref = ref;
       window.dispatchEvent(new CustomEvent("__bshb_ref_changed"));
@@ -208,8 +207,8 @@ export const ClientToolbar = ({
   /** If selected ref is equal to resolvedRef (from build), then we consider this the default state. */
   React.useEffect(() => {
     if (isLoadingRef) return;
-    setIsDefaultRefSelected(ref === resolvedRef.ref);
-  }, [ref, resolvedRef.ref, isLoadingRef]);
+    setIsDefaultRefSelected(previewRef === resolvedRef.ref);
+  }, [previewRef, resolvedRef.ref, isLoadingRef]);
 
   /**
    * If the build ref changes and the user was selecting it, we set the ref to the new build ref.
@@ -233,19 +232,21 @@ export const ClientToolbar = ({
     setRefWithEvents,
   ]);
 
-  // human revalidate pending tags
-  const lastHumanRevalidatedRef = React.useRef<string | null>(null);
-  React.useEffect(() => {
-    if (!bshbPreviewToken) return;
-    if (!ref) return;
-    if (isForcedDraft) return;
-    if (lastHumanRevalidatedRef.current === ref) return;
-    lastHumanRevalidatedRef.current = ref;
+  // // human revalidate pending tags
+  // const lastHumanRevalidatedRef = React.useRef<string | null>(null);
+  // React.useEffect(() => {
+  //   if (!bshbPreviewToken) return;
+  //   if (!previewRef) return;
+  //   if (isForcedDraft) return;
+  //   if (lastHumanRevalidatedRef.current === previewRef) return;
+  //   lastHumanRevalidatedRef.current = previewRef;
 
-    humanRevalidatePendingTags({ bshbPreviewToken, ref }).catch(() => {
-      // ignore
-    });
-  }, [bshbPreviewToken, humanRevalidatePendingTags, ref, isForcedDraft]);
+  //   humanRevalidatePendingTags({ bshbPreviewToken, ref: previewRef }).catch(
+  //     () => {
+  //       // ignore
+  //     }
+  //   );
+  // }, [bshbPreviewToken, humanRevalidatePendingTags, previewRef, isForcedDraft]);
 
   /** Position tooltip when message changes. */
   React.useLayoutEffect(() => {
@@ -351,7 +352,7 @@ export const ClientToolbar = ({
     : `${draft ? "Disable" : "Enable"} draft mode`;
 
   return (
-    <div className={s.wrapper} ref={(ref) => setToolbarRef(ref)}>
+    <div className={s.wrapper} ref={setToolbarRef}>
       <DragHandle
         ref={dragHandleRef}
         onDrag={(pos) => {
@@ -364,7 +365,7 @@ export const ClientToolbar = ({
           <BranchSwitcher
             isForcedDraft={isForcedDraft}
             draft={draft}
-            apiRref={ref}
+            apiRref={previewRef}
             latestBranches={latestBranches}
             onRefChange={(newRef, opts) => {
               const url = new URL(window.location.href);
@@ -384,7 +385,7 @@ export const ClientToolbar = ({
             getAndSetLatestBranches={getAndSetLatestBranches}
           />
           <AutoAddRefToUrlOnPathChangeIfRefIsNotDefault
-            ref={ref}
+            previewRef={previewRef}
             resolvedRef={resolvedRef}
             isDraftModeEnabled={isForcedDraft || draft}
           />
@@ -436,11 +437,11 @@ export const ClientToolbar = ({
 };
 
 const AutoAddRefToUrlOnPathChangeIfRefIsNotDefault = ({
-  ref,
+  previewRef,
   resolvedRef,
   isDraftModeEnabled,
 }: {
-  ref: string;
+  previewRef: string;
   resolvedRef: ResolvedRef;
   isDraftModeEnabled: boolean;
 }) => {
@@ -458,13 +459,19 @@ const AutoAddRefToUrlOnPathChangeIfRefIsNotDefault = ({
       // ignore the first render/pathname
       return;
     }
-    if (ref !== resolvedRef.ref) {
+    if (previewRef !== resolvedRef.ref) {
       // also add ?bshb-preview-ref=... to the url
       const url = new URL(window.location.href);
-      url.searchParams.set("bshb-preview-ref", ref);
+      url.searchParams.set("bshb-preview-ref", previewRef);
       window.history.replaceState(null, "", url.toString());
     }
-  }, [isDraftModeEnabled, ref, resolvedRef.ref, pathname, initialPathname]);
+  }, [
+    isDraftModeEnabled,
+    previewRef,
+    resolvedRef.ref,
+    pathname,
+    initialPathname,
+  ]);
 
   return null;
 };
