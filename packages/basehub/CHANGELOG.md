@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.13
+
+### Patch Changes
+
+- 3026a06: Add highlight mark handlers
+
 ## 8.1.12
 
 ### Patch Changes
