@@ -9,6 +9,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - run: npm install -g corepack@latest
+
       - run: corepack enable
       - uses: actions/setup-node@v4
         with:

@@ -64,6 +64,7 @@ type Marks = Array<Mark>;
 type Handlers = {
   p: (props: { children: ReactNode }) => ReactNode;
   b: (props: { children: ReactNode }) => ReactNode;
+  highlight: (props: { children: ReactNode }) => ReactNode;
   em: (props: { children: ReactNode }) => ReactNode;
   s: (props: { children: ReactNode }) => ReactNode;
   kbd: (props: { children: ReactNode }) => ReactNode;
@@ -220,6 +221,7 @@ const defaultHandlers: Handlers = {
   }) as Handlers["a"],
   p: ({ children }) => <p>{children}</p>,
   b: ({ children }) => <b>{children}</b>,
+  highlight: ({ children }) => <span>{children}</span>,
   em: ({ children }) => <em>{children}</em>,
   s: ({ children }) => <s>{children}</s>,
   kbd: ({ children }) => <kbd>{children}</kbd>,
@@ -574,6 +576,14 @@ const Marks = ({
         components?.b ??
         (disableDefaultComponents ? () => <></> : defaultHandlers.b);
       props = { children } satisfies ExtractPropsForHandler<Handlers["b"]>;
+      break;
+    case "highlight":
+      Handler =
+        components?.highlight ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.highlight);
+      props = { children } satisfies ExtractPropsForHandler<
+        Handlers["highlight"]
+      >;
       break;
     case "italic":
       Handler =
