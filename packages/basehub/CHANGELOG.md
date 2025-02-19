@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.14
+
+### Patch Changes
+
+- d5d0aa2: Toolbar alignment quick fix
+
 ## 8.1.13
 
 ### Patch Changes
