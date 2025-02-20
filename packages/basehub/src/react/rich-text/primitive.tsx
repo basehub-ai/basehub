@@ -126,6 +126,7 @@ type Handlers = {
   tbody: (props: { children: ReactNode }) => ReactNode;
   tfoot: (props: { children: ReactNode }) => ReactNode;
   br: () => ReactNode;
+  u: (props: { children: ReactNode }) => ReactNode;
 };
 
 type ExtractPropsForHandler<Handler extends (props: any) => ReactNode> =
@@ -285,6 +286,7 @@ const defaultHandlers: Handlers = {
   tbody: ({ children }) => <tbody>{children}</tbody>,
   tfoot: ({ children }) => <tfoot>{children}</tfoot>,
   br: () => <br />,
+  u: ({ children }) => <u>{children}</u>,
 };
 
 const Node = ({
@@ -613,9 +615,9 @@ const Marks = ({
       break;
     case "underline":
       Handler =
-        components?.s ??
-        (disableDefaultComponents ? () => <></> : defaultHandlers.s);
-      props = { children } satisfies ExtractPropsForHandler<Handlers["s"]>;
+        components?.u ??
+        (disableDefaultComponents ? () => <></> : defaultHandlers.u);
+      props = { children } satisfies ExtractPropsForHandler<Handlers["u"]>;
       break;
     case "link": {
       // @ts-ignore
