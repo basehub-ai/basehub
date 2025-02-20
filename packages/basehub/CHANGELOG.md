@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.15
+
+### Patch Changes
+
+- 8e023d9: Fix underline mark handler to rich text primitive
+
 ## 8.1.14
 
 ### Patch Changes
