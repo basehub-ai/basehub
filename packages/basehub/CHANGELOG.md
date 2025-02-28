@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.16
+
+### Patch Changes
+
+- upgrade genql
+
 ## 8.1.15
 
 ### Patch Changes
