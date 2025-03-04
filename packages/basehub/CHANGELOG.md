@@ -1,5 +1,17 @@
 # basehub
 
+## 8.1.18
+
+### Patch Changes
+
+- update genql
+
+## 8.1.18-canary.0
+
+### Patch Changes
+
+- update genql
+
 ## 8.1.17
 
 ### Patch Changes

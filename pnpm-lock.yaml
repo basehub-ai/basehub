@@ -65,8 +65,8 @@ importers:
   packages/basehub:
     dependencies:
       '@basehub/genql':
-        specifier: 9.0.0-canary.12
-        version: 9.0.0-canary.12(enquirer@2.4.1)
+        specifier: 9.0.0-canary.13
+        version: 9.0.0-canary.13(enquirer@2.4.1)
       '@radix-ui/react-slot':
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.2.20)(react@18.2.0)
@@ -232,8 +232,8 @@ packages:
     resolution: {integrity: sha512-Ja18XcETdEl5mzzACGd+DKgaGJzPTCow7EglgwTmHdwokzDFYh/MHua6lU6DV/hjF2IaOJ4oX2nqnjG7RElKOw==}
     engines: {node: '>=6.9.0'}
 
-  '@basehub/genql@9.0.0-canary.12':
-    resolution: {integrity: sha512-rShjD+vV7QqSnehfBsay+785GgGI3dRJYmXjNDbcqw2yuxQX2xlMDjhlm/drubjapj0C6l+T/oIh9rE3ysSbOw==}
+  '@basehub/genql@9.0.0-canary.13':
+    resolution: {integrity: sha512-F3pXqJSEJYyQ0JTsp37D7YFkNaCSyQhkJqlDZ6Xr9fORoiz5OvkpHP1795RlYb4zIoQvJ3mtP4vyzQ4tsWo9Dg==}
 
   '@basehub/mutation-api-helpers@2.0.10':
     resolution: {integrity: sha512-vuBteH6XOheg8ycEJ4pGB9z+jN63JjHQVeDsdT0Y8fDV8KTfq+mELrpaUHhTXKkk83MnVD0H3bjdq7gCjsUb6Q==}
@@ -3919,7 +3919,7 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@basehub/genql@9.0.0-canary.12(enquirer@2.4.1)':
+  '@basehub/genql@9.0.0-canary.13(enquirer@2.4.1)':
     dependencies:
       '@graphql-tools/graphql-file-loader': 7.5.17(graphql@16.8.1)
       '@graphql-tools/load': 7.8.14(graphql@16.8.1)
