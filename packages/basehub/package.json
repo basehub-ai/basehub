@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "8.1.16",
+  "version": "8.1.17",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -57,7 +57,7 @@
     "build:client": "tsup --config tsup-client.config.ts"
   },
   "dependencies": {
-    "@basehub/genql": "9.0.0-canary.11",
+    "@basehub/genql": "9.0.0-canary.12",
     "@radix-ui/react-slot": "^1.1.0",
     "@shikijs/transformers": "1.17.7",
     "@xmldom/xmldom": "^0.9.6",
