@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.19
+
+### Patch Changes
+
+- allow images from other origins in basehub image
+
 ## 8.1.18
 
 ### Patch Changes

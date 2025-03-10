@@ -78,9 +78,12 @@ Expected origin to be one of:
       imageURL.pathname = url.pathname;
       imageURL.search = url.search;
     }
-  } else {
+  } else if (url.href.includes(assetsURL)) {
     imageURL.pathname = url.pathname;
     imageURL.search = url.search;
+  } else {
+    // the image is not a basehub image. we'll just return the original url
+    return src;
   }
 
   return imageURL.toString();
