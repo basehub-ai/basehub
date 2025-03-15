@@ -96,9 +96,20 @@ export const ClientConditionalRenderer = ({
           document.documentElement.dataset.basehubOdrStatus = success
             ? "success"
             : "error";
+          document.documentElement.dataset.basehubOdrErrorMessage =
+            "Response failed";
         })
-        .catch(() => {
+        .catch((e) => {
           document.documentElement.dataset.basehubOdrStatus = "error";
+          let errorMessage = "";
+          try {
+            errorMessage = e.message;
+          } catch (err) {
+            console.error(err);
+            errorMessage = "Unknown error";
+          }
+          document.documentElement.dataset.basehubOdrErrorMessage =
+            errorMessage;
         });
     }
   }, [revalidateTags]);

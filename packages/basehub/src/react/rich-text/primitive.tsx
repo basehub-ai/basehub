@@ -191,7 +191,22 @@ export const RichText = <
 >(
   props: RichTextProps<CustomBlocks>
 ): JSX.Element => {
-  const value = (props.content ?? props.children) as RichTextNode[] | undefined;
+  let value: RichTextNode[] | undefined;
+  const contentRaw = props.content ?? props.children;
+  if (contentRaw) {
+    if (Array.isArray(contentRaw)) {
+      value = contentRaw;
+    } else if (
+      typeof contentRaw === "object" &&
+      contentRaw &&
+      "content" in contentRaw &&
+      // @ts-ignore
+      Array.isArray(contentRaw.content)
+    ) {
+      // @ts-ignore
+      value = contentRaw.content;
+    }
+  }
   const slugger = new GithubSlugger();
 
   return (
