@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.20
+
+### Patch Changes
+
+- 95a3c4e: rich text nit, and more logs on revalidation failures
+
 ## 8.1.19
 
 ### Patch Changes
