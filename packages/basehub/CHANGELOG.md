@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.22
+
+### Patch Changes
+
+- 781a6fd: Add <ol /> attributes
+
 ## 8.1.21
 
 ### Patch Changes
