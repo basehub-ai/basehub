@@ -74,7 +74,11 @@ type Handlers = {
       internal: undefined | InternalLinkProps<BaseCustomBlock, any>;
     }
   ) => ReactNode;
-  ol: (props: { children: ReactNode }) => ReactNode;
+  ol: (props: {
+    children: ReactNode;
+    tight: boolean;
+    start: number;
+  }) => ReactNode;
   ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
   li: (
     props: {
@@ -242,8 +246,8 @@ const defaultHandlers: Handlers = {
   s: ({ children }) => <s>{children}</s>,
   kbd: ({ children }) => <kbd>{children}</kbd>,
   code: ({ children }) => <code>{children}</code>,
-  ol: ({ children }) => <ol>{children}</ol>,
-  ul: ({ children }) => <ul>{children}</ul>,
+  ol: ({ children, ...rest }) => <ol {...rest}>{children}</ol>,
+  ul: ({ children, ...rest }) => <ul {...rest}>{children}</ul>,
   li: ({ children, ...rest }) => {
     return (
       <li
@@ -369,7 +373,11 @@ const Node = ({
       Handler =
         components?.ol ??
         (disableDefaultComponents ? () => <></> : defaultHandlers.ol);
-      props = { children } satisfies ExtractPropsForHandler<Handlers["ol"]>;
+      props = {
+        children,
+        tight: node.attrs?.tight ?? false,
+        start: node.attrs?.start ?? 1,
+      } satisfies ExtractPropsForHandler<Handlers["ol"]>;
       break;
     case "listItem":
       Handler =
