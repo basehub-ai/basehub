@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.21
+
+### Patch Changes
+
+- new odr strategy
+
 ## 8.1.20
 
 ### Patch Changes

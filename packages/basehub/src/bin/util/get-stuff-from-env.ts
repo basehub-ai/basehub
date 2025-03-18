@@ -9,7 +9,7 @@ import { ResolvedRef } from "../../common-types";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
-const DEFAULT_API_VERSION = "3";
+const DEFAULT_API_VERSION = "4";
 
 export type Options = {
   forceDraft?: boolean;

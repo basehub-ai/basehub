@@ -42,10 +42,6 @@ export const ClientToolbar = ({
     status: number;
     response: LatestBranch[] | { error: string };
   }>;
-  humanRevalidatePendingTags: (o: {
-    bshbPreviewToken: string;
-    ref: string;
-  }) => Promise<{ success: boolean }>;
 }) => {
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
@@ -231,22 +227,6 @@ export const ClientToolbar = ({
     resolvedRef.ref,
     setRefWithEvents,
   ]);
-
-  // // human revalidate pending tags
-  // const lastHumanRevalidatedRef = React.useRef<string | null>(null);
-  // React.useEffect(() => {
-  //   if (!bshbPreviewToken) return;
-  //   if (!previewRef) return;
-  //   if (isForcedDraft) return;
-  //   if (lastHumanRevalidatedRef.current === previewRef) return;
-  //   lastHumanRevalidatedRef.current = previewRef;
-
-  //   humanRevalidatePendingTags({ bshbPreviewToken, ref: previewRef }).catch(
-  //     () => {
-  //       // ignore
-  //     }
-  //   );
-  // }, [bshbPreviewToken, humanRevalidatePendingTags, previewRef, isForcedDraft]);
 
   /** Position tooltip when message changes. */
   React.useLayoutEffect(() => {

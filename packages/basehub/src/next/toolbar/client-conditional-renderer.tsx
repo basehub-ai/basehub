@@ -17,7 +17,6 @@ export const ClientConditionalRenderer = ({
   revalidateTags,
   resolvedRef,
   getLatestBranches,
-  humanRevalidatePendingTags,
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -25,15 +24,13 @@ export const ClientConditionalRenderer = ({
     bshbPreviewToken: string;
   }) => Promise<{ status: number; response: object }>;
   disableDraftMode: () => Promise<void>;
-  revalidateTags: (o: { tags: string[] }) => Promise<{ success: boolean }>;
+  revalidateTags: (o: {
+    bshbPreviewToken: string;
+  }) => Promise<{ success: boolean }>;
   getLatestBranches: (o: { bshbPreviewToken: string | undefined }) => Promise<{
     status: number;
     response: LatestBranch[] | { error: string };
   }>;
-  humanRevalidatePendingTags: (o: {
-    bshbPreviewToken: string;
-    ref: string;
-  }) => Promise<{ success: boolean }>;
   resolvedRef: ResolvedRef;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
@@ -87,17 +84,19 @@ export const ClientConditionalRenderer = ({
 
   React.useEffect(() => {
     const url = new URL(window.location.href);
-    const tags = url.searchParams.get("bshb-odr-tags");
-    if (tags) {
-      url.searchParams.delete("bshb-odr-tags");
-      window.history.replaceState(null, "", url);
-      revalidateTags({ tags: tags.split(",") })
+    const shouldRevalidate = url.searchParams.get("__bshb-odr") === "true";
+    const odrToken = url.searchParams.get("__bshb-odr-token");
+
+    if (shouldRevalidate && odrToken) {
+      revalidateTags({ bshbPreviewToken: odrToken })
         .then(({ success }) => {
           document.documentElement.dataset.basehubOdrStatus = success
             ? "success"
             : "error";
-          document.documentElement.dataset.basehubOdrErrorMessage =
-            "Response failed";
+          if (!success) {
+            document.documentElement.dataset.basehubOdrErrorMessage =
+              "Response failed";
+          }
         })
         .catch((e) => {
           document.documentElement.dataset.basehubOdrStatus = "error";
@@ -132,7 +131,6 @@ export const ClientConditionalRenderer = ({
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
       resolvedRef={resolvedRef}
       getLatestBranches={getLatestBranches}
-      humanRevalidatePendingTags={humanRevalidatePendingTags}
       bshbPreviewLSName={bshbPreviewLSName}
     />,
     document.body

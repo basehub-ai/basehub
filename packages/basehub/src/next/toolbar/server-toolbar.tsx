@@ -110,28 +110,17 @@ export const ServerToolbar = async ({
     (await draftMode()).disable();
   };
 
-  const revalidateTags = async ({ tags }: { tags: string[] }) => {
-    "use server";
-    await Promise.all(
-      tags.map(async (tag) => {
-        if (tag.startsWith("basehub-")) {
-          await revalidateTag(tag);
-        }
-      })
-    );
-    return { success: true };
-  };
-
-  // used by a client that's authenticated to the toolbar
-  // sort of as a fallback to the headless browser's revalidation failing
-  const humanRevalidatePendingTags = async ({
+  const revalidateTags = async ({
     bshbPreviewToken,
-    ref,
   }: {
     bshbPreviewToken: string;
-    ref: string;
   }) => {
     "use server";
+
+    if (!bshbPreviewToken) {
+      return { success: false, error: "Unauthorized" };
+    }
+
     const { headers, url } = getStuffFromEnv(basehubProps);
     const appApiEndpoint = getBaseHubAppApiEndpoint(
       url,
@@ -145,7 +134,6 @@ export const ServerToolbar = async ({
         "content-type": "application/json",
         "x-basehub-token": headers["x-basehub-token"],
         "x-basehub-preview-token": bshbPreviewToken,
-        "x-basehub-ref": ref,
       },
     });
 
@@ -159,7 +147,15 @@ export const ServerToolbar = async ({
       return { success: false };
     }
 
-    return await revalidateTags({ tags });
+    await Promise.all(
+      tags.map(async (tag) => {
+        if (tag.startsWith("basehub-")) {
+          await revalidateTag(tag);
+        }
+      })
+    );
+
+    return { success: true };
   };
 
   return (
@@ -171,7 +167,6 @@ export const ServerToolbar = async ({
       revalidateTags={revalidateTags}
       getLatestBranches={getLatestBranches}
       resolvedRef={resolvedRef}
-      humanRevalidatePendingTags={humanRevalidatePendingTags}
     />
   );
 };
