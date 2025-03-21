@@ -1,5 +1,5 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import {
+import type {
   // @ts-ignore
   Scalars,
   // @ts-ignore
@@ -10,7 +10,7 @@ import {
   resolvedRef,
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
-} from "../index";
+} from "../index.js";
 import type { ResolvedRef } from "../common-types";
 import type { Field } from "../react/form/primitive";
 

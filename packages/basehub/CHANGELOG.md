@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.23
+
+### Patch Changes
+
+- see if this fixes astro error
+
 ## 8.1.22
 
 ### Patch Changes
