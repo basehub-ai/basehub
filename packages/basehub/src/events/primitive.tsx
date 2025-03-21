@@ -10,7 +10,7 @@ import {
   resolvedRef,
   // @ts-ignore
   // eslint-disable-next-line import/no-unresolved
-} from "../index.js";
+} from "../index";
 import type { ResolvedRef } from "../common-types";
 import type { Field } from "../react/form/primitive";
 

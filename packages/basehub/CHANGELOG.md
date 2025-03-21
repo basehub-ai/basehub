@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.24
+
+### Patch Changes
+
+- Revert
+
 ## 8.1.23
 
 ### Patch Changes
