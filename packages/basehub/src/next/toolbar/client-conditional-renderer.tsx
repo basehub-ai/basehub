@@ -26,7 +26,8 @@ export const ClientConditionalRenderer = ({
   disableDraftMode: () => Promise<void>;
   revalidateTags: (o: {
     bshbPreviewToken: string;
-  }) => Promise<{ success: boolean }>;
+    ref?: string;
+  }) => Promise<{ success: boolean; message?: string }>;
   getLatestBranches: (o: { bshbPreviewToken: string | undefined }) => Promise<{
     status: number;
     response: LatestBranch[] | { error: string };
@@ -86,16 +87,19 @@ export const ClientConditionalRenderer = ({
     const url = new URL(window.location.href);
     const shouldRevalidate = url.searchParams.get("__bshb-odr") === "true";
     const odrToken = url.searchParams.get("__bshb-odr-token");
-
+    const ref = url.searchParams.get("__bshb-odr-ref");
     if (shouldRevalidate && odrToken) {
-      revalidateTags({ bshbPreviewToken: odrToken })
-        .then(({ success }) => {
+      revalidateTags({ bshbPreviewToken: odrToken, ...(ref ? { ref } : {}) })
+        .then(({ success, message }) => {
           document.documentElement.dataset.basehubOdrStatus = success
             ? "success"
             : "error";
           if (!success) {
             document.documentElement.dataset.basehubOdrErrorMessage =
               "Response failed";
+          }
+          if (message) {
+            document.documentElement.dataset.basehubOdrMessage = message;
           }
         })
         .catch((e) => {

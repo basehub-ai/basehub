@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.25
+
+### Patch Changes
+
+- Fix bug in ODR logic
+
 ## 8.1.24
 
 ### Patch Changes

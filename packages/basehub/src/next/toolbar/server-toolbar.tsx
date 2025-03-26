@@ -112,14 +112,12 @@ export const ServerToolbar = async ({
 
   const revalidateTags = async ({
     bshbPreviewToken,
+    ref,
   }: {
     bshbPreviewToken: string;
+    ref?: string;
   }) => {
     "use server";
-
-    if (!bshbPreviewToken) {
-      return { success: false, error: "Unauthorized" };
-    }
 
     const { headers, url } = getStuffFromEnv(basehubProps);
     const appApiEndpoint = getBaseHubAppApiEndpoint(
@@ -127,35 +125,41 @@ export const ServerToolbar = async ({
       "/api/nextjs/pending-tags"
     );
 
+    if (!bshbPreviewToken) {
+      return { success: false, error: "Unauthorized" };
+    }
+
     const res = await fetch(appApiEndpoint, {
       cache: "no-store",
       method: "GET",
       headers: {
         "content-type": "application/json",
         "x-basehub-token": headers["x-basehub-token"],
+        "x-basehub-ref": ref || headers["x-basehub-ref"],
         "x-basehub-preview-token": bshbPreviewToken,
       },
     });
 
     if (res.status !== 200) {
-      return { success: false };
+      return {
+        success: false,
+        message: `Received status ${res.status} from server`,
+      };
     }
 
     const response = await res.json();
     const tags = response;
     if (!tags || !Array.isArray(tags)) {
-      return { success: false };
+      return { success: false, message: "No tags to revalidate" };
     }
 
     await Promise.all(
       tags.map(async (tag) => {
-        if (tag.startsWith("basehub-")) {
-          await revalidateTag(tag);
-        }
+        await revalidateTag(tag);
       })
     );
 
-    return { success: true };
+    return { success: true, message: `Revalidated ${tags.length} tags` };
   };
 
   return (
