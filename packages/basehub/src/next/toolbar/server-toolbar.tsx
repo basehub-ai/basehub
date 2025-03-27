@@ -151,7 +151,7 @@ export const ServerToolbar = async ({
     const response = await res.json();
     const tags = response;
     if (!tags || !Array.isArray(tags)) {
-      return { success: false, message: "No tags to revalidate" };
+      return { success: true, message: "No tags to revalidate" };
     }
 
     await Promise.all(
