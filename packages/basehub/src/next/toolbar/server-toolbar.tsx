@@ -24,11 +24,10 @@ export const ServerToolbar = async ({
 }: ServerToolbarProps) => {
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
 
-  const enableDraftMode = async ({
-    bshbPreviewToken,
-  }: {
-    bshbPreviewToken: string;
-  }) => {
+  const enableDraftMode_unbounded = async (
+    basehubProps: ServerToolbarProps,
+    { bshbPreviewToken }: { bshbPreviewToken: string }
+  ) => {
     "use server";
     try {
       const { headers, url } = getStuffFromEnv(basehubProps);
@@ -59,11 +58,10 @@ export const ServerToolbar = async ({
     }
   };
 
-  const getLatestBranches = async ({
-    bshbPreviewToken,
-  }: {
-    bshbPreviewToken: string | undefined;
-  }) => {
+  const getLatestBranches_unbounded = async (
+    basehubProps: ServerToolbarProps,
+    { bshbPreviewToken }: { bshbPreviewToken: string | undefined }
+  ) => {
     "use server";
     try {
       const { headers, url, isForcedDraft } = getStuffFromEnv(basehubProps);
@@ -110,13 +108,16 @@ export const ServerToolbar = async ({
     (await draftMode()).disable();
   };
 
-  const revalidateTags = async ({
-    bshbPreviewToken,
-    ref,
-  }: {
-    bshbPreviewToken: string;
-    ref?: string;
-  }) => {
+  const revalidateTags_unbounded = async (
+    basehubProps: ServerToolbarProps,
+    {
+      bshbPreviewToken,
+      ref,
+    }: {
+      bshbPreviewToken: string;
+      ref?: string;
+    }
+  ) => {
     "use server";
 
     const { headers, url } = getStuffFromEnv(basehubProps);
@@ -161,6 +162,13 @@ export const ServerToolbar = async ({
 
     return { success: true, message: `Revalidated ${tags.length} tags` };
   };
+
+  const enableDraftMode = enableDraftMode_unbounded.bind(null, basehubProps);
+  const getLatestBranches = getLatestBranches_unbounded.bind(
+    null,
+    basehubProps
+  );
+  const revalidateTags = revalidateTags_unbounded.bind(null, basehubProps);
 
   return (
     <LazyClientConditionalRenderer

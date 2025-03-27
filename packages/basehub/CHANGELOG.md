@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.26
+
+### Patch Changes
+
+- bound basehubProps for better server actions behavior
+
 ## 8.1.25
 
 ### Patch Changes
