@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.27
+
+### Patch Changes
+
+- nit
+
 ## 8.1.26
 
 ### Patch Changes
