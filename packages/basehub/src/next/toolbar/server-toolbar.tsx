@@ -149,18 +149,29 @@ export const ServerToolbar = async ({
     }
 
     const response = await res.json();
-    const tags = response;
-    if (!tags || !Array.isArray(tags)) {
-      return { success: true, message: "No tags to revalidate" };
+
+    try {
+      const { tags } = response;
+      if (!tags || !Array.isArray(tags) || tags.length === 0) {
+        return { success: true, message: "No tags to revalidate" };
+      }
+
+      await Promise.all(
+        tags.map(async (_tag: string) => {
+          const tag = _tag.startsWith("basehub-") ? _tag : `basehub-${_tag}`;
+          await revalidateTag(tag);
+        })
+      );
+
+      return { success: true, message: `Revalidated ${tags.length} tags` };
+    } catch (error) {
+      console.log(response);
+      console.error(error);
+      return {
+        success: false,
+        message: "Something went wrong while revalidating tags",
+      };
     }
-
-    await Promise.all(
-      tags.map(async (tag) => {
-        await revalidateTag(tag);
-      })
-    );
-
-    return { success: true, message: `Revalidated ${tags.length} tags` };
   };
 
   const enableDraftMode = enableDraftMode_unbounded.bind(null, basehubProps);

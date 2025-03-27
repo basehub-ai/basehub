@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.28
+
+### Patch Changes
+
+- fix revalidateTags bug
+
 ## 8.1.27
 
 ### Patch Changes
