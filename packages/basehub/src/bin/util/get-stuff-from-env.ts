@@ -22,6 +22,7 @@ export type Options = {
   token: string | undefined;
   ref: string | undefined;
   apiVersion: string | undefined;
+  sdkBuildId: string;
 };
 
 export const getStuffFromEnv = async (
@@ -215,6 +216,7 @@ export const getStuffFromEnv = async (
     headers: {
       "x-basehub-token": token,
       "x-basehub-ref": resolvedRef.ref,
+      "x-basehub-sdk-build-id": options.sdkBuildId,
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
       ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
@@ -427,13 +429,17 @@ export const getStuffFromEnv = (options) => {
       options.gitCommitSHA ? `"${options.gitCommitSHA}"` : null
     };
 
+    const sdkBuildId = "${options.sdkBuildId}";
+
     return {
       isForcedDraft: ${!!options.forceDraft},
       draft,
       url: basehubUrl,
+      sdkBuildId,
       headers: {
         "x-basehub-token": token,
         "x-basehub-ref": options?.ref ?? resolvedRef.ref,
+        "x-basehub-sdk-build-id": sdkBuildId,
         ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
         ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
         ...(gitBranchDeploymentURL ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL } : {}),

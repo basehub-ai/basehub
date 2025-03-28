@@ -24,7 +24,7 @@ export const ServerToolbar = async ({
 }: ServerToolbarProps) => {
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
 
-  const enableDraftMode_unbounded = async (
+  const enableDraftMode_unbound = async (
     basehubProps: ServerToolbarProps,
     { bshbPreviewToken }: { bshbPreviewToken: string }
   ) => {
@@ -58,7 +58,7 @@ export const ServerToolbar = async ({
     }
   };
 
-  const getLatestBranches_unbounded = async (
+  const getLatestBranches_unbound = async (
     basehubProps: ServerToolbarProps,
     { bshbPreviewToken }: { bshbPreviewToken: string | undefined }
   ) => {
@@ -108,7 +108,7 @@ export const ServerToolbar = async ({
     (await draftMode()).disable();
   };
 
-  const revalidateTags_unbounded = async (
+  const revalidateTags_unbound = async (
     basehubProps: ServerToolbarProps,
     {
       bshbPreviewToken,
@@ -138,6 +138,7 @@ export const ServerToolbar = async ({
         "x-basehub-token": headers["x-basehub-token"],
         "x-basehub-ref": ref || headers["x-basehub-ref"],
         "x-basehub-preview-token": bshbPreviewToken,
+        "x-basehub-sdk-build-id": headers["x-basehub-sdk-build-id"],
       },
     });
 
@@ -174,12 +175,9 @@ export const ServerToolbar = async ({
     }
   };
 
-  const enableDraftMode = enableDraftMode_unbounded.bind(null, basehubProps);
-  const getLatestBranches = getLatestBranches_unbounded.bind(
-    null,
-    basehubProps
-  );
-  const revalidateTags = revalidateTags_unbounded.bind(null, basehubProps);
+  const enableDraftMode = enableDraftMode_unbound.bind(null, basehubProps);
+  const getLatestBranches = getLatestBranches_unbound.bind(null, basehubProps);
+  const revalidateTags = revalidateTags_unbound.bind(null, basehubProps);
 
   return (
     <LazyClientConditionalRenderer

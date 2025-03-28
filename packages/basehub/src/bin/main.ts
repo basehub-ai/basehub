@@ -43,6 +43,7 @@ export const main = async (
     draft: args["--draft"],
     ref: args["--ref"],
     apiVersion: args["--api-version"],
+    sdkBuildId,
     ...(opts?.forceDraft && { draft: true }),
   };
 
@@ -61,7 +62,11 @@ export const main = async (
     isNextjs = false;
   }
 
-  const { output } = await getStuffFromEnv({ ...options, previousResolvedRef });
+  const { output } = await getStuffFromEnv({
+    ...options,
+    previousResolvedRef,
+    sdkBuildId,
+  });
 
   let shouldAppendToGitIgnore = "";
   let pathArgs: string[] = [];
@@ -101,7 +106,7 @@ export const main = async (
       newResolvedRefPromise,
       token,
       productionDeploymentURL,
-    } = await getStuffFromEnv({ ...options, previousResolvedRef });
+    } = await getStuffFromEnv({ ...options, previousResolvedRef, sdkBuildId });
 
     if (!silent) {
       logInsideBox([
@@ -929,7 +934,7 @@ export const basehub = (options?: Options) => {
 
     let extra = {
       headers: {
-        "x-basehub-sdk-build-id": "${sdkBuildId}",
+        "x-basehub-sdk-build-id": sdkBuildId,
       },
     };
 
