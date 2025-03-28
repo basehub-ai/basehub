@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.30
+
+### Patch Changes
+
+- use api version as hash param
+
 ## 8.1.29
 
 ### Patch Changes

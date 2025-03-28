@@ -900,9 +900,9 @@ type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 
 
 // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
 // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
-export function cacheTagFromQuery(query: QueryGenqlSelection) {
+export function cacheTagFromQuery(query: QueryGenqlSelection, apiVersion: string | undefined) {
   const now = performance.now();
-  const result = "basehub-" + hashObject({ ...query, refId: resolvedRef.id });
+  const result = "basehub-" + hashObject({ ...query, refId: resolvedRef.id, ...(apiVersion ? { apiVersion } : {}) });
   return result;
 }
 
@@ -1000,7 +1000,7 @@ export const basehub = (options?: Options) => {
           // noop, not using nextjs
         }
         if (isNextjs) {
-          const cacheTag = cacheTagFromQuery(originalRequest);
+          const cacheTag = cacheTagFromQuery(originalRequest, headers['x-basehub-api-version']);
           // don't override if revalidation is already being handled by the user
           extra.next = { tags: [cacheTag] };
           extra.headers = {
