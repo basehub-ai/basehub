@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "8.1.30",
+  "version": "8.1.31",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -77,7 +77,7 @@
     "zod": "^3.22.1"
   },
   "devDependencies": {
-    "@basehub/mutation-api-helpers": "2.0.10",
+    "@basehub/mutation-api-helpers": "2.0.11",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.get": "4.4.9",
     "@types/node": "18.13.0",
