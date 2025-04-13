@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.32
+
+### Patch Changes
+
+- Support binding params into pump server action as an escape hatch for weird reference errors
+
 ## 8.1.31
 
 ### Patch Changes
