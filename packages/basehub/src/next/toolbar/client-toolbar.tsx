@@ -146,6 +146,7 @@ export const ClientToolbar = ({
   const getAndSetLatestBranches = React.useCallback(async () => {
     let result: LatestBranch[] = [];
     const res = await getLatestBranches({ bshbPreviewToken });
+    if (!res) return;
     if (Array.isArray(res.response)) {
       result = res.response;
     } else if ("error" in res.response) {
