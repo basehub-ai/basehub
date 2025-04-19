@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.33
+
+### Patch Changes
+
+- protect call
+
 ## 8.1.32
 
 ### Patch Changes
