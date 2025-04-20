@@ -237,6 +237,8 @@ export const ClientToolbar = ({
   const getStoredToolbarPosition = React.useCallback(() => {
     if (!toolbarRef) return;
 
+    if (typeof window === "undefined" || !window.sessionStorage) return;
+
     const toolbarPositionStored = window.sessionStorage.getItem(
       TOOLBAR_POSITION_STORAGE_KEY
     );
@@ -253,6 +255,8 @@ export const ClientToolbar = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateToolbarStoredPositionDebounced = React.useCallback(
     debounce((position: { x?: number; y?: number }) => {
+      if (typeof window === "undefined" || !window.sessionStorage) return;
+
       const storedPosition = getStoredToolbarPosition() ?? { x: 0, y: 0 };
       window.sessionStorage.setItem(
         TOOLBAR_POSITION_STORAGE_KEY,

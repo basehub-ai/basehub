@@ -49,14 +49,22 @@ export const ClientConditionalRenderer = ({
       const bshbPreviewToken = urlParams.get("bshb-preview");
 
       if (bshbPreviewToken) {
-        window.localStorage.setItem(bshbPreviewLSName, bshbPreviewToken);
+        try {
+          window.localStorage?.setItem(bshbPreviewLSName, bshbPreviewToken);
+        } catch (e) {
+          // Silently fail if localStorage is not available
+        }
         return bshbPreviewToken;
       }
 
       if (type === "url-only") return;
 
-      const fromStorage = window.localStorage.getItem(bshbPreviewLSName);
-      if (fromStorage) return fromStorage;
+      try {
+        const fromStorage = window.localStorage?.getItem(bshbPreviewLSName);
+        if (fromStorage) return fromStorage;
+      } catch (e) {
+        // Silently fail if localStorage is not available
+      }
     },
     [bshbPreviewLSName]
   );

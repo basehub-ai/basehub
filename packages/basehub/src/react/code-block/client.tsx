@@ -57,12 +57,16 @@ const CodeBlockClientController = ({
 
   React.useEffect(() => {
     if (!localStorageKey) return;
-    const activeSnippetFromLS = window.localStorage.getItem(localStorageKey);
-    if (activeSnippetFromLS) {
-      const snippet = snippets.find(
-        (s) => s.label === activeSnippetFromLS || s.id === activeSnippetFromLS
-      );
-      if (snippet) setActiveSnippet(snippet);
+    try {
+      const activeSnippetFromLS = window.localStorage?.getItem(localStorageKey);
+      if (activeSnippetFromLS) {
+        const snippet = snippets.find(
+          (s) => s.label === activeSnippetFromLS || s.id === activeSnippetFromLS
+        );
+        if (snippet) setActiveSnippet(snippet);
+      }
+    } catch (e) {
+      // Silently fail if localStorage is not available
     }
 
     /**
@@ -94,7 +98,14 @@ const CodeBlockClientController = ({
     (snippet: ClientSnippet) => {
       setActiveSnippet(snippet);
       if (!localStorageKey) return;
-      window.localStorage.setItem(localStorageKey, snippet.label || snippet.id);
+      try {
+        window.localStorage?.setItem(
+          localStorageKey,
+          snippet.label || snippet.id
+        );
+      } catch (e) {
+        // Silently fail if localStorage is not available
+      }
       const event = new CustomEvent("__bshb-snippet-change", {
         detail: { key: localStorageKey, snippet },
       });

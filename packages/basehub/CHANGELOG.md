@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.34
+
+### Patch Changes
+
+- safe localStorage usage
+
 ## 8.1.33
 
 ### Patch Changes
