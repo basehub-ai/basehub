@@ -110,7 +110,7 @@ export const main = async (
 
     if (!silent) {
       logInsideBox([
-        `🎫 SDK Version: ${opts.version}`,
+        `🎫 SDK Version: ${opts.version} (build id: ${sdkBuildId})`,
         `🔗 Endpoint: ${url.toString()}`,
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,

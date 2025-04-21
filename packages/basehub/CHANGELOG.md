@@ -1,5 +1,11 @@
 # basehub
 
+## 8.1.35
+
+### Patch Changes
+
+- log build id
+
 ## 8.1.34
 
 ### Patch Changes
