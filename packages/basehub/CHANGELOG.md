@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.0
+
+### Minor Changes
+
+- fix annoying isTaskList warning by just passing it when it IS, and by using data-... instead of an unknown prop. gosh.
+
 ## 8.1.35
 
 ### Patch Changes

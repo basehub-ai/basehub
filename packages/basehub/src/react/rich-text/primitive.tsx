@@ -75,11 +75,17 @@ type Handlers = {
     }
   ) => ReactNode;
   ol: (props: { children: ReactNode; start: number }) => ReactNode;
-  ul: (props: { children: ReactNode; isTasksList: boolean }) => ReactNode;
+  ul: (props: {
+    children: ReactNode;
+    ["data-is-task-list"]?: boolean;
+  }) => ReactNode;
   li: (
     props: {
       children: ReactNode;
-    } & ({ isTaskListItem: false } | { isTaskListItem: true; checked: boolean })
+    } & (
+      | { ["data-is-task-list"]?: false }
+      | { ["data-is-task-list"]: true; ["data-checked"]: boolean }
+    )
   ) => ReactNode;
   h1: (props: { children: ReactNode; id: string }) => ReactNode;
   h2: (props: { children: ReactNode; id: string }) => ReactNode;
@@ -247,12 +253,12 @@ const defaultHandlers: Handlers = {
   li: ({ children, ...rest }) => {
     return (
       <li
-        {...(rest.isTaskListItem
+        {...(rest["data-is-task-list"]
           ? { style: { display: "flex", alignItems: "baseline" } }
           : undefined)}
       >
-        {rest.isTaskListItem ? (
-          <input type="checkbox" defaultChecked={rest.checked} />
+        {rest["data-is-task-list"] ? (
+          <input type="checkbox" defaultChecked={rest["data-checked"]} />
         ) : null}
         {children}
       </li>
@@ -362,7 +368,7 @@ const Node = ({
         (disableDefaultComponents ? () => <></> : defaultHandlers.ul);
       props = {
         children,
-        isTasksList: node.type === "taskList",
+        ...(node.type === "taskList" ? { ["data-is-task-list"]: true } : {}),
       } satisfies ExtractPropsForHandler<Handlers["ul"]>;
       break;
     case "orderedList":
@@ -380,7 +386,6 @@ const Node = ({
         (disableDefaultComponents ? () => <></> : defaultHandlers.li);
       props = {
         children,
-        isTaskListItem: false,
       } satisfies ExtractPropsForHandler<Handlers["li"]>;
       break;
     case "taskItem":
@@ -389,8 +394,8 @@ const Node = ({
         (disableDefaultComponents ? () => <></> : defaultHandlers.li);
       props = {
         children,
-        isTaskListItem: true,
-        checked: node.attrs?.checked ?? false,
+        ["data-is-task-list"]: true,
+        ["data-checked"]: node.attrs?.checked ?? false,
       } satisfies ExtractPropsForHandler<Handlers["li"]>;
       break;
     case "heading":
