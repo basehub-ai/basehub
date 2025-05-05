@@ -82,14 +82,16 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
     formData.append("_system_branch", parsedResolvedRef.name);
   }
 
-  // Append all data fields to FormData
-  Object.entries(data).forEach(([field, value]) => {
-    if (value instanceof File) {
-      formData.append(field, value);
-    } else if (value !== null && value !== undefined) {
-      formData.append(field, String(value));
-    }
-  });
+  if (data) {
+    // Append all data fields to FormData
+    Object.entries(data).forEach(([field, value]) => {
+      if (value instanceof File) {
+        formData.append(field, value);
+      } else if (value !== null && value !== undefined) {
+        formData.append(field, String(value));
+      }
+    });
+  }
 
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
