@@ -68,22 +68,35 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
 ) => {
   const [key, data] = args;
   const parsedResolvedRef = resolvedRef as ResolvedRef;
+
+  const formData = new FormData();
+  formData.append("_system_key", key);
+  formData.append("_system_type", "create");
+  formData.append(
+    "_system_commitId",
+    (parsedResolvedRef.type === "commit"
+      ? parsedResolvedRef.id
+      : parsedResolvedRef.headCommitId) ?? ""
+  );
+  if (parsedResolvedRef.type === "branch") {
+    formData.append("_system_branch", parsedResolvedRef.name);
+  }
+
+  // Append all data fields to FormData
+  Object.entries(data).forEach(([field, value]) => {
+    if (value instanceof File) {
+      formData.append(field, value);
+    } else if (value !== null && value !== undefined) {
+      formData.append(field, String(value));
+    }
+  });
+
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      key,
-      data,
-      type: "create",
-      commitId:
-        parsedResolvedRef.type === "commit"
-          ? parsedResolvedRef.id
-          : parsedResolvedRef.headCommitId,
-      branch:
-        parsedResolvedRef.type === "branch"
-          ? parsedResolvedRef.name
-          : undefined,
-    }),
+    headers: {
+      Accept: "application/json",
+    },
+    body: formData,
   });
 
   return (await response.json()) as
@@ -253,10 +266,26 @@ export async function updateEvent<Key extends `${EventKeys}:${string}`>(
   id: string,
   data: Partial<NullableEventSchemaMap[ExtractEventKey<Key>]>
 ) {
+  const formData = new FormData();
+  formData.append("_system_key", key);
+  formData.append("_system_type", "update");
+  formData.append("_system_id", id);
+
+  // Append all data fields to FormData
+  Object.entries(data).forEach(([field, value]) => {
+    if (value instanceof File) {
+      formData.append(field, value);
+    } else if (value !== null && value !== undefined) {
+      formData.append(field, String(value));
+    }
+  });
+
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, data, type: "update", id }),
+    headers: {
+      Accept: "application/json",
+    },
+    body: formData,
   });
 
   return (await response.json()) as
