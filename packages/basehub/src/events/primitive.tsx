@@ -19,19 +19,21 @@ import type { Field } from "../react/form/primitive";
  * -----------------------------------------------------------------------------------------------*/
 
 let EVENTS_V2_ENDPOINT_URL = "https://basehub.com/api/v2/events";
-if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT) {
-  EVENTS_V2_ENDPOINT_URL =
-    process.env.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT;
-} else if (process?.env?.BASEHUB_ANALYTICS_V2_ENDPOINT) {
-  EVENTS_V2_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_V2_ENDPOINT;
-}
-
 let QUERY_EVENTS_ENDPOINT_URL = "https://basehub.com/api/v2/events/query";
-if (process?.env?.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
-  QUERY_EVENTS_ENDPOINT_URL =
-    process.env.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
-} else if (process?.env?.BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
-  QUERY_EVENTS_ENDPOINT_URL = process.env.BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
+if (typeof process !== "undefined") {
+  if (process?.env?.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT) {
+    EVENTS_V2_ENDPOINT_URL =
+      process.env.NEXT_PUBLIC_BASEHUB_ANALYTICS_V2_ENDPOINT;
+  } else if (process?.env?.BASEHUB_ANALYTICS_V2_ENDPOINT) {
+    EVENTS_V2_ENDPOINT_URL = process.env.BASEHUB_ANALYTICS_V2_ENDPOINT;
+  }
+
+  if (process?.env?.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
+    QUERY_EVENTS_ENDPOINT_URL =
+      process.env.NEXT_PUBLIC_BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
+  } else if (process?.env?.BASEHUB_QUERY_EVENTS_V2_ENDPOINT) {
+    QUERY_EVENTS_ENDPOINT_URL = process.env.BASEHUB_QUERY_EVENTS_V2_ENDPOINT;
+  }
 }
 
 type KeysStartingWith<Obj, Prefix extends string> = {

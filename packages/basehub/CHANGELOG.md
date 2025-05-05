@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.1
+
+### Patch Changes
+
+- guard process
+
 ## 8.2.0
 
 ### Minor Changes
