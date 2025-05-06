@@ -3,6 +3,7 @@ import type {
   BundledLanguage,
   BundledTheme,
   ShikiTransformer,
+  SpecialLanguage,
   ThemeRegistrationAny,
 } from "shiki";
 import * as prod from "react/jsx-runtime";
@@ -23,7 +24,7 @@ type ComponentsToOverride = Pick<Components, "pre" | "code" | "span" | "div">;
 export type HighlighterProps = {
   id: string;
   children: string;
-  lang: BundledLanguage;
+  lang: BundledLanguage | SpecialLanguage;
   theme: BundledTheme | ThemeRegistrationAny;
   components?: Partial<ComponentsToOverride>;
   extraTransformers?: Array<ShikiTransformer>;

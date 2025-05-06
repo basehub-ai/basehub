@@ -5,6 +5,8 @@ import { Snippet } from "./types";
 export { createCssVariablesTheme } from "shiki";
 export type { BundledLanguage as Language } from "shiki";
 import { useId } from "react";
+import { BundledLanguage } from "shiki/langs";
+import { SpecialLanguage } from "shiki/types.mjs";
 
 const LazyClientController = lazy(() => import("./client"));
 
@@ -56,7 +58,7 @@ export const CodeBlock = ({
           // @ts-ignore
           <Highlighter
             key={snippet.id}
-            lang={snippet.language}
+            lang={formatLanguage(snippet.language)}
             theme={theme}
             id={snippet.id}
             components={components}
@@ -72,4 +74,13 @@ export const CodeBlock = ({
       {childrenBottom}
     </LazyClientController>
   );
+};
+
+const formatLanguage = (
+  language: BundledLanguage | SpecialLanguage | "plainText"
+): BundledLanguage | SpecialLanguage => {
+  if (language === "plainText") {
+    return "text";
+  }
+  return language;
 };
