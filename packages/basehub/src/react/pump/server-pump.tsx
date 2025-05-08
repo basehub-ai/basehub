@@ -39,11 +39,20 @@ let pusherData: ResponseCache["pusherData"] | null = null;
 
 const DEDUPE_TIME_MS = 32;
 
-export type PumpProps<Queries extends Array<PumpQuery>> = {
-  children: (
-    data: QueryResults<Queries>
-  ) => React.ReactNode | Promise<React.ReactNode>;
+export type PumpProps<
+  Queries extends Array<PumpQuery>,
+  Bind extends unknown | undefined = undefined,
+> = {
+  children: Bind extends undefined
+    ? (
+        data: QueryResults<Queries>
+      ) => React.ReactNode | Promise<React.ReactNode>
+    : (
+        boundProps: Bind,
+        data: QueryResults<Queries>
+      ) => React.ReactNode | Promise<React.ReactNode>;
   queries: [...Queries]; // Tuple type for better type inference
+  bind?: Bind;
 } & Parameters<typeof basehub>[0];
 
 // Utility type to infer result types from an array of queries
@@ -51,11 +60,15 @@ export type QueryResults<Queries extends Array<PumpQuery>> = {
   [K in keyof Queries]: QueryResult<Queries[K]>;
 };
 
-export const Pump = async <Queries extends Array<PumpQuery>>({
+export const Pump = async <
+  Queries extends Array<PumpQuery>,
+  Bind extends unknown | undefined = undefined,
+>({
   children,
   queries,
+  bind,
   ...basehubProps
-}: PumpProps<Queries>): Promise<JSX.Element> => {
+}: PumpProps<Queries, Bind>): Promise<JSX.Element> => {
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
@@ -127,7 +140,7 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       if (!data) {
         const dataPromise = draft
           ? fetch(pumpEndpoint, {
-              cache: "no-store",
+              ...(isNextjs ? { cache: "no-store" } : {}),
               method: "POST",
               headers: {
                 ...headers,
@@ -164,6 +177,10 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
       return { data, rawQueryOp };
     })
   );
+
+  if (bind) {
+    children = children.bind(null, bind);
+  }
 
   let resolvedChildren;
   //@ts-ignore
@@ -239,11 +256,12 @@ export const Pump = async <Queries extends Array<PumpQuery>>({
 export const createPump = <
   Query extends PumpQuery[],
   Params extends Record<string, unknown> | void,
+  Bind extends unknown = undefined,
 >(
   queries: Query | ((params: Params) => Query)
 ) => {
   return (
-    props: Omit<PumpProps<Query>, "queries"> &
+    props: Omit<PumpProps<Query, Bind>, "queries"> &
       (Params extends void ? unknown : { params: Params })
   ): JSX.Element => {
     // Dynamically call query function based on whether query is a function and params are provided

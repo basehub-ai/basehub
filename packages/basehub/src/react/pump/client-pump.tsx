@@ -27,7 +27,10 @@ const lastResponseHashCache = new Map<string, string>();
 
 const DEDUPE_TIME_MS = 32;
 
-export const ClientPump = <Queries extends PumpQuery[]>({
+export const ClientPump = <
+  Queries extends PumpQuery[],
+  Bind extends unknown | undefined = undefined,
+>({
   children,
   rawQueries,
   pumpEndpoint,
@@ -37,7 +40,7 @@ export const ClientPump = <Queries extends PumpQuery[]>({
   apiVersion,
   previewRef: _previewRef,
 }: {
-  children: PumpProps<Queries>["children"];
+  children: PumpProps<Queries, Bind>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
   pumpEndpoint: string;
   pumpToken: string | undefined;

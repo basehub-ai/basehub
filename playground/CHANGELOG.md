@@ -1,5 +1,124 @@
 # playground
 
+## 0.0.207
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.2.2
+
+## 0.0.206
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.2.1
+
+## 0.0.205
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.2.0
+
+## 0.0.204
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.35
+
+## 0.0.203
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.34
+
+## 0.0.202
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.33
+
+## 0.0.201
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.32
+
+## 0.0.200
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.31
+
+## 0.0.199
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.30
+
+## 0.0.198
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.29
+
+## 0.0.197
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.28
+
+## 0.0.196
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.27
+
+## 0.0.195
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.26
+
+## 0.0.194
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.25
+
+## 0.0.193
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.24
+
+## 0.0.192
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@8.1.23
+
+## 0.0.191
+
+### Patch Changes
+
+- Updated dependencies [781a6fd]
+  - basehub@8.1.22
+
 ## 0.0.190
 
 ### Patch Changes

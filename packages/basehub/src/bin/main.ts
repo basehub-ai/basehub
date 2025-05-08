@@ -43,6 +43,7 @@ export const main = async (
     draft: args["--draft"],
     ref: args["--ref"],
     apiVersion: args["--api-version"],
+    sdkBuildId,
     ...(opts?.forceDraft && { draft: true }),
   };
 
@@ -61,7 +62,11 @@ export const main = async (
     isNextjs = false;
   }
 
-  const { output } = await getStuffFromEnv({ ...options, previousResolvedRef });
+  const { output } = await getStuffFromEnv({
+    ...options,
+    previousResolvedRef,
+    sdkBuildId,
+  });
 
   let shouldAppendToGitIgnore = "";
   let pathArgs: string[] = [];
@@ -101,11 +106,11 @@ export const main = async (
       newResolvedRefPromise,
       token,
       productionDeploymentURL,
-    } = await getStuffFromEnv({ ...options, previousResolvedRef });
+    } = await getStuffFromEnv({ ...options, previousResolvedRef, sdkBuildId });
 
     if (!silent) {
       logInsideBox([
-        `🎫 SDK Version: ${opts.version}`,
+        `🎫 SDK Version: ${opts.version} (build id: ${sdkBuildId})`,
         `🔗 Endpoint: ${url.toString()}`,
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,
@@ -895,9 +900,9 @@ type Options = Omit<ClientOptions, 'url' | 'method' | 'batch' | 'credentials' | 
 
 // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
 // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
-export function cacheTagFromQuery(query: QueryGenqlSelection) {
+export function cacheTagFromQuery(query: QueryGenqlSelection, apiVersion: string | undefined) {
   const now = performance.now();
-  const result = "basehub-" + hashObject({ ...query, refId: resolvedRef.id });
+  const result = "basehub-" + hashObject({ ...query, refId: resolvedRef.id, ...(apiVersion ? { apiVersion } : {}) });
   return result;
 }
 
@@ -929,7 +934,7 @@ export const basehub = (options?: Options) => {
 
     let extra = {
       headers: {
-        "x-basehub-sdk-build-id": "${sdkBuildId}",
+        "x-basehub-sdk-build-id": sdkBuildId,
       },
     };
 
@@ -995,7 +1000,7 @@ export const basehub = (options?: Options) => {
           // noop, not using nextjs
         }
         if (isNextjs) {
-          const cacheTag = cacheTagFromQuery(originalRequest);
+          const cacheTag = cacheTagFromQuery(originalRequest, headers['x-basehub-api-version']);
           // don't override if revalidation is already being handled by the user
           extra.next = { tags: [cacheTag] };
           extra.headers = {

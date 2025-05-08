@@ -24,11 +24,10 @@ export const ServerToolbar = async ({
 }: ServerToolbarProps) => {
   const { isForcedDraft } = getStuffFromEnv(basehubProps);
 
-  const enableDraftMode = async ({
-    bshbPreviewToken,
-  }: {
-    bshbPreviewToken: string;
-  }) => {
+  const enableDraftMode_unbound = async (
+    basehubProps: ServerToolbarProps,
+    { bshbPreviewToken }: { bshbPreviewToken: string }
+  ) => {
     "use server";
     try {
       const { headers, url } = getStuffFromEnv(basehubProps);
@@ -59,11 +58,10 @@ export const ServerToolbar = async ({
     }
   };
 
-  const getLatestBranches = async ({
-    bshbPreviewToken,
-  }: {
-    bshbPreviewToken: string | undefined;
-  }) => {
+  const getLatestBranches_unbound = async (
+    basehubProps: ServerToolbarProps,
+    { bshbPreviewToken }: { bshbPreviewToken: string | undefined }
+  ) => {
     "use server";
     try {
       const { headers, url, isForcedDraft } = getStuffFromEnv(basehubProps);
@@ -110,16 +108,17 @@ export const ServerToolbar = async ({
     (await draftMode()).disable();
   };
 
-  const revalidateTags = async ({
-    bshbPreviewToken,
-  }: {
-    bshbPreviewToken: string;
-  }) => {
-    "use server";
-
-    if (!bshbPreviewToken) {
-      return { success: false, error: "Unauthorized" };
+  const revalidateTags_unbound = async (
+    basehubProps: ServerToolbarProps,
+    {
+      bshbPreviewToken,
+      ref,
+    }: {
+      bshbPreviewToken: string;
+      ref?: string;
     }
+  ) => {
+    "use server";
 
     const { headers, url } = getStuffFromEnv(basehubProps);
     const appApiEndpoint = getBaseHubAppApiEndpoint(
@@ -127,36 +126,58 @@ export const ServerToolbar = async ({
       "/api/nextjs/pending-tags"
     );
 
+    if (!bshbPreviewToken) {
+      return { success: false, error: "Unauthorized" };
+    }
+
     const res = await fetch(appApiEndpoint, {
       cache: "no-store",
       method: "GET",
       headers: {
         "content-type": "application/json",
         "x-basehub-token": headers["x-basehub-token"],
+        "x-basehub-ref": ref || headers["x-basehub-ref"],
         "x-basehub-preview-token": bshbPreviewToken,
+        "x-basehub-sdk-build-id": headers["x-basehub-sdk-build-id"],
       },
     });
 
     if (res.status !== 200) {
-      return { success: false };
+      return {
+        success: false,
+        message: `Received status ${res.status} from server`,
+      };
     }
 
     const response = await res.json();
-    const tags = response;
-    if (!tags || !Array.isArray(tags)) {
-      return { success: false };
-    }
 
-    await Promise.all(
-      tags.map(async (tag) => {
-        if (tag.startsWith("basehub-")) {
+    try {
+      const { tags } = response;
+      if (!tags || !Array.isArray(tags) || tags.length === 0) {
+        return { success: true, message: "No tags to revalidate" };
+      }
+
+      await Promise.all(
+        tags.map(async (_tag: string) => {
+          const tag = _tag.startsWith("basehub-") ? _tag : `basehub-${_tag}`;
           await revalidateTag(tag);
-        }
-      })
-    );
+        })
+      );
 
-    return { success: true };
+      return { success: true, message: `Revalidated ${tags.length} tags` };
+    } catch (error) {
+      console.log(response);
+      console.error(error);
+      return {
+        success: false,
+        message: "Something went wrong while revalidating tags",
+      };
+    }
   };
+
+  const enableDraftMode = enableDraftMode_unbound.bind(null, basehubProps);
+  const getLatestBranches = getLatestBranches_unbound.bind(null, basehubProps);
+  const revalidateTags = revalidateTags_unbound.bind(null, basehubProps);
 
   return (
     <LazyClientConditionalRenderer

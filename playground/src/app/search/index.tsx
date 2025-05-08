@@ -7,7 +7,13 @@ export const Search = ({ keys }: { keys: [string, string] }) => {
     _searchKey: keys[0],
     queryBy: ["_title", "description"],
     saveRecentSearches: {
-      getStorage: () => window.localStorage,
+      getStorage: () => {
+        try {
+          return window.localStorage;
+        } catch (e) {
+          return null;
+        }
+      },
       key: "recent-searches",
     },
   });

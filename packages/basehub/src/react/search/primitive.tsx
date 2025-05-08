@@ -25,7 +25,7 @@ export type UseSearchParams<SearchKey = string | null> = {
   _searchKey: SearchKey;
   saveRecentSearches?: {
     key: string;
-    getStorage: () => Storage;
+    getStorage: () => Storage | null;
   };
 } & SearchOptions;
 
@@ -113,7 +113,7 @@ export const useSearch = <
           return;
         }
         const storage = getRecentSearchesStorageRef.current();
-
+        if (!storage) return;
         const _key = getHitRecentSearchKey(hit);
         const updatedHit = { ...hit, _key, addedAt: Date.now() };
 
@@ -137,7 +137,7 @@ export const useSearch = <
 
         setRecentSearchesHits((prev) => {
           const next = prev?.filter((hit) => hit._key !== _key);
-          storage.setItem(storageKey, JSON.stringify(next));
+          storage?.setItem(storageKey, JSON.stringify(next));
           return next;
         });
       },
@@ -148,14 +148,14 @@ export const useSearch = <
         const storage = getRecentSearchesStorageRef.current();
 
         setRecentSearchesHits(undefined);
-        storage.removeItem(storageKey);
+        storage?.removeItem(storageKey);
       },
       get: () => {
         if (!getRecentSearchesStorageRef.current || !storageKey) {
           return;
         }
         const storage = getRecentSearchesStorageRef.current();
-        const raw = storage.getItem(storageKey);
+        const raw = storage?.getItem(storageKey);
         if (!raw) return;
 
         return (JSON.parse(raw) as (Hit<Document> & { addedAt: number })[]).map(

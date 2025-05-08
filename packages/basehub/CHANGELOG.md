@@ -1,5 +1,107 @@
 # basehub
 
+## 8.2.2
+
+### Patch Changes
+
+- don't pass cache: no-store for non-nextjs apps
+
+## 8.2.1
+
+### Patch Changes
+
+- guard process
+
+## 8.2.0
+
+### Minor Changes
+
+- fix annoying isTaskList warning by just passing it when it IS, and by using data-... instead of an unknown prop. gosh.
+
+## 8.1.35
+
+### Patch Changes
+
+- log build id
+
+## 8.1.34
+
+### Patch Changes
+
+- safe localStorage usage
+
+## 8.1.33
+
+### Patch Changes
+
+- protect call
+
+## 8.1.32
+
+### Patch Changes
+
+- Support binding params into pump server action as an escape hatch for weird reference errors
+
+## 8.1.31
+
+### Patch Changes
+
+- upgrade mutation api helpers
+
+## 8.1.30
+
+### Patch Changes
+
+- use api version as hash param
+
+## 8.1.29
+
+### Patch Changes
+
+- send sdk build id to get pending tags just for that
+
+## 8.1.28
+
+### Patch Changes
+
+- fix revalidateTags bug
+
+## 8.1.27
+
+### Patch Changes
+
+- nit
+
+## 8.1.26
+
+### Patch Changes
+
+- bound basehubProps for better server actions behavior
+
+## 8.1.25
+
+### Patch Changes
+
+- Fix bug in ODR logic
+
+## 8.1.24
+
+### Patch Changes
+
+- Revert
+
+## 8.1.23
+
+### Patch Changes
+
+- see if this fixes astro error
+
+## 8.1.22
+
+### Patch Changes
+
+- 781a6fd: Add <ol /> attributes
+
 ## 8.1.21
 
 ### Patch Changes
