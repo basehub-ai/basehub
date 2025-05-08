@@ -69,36 +69,58 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
   const [key, data] = args;
   const parsedResolvedRef = resolvedRef as ResolvedRef;
 
-  const formData = new FormData();
-  formData.append("_system_key", key);
-  formData.append("_system_type", "create");
-  formData.append(
-    "_system_commitId",
-    (parsedResolvedRef.type === "commit"
-      ? parsedResolvedRef.id
-      : parsedResolvedRef.headCommitId) ?? ""
-  );
-  if (parsedResolvedRef.type === "branch") {
-    formData.append("_system_branch", parsedResolvedRef.name);
-  }
+  let formDataOrJson: FormData | string;
+  if (data && Object.values(data).some((value) => value instanceof File)) {
+    formDataOrJson = new FormData();
+    formDataOrJson.append("_system_key", key);
+    formDataOrJson.append("_system_type", "create");
+    formDataOrJson.append(
+      "_system_commitId",
+      (parsedResolvedRef.type === "commit"
+        ? parsedResolvedRef.id
+        : parsedResolvedRef.headCommitId) ?? ""
+    );
+    if (parsedResolvedRef.type === "branch") {
+      formDataOrJson.append("_system_branch", parsedResolvedRef.name);
+    }
 
-  if (data) {
-    // Append all data fields to FormData
-    Object.entries(data).forEach(([field, value]) => {
-      if (value instanceof File) {
-        formData.append(field, value);
-      } else if (value !== null && value !== undefined) {
-        formData.append(field, String(value));
-      }
+    if (data) {
+      // Append all data fields to FormData
+      Object.entries(data).forEach(([field, value]) => {
+        if (typeof formDataOrJson === "string") return;
+        if (value instanceof File) {
+          formDataOrJson.append(field, value);
+        } else if (value !== null && value !== undefined) {
+          formDataOrJson.append(field, String(value));
+        }
+      });
+    }
+  } else {
+    formDataOrJson = JSON.stringify({
+      key,
+      data,
+      type: "create",
+      commitId:
+        parsedResolvedRef.type === "commit"
+          ? parsedResolvedRef.id
+          : parsedResolvedRef.headCommitId,
+      branch:
+        parsedResolvedRef.type === "branch"
+          ? parsedResolvedRef.name
+          : undefined,
     });
   }
 
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
     headers: {
+      "Content-Type":
+        typeof formDataOrJson === "string"
+          ? "application/json"
+          : "multipart/form-data",
       Accept: "application/json",
     },
-    body: formData,
+    body: formDataOrJson,
   });
 
   return (await response.json()) as
@@ -268,26 +290,41 @@ export async function updateEvent<Key extends `${EventKeys}:${string}`>(
   id: string,
   data: Partial<NullableEventSchemaMap[ExtractEventKey<Key>]>
 ) {
-  const formData = new FormData();
-  formData.append("_system_key", key);
-  formData.append("_system_type", "update");
-  formData.append("_system_id", id);
+  let formDataOrJson: FormData | string;
+  if (data && Object.values(data).some((value) => value instanceof File)) {
+    formDataOrJson = new FormData();
+    formDataOrJson.append("_system_key", key);
+    formDataOrJson.append("_system_type", "update");
+    formDataOrJson.append("_system_id", id);
 
-  // Append all data fields to FormData
-  Object.entries(data).forEach(([field, value]) => {
-    if (value instanceof File) {
-      formData.append(field, value);
-    } else if (value !== null && value !== undefined) {
-      formData.append(field, String(value));
-    }
-  });
+    // Append all data fields to FormData
+    Object.entries(data).forEach(([field, value]) => {
+      if (typeof formDataOrJson === "string") return;
+      if (value instanceof File) {
+        formDataOrJson.append(field, value);
+      } else if (value !== null && value !== undefined) {
+        formDataOrJson.append(field, String(value));
+      }
+    });
+  } else {
+    formDataOrJson = JSON.stringify({
+      key,
+      data,
+      type: "update",
+      id,
+    });
+  }
 
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
     headers: {
+      "Content-Type":
+        typeof formDataOrJson === "string"
+          ? "application/json"
+          : "multipart/form-data",
       Accept: "application/json",
     },
-    body: formData,
+    body: formDataOrJson,
   });
 
   return (await response.json()) as
