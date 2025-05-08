@@ -140,7 +140,7 @@ export const Pump = async <
       if (!data) {
         const dataPromise = draft
           ? fetch(pumpEndpoint, {
-              cache: "no-store",
+              ...(isNextjs ? { cache: "no-store" } : {}),
               method: "POST",
               headers: {
                 ...headers,
