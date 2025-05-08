@@ -93,7 +93,7 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
         if (value instanceof File) {
           formDataOrJson.append(field, value);
         } else if (value !== null && value !== undefined) {
-          formDataOrJson.append(field, String(value));
+          formDataOrJson.append(`${typeof field}__${field}`, String(value));
         }
       });
     }
@@ -305,7 +305,7 @@ export async function updateEvent<Key extends `${EventKeys}:${string}`>(
       if (value instanceof File) {
         formDataOrJson.append(field, value);
       } else if (value !== null && value !== undefined) {
-        formDataOrJson.append(field, String(value));
+        formDataOrJson.append(`${typeof field}__${field}`, String(value));
       }
     });
   } else {
@@ -447,12 +447,11 @@ export function parseFormData<
         }
 
         case "file": {
-          const file = value as File;
-          if (!(file instanceof File)) {
+          if (!(value instanceof File)) {
             errors[key] = `${field.label || key} must be a valid file`;
             break;
           }
-          formattedData[key] = file;
+          formattedData[key] = value;
           break;
         }
 
