@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.2
+
+### Patch Changes
+
+- don't pass cache: no-store for non-nextjs apps
+
 ## 8.2.1
 
 ### Patch Changes
