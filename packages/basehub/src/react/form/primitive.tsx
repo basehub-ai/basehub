@@ -22,6 +22,7 @@ export type Field = {
   | { type: "datetime" }
   | { type: "email" }
   | { type: "checkbox" }
+  | { type: "file" }
   | { type: "hidden" }
   | { type: "select"; options: string[]; multiple: boolean }
   | { type: "radio"; options: string[]; multiple: boolean }
