@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.3
+
+### Patch Changes
+
+- d3c35c2: Fix Highlighter component to support SpecialLanguage and handle plainText as 'text' in language prop instead of throw error.
+
 ## 8.2.2
 
 ### Patch Changes
