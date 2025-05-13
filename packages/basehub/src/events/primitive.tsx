@@ -116,10 +116,9 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
     headers: {
-      "Content-Type":
-        typeof formDataOrJson === "string"
-          ? "application/json"
-          : "multipart/form-data",
+      ...(typeof formDataOrJson === "string"
+        ? { "Content-Type": "application/json" }
+        : {}),
       Accept: "application/json",
     },
     body: formDataOrJson,
@@ -320,10 +319,9 @@ export async function updateEvent<Key extends `${EventKeys}:${string}`>(
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
     headers: {
-      "Content-Type":
-        typeof formDataOrJson === "string"
-          ? "application/json"
-          : "multipart/form-data",
+      ...(typeof formDataOrJson === "string"
+        ? { "Content-Type": "application/json" }
+        : {}),
       Accept: "application/json",
     },
     body: formDataOrJson,
