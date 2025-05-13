@@ -449,7 +449,14 @@ export function parseFormData<
             errors[key] = `${field.label || key} must be a valid file`;
             break;
           }
-          formattedData[key] = value;
+
+          if (!value.size && field.required) {
+            errors[key] = `${field.label || key} is required`;
+          } else if (!value.size) {
+            formattedData[key] = null;
+          } else {
+            formattedData[key] = value;
+          }
           break;
         }
 
