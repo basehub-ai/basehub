@@ -70,10 +70,35 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
 ) => {
   const [key, data] = args;
   const parsedResolvedRef = resolvedRef as ResolvedRef;
-  const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+
+  let formDataOrJson: FormData | string;
+  if (data && Object.values(data).some((value) => value instanceof File)) {
+    formDataOrJson = new FormData();
+    formDataOrJson.append("_system_key", key);
+    formDataOrJson.append("_system_type", "create");
+    formDataOrJson.append(
+      "_system_commitId",
+      (parsedResolvedRef.type === "commit"
+        ? parsedResolvedRef.id
+        : parsedResolvedRef.headCommitId) ?? ""
+    );
+    if (parsedResolvedRef.type === "branch") {
+      formDataOrJson.append("_system_branch", parsedResolvedRef.name);
+    }
+
+    if (data) {
+      // Append all data fields to FormData
+      Object.entries(data).forEach(([field, value]) => {
+        if (typeof formDataOrJson === "string") return;
+        if (value instanceof File) {
+          formDataOrJson.append(field, value);
+        } else if (value !== null && value !== undefined) {
+          formDataOrJson.append(`${typeof field}__${field}`, String(value));
+        }
+      });
+    }
+  } else {
+    formDataOrJson = JSON.stringify({
       key,
       data,
       type: "create",
@@ -85,7 +110,18 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
         parsedResolvedRef.type === "branch"
           ? parsedResolvedRef.name
           : undefined,
-    }),
+    });
+  }
+
+  const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
+    method: "POST",
+    headers: {
+      ...(typeof formDataOrJson === "string"
+        ? { "Content-Type": "application/json" }
+        : {}),
+      Accept: "application/json",
+    },
+    body: formDataOrJson,
   });
 
   return (await response.json()) as
@@ -255,10 +291,40 @@ export async function updateEvent<Key extends `${EventKeys}:${string}`>(
   id: string,
   data: Partial<NullableEventSchemaMap[ExtractEventKey<Key>]>
 ) {
+  let formDataOrJson: FormData | string;
+  if (data && Object.values(data).some((value) => value instanceof File)) {
+    formDataOrJson = new FormData();
+    formDataOrJson.append("_system_key", key);
+    formDataOrJson.append("_system_type", "update");
+    formDataOrJson.append("_system_id", id);
+
+    // Append all data fields to FormData
+    Object.entries(data).forEach(([field, value]) => {
+      if (typeof formDataOrJson === "string") return;
+      if (value instanceof File) {
+        formDataOrJson.append(field, value);
+      } else if (value !== null && value !== undefined) {
+        formDataOrJson.append(`${typeof field}__${field}`, String(value));
+      }
+    });
+  } else {
+    formDataOrJson = JSON.stringify({
+      key,
+      data,
+      type: "update",
+      id,
+    });
+  }
+
   const response = await fetch(EVENTS_V2_ENDPOINT_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key, data, type: "update", id }),
+    headers: {
+      ...(typeof formDataOrJson === "string"
+        ? { "Content-Type": "application/json" }
+        : {}),
+      Accept: "application/json",
+    },
+    body: formDataOrJson,
   });
 
   return (await response.json()) as
@@ -379,12 +445,11 @@ export function parseFormData<
         }
 
         case "file": {
-          const file = value as File;
-          if (!(file instanceof File)) {
+          if (!(value instanceof File)) {
             errors[key] = `${field.label || key} must be a valid file`;
             break;
           }
-          formattedData[key] = file;
+          formattedData[key] = value;
           break;
         }
 
