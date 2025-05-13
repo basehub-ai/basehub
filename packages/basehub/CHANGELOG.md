@@ -1,5 +1,12 @@
 # basehub
 
+## 8.2.4
+
+### Patch Changes
+
+- acecb1c: Add support for files in events helper functions: `sendEvent` and `updateEvent`
+- 6c14cac: Parse empty files to `null` in `parseFormData` fields handling.
+
 ## 8.2.3
 
 ### Patch Changes
