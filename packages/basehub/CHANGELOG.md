@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.6
+
+### Patch Changes
+
+- fix process thing in cf
+
 ## 8.2.5
 
 ### Patch Changes

@@ -337,7 +337,12 @@ export const getStuffFromEnv = (options) => {
       return \`\${prefix}_\${name}\`;
     };
 
-    const getEnvVar = (name: EnvVarName) => process?.env?.[buildEnvVarName(name)];
+    const getEnvVar = (name: EnvVarName) => {
+      if (typeof process === 'undefined') {
+        return undefined;
+      }
+      return process?.env?.[buildEnvVarName(name)];
+    };
 
     const parsedDebugForcedURL = getEnvVar("DEBUG_FORCED_URL");
     const parsedBackwardsCompatURL = getEnvVar("URL");
@@ -370,6 +375,9 @@ export const getStuffFromEnv = (options) => {
       const isRaw = token.startsWith("bshb_");
       if (isRaw) return token;
       tokenNotFoundErrorMessage = \`🔴 Token not found. Make sure to include the \${token} env var.\`;
+      if (typeof process === 'undefined') {
+        return undefined;
+      }
       return process?.env?.[token] ?? ''; // empty string to prevent fallback
     };
 
