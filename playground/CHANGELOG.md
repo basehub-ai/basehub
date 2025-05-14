@@ -13,6 +13,7 @@
 ### Patch Changes
 
 - Updated dependencies [d3c35c2]
+- Updated dependencies
   - basehub@8.2.3
 
 ## 0.0.207

@@ -77,7 +77,7 @@ export const getStuffFromEnv = async (
     return `${prefix}_${name}`;
   };
 
-  const getEnvVar = (name: EnvVarName) => process.env[buildEnvVarName(name)];
+  const getEnvVar = (name: EnvVarName) => process?.env?.[buildEnvVarName(name)];
 
   const parsedDebugForcedURL = getEnvVar("DEBUG_FORCED_URL");
 
@@ -110,7 +110,7 @@ export const getStuffFromEnv = async (
       return token;
     }
     tokenNotFoundErrorMessage = `🔴 Token not found. Make sure to include the ${token} env var.`;
-    const fromEnv = process.env[token];
+    const fromEnv = process?.env?.[token];
     if (fromEnv) return fromEnv;
     return ""; // empty string to prevent fallback
   };
@@ -337,7 +337,7 @@ export const getStuffFromEnv = (options) => {
       return \`\${prefix}_\${name}\`;
     };
 
-    const getEnvVar = (name: EnvVarName) => process.env[buildEnvVarName(name)];
+    const getEnvVar = (name: EnvVarName) => process?.env?.[buildEnvVarName(name)];
 
     const parsedDebugForcedURL = getEnvVar("DEBUG_FORCED_URL");
     const parsedBackwardsCompatURL = getEnvVar("URL");
@@ -370,7 +370,7 @@ export const getStuffFromEnv = (options) => {
       const isRaw = token.startsWith("bshb_");
       if (isRaw) return token;
       tokenNotFoundErrorMessage = \`🔴 Token not found. Make sure to include the \${token} env var.\`;
-      return process.env[token] ?? ''; // empty string to prevent fallback
+      return process?.env?.[token] ?? ''; // empty string to prevent fallback
     };
 
     const resolvedToken = resolveTokenParam(options?.token ?? null);

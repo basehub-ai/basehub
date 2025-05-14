@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.5
+
+### Patch Changes
+
+- safe access to process env so cf doesn't break
+
 ## 8.2.4
 
 ### Patch Changes
