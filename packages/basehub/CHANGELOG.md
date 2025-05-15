@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.7
+
+### Patch Changes
+
+- clear cookie if branch was archived
+
 ## 8.2.6
 
 ### Patch Changes

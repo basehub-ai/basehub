@@ -332,6 +332,16 @@ export const ClientToolbar = ({
     };
   }, [getStoredToolbarPosition, dragToolbar]);
 
+  React.useEffect(() => {
+    if (!latestBranches) return;
+    // make sure selected branch is in latestBranches else we need to clear the cookie
+    const fromCookie = previewRefCookieManager.get();
+    if (!fromCookie) return;
+    if (!latestBranches.find((branch) => branch.name === fromCookie)) {
+      previewRefCookieManager.clear();
+    }
+  }, [latestBranches, previewRefCookieManager]);
+
   const tooltip = isForcedDraft
     ? "Draft enforced by dev env"
     : `${draft ? "Disable" : "Enable"} draft mode`;
