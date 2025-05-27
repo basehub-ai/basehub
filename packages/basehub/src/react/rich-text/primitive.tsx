@@ -133,6 +133,8 @@ type Handlers = {
   tfoot: (props: { children: ReactNode }) => ReactNode;
   br: () => ReactNode;
   u: (props: { children: ReactNode }) => ReactNode;
+  superscript: (props: { children: ReactNode }) => ReactNode;
+  subscript: (props: { children: ReactNode }) => ReactNode;
 };
 
 type ExtractPropsForHandler<Handler extends (props: any) => ReactNode> =
@@ -308,6 +310,8 @@ const defaultHandlers: Handlers = {
   tfoot: ({ children }) => <tfoot>{children}</tfoot>,
   br: () => <br />,
   u: ({ children }) => <u>{children}</u>,
+  superscript: ({ children }) => <sup>{children}</sup>,
+  subscript: ({ children }) => <sub>{children}</sub>,
 };
 
 const Node = ({
