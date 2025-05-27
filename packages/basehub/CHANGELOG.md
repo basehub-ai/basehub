@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.9
+
+### Patch Changes
+
+- add retries to watch mode
+
 ## 8.2.8
 
 ### Patch Changes

@@ -736,33 +736,52 @@ import type { Language as B_Language } from './react-code-block';
 
     const { watchPromise, stopWatching } = scheduleNonOverlappingWork(
       async () => {
-        const result = await generateSDK(!isFirst, previousHash);
-        if (isFirst) {
-          console.log(" ");
-          logInsideBox([
-            "👀 `basehub` experimental --watch mode. Bugs: https://github.com/basehub-ai/basehub/issues",
-          ]);
-          console.log(" ");
-        } else {
-          if (result.newResolvedRef.ref !== previousResolvedRef?.ref) {
-            logInsideBox([
-              `🔀 Ref changed, now querying from ${
-                result.newResolvedRef.type
-              } ${result.newResolvedRef.ref}${
-                result.newResolvedRef.type === "branch" &&
-                result.newResolvedRef.git?.branch
-                  ? ` (linked to Git branch ${result.newResolvedRef.git?.branch})`
-                  : ""
-              }`,
-            ]);
-          } else if (!result.preventedClientGeneration) {
-            console.log("🔄 Detected changes, `basehub` re-generated");
+        let retryCount = 0;
+        const maxRetries = 5;
+        const retryDelay = 1000;
+
+        while (retryCount <= maxRetries) {
+          try {
+            const result = await generateSDK(!isFirst, previousHash);
+            if (isFirst) {
+              console.log(" ");
+              logInsideBox([
+                "👀 `basehub` experimental --watch mode. Bugs: https://github.com/basehub-ai/basehub/issues",
+              ]);
+              console.log(" ");
+            } else {
+              if (result.newResolvedRef.ref !== previousResolvedRef?.ref) {
+                logInsideBox([
+                  `🔀 Ref changed, now querying from ${
+                    result.newResolvedRef.type
+                  } ${result.newResolvedRef.ref}${
+                    result.newResolvedRef.type === "branch" &&
+                    result.newResolvedRef.git?.branch
+                      ? ` (linked to Git branch ${result.newResolvedRef.git?.branch})`
+                      : ""
+                  }`,
+                ]);
+              } else if (!result.preventedClientGeneration) {
+                console.log("🔄 Detected changes, `basehub` re-generated");
+              }
+            }
+
+            previousResolvedRef = result.newResolvedRef;
+            previousHash = result.schemaHash;
+            isFirst = false;
+            break; // Success, exit retry loop
+          } catch (error) {
+            retryCount++;
+            if (retryCount > maxRetries) {
+              console.error(
+                `❌ Failed to generate SDK after ${maxRetries} retries:`,
+                error
+              );
+              throw error; // Re-throw after all retries exhausted
+            }
+            await new Promise((resolve) => setTimeout(resolve, retryDelay));
           }
         }
-
-        previousResolvedRef = result.newResolvedRef;
-        previousHash = result.schemaHash;
-        isFirst = false;
       },
       2500,
       1000 * 60 * 60 * 24 // 24 hours
