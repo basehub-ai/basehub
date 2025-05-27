@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.8
+
+### Patch Changes
+
+- cc89921: Fix bug: Subscript and Superscript in RichText not rendering
+
 ## 8.2.7
 
 ### Patch Changes
