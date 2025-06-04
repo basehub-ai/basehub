@@ -302,6 +302,14 @@ import type { Language as B_Language } from './react-code-block';
 `
     );
 
+  await esbuild.build({
+    entryPoints: [path.join(generatedPath, "schema.ts")],
+    bundle: false,
+    format: "cjs",
+    target: ["node14"], 
+    outdir: generatedPath,
+  });
+
     // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
     const peerDependencies = [
       "react",
@@ -730,24 +738,22 @@ import type { Language as B_Language } from './react-code-block';
       });
     }
 
-            const barrelIndexTs = path.join(basehubOutputPath, "index.ts");
+    const barrelIndexTs = path.join(basehubOutputPath, "index.ts");
     const barrelIndexTsContents =
-      `// Este archivo reexporta TODO desde ./generated\n` +
+      `// This file re-exports EVERYTHING from ./generated\n` +
       `export * from "./generated/index";\n` +
       `export * from "./generated/schema";\n`;
 
     fs.writeFileSync(barrelIndexTs, barrelIndexTsContents);
 
-    // 2) path completo a .basehub/index.js
     const barrelIndexJs = path.join(basehubOutputPath, "index.js");
     const barrelIndexJsContents =
-      `// Este archivo reexporta TODO desde ./generated\n` +
+      `// This file re-exports EVERYTHING from ./generated\n` +
       `const _gen = require("./generated/index.js");\n` +
       `const _sch = require("./generated/schema.js");\n` +
       `module.exports = { ..._gen, ..._sch };\n`;
 
     fs.writeFileSync(barrelIndexJs, barrelIndexJsContents);
-
 
     return {
       preventedClientGeneration,
