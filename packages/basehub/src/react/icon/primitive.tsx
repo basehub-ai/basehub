@@ -30,7 +30,9 @@ export const supportedSvgTags = [
 type SvgComponent = (typeof supportedSvgTags)[number];
 
 type ComponentsOverride = {
-  [K in SvgComponent]: (props: JSX.IntrinsicElements[K]) => React.ReactElement;
+  [K in SvgComponent]: (
+    props: React.JSX.IntrinsicElements[K]
+  ) => React.ReactElement;
 };
 
 const DEFAULT_COMPONENTS: ComponentsOverride = {
