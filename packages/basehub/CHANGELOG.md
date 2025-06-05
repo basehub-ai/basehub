@@ -1,5 +1,11 @@
 # basehub
 
+## 8.2.11
+
+### Patch Changes
+
+- 25fd71f: Use React namespace instead of 'JSX' for typing
+
 ## 8.2.10
 
 ### Patch Changes
