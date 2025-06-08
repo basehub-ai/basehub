@@ -82,6 +82,7 @@ export const main = async (
   }
 
   const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
+  const generatedPath = path.join(basehubOutputPath, "generated");
 
   ensureSingleInstance(basehubOutputPath);
 
@@ -140,10 +141,7 @@ export const main = async (
     }
 
     // cleanup the output directory if input hash changes
-    const buildManifestPath = path.join(
-      basehubOutputPath,
-      "build-manifest.json"
-    );
+    const buildManifestPath = path.join(generatedPath, "build-manifest.json");
     let currentBuildManifest;
     try {
       currentBuildManifest = fs.existsSync(buildManifestPath)
@@ -181,7 +179,7 @@ export const main = async (
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      output: path.join(basehubOutputPath),
+      output: path.join(generatedPath),
       verbose: silent ? false : args["--debug"],
       sortProperties: true,
       silent,
@@ -189,7 +187,6 @@ export const main = async (
     });
 
     if (preventedClientGeneration) {
-      // done
       return {
         preventedClientGeneration,
         schemaHash,
@@ -198,11 +195,12 @@ export const main = async (
     }
 
     if (args["--debug"]) {
-      console.log(`[basehub] generated in: ${basehubOutputPath}`);
+      console.log(`[basehub] generated in: ${generatedPath}`);
     }
 
-    const generatedMainExportPath = path.join(basehubOutputPath, "index.ts");
-    const generatedSchemaPath = path.join(basehubOutputPath, "schema.ts");
+    const generatedMainExportPath = path.join(generatedPath, "index.ts");
+    // const generatedMainJSExportPath = path.join(generatedPath, "index.js");
+    const generatedSchemaPath = path.join(generatedPath, "schema.ts");
 
     // We'll patch some things from the generated code.
     let schemaFileContents = fs.readFileSync(generatedMainExportPath, "utf-8");
@@ -299,6 +297,14 @@ import type { Language as B_Language } from './react-code-block';
 `
     );
 
+    await esbuild.build({
+      entryPoints: [path.join(generatedPath, "schema.ts")],
+      bundle: false,
+      format: "cjs",
+      target: ["node14"],
+      outdir: generatedPath,
+    });
+
     // we'll want to externalize react, react-dom, and "../index" in this case is the generated basehub client.
     const peerDependencies = [
       "react",
@@ -329,107 +335,87 @@ import type { Language as B_Language } from './react-code-block';
     };
 
     logIfNotSilent(silent, "📦 Compiling to JavaScript...");
-    const reactPumpOutDir = path.join(basehubOutputPath, "react-pump");
-    const nextToolbarOutDir = path.join(basehubOutputPath, "next-toolbar");
-    const analyticsOutDir = path.join(basehubOutputPath, "events");
-    const workflowsOutDir = path.join(basehubOutputPath, "workflows");
 
-    await esbuild.build({
-      entryPoints: [generatedMainExportPath],
-      bundle: true,
-      outdir: basehubOutputPath,
-      minify: false,
-      treeShaking: true,
-      splitting: true,
-      format: "esm",
-      external: peerDependencies,
-    });
+    const reactPumpOutDir = path.join(generatedPath, "react-pump");
+    const nextToolbarOutDir = path.join(generatedPath, "next-toolbar");
+    const analyticsOutDir = path.join(generatedPath, "events");
+    const workflowsOutDir = path.join(generatedPath, "workflows");
 
-    if (args["--debug"]) {
-      console.log(
-        `[basehub] compiled main export with esbuild in: ${generatedMainExportPath}`
-      );
-    }
-
-    await esbuild.build({
-      entryPoints: [
-        path.join(basehubModulePath, "src", "react", "pump", "index.ts"),
-      ],
-      bundle: true,
-      outdir: reactPumpOutDir,
-      minify: false,
-      treeShaking: true,
-      splitting: true,
-      format: "esm",
-      target: ["es2020", "node18"],
-      external: peerDependencies,
-      plugins: [useClientPlugin],
-    });
-
-    if (args["--debug"]) {
-      console.log(
-        `[basehub] compiled react pump with esbuild in: ${reactPumpOutDir}`
-      );
-    }
-
-    await esbuild.build({
-      entryPoints: [
-        path.join(basehubModulePath, "src", "next", "toolbar", "index.ts"),
-      ],
-      bundle: true,
-      outdir: nextToolbarOutDir,
-      minify: false,
-      treeShaking: true,
-      splitting: true,
-      format: "esm",
-      target: ["es2020", "node18"],
-      external: peerDependencies,
-      plugins: [ScssModulesPlugin(), useClientPlugin],
-    });
-
-    if (args["--debug"]) {
-      console.log(
-        `[basehub] compiled next toolbar with esbuild in: ${nextToolbarOutDir}`
-      );
-    }
-
-    await esbuild.build({
-      entryPoints: [path.join(basehubModulePath, "src", "events", "index.ts")],
-      bundle: true,
-      outdir: analyticsOutDir,
-      minify: false,
-      treeShaking: true,
-      splitting: true,
-      format: "esm",
-      target: ["es2020", "node18"],
-      external: peerDependencies,
-      plugins: [],
-    });
+    await Promise.all([
+      await esbuild.build({
+        entryPoints: [generatedMainExportPath],
+        bundle: true,
+        outdir: generatedPath,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        external: peerDependencies,
+      }),
+      await esbuild.build({
+        entryPoints: [
+          path.join(basehubModulePath, "src", "react", "pump", "index.ts"),
+        ],
+        bundle: true,
+        outdir: reactPumpOutDir,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        target: ["es2020", "node18"],
+        external: peerDependencies,
+        plugins: [useClientPlugin],
+      }),
+      await esbuild.build({
+        entryPoints: [
+          path.join(basehubModulePath, "src", "next", "toolbar", "index.ts"),
+        ],
+        bundle: true,
+        outdir: nextToolbarOutDir,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        target: ["es2020", "node18"],
+        external: peerDependencies,
+        plugins: [ScssModulesPlugin(), useClientPlugin],
+      }),
+      await esbuild.build({
+        entryPoints: [
+          path.join(basehubModulePath, "src", "events", "index.ts"),
+        ],
+        bundle: true,
+        outdir: analyticsOutDir,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        target: ["es2020", "node18"],
+        external: peerDependencies,
+        plugins: [],
+      }),
+      await esbuild.build({
+        entryPoints: [
+          path.join(basehubModulePath, "src", "workflows", "index.ts"),
+        ],
+        bundle: true,
+        outdir: workflowsOutDir,
+        minify: false,
+        treeShaking: true,
+        splitting: true,
+        format: "esm",
+        target: ["es2020", "node18"],
+        external: peerDependencies,
+      }),
+    ]);
 
     if (args["--debug"]) {
-      console.log(
-        `[basehub] compiled events with esbuild in: ${analyticsOutDir}`
-      );
-    }
-
-    await esbuild.build({
-      entryPoints: [
-        path.join(basehubModulePath, "src", "workflows", "index.ts"),
-      ],
-      bundle: true,
-      outdir: workflowsOutDir,
-      minify: false,
-      treeShaking: true,
-      splitting: true,
-      format: "esm",
-      target: ["es2020", "node18"],
-      external: peerDependencies,
-    });
-
-    if (args["--debug"]) {
-      console.log(
-        `[basehub] compiled workflows with esbuild in: ${workflowsOutDir}`
-      );
+      console.log("[basehub] compiled esbuild:");
+      console.log(` - main export: ${generatedPath}`);
+      console.log(` - react pump: ${reactPumpOutDir}`);
+      console.log(` - next toolbar: ${nextToolbarOutDir}`);
+      console.log(` - events: ${analyticsOutDir}`);
+      console.log(` - workflows: ${workflowsOutDir}`);
     }
 
     /**
@@ -478,14 +464,14 @@ import type { Language as B_Language } from './react-code-block';
       ].map((pathsToAlias) => {
         // ensure the directory exists
         fs.mkdirSync(
-          path.join(basehubOutputPath, ...pathsToAlias.split("/").slice(0, -1)),
+          path.join(generatedPath, ...pathsToAlias.split("/").slice(0, -1)),
           { recursive: true }
         );
 
         // create a file in the output directory that aliases the package to the generated client
         fs.writeFileSync(
           path.join(
-            basehubOutputPath,
+            generatedPath,
             ...pathsToAlias
               .split("/")
               .map((p, i, { length }) => (i + 1 === length ? `${p}.d.ts` : p))
@@ -494,7 +480,7 @@ import type { Language as B_Language } from './react-code-block';
         );
         fs.writeFileSync(
           path.join(
-            basehubOutputPath,
+            generatedPath,
             ...pathsToAlias
               .split("/")
               .map((p, i, { length }) => (i + 1 === length ? `${p}.js` : p))
@@ -504,8 +490,9 @@ import type { Language as B_Language } from './react-code-block';
       });
 
       // override index.js and index.d.ts to point to the generated client
-      const indexJsPath = path.join(basehubModulePath, "index.js");
-      const indexDtsPath = path.join(basehubModulePath, "index.d.ts");
+      const sdkIndexJsPath = path.join(basehubModulePath, "index.js");
+      const sdkIndexDtsPath = path.join(basehubModulePath, "index.d.ts");
+
       const reactPumpIndexJsPath = path.join(
         basehubModulePath,
         "react-pump.js"
@@ -530,7 +517,7 @@ import type { Language as B_Language } from './react-code-block';
         "workflows.d.ts"
       );
       fs.writeFileSync(
-        indexJsPath,
+        sdkIndexJsPath,
         ensureCrossPlatformTsImport(
           `export * from "${path.relative(
             basehubModulePath,
@@ -539,7 +526,7 @@ import type { Language as B_Language } from './react-code-block';
         )
       );
       fs.writeFileSync(
-        indexDtsPath,
+        sdkIndexDtsPath,
         ensureCrossPlatformTsImport(
           `export * from "${path.relative(
             basehubModulePath,
@@ -722,6 +709,23 @@ import type { Language as B_Language } from './react-code-block';
         }, 1000);
       });
     }
+
+    const barrelIndexTs = path.join(basehubOutputPath, "index.ts");
+    const barrelIndexTsContents =
+      `// This file re-exports EVERYTHING from ./generated\n` +
+      `export * from "./generated/index";\n` +
+      `export * from "./generated/schema";\n`;
+
+    fs.writeFileSync(barrelIndexTs, barrelIndexTsContents);
+
+    const barrelIndexJs = path.join(basehubOutputPath, "index.js");
+    const barrelIndexJsContents =
+      `// This file re-exports EVERYTHING from ./generated\n` +
+      `const _gen = require("./generated/index.js");\n` +
+      `const _sch = require("./generated/schema.js");\n` +
+      `module.exports = { ..._gen, ..._sch };\n`;
+
+    fs.writeFileSync(barrelIndexJs, barrelIndexJsContents);
 
     return {
       preventedClientGeneration,
