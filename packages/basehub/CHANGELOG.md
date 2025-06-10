@@ -1,5 +1,11 @@
 # basehub
 
+## 8.3.0-canary.0
+
+### Minor Changes
+
+- expose basehub/cli
+
 ## 8.2.11
 
 ### Patch Changes

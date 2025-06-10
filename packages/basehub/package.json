@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "8.2.11",
+  "version": "8.3.0-canary.0",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -46,7 +46,9 @@
     "search.js",
     "search.d.ts",
     "next-image.js",
-    "next-image.d.ts"
+    "next-image.d.ts",
+    "cli.js",
+    "cli.d.ts"
   ],
   "sideEffects": false,
   "scripts": {
