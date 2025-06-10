@@ -1,5 +1,11 @@
 # basehub
 
+## 8.3.0-canary.1
+
+### Patch Changes
+
+- internalize some deps
+
 ## 8.3.0-canary.0
 
 ### Minor Changes
