@@ -49,16 +49,25 @@ export type Options = Omit<
  * @returns A basehub client.
  *
  * @example
- * import { basehub } from 'basehub'
+ * import { createClient } from 'basehub'
  *
- * const firstQuery = await basehub().query({
+ * const basehub = createClient()
+ *
+ * const firstQuery = await basehub.query({
  *   __typename: true,
  * });
  *
  * console.log(firstQuery.__typename) // => 'Query'
  *
  */
-export const basehub = (options?: Options) => {
+export const createClient = <
+  Q extends Record<string, any> = Record<string, any>,
+  QSel extends Record<string, any> = Record<string, any>,
+  M extends Record<string, any> = Record<string, any>,
+  MSel extends Record<string, any> = Record<string, any>,
+>(
+  options?: Options
+) => {
   if (!options) {
     options = {};
   }
@@ -147,10 +156,10 @@ export const basehub = (options?: Options) => {
     return extra;
   };
 
-  return createClientOriginal(options);
+  return createClientOriginal<Q, QSel, M, MSel>(options);
 };
 
-basehub.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
+createClient.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
 
 /**
  * Create a basehub client.
@@ -159,18 +168,21 @@ basehub.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
  * @returns A basehub client.
  *
  * @example
- * import { createClient } from 'basehub'
+ * import { basehub } from 'basehub'
  *
- * const basehub = createClient()
- *
- * const firstQuery = await basehub.query({
+ * const firstQuery = await basehub().query({
  *   __typename: true,
  * });
  *
  * console.log(firstQuery.__typename) // => 'Query'
  *
  */
-export const createClient = basehub;
+export const basehub = createClient<
+  Query,
+  QueryGenqlSelection,
+  Mutation,
+  MutationGenqlSelection
+>;
 
 export type QueryResult<fields extends QueryGenqlSelection> = FieldsSelection<
   Query,

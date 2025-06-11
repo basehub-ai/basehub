@@ -9,13 +9,7 @@ export default function HomePage() {
         theme={"andromeeda"}
       />
       <Pump
-        queries={[
-          {
-            homepage: {
-              heroTitle: { html: true },
-            },
-          },
-        ]}
+        queries={[{ homepage: { heroTitle: { html: true } } }]}
         bind={{
           someParam: "someValue",
         }}
