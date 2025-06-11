@@ -17,6 +17,7 @@ import { createHash } from "crypto";
 import { ResolvedRef } from "../common-types";
 import { ensureCrossPlatformTsImport } from "./util/cross-platform-ts-imports";
 import { ensureSingleInstance } from "./util/ensure-single-instance";
+import { BASEHUB_MODULES } from "./shared-modules";
 
 const buildManifestSchema = z.object({
   generatedAt: z.string(),
@@ -465,17 +466,7 @@ import type { Language as B_Language } from './react-code-block';
 
     if (output !== "node_modules") {
       // alias react-rich-text and other packages to the generated client for better import experience
-      [
-        "react-svg",
-        "react-rich-text",
-        "react-form",
-        "react-code-block/index",
-        "react-code-block/client",
-        "api-transaction",
-        "react-search",
-        "search",
-        "next-image",
-      ].map((pathsToAlias) => {
+      BASEHUB_MODULES.map((pathsToAlias) => {
         // ensure the directory exists
         fs.mkdirSync(
           path.join(basehubOutputPath, ...pathsToAlias.split("/").slice(0, -1)),

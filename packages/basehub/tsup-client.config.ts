@@ -17,6 +17,7 @@ export default defineConfig((_options: Options) => {
       "api-transaction": "./src/api-transaction.ts",
       search: "./src/search/index.ts",
       "next-image": "./src/next/image/index.ts",
+      cli: "./src/cli.ts",
     },
     format: ["esm"],
     splitting: true,

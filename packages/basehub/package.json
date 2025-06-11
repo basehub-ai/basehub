@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "8.2.11",
+  "version": "8.3.0-canary.17",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -46,7 +46,9 @@
     "search.js",
     "search.d.ts",
     "next-image.js",
-    "next-image.d.ts"
+    "next-image.d.ts",
+    "cli.js",
+    "cli.d.ts"
   ],
   "sideEffects": false,
   "scripts": {
@@ -54,7 +56,9 @@
     "dev": "pnpm emit-dts && pnpm build --watch",
     "build": "pnpm build:bin && pnpm build:client",
     "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
-    "build:client": "tsup --config tsup-client.config.ts"
+    "build:client": "tsup --config tsup-client.config.ts",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@basehub/genql": "9.0.0-canary.13",
@@ -83,14 +87,17 @@
     "@types/node": "18.13.0",
     "@types/react": "18.2.20",
     "@types/react-dom": "18.2.7",
+    "@types/tar": "^6.1.5",
     "dts-bundle-generator": "^9.5.1",
     "esbuild-scss-modules-plugin": "^1.1.1",
     "next": "^13.5.3",
     "pkg-pr-new": "^0.0.30",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "tar": "^6.2.0",
     "tsconfig": "workspace:*",
     "tsup": "8.0.2",
-    "type-fest": "3.0.0"
+    "type-fest": "3.0.0",
+    "vitest": "^0.32.3"
   }
 }
