@@ -1,8 +1,7 @@
-import { QueryBatcher } from "./_batcher";
-
-import type { ClientOptions } from "./_create-client";
-import type { GraphqlOperation } from "./_generate-graphql-operation";
-import { GenqlError } from "./_error";
+import { QueryBatcher } from "./_batcher.js";
+import type { ClientOptions } from "./_create-client.js";
+import type { GraphqlOperation } from "./_generate-graphql-operation.js";
+import { GenqlError } from "./_error.js";
 
 export interface Fetcher {
   (

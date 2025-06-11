@@ -1,10 +1,5 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import {
-  // @ts-ignore
-  Scalars,
-  // @ts-ignore
-  // eslint-disable-next-line import/no-unresolved
-} from "../schema";
+import { Scalars } from "../index.js";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -53,6 +48,7 @@ export const authenticateWebhook = async <
    */
   secret: Key;
 }): Promise<
+  // @ts-ignore
   | { success: true; payload: WorkflowSchemaMap[ExtractWorkflowKey<Key>] }
   | { success: false; error: string }
 > => {
@@ -65,7 +61,9 @@ export const authenticateWebhook = async <
     }
 
     let secret: string | undefined = _secret;
+    // @ts-ignore
     if (_secret.startsWith("bshb_workflow")) {
+      // @ts-ignore
       secret = _secret.split(":")[1];
     }
     if (typeof secret !== "string") {
@@ -135,6 +133,7 @@ export const authenticateWebhook = async <
 
     return {
       success: true,
+      // @ts-ignore
       payload: parsedBody as WorkflowSchemaMap[ExtractWorkflowKey<Key>],
     };
   } catch (error) {

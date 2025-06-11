@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
-import { CodeBlockContext } from "./client/context";
-import { ClientSnippet } from "./types";
+import { CodeBlockContext } from "./client/context.js";
+import type { ClientSnippet } from "./types.js";
 
 export type CodeBlockClientControllerProps = {
   children?: React.ReactNode;

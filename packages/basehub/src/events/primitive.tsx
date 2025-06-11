@@ -1,18 +1,7 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import type {
-  // @ts-ignore
-  Scalars,
-  // @ts-ignore
-  // eslint-disable-next-line import/no-unresolved
-} from "../schema";
-import {
-  // @ts-ignore
-  resolvedRef,
-  // @ts-ignore
-  // eslint-disable-next-line import/no-unresolved
-} from "../index";
-import type { ResolvedRef } from "../common-types";
-import type { Field } from "../react/form/primitive";
+import { Scalars } from "../index.js";
+import type { Field } from "../react/form/primitive.js";
+import { getStuffFromEnv } from "../bin/util/get-stuff-from-env.js";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -47,6 +36,7 @@ type ExtractEventKey<T extends string> = T extends `${infer Base}:${string}`
 // Get all event key types (bshb_event_*)
 export type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
 export type EventSchema<Key extends `${EventKeys}:${string}`> =
+  // @ts-ignore
   EventSchemaMap[ExtractEventKey<Key>];
 
 // Map from event key to its schema type
@@ -61,15 +51,17 @@ type NullableEventSchemaMap = {
 };
 
 export type EventArgs<Key extends string> =
+  // @ts-ignore
   EventSchemaMap[ExtractEventKey<Key>] extends never
     ? [Key]
-    : [Key, EventSchemaMap[ExtractEventKey<Key>]];
+    : // @ts-ignore
+      [Key, EventSchemaMap[ExtractEventKey<Key>]];
 
 export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
   ...args: EventArgs<Key>
 ) => {
   const [key, data] = args;
-  const parsedResolvedRef = resolvedRef as ResolvedRef;
+  const { resolvedRef } = await getStuffFromEnv();
 
   let formDataOrJson: FormData | string;
   if (data && Object.values(data).some((value) => value instanceof File)) {
@@ -78,12 +70,12 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
     formDataOrJson.append("_system_type", "create");
     formDataOrJson.append(
       "_system_commitId",
-      (parsedResolvedRef.type === "commit"
-        ? parsedResolvedRef.id
-        : parsedResolvedRef.headCommitId) ?? ""
+      (resolvedRef.type === "commit"
+        ? resolvedRef.id
+        : resolvedRef.headCommitId) ?? ""
     );
-    if (parsedResolvedRef.type === "branch") {
-      formDataOrJson.append("_system_branch", parsedResolvedRef.name);
+    if (resolvedRef.type === "branch") {
+      formDataOrJson.append("_system_branch", resolvedRef.name);
     }
 
     if (data) {
@@ -103,13 +95,10 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
       data,
       type: "create",
       commitId:
-        parsedResolvedRef.type === "commit"
-          ? parsedResolvedRef.id
-          : parsedResolvedRef.headCommitId,
-      branch:
-        parsedResolvedRef.type === "branch"
-          ? parsedResolvedRef.name
-          : undefined,
+        resolvedRef.type === "commit"
+          ? resolvedRef.id
+          : resolvedRef.headCommitId,
+      branch: resolvedRef.type === "branch" ? resolvedRef.name : undefined,
     });
   }
 
@@ -235,6 +224,7 @@ export function getEvents<
 >(
   key: Key,
   options: Extract<GetOptions<ExtractEventKey<Key>, Select>, { type: "table" }>
+  // @ts-ignore
 ): Promise<TableResponse<Key, EventSchemaMap[ExtractEventKey<Key>], Select>>;
 
 // Time-series type overload
@@ -289,6 +279,7 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
 export async function updateEvent<Key extends `${EventKeys}:${string}`>(
   key: Key,
   id: string,
+  // @ts-ignore
   data: Partial<NullableEventSchemaMap[ExtractEventKey<Key>]>
 ) {
   let formDataOrJson: FormData | string;
@@ -362,6 +353,7 @@ export function parseFormData<
   key: Key,
   schema: Schema,
   formData: FormData
+  // @ts-ignore
 ): SafeReturn<EventSchemaMap[ExtractEventKey<Key>]> {
   const formattedData: Record<string, unknown> = {};
   const errors: Record<string, string> = {};
@@ -473,6 +465,7 @@ export function parseFormData<
   }
 
   return {
+    // @ts-ignore
     data: formattedData as EventSchemaMap[ExtractEventKey<Key>],
     success: true,
   };

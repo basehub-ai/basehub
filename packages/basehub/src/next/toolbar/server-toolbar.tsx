@@ -1,18 +1,15 @@
 import * as React from "react";
 
+// @ts-ignore
 import { draftMode } from "next/headers";
+// @ts-ignore
 import { revalidateTag } from "next/cache";
-import {
-  getStuffFromEnv,
-  basehub,
-  resolvedRef,
-  // @ts-ignore
-  // eslint-disable-next-line import/no-unresolved
-} from "../index";
+import { basehub } from "../../index.js";
+import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
 
 // we use react.lazy to code split client-toolbar
 const LazyClientConditionalRenderer = React.lazy(() =>
-  import("./client-conditional-renderer").then((mod) => ({
+  import("./client-conditional-renderer.js").then((mod) => ({
     default: mod.ClientConditionalRenderer,
   }))
 );
@@ -22,7 +19,7 @@ type ServerToolbarProps = Parameters<typeof basehub>[0];
 export const ServerToolbar = async ({
   ...basehubProps
 }: ServerToolbarProps) => {
-  const { isForcedDraft } = getStuffFromEnv(basehubProps);
+  const { isForcedDraft, resolvedRef } = await getStuffFromEnv(basehubProps);
 
   const enableDraftMode_unbound = async (
     basehubProps: ServerToolbarProps,
@@ -30,9 +27,9 @@ export const ServerToolbar = async ({
   ) => {
     "use server";
     try {
-      const { headers, url } = getStuffFromEnv(basehubProps);
+      const { headers, url } = await getStuffFromEnv(basehubProps);
       const appApiEndpoint = getBaseHubAppApiEndpoint(
-        url,
+        new URL(url),
         "/api/nextjs/preview-auth"
       );
 
@@ -64,7 +61,8 @@ export const ServerToolbar = async ({
   ) => {
     "use server";
     try {
-      const { headers, url, isForcedDraft } = getStuffFromEnv(basehubProps);
+      const { headers, url, isForcedDraft } =
+        await getStuffFromEnv(basehubProps);
       if (
         (await draftMode()).isEnabled === false &&
         !isForcedDraft &&
@@ -73,7 +71,7 @@ export const ServerToolbar = async ({
         return { status: 403, response: { error: "Unauthorized" } };
       }
       const appApiEndpoint = getBaseHubAppApiEndpoint(
-        url,
+        new URL(url),
         "/api/nextjs/latest-branches"
       );
 
@@ -120,9 +118,9 @@ export const ServerToolbar = async ({
   ) => {
     "use server";
 
-    const { headers, url } = getStuffFromEnv(basehubProps);
+    const { headers, url } = await getStuffFromEnv(basehubProps);
     const appApiEndpoint = getBaseHubAppApiEndpoint(
-      url,
+      new URL(url),
       "/api/nextjs/pending-tags"
     );
 
@@ -139,7 +137,7 @@ export const ServerToolbar = async ({
         "x-basehub-ref": ref || headers["x-basehub-ref"],
         "x-basehub-preview-token": bshbPreviewToken,
         "x-basehub-sdk-build-id": headers["x-basehub-sdk-build-id"],
-      },
+      } as HeadersInit,
     });
 
     if (res.status !== 200) {

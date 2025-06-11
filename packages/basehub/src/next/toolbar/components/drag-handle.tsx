@@ -1,4 +1,5 @@
 import * as React from "react";
+// @ts-ignore
 import s from "../toolbar.module.scss";
 
 export type DragHandle = { hasDragged: boolean };

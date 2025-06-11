@@ -1,12 +1,11 @@
-// @ts-nocheck
-import { type BatchOptions, createFetcher } from "./_fetcher";
-import type { ExecutionResult, LinkedType } from "./_types";
+import { type BatchOptions, createFetcher } from "./_fetcher.js";
+import type { ExecutionResult } from "./_types.js";
 import {
   generateGraphqlOperation,
   type GraphqlOperation,
-} from "./_generate-graphql-operation";
-import { replaceSystemAliases } from "./_aliasing";
-import { FieldsSelection } from "./_type-selection";
+} from "./_generate-graphql-operation.js";
+import { replaceSystemAliases } from "./_aliasing.js";
+import { FieldsSelection } from "./_type-selection.js";
 
 export type Headers =
   | HeadersInit
@@ -24,6 +23,11 @@ export type ClientOptions = Omit<RequestInit, "body" | "headers"> & {
   fetcher?: BaseFetcher;
   fetch?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
   headers?: Headers;
+  getExtraFetchOptions?: (
+    op: "query" | "mutation",
+    body: GraphqlOperation,
+    originalRequest: any
+  ) => Partial<RequestInit> | Promise<Partial<RequestInit>>;
 };
 
 export type GetClient<
@@ -48,17 +52,7 @@ export const createClient = <
 >({
   getExtraFetchOptions,
   ...options
-}: ClientOptions & {
-  queryRoot?: LinkedType;
-  mutationRoot?: LinkedType;
-  subscriptionRoot?: LinkedType;
-  getExtraFetchOptions?: (
-    op: "query" | "mutation",
-    body: GraphqlOperation,
-    originalRequest: any
-  ) => Partial<RequestInit> | Promise<Partial<RequestInit>>;
-}): GetClient<Q, QSel, M, MSel> => {
-  const fetcher = createFetcher(options);
+}: ClientOptions): GetClient<Q, QSel, M, MSel> => {
   return {
     query: async <R>(request: R): Promise<FieldsSelection<Q, R>> => {
       const body = generateGraphqlOperation("query", request as any);
@@ -67,6 +61,7 @@ export const createClient = <
         body,
         request
       );
+      const fetcher = createFetcher({ ...options, ...extraFetchOptions });
       const result = await fetcher(body as GraphqlOperation, extraFetchOptions);
       return replaceSystemAliases(result);
     },
@@ -77,6 +72,7 @@ export const createClient = <
         body,
         request
       );
+      const fetcher = createFetcher({ ...options, ...extraFetchOptions });
       const result = await fetcher(body as GraphqlOperation, extraFetchOptions);
       return replaceSystemAliases(result);
     },

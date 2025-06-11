@@ -2,7 +2,7 @@ export {
   getSearchClient as getSearchClientRaw,
   search,
   askAi,
-} from "./primitive";
+} from "./primitive.js";
 export type {
   Highlight,
   Hit,
@@ -10,4 +10,4 @@ export type {
   SearchResult,
   AskAiResult,
   AskAiOptions,
-} from "./primitive";
+} from "./primitive.js";

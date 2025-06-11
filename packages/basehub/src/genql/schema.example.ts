@@ -1,4 +1,4 @@
-import { FieldsSelection } from "./runtime/_type-selection";
+import type { FieldsSelection } from "./runtime/_type-selection.js";
 
 export type Scalars = {
   MyCustomScalar: { x: string };

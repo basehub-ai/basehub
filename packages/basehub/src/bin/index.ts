@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import arg from "arg";
-import { main } from "./main";
-import { formatError } from "./util/format-error";
+import { main } from "./main.js";
+import { formatError } from "./util/format-error.js";
 import fs from "fs";
 import resolvePkg from "resolve-pkg";
 

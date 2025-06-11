@@ -1,4 +1,4 @@
-import type { QueryResults } from "./server-pump";
+import type { QueryResults } from "./server-pump.js";
 
 export type ResponseCache = {
   data: QueryResults<[]>[number] | null;

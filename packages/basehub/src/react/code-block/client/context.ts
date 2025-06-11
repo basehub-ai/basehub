@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ClientSnippet } from "../types";
+import type { ClientSnippet } from "../types.js";
 
 export const CodeBlockContext = React.createContext<
   | {

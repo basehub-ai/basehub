@@ -1,22 +1,18 @@
 import { generate } from "@basehub/genql";
 import resolvePkg from "resolve-pkg";
 import path from "path";
-import { Args } from ".";
+import { Args } from "./index.js";
 import fs from "fs";
 import * as esbuild from "esbuild";
 import { ScssModulesPlugin } from "esbuild-scss-modules-plugin";
-import {
-  getStuffFromEnv,
-  runtime__getStuffFromEnvString,
-  Options,
-} from "./util/get-stuff-from-env";
-import { appendGeneratedCodeBanner } from "./util/disable-linters";
-import { copyDirSync } from "./util/cp";
+import { getStuffFromEnv, Options } from "./util/get-stuff-from-env.js";
+import { appendGeneratedCodeBanner } from "./util/disable-linters.js";
+import { copyDirSync } from "./util/cp.js";
 import { z } from "zod";
 import { createHash } from "crypto";
-import { ResolvedRef } from "../common-types";
-import { ensureCrossPlatformTsImport } from "./util/cross-platform-ts-imports";
-import { ensureSingleInstance } from "./util/ensure-single-instance";
+import type { ResolvedRef } from "../common-types.js";
+import { ensureCrossPlatformTsImport } from "./util/cross-platform-ts-imports.js";
+import { ensureSingleInstance } from "./util/ensure-single-instance.js";
 
 const buildManifestSchema = z.object({
   generatedAt: z.string(),
@@ -39,11 +35,12 @@ export const main = async (
   const options: Options = {
     token: args["--token"],
     prefix: args["--env-prefix"],
-    output: args["--output"],
+    cli: {
+      output: args["--output"],
+    },
     draft: args["--draft"],
     ref: args["--ref"],
     apiVersion: args["--api-version"],
-    sdkBuildId,
     ...(opts?.forceDraft && { draft: true }),
   };
 
@@ -62,11 +59,7 @@ export const main = async (
     isNextjs = false;
   }
 
-  const { output } = await getStuffFromEnv({
-    ...options,
-    previousResolvedRef,
-    sdkBuildId,
-  });
+  const { output } = await getStuffFromEnv({ ...options });
 
   let shouldAppendToGitIgnore = "";
   let pathArgs: string[] = [];
@@ -99,14 +92,11 @@ export const main = async (
       url,
       headers,
       draft,
-      gitBranch,
-      gitCommitSHA,
       gitBranchDeploymentURL,
       resolvedRef,
-      newResolvedRefPromise,
       token,
       productionDeploymentURL,
-    } = await getStuffFromEnv({ ...options, previousResolvedRef, sdkBuildId });
+    } = await getStuffFromEnv({ ...options, revalidateResolvedRef: true });
 
     if (!silent) {
       logInsideBox([
@@ -193,7 +183,7 @@ export const main = async (
       return {
         preventedClientGeneration,
         schemaHash,
-        newResolvedRef: await newResolvedRefPromise,
+        newResolvedRef: resolvedRef,
       };
     }
 
@@ -237,16 +227,16 @@ export const main = async (
       "const createClient = "
     );
 
-    // this should go at the end so that it doesn't suffer any modifications.
-    schemaFileContents = schemaFileContents.concat(
-      `\n${runtime__getStuffFromEnvString({
-        ...options,
-        draft,
-        forceDraft: opts?.forceDraft,
-        gitBranch,
-        gitCommitSHA,
-      })}}`
-    );
+    // // this should go at the end so that it doesn't suffer any modifications.
+    // schemaFileContents = schemaFileContents.concat(
+    //   `\n${runtime__getStuffFromEnvString({
+    //     ...options,
+    //     draft,
+    //     forceDraft: opts?.forceDraft,
+    //     gitBranch,
+    //     gitCommitSHA,
+    //   })}}`
+    // );
 
     if (
       schemaFileContents.includes("mutation<R extends MutationGenqlSelection>")
@@ -726,7 +716,7 @@ import type { Language as B_Language } from './react-code-block';
     return {
       preventedClientGeneration,
       schemaHash,
-      newResolvedRef: await newResolvedRefPromise,
+      newResolvedRef: resolvedRef,
     };
   }
 

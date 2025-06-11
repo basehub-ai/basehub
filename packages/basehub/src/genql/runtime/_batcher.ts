@@ -1,5 +1,5 @@
-import type { GraphqlOperation } from "./_generate-graphql-operation";
-import { GenqlError } from "./_error";
+import type { GraphqlOperation } from "./_generate-graphql-operation.js";
+import { GenqlError } from "./_error.js";
 
 type Variables = Record<string, any>;
 

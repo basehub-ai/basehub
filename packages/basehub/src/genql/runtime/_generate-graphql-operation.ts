@@ -1,5 +1,5 @@
-import { aliasSeparator } from "./_aliasing";
-import type { LinkedField, LinkedType } from "./_types";
+import { aliasSeparator } from "./_aliasing.js";
+import type { LinkedField, LinkedType } from "./_types.js";
 
 export interface Args {
   [arg: string]: any | undefined;

@@ -1,48 +1,47 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import { dotenvLoad } from "dotenv-mono";
-import { getGitEnv } from "./get-git-env";
-import { ResolvedRef } from "../../common-types";
-
-/**
- * IMPORTANT: This function's logic needs to be the same as the one further down, which will be injected to the generated code and ran at runtime.
- */
+import { getGitEnv } from "./get-git-env.js";
+import type { ResolvedRef } from "../../common-types.js";
+import { hashObject } from "./hash.js";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
 const DEFAULT_API_VERSION = "4";
 
 export type Options = {
-  forceDraft?: boolean;
   draft?: boolean;
-  output: string | undefined;
-  prefix: string | undefined;
+  prefix?: string | undefined;
+  token?: string | undefined;
+  ref?: string | undefined;
+  apiVersion?: string | undefined;
+  revalidateResolvedRef?: boolean;
   /**
-   * @deprecated
+   * In case this is being called from the CLI and not the user's app runtime
    */
-  token: string | undefined;
-  ref: string | undefined;
-  apiVersion: string | undefined;
-  sdkBuildId: string;
+  cli?: {
+    /**
+     * in case of a type generation
+     */
+    output?: string | undefined;
+  };
 };
 
-export const getStuffFromEnv = async (
-  options: Options & {
-    previousResolvedRef: ResolvedRef | null;
+export const getStuffFromEnv = async (options?: Options) => {
+  if (!options) {
+    options = {};
   }
-): Promise<{
-  output: string | null;
-  draft: boolean;
-  url: URL;
-  headers: Record<string, string>;
-  gitBranch: string | null;
-  gitCommitSHA: string | null;
-  gitBranchDeploymentURL: string | null;
-  productionDeploymentURL: string | null;
-  token: string;
-  resolvedRef: ResolvedRef;
-  newResolvedRefPromise: Promise<ResolvedRef>;
-}> => {
-  dotenvLoad({ priorities: { ".dev.vars": 1 } });
+
+  if (options.cli) {
+    await import("dotenv-mono").then(({ dotenvLoad }) => {
+      dotenvLoad({ priorities: { ".dev.vars": 1 } });
+    });
+  }
+
+  let isForcedDraft = false;
+  try {
+    isForcedDraft = process.env.NODE_ENV === "development";
+  } catch (err) {
+    // noop
+  }
 
   type EnvVarName =
     | "TOKEN"
@@ -148,6 +147,10 @@ export const getStuffFromEnv = async (
       : undefined) ??
     false;
 
+  if (isForcedDraft) {
+    draft = true;
+  }
+
   if (options?.draft) {
     draft = true;
   }
@@ -186,9 +189,9 @@ export const getStuffFromEnv = async (
     gitCommitSHA,
     gitBranchDeploymentURL,
     productionDeploymentURL,
-  } = getGitEnv();
+  } = await getGitEnv(options);
 
-  const newResolvedRefPromise = resolveRef({
+  const resolvedRef = await resolveRef({
     url: basehubUrl,
     token,
     ref,
@@ -197,30 +200,28 @@ export const getStuffFromEnv = async (
     gitBranchDeploymentURL,
     productionDeploymentURL,
     apiVersion,
+    revalidate: options.revalidateResolvedRef,
   });
-
-  const resolvedRef =
-    options.previousResolvedRef ?? (await newResolvedRefPromise);
 
   return {
     draft,
-    output: getEnvVar("OUTPUT") ?? options.output ?? null,
-    url: basehubUrl,
+    isForcedDraft,
+    output: getEnvVar("OUTPUT") ?? options.cli?.output ?? null,
+    resolvedRef,
+    url: basehubUrl.toString(),
     gitBranch,
     gitCommitSHA,
     token,
-    resolvedRef,
-    newResolvedRefPromise,
     gitBranchDeploymentURL,
     productionDeploymentURL,
     headers: {
       "x-basehub-token": token,
-      "x-basehub-ref": resolvedRef.ref,
-      "x-basehub-sdk-build-id": options.sdkBuildId,
+      "x-basehub-api-version": apiVersion,
+      "x-basehub-sdk-build-id": resolvedRef.id,
+      ...(ref ? { "x-basehub-ref": ref } : {}),
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
       ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
-      ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
       ...(gitBranchDeploymentURL
         ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
         : {}),
@@ -231,7 +232,9 @@ export const getStuffFromEnv = async (
   };
 };
 
-async function resolveRef({
+const resolvedRefCache = new Map<string, ResolvedRef>();
+
+export async function resolveRef({
   url,
   token,
   ref,
@@ -240,6 +243,7 @@ async function resolveRef({
   gitBranchDeploymentURL,
   productionDeploymentURL,
   apiVersion,
+  revalidate,
 }: {
   url: URL;
   token: string;
@@ -249,7 +253,30 @@ async function resolveRef({
   gitBranchDeploymentURL: string | null;
   productionDeploymentURL: string | null;
   apiVersion: string | null;
+  revalidate?: boolean;
 }) {
+  const headers = {
+    "x-basehub-token": token,
+    ...(ref ? { "x-basehub-ref": ref } : {}),
+    ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
+    ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
+    ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
+    ...(gitBranchDeploymentURL
+      ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
+      : {}),
+    ...(productionDeploymentURL
+      ? { "x-basehub-production-deployment-url": productionDeploymentURL }
+      : {}),
+  };
+
+  const cacheKey = hashObject({ headers });
+  if (!revalidate) {
+    const cachedResolvedRef = resolvedRefCache.get(cacheKey);
+    if (cachedResolvedRef) {
+      return cachedResolvedRef;
+    }
+  }
+
   const refResolverEndpoint = getBaseHubAppApiEndpoint(
     url,
     "/api/git/resolve-ref"
@@ -259,17 +286,7 @@ async function resolveRef({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-basehub-token": token,
-      ...(ref ? { "x-basehub-ref": ref } : {}),
-      ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
-      ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
-      ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
-      ...(gitBranchDeploymentURL
-        ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL }
-        : {}),
-      ...(productionDeploymentURL
-        ? { "x-basehub-production-deployment-url": productionDeploymentURL }
-        : {}),
+      ...headers,
     },
     cache: "no-store",
     body: JSON.stringify({}),
@@ -281,182 +298,9 @@ async function resolveRef({
 
   const data = await res.json();
   const resolvedRef = data as ResolvedRef;
+  resolvedRefCache.set(cacheKey, resolvedRef);
   return resolvedRef;
 }
-
-/**
- * Will inject to generated code, so we keep the same logic and don't hardcode the URL in the generated output.
- * doesn't use Zod nor dotenv-flow (so we don't ship extra stuff to the generated bundle). Assumes the env vars are already loaded.
- */
-export const runtime__getStuffFromEnvString = (
-  options: Options & {
-    gitBranch: string | null;
-    gitCommitSHA: string | null;
-  }
-) => /**JavaScript */ `
-export const getStuffFromEnv = (options) => {
-    const defaultEnvVarPrefix = "${defaultEnvVarPrefix}";
-
-    options = options || {};
-    if (options.token === undefined) {
-      options.token = ${
-        options.token ? `"${options.token}"` : undefined
-      } || null;
-    }
-    if (options.prefix === undefined) {
-      options.prefix = ${
-        options.prefix ? `"${options.prefix}"` : undefined
-      } || null;
-    }
-    // we'll use the draft from .env if available
-    if (!options.draft && ${options.draft}) {
-      options.draft = true;
-    }
-
-    const buildEnvVarName = (name) => {
-      let prefix = defaultEnvVarPrefix;
-      if (options.prefix) {
-        if (options.prefix.endsWith("_")) {
-          options.prefix = options.prefix.slice(0, -1); // we remove the trailing _
-        }
-  
-        if (options.prefix.endsWith(name)) {
-          // remove the name from the prefix
-          options.prefix = options.prefix.slice(0, -name.length);
-        }
-  
-        // the user may include BASEHUB in their prefix...
-        if (options.prefix.endsWith(defaultEnvVarPrefix)) {
-          prefix = options.prefix;
-        } else {
-          // ... if they don't, we'll add it ourselves.
-          prefix = \`\${options.prefix}_\${defaultEnvVarPrefix}\`;
-        }
-      }
-      // this should result in something like <prefix>_BASEHUB_{TOKEN,REF,DRAFT} or BASEHUB_{TOKEN,REF,DRAFT}
-      return \`\${prefix}_\${name}\`;
-    };
-
-    const getEnvVar = (name: EnvVarName) => {
-      if (typeof process === 'undefined') {
-        return undefined;
-      }
-      return process?.env?.[buildEnvVarName(name)];
-    };
-
-    const parsedDebugForcedURL = getEnvVar("DEBUG_FORCED_URL");
-    const parsedBackwardsCompatURL = getEnvVar("URL");
-
-    const backwardsCompatURL = parsedBackwardsCompatURL
-      ? new URL(parsedBackwardsCompatURL)
-      : undefined;
-
-
-    const basehubUrl = new URL(
-      parsedDebugForcedURL
-        ? parsedDebugForcedURL
-        : \`${basehubAPIOrigin}/graphql\`
-    );
-
-    // These params can either come disambiguated, or in the URL.
-    // Params that come from the URL take precedence.
-
-    const parsedBasehubTokenEnv = getEnvVar("TOKEN");
-    const parsedBasehubRefEnv = getEnvVar("REF");
-    const parsedBasehubDraftEnv = getEnvVar("DRAFT");
-    const parsedBasehubApiVersionEnv = getEnvVar("API_VERSION");
-
-    let tokenNotFoundErrorMessage = \`🔴 Token not found. Make sure to include the \${buildEnvVarName(
-      "TOKEN"
-    )} env var.\`;
-
-    const resolveTokenParam = (token) => {
-      if (!token) return null;
-      const isRaw = token.startsWith("bshb_");
-      if (isRaw) return token;
-      tokenNotFoundErrorMessage = \`🔴 Token not found. Make sure to include the \${token} env var.\`;
-      if (typeof process === 'undefined') {
-        return undefined;
-      }
-      return process?.env?.[token] ?? ''; // empty string to prevent fallback
-    };
-
-    const resolvedToken = resolveTokenParam(options?.token ?? null);
-
-    const token =
-      resolvedToken ?? basehubUrl.searchParams.get("token") ??
-      parsedBasehubTokenEnv ??
-      (backwardsCompatURL
-        ? backwardsCompatURL.searchParams.get("token")
-        : undefined) ??
-      null;
-
-    if (!token) {
-      throw new Error(tokenNotFoundErrorMessage);
-    }
-
-    let draft =
-       basehubUrl.searchParams.get("draft") ??
-      parsedBasehubDraftEnv ??
-      (backwardsCompatURL
-        ? backwardsCompatURL.searchParams.get("draft")
-        : undefined) ??
-      false;
-
-    if (options?.draft !== undefined) {
-      draft = options.draft;
-    }
-
-    let apiVersion =
-      basehubUrl.searchParams.get("api-version") ??
-      parsedBasehubApiVersionEnv ??
-      (backwardsCompatURL
-        ? backwardsCompatURL.searchParams.get("api-version")
-        : undefined) ??
-      "${DEFAULT_API_VERSION}";
-
-      if (options?.apiVersion !== undefined) {
-        apiVersion = options.apiVersion;
-      }
-  
-    // 2. let's validate the URL
-
-    if (basehubUrl.pathname.split("/")[1] !== "graphql") {
-        throw new Error(\`🔴 Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql.\`);
-    }
-
-    // we'll pass these via headers
-    basehubUrl.searchParams.delete("token");
-    basehubUrl.searchParams.delete("ref");
-    basehubUrl.searchParams.delete("draft");
-    basehubUrl.searchParams.delete("api-version");
-
-    // 3.
-    const gitBranch = ${options.gitBranch ? `"${options.gitBranch}"` : null};
-    const gitCommitSHA = ${
-      options.gitCommitSHA ? `"${options.gitCommitSHA}"` : null
-    };
-
-    const sdkBuildId = "${options.sdkBuildId}";
-
-    return {
-      isForcedDraft: ${!!options.forceDraft},
-      draft,
-      url: basehubUrl,
-      sdkBuildId,
-      headers: {
-        "x-basehub-token": token,
-        "x-basehub-ref": options?.ref ?? resolvedRef.ref,
-        "x-basehub-sdk-build-id": sdkBuildId,
-        ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
-        ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
-        ...(gitBranchDeploymentURL ? { "x-basehub-git-branch-deployment-url": gitBranchDeploymentURL } : {}),
-        ...(productionDeploymentURL ? { "x-basehub-production-deployment-url": productionDeploymentURL } : {}),
-        ...(draft ? { "x-basehub-draft": "true" } : {}),
-        ...(apiVersion ? { "x-basehub-api-version": apiVersion } : {}),
-      },
-    };
-`;
 
 function getBaseHubAppApiEndpoint(url: URL, pathname: string) {
   let origin: string;

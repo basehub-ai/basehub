@@ -1,13 +1,15 @@
 "use client";
 
-import * as React from "react";
+// @ts-ignore
 import s from "./toolbar.module.scss";
-import { Tooltip } from "./components/tooltip";
-import { DragHandle } from "./components/drag-handle";
-import { BranchSwitcher, LatestBranch } from "./components/branch-swticher";
+import * as React from "react";
+import { Tooltip } from "./components/tooltip.js";
+import { DragHandle } from "./components/drag-handle.js";
+import { BranchSwitcher, LatestBranch } from "./components/branch-swticher.js";
 import debounce from "lodash.debounce";
+// @ts-ignore
 import { usePathname } from "next/navigation";
-import { ResolvedRef } from "../../common-types";
+import { ResolvedRef } from "../../common-types.js";
 
 const TOOLBAR_POSITION_STORAGE_KEY = "bshb_toolbar_pos";
 

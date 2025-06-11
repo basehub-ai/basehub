@@ -1,2 +1,2 @@
-export { useCodeBlockContext } from "./context";
-export { useCopyToClipboard } from "./use-copy-to-clipboard";
+export { useCodeBlockContext } from "./context.js";
+export { useCopyToClipboard } from "./use-copy-to-clipboard.js";

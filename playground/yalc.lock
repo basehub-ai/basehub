@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "packages": {
+    "basehub": {
+      "signature": "87c812216acf20bde1d6d0a284012fc8",
+      "file": true,
+      "replaced": "workspace:*"
+    }
+  }
+}

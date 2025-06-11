@@ -8,58 +8,87 @@
   "bugs": "https://github.com/basehub-ai/basehub/issues",
   "homepage": "https://basehub.com",
   "bin": {
-    "basehub": "./dist/bin.cjs"
+    "basehub": "./dist/bin/index.js"
   },
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "files": [
-    "dts",
     "dist",
-    "scripts",
-    "index.js",
-    "index.d.ts",
-    "react-pump.js",
-    "react-pump.d.ts",
-    "next-toolbar.js",
-    "next-toolbar.d.ts",
-    "src/next/toolbar",
-    "src/react/pump",
-    "src/events",
-    "src/workflows",
-    "react-svg.js",
-    "react-svg.d.ts",
-    "react-icon.js",
-    "react-icon.d.ts",
-    "react-rich-text.js",
-    "react-rich-text.d.ts",
-    "react-form.js",
-    "react-form.d.ts",
-    "react-code-block",
-    "react-search.js",
-    "react-search.d.ts",
-    "api-transaction.d.ts",
-    "events.js",
-    "events.d.ts",
-    "workflows.js",
-    "workflows.d.ts",
-    "search.js",
-    "search.d.ts",
-    "next-image.js",
-    "next-image.d.ts"
+    "README.md"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react-pump": {
+      "import": "./dist/react/pump/index.js",
+      "types": "./dist/react/pump/index.d.ts"
+    },
+    "./next-toolbar": {
+      "import": "./dist/next/toolbar/index.js",
+      "types": "./dist/next/toolbar/index.d.ts"
+    },
+    "./events": {
+      "import": "./dist/events/index.js",
+      "types": "./dist/events/index.d.ts"
+    },
+    "./workflows": {
+      "import": "./dist/workflows/index.js",
+      "types": "./dist/workflows/index.d.ts"
+    },
+    "./react-icon": {
+      "import": "./dist/react/icon/index.js",
+      "types": "./dist/react/icon/index.d.ts"
+    },
+    "./react-form": {
+      "import": "./dist/react/form/index.js",
+      "types": "./dist/react/form/index.d.ts"
+    },
+    "./react-svg": {
+      "import": "./dist/react/svg/index.js",
+      "types": "./dist/react/svg/index.d.ts"
+    },
+    "./search": {
+      "import": "./dist/search/index.js",
+      "types": "./dist/search/index.d.ts"
+    },
+    "./react-search": {
+      "import": "./dist/react/search/index.js",
+      "types": "./dist/react/search/index.d.ts"
+    },
+    "./react-rich-text": {
+      "import": "./dist/react/rich-text/index.js",
+      "types": "./dist/react/rich-text/index.d.ts"
+    },
+    "./next-image": {
+      "import": "./dist/next/image/index.js",
+      "types": "./dist/next/image/index.d.ts"
+    },
+    "./react-code-block": {
+      "import": "./dist/react/code-block/index.js",
+      "types": "./dist/react/code-block/index.d.ts"
+    },
+    "./react-code-block/client": {
+      "import": "./dist/react/code-block/client/index.js",
+      "types": "./dist/react/code-block/client/index.d.ts"
+    },
+    "./api-transaction": {
+      "import": "./dist/api-transaction.js",
+      "types": "./dist/api-transaction.d.ts"
+    }
+  },
   "sideEffects": false,
   "scripts": {
     "emit-dts": "dts-bundle-generator --inline-declare-externals --external-inlines @basehub/mutation-api-helpers --no-check -o dts/src/api-transaction.d.ts src/api-transaction.ts && node scripts/fix-api-transaction-types.mjs && tsc --project tsconfig.dts-only.json",
     "dev": "pnpm emit-dts && pnpm build --watch",
-    "build": "pnpm build:bin && pnpm build:client",
-    "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
-    "build:client": "tsup --config tsup-client.config.ts",
+    "build": "tsc",
+    "yalc:push": "pnpm build && yalc push",
     "test": "vitest"
   },
   "dependencies": {
     "@basehub/genql": "9.0.0-canary.13",
-    "@genql/runtime": "^2.10.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@shikijs/transformers": "1.17.7",
     "@xmldom/xmldom": "^0.9.6",
