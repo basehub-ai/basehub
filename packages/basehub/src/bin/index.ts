@@ -2,6 +2,7 @@
 
 import arg from "arg";
 import { main } from "./main";
+import { pack } from "./pack";
 import { formatError } from "./util/format-error";
 import fs from "fs";
 import resolvePkg from "resolve-pkg";
@@ -25,6 +26,7 @@ async function help(code: number) {
   Usage
     $ basehub
     $ basehub dev  # turns on draft and watch mode automatically.
+    $ basehub pack # creates a standalone tarball of the generated client.
 
   Options
     --output, -o  Output directory, if you don't want the default behavior.
@@ -33,6 +35,8 @@ async function help(code: number) {
     --watch, -w  Watch for changes and regenerate.
     --draft, -d  Generate with draft mode enabled.
     --api-version, -av  The version of the API to use.
+    --pack-dest, -pd  Directory to place the tarball (pack command only).
+    --keep-generated, -kg  Keep the generated client directory after packing.
     --version, -v  Version number.
     --help, -h     Display this message.`);
   process.exit(code);
@@ -61,6 +65,8 @@ const args = arg(
     "--watch": Boolean,
     "--api-version": String,
     "--debug": Boolean,
+    "--pack-dest": String,
+    "--keep-generated": Boolean,
     // aliases
     "-o": "--output",
     "-t": "--token",
@@ -72,6 +78,8 @@ const args = arg(
     "-h": "--help",
     "-w": "--watch",
     "-av": "--api-version",
+    "-pd": "--pack-dest",
+    "-kg": "--keep-generated",
   },
   { permissive: true }
 );
@@ -88,6 +96,10 @@ const cmds: { [key: string]: (args: Args) => Promise<void> } = {
   generate: () => main(args, { version }),
   build: () => main(args, { version }), // same as "generate"
   dev: () => main({ ...args, "--watch": true }, { forceDraft: true, version }),
+  pack: async () => {
+    const _tarballPath = await pack(args, { version });
+    // Don't print the path again as it's already logged in the pack function
+  },
   help: () => help(0),
 };
 

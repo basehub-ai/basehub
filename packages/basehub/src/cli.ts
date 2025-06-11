@@ -1,4 +1,5 @@
 import { main } from "./bin/main";
+import { pack as packCommand } from "./bin/pack";
 import { Args } from "./bin/index";
 
 export interface GenerateOptions {
@@ -46,6 +47,14 @@ export interface GenerateOptions {
    * SDK version (defaults to package version)
    */
   version?: string;
+  /**
+   * Directory to place the tarball (pack command only)
+   */
+  packDest?: string;
+  /**
+   * Keep the generated client directory after packing
+   */
+  keepGenerated?: boolean;
 }
 
 /**
@@ -63,6 +72,8 @@ function optionsToArgs(options: GenerateOptions = {}): Args {
   if (options.watch) args["--watch"] = true;
   if (options.apiVersion) args["--api-version"] = options.apiVersion;
   if (options.debug) args["--debug"] = true;
+  if (options.packDest) args["--pack-dest"] = options.packDest;
+  if (options.keepGenerated) args["--keep-generated"] = true;
 
   return args as Args;
 }
@@ -140,6 +151,40 @@ export async function dev(options: GenerateOptions = {}): Promise<void> {
  * Alias for generate() - builds the BaseHub client
  */
 export const build = generate;
+
+/**
+ * Create a standalone tarball of the BaseHub client
+ *
+ * @param options Configuration options for generation and packing
+ * @returns Promise that resolves with the path to the created tarball
+ *
+ * @example
+ * ```typescript
+ * import { pack } from 'basehub/cli'
+ *
+ * // Create tarball with default settings
+ * const tarballPath = await pack()
+ * console.log('Tarball created at:', tarballPath)
+ *
+ * // Create tarball with custom options
+ * const customPath = await pack({
+ *   output: './my-basehub',
+ *   draft: true,
+ *   packDest: './dist',        // Place tarball in ./dist/
+ *   keepGenerated: true        // Keep generated client directory
+ * })
+ * ```
+ */
+export async function pack(options: GenerateOptions = {}): Promise<string> {
+  const version = options.version || getPackageVersion();
+  const args = optionsToArgs(options);
+  const opts = {
+    version,
+    ...(options.forceDraft && { forceDraft: true }),
+  };
+
+  return packCommand(args, opts);
+}
 
 // Re-export types that might be useful
 export type { Args } from "./bin/index";

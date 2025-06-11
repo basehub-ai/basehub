@@ -1,5 +1,95 @@
 # basehub
 
+## 8.3.0-canary.16
+
+### Patch Changes
+
+- sd:
+
+## 8.3.0-canary.15
+
+### Patch Changes
+
+- .
+
+## 8.3.0-canary.14
+
+### Patch Changes
+
+- dsf
+
+## 8.3.0-canary.13
+
+### Patch Changes
+
+- .
+
+## 8.3.0-canary.12
+
+### Patch Changes
+
+- asdf
+
+## 8.3.0-canary.11
+
+### Patch Changes
+
+- .
+
+## 8.3.0-canary.10
+
+### Patch Changes
+
+- asdf
+
+## 8.3.0-canary.9
+
+### Patch Changes
+
+- .
+
+## 8.3.0-canary.8
+
+### Patch Changes
+
+- asdf
+
+## 8.3.0-canary.7
+
+### Patch Changes
+
+- .
+
+## 8.3.0-canary.6
+
+### Patch Changes
+
+- .
+
+## 8.3.0-canary.5
+
+### Patch Changes
+
+- fitz
+
+## 8.3.0-canary.4
+
+### Patch Changes
+
+- next
+
+## 8.3.0-canary.3
+
+### Patch Changes
+
+- pack next
+
+## 8.3.0-canary.2
+
+### Patch Changes
+
+- pack v0.00001
+
 ## 8.3.0-canary.1
 
 ### Patch Changes
