@@ -1,6 +1,6 @@
 import { main } from "./main";
 import { Args } from "./index";
-import { ALL_PACK_MODULES } from "./shared-modules";
+import { ALL_PACK_MODULES, generatePackageExports } from "./shared-modules";
 import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
@@ -170,14 +170,7 @@ async function bundleStandalone(
     name: "basehub",
     main: "./index.js",
     types: "./index.d.ts",
-    exports: {
-      ".": {
-        import: "./index.js",
-        require: "./index.js",
-        types: "./index.d.ts",
-      },
-      "./*": "./*",
-    },
+    exports: generatePackageExports(true), // Include pack-only modules for standalone
     sideEffects: false,
     files: ["**/*"],
     dependencies: basehubDependencies,
