@@ -54,10 +54,12 @@
     "dev": "pnpm emit-dts && pnpm build --watch",
     "build": "pnpm build:bin && pnpm build:client",
     "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
-    "build:client": "tsup --config tsup-client.config.ts"
+    "build:client": "tsup --config tsup-client.config.ts",
+    "test": "vitest"
   },
   "dependencies": {
     "@basehub/genql": "9.0.0-canary.13",
+    "@genql/runtime": "^2.10.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@shikijs/transformers": "1.17.7",
     "@xmldom/xmldom": "^0.9.6",
@@ -91,6 +93,7 @@
     "react-dom": "18.2.0",
     "tsconfig": "workspace:*",
     "tsup": "8.0.2",
-    "type-fest": "3.0.0"
+    "type-fest": "3.0.0",
+    "vitest": "^3.2.3"
   }
 }
