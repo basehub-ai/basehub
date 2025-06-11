@@ -47,8 +47,8 @@
       "types": "./dist/react/form/index.d.ts"
     },
     "./react-svg": {
-      "import": "./dist/react/svg/index.js",
-      "types": "./dist/react/svg/index.d.ts"
+      "import": "./dist/react/icon/index.js",
+      "types": "./dist/react/icon/index.d.ts"
     },
     "./search": {
       "import": "./dist/search/index.js",
@@ -83,7 +83,7 @@
   "scripts": {
     "emit-dts": "dts-bundle-generator --inline-declare-externals --external-inlines @basehub/mutation-api-helpers --no-check -o dts/src/api-transaction.d.ts src/api-transaction.ts && node scripts/fix-api-transaction-types.mjs && tsc --project tsconfig.dts-only.json",
     "dev": "pnpm emit-dts && pnpm build --watch",
-    "build": "tsc",
+    "build": "tsup --config tsup.config.ts",
     "yalc:push": "pnpm build && yalc push",
     "test": "vitest"
   },

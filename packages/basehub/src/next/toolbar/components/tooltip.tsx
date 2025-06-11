@@ -20,6 +20,7 @@ export const Tooltip = React.forwardRef(
   ) => {
     const tooltipContentRef = React.useRef<HTMLParagraphElement>(null);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const checkOverflow = React.useCallback(
       debounce(() => {
         if (tooltipContentRef.current) {
