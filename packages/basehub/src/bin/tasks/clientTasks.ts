@@ -9,7 +9,10 @@ import { RenderContext } from "./render/common/RenderContext.js";
 import { renderRequestTypes } from "./render/requestTypes/renderRequestTypes.js";
 import { renderResponseTypes } from "./render/responseTypes/renderResponseTypes.js";
 import { renderSchema } from "./render/schema/renderSchema.js";
-import { renderModuleAugmentation } from "./render/responseTypes/renderModuleAugmentation.js";
+import {
+  renderModuleAugmentation,
+  enhanceMutationGenqlSelection,
+} from "./render/responseTypes/renderModuleAugmentation.js";
 // import { renderTypeGuards } from "./render/typeGuards/renderTypeGuards.js";
 
 export type OutputContextRef = {
@@ -64,7 +67,9 @@ export const clientTasks = (
                 await writeFileToPath(
                   [output],
                   "// @ts-nocheck\n/* istanbul ignore file */\n/* tslint:disable */\n/* eslint-disable */\n\n" +
-                    renderCtx.toCode("typescript")
+                    enhanceMutationGenqlSelection(
+                      await renderCtx.toCode("typescript")
+                    )
                 );
               },
             },

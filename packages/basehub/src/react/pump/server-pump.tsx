@@ -6,6 +6,7 @@ import {
   generateQueryOp,
   type QueryGenqlSelection,
   type QueryResult,
+  type Options,
 } from "../../index.js";
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
 import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
@@ -46,7 +47,12 @@ export type PumpProps<
       ) => React.ReactNode | Promise<React.ReactNode>;
   queries: [...Queries]; // Tuple type for better type inference
   bind?: Bind;
-} & Parameters<typeof basehub>[0];
+} & Omit<Options, "ref"> & {
+    /**
+     * same as "ref", but to avoid React complaining about the "ref" prop
+     */
+    _ref?: Options["ref"];
+  };
 
 // Utility type to infer result types from an array of queries
 export type QueryResults<Queries extends Array<PumpQuery>> = {
@@ -60,8 +66,10 @@ export const Pump = async <
   children,
   queries,
   bind,
-  ...basehubProps
+  _ref,
+  ..._basehubProps
 }: PumpProps<Queries, Bind>): Promise<JSX.Element> => {
+  const basehubProps = { ..._basehubProps, ref: _ref };
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];

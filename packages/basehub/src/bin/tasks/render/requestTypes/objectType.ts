@@ -82,7 +82,6 @@ export const objectType = (
   }
 
   fieldStrings.push("__typename?: boolean | number");
-  fieldStrings.push("__scalar?: boolean | number");
 
   // add indentation
   fieldStrings = fieldStrings.map((x) =>

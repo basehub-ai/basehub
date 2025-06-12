@@ -12,6 +12,8 @@ import type {
 
 const isDev = process.env.NODE_ENV === "development";
 
+export { RichTextNode, RichTextTocNode };
+
 const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;
 

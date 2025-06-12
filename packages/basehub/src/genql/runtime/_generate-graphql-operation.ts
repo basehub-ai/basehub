@@ -38,6 +38,22 @@ const parseRequest = (
       return parseRequest(fields, ctx, path, options);
     }
 
+    const argsThatShouldNotBeEnums = [
+      // image processing args
+      "format",
+      "anim",
+      "background",
+      "border",
+      "compression",
+      "fit",
+      "gamma",
+      "gravity",
+      "metadata",
+      "rotate",
+      "sharpen",
+      "trim",
+    ];
+
     const argStrings = argNames.map((argName) => {
       let value = args[argName];
       if (typeof value === "object") {
@@ -45,6 +61,11 @@ const parseRequest = (
         value = JSON.stringify(value);
         // strip quotes except for string values
         value = value.replace(/"([^"]+)":/g, "$1:");
+      } else if (
+        typeof value === "string" &&
+        argsThatShouldNotBeEnums.includes(argName)
+      ) {
+        value = JSON.stringify(value);
       }
 
       return `${argName}:${value}`;

@@ -29,6 +29,32 @@ export default function HomePage() {
           );
         }}
       </Pump>
+      this one targets a different ref
+      <Pump
+        _ref="FdhB3Vr5gK0s4S582524R"
+        queries={[
+          {
+            homepage: {
+              _id: true,
+              branching: {
+                sectionTitle: true,
+              },
+            },
+          },
+        ]}
+      >
+        {async ([data]) => {
+          "use server";
+
+          return (
+            <div>
+              <pre>
+                <code>{JSON.stringify(data, null, 2)}</code>
+              </pre>
+            </div>
+          );
+        }}
+      </Pump>
     </>
   );
 }

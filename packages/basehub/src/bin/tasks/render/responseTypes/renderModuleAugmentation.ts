@@ -28,11 +28,23 @@ declare module "${ctx.config?.packageName || "basehub"}" {
   export interface Scalars extends _Scalars {}
 }
 
+import type { Transaction } from 'basehub/api-transaction'
+
 interface _Query extends Query {}
 interface _QueryGenqlSelection extends QueryGenqlSelection {}
 interface _Mutation extends Mutation {}
 interface _MutationGenqlSelection extends MutationGenqlSelection {}
 interface _FragmentsMap extends FragmentsMap {}
 interface _Scalars extends Scalars {}`
+  );
+};
+
+export const enhanceMutationGenqlSelection = (schemaFileContents: string) => {
+  // edit `MutationGenqlSelection` to receive the Transaction directly instead of a string
+  return schemaFileContents.replace(
+    `      /** Transaction data. */
+      data: Scalars["String"];`,
+    `      /** Transaction data. */
+      data: Transaction | Scalars["String"];`
   );
 };
