@@ -1,0 +1,30 @@
+import { GraphQLSchema } from "graphql";
+import { RenderContext } from "../common/RenderContext.js";
+import { sortKeys } from "../common/support.js";
+
+export const renderModuleAugmentation = (
+  schema: GraphQLSchema,
+  ctx: RenderContext
+) => {
+  let typeMap = schema.getTypeMap();
+  if (ctx.config?.sortProperties) {
+    typeMap = sortKeys(typeMap);
+  }
+  ctx.addCodeBlock(
+    `declare module "${ctx.config?.packageName || "basehub"}" {
+  export interface Query extends _Query {}
+  export interface QueryGenqlSelection extends _QueryGenqlSelection {}
+  export interface Mutation extends _Mutation {}
+  export interface MutationGenqlSelection extends _MutationGenqlSelection {}
+  export interface FragmentsMap extends _FragmentsMap {}
+  export interface Scalars extends _Scalars {}
+}
+
+interface _Query extends Query {}
+interface _QueryGenqlSelection extends QueryGenqlSelection {}
+interface _Mutation extends Mutation {}
+interface _MutationGenqlSelection extends MutationGenqlSelection {}
+interface _FragmentsMap extends FragmentsMap {}
+interface _Scalars extends Scalars {}`
+  );
+};

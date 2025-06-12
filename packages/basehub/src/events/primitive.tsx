@@ -1,5 +1,5 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import { Scalars } from "../index.js";
+import type { Scalars } from "../index.js";
 import type { Field } from "../react/form/primitive.js";
 import { getStuffFromEnv } from "../bin/util/get-stuff-from-env.js";
 
@@ -34,7 +34,9 @@ type ExtractEventKey<T extends string> = T extends `${infer Base}:${string}`
   : T;
 
 // Get all event key types (bshb_event_*)
-export type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
+export type EventKeys = KeysStartingWith<Scalars, "bshb_event"> extends never
+  ? `bshb_event_${string}`
+  : KeysStartingWith<Scalars, "bshb_event">;
 export type EventSchema<Key extends `${EventKeys}:${string}`> =
   // @ts-ignore
   EventSchemaMap[ExtractEventKey<Key>];
@@ -172,15 +174,18 @@ type MapScalarTypeToOrder<T extends Record<string, any>> = {
 
 type GetOptions<
   K extends string,
-  Select extends
-    | Partial<Record<keyof Scalars[`schema_${K}`], boolean>>
-    | undefined = undefined,
+  Select extends // @ts-ignore
+
+      | Partial<Record<keyof Scalars[`schema_${K}`], boolean>>
+      | undefined = undefined,
 > =
   | {
       type: "table";
       first?: number;
       skip?: number;
+      // @ts-ignore
       filter?: MapScalarTypeToFilters<Scalars[`schema_${K}`]>;
+      // @ts-ignore
       orderBy?: MapScalarTypeToOrder<Scalars[`schema_${K}`]>;
       select?: Select;
     }
@@ -192,11 +197,14 @@ type GetOptions<
 // Type for table-based response
 type TableResponse<
   K extends string,
+  // @ts-ignore
   T extends Record<keyof Scalars[`schema_${K}`], unknown>,
+  // @ts-ignore
   Select extends Partial<Record<keyof Scalars[`schema_${K}`], boolean>>,
 > =
   | {
       success: true;
+      // @ts-ignore
       data: Array<{ date: string; id: string } & Pick<T, keyof Select>>;
     }
   | {
@@ -219,6 +227,7 @@ type TimeSeriesResponse =
 export function getEvents<
   Key extends `${EventKeys}:${string}`,
   Select extends Partial<
+    // @ts-ignore
     Record<keyof Scalars[`schema_${ExtractEventKey<Key>}`], boolean>
   >,
 >(

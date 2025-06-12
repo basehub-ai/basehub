@@ -22,6 +22,7 @@ export type Options = {
      * in case of a type generation
      */
     output?: string | undefined;
+    packageName?: string | undefined;
   };
 };
 

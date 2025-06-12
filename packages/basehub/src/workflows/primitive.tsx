@@ -1,5 +1,5 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import { Scalars } from "../index.js";
+import type { Scalars } from "../index.js";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -14,7 +14,12 @@ type ExtractWorkflowKey<T extends string> = T extends `${infer Base}:${string}`
   : T;
 
 // Get all event key types (bshb_event_*)
-export type WorkflowKeys = KeysStartingWith<Scalars, "bshb_workflow">;
+export type WorkflowKeys = KeysStartingWith<
+  Scalars,
+  "bshb_workflow"
+> extends never
+  ? `bshb_workflow_${string}`
+  : KeysStartingWith<Scalars, "bshb_workflow">;
 
 // Map from event key to its schema type
 type WorkflowSchemaMap = {

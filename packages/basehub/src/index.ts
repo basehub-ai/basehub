@@ -10,6 +10,14 @@ import {
 } from "./genql/runtime/_generate-graphql-operation.js";
 import { FieldsSelection } from "./genql/runtime/_type-selection.js";
 
+// these will be overridden by the generated types (if any)
+export interface Scalars {}
+export interface Query {}
+export interface Mutation {}
+export interface QueryGenqlSelection {}
+export interface MutationGenqlSelection {}
+export interface FragmentsMap {}
+
 // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
 // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
 export function cacheTagFromQuery(
@@ -159,8 +167,6 @@ export const createClient = <
   return createClientOriginal<Q, QSel, M, MSel>(options);
 };
 
-createClient.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
-
 /**
  * Create a basehub client.
  *
@@ -177,12 +183,10 @@ createClient.replaceSystemAliases = createClientOriginal.replaceSystemAliases;
  * console.log(firstQuery.__typename) // => 'Query'
  *
  */
-export const basehub = createClient<
-  Query,
-  QueryGenqlSelection,
-  Mutation,
-  MutationGenqlSelection
->;
+export const basehub = (...params: Parameters<typeof createClient>) =>
+  createClient<Query, QueryGenqlSelection, Mutation, MutationGenqlSelection>(
+    ...params
+  );
 
 export type QueryResult<fields extends QueryGenqlSelection> = FieldsSelection<
   Query,
@@ -202,10 +206,77 @@ export const generateMutationOp: (
   return generateGraphqlOperation("mutation", fields as any);
 };
 
-// these can be overriden by type generation
+// type helper
 
-export type Scalars = any;
-export type Query = any;
-export type Mutation = any;
-export type QueryGenqlSelection = any;
-export type MutationGenqlSelection = any;
+export function fragmentOn<
+  TypeName extends keyof FragmentsMap,
+  Selection extends FragmentsMap[TypeName]["selection"],
+>(name: TypeName, fields: Selection) {
+  // @ts-ignore
+  return { __fragmentOn: name, ...fields } as const;
+}
+
+// credits: https://stackoverflow.com/a/54487392
+type OmitDistributive<T, K extends PropertyKey> = T extends any
+  ? T extends object
+    ? Id<OmitRecursively<T, K>>
+    : T
+  : never;
+// eslint-disable-next-line @typescript-eslint/ban-types
+type Id<T> = {} & { [P in keyof T]: T[P] }; // Cosmetic use only makes the tooltips expad the type can be removed
+type OmitRecursively<T, K extends PropertyKey> = Omit<
+  { [P in keyof T]: OmitDistributive<T[P], K> },
+  K
+>;
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace fragmentOn {
+  export type infer<T> = T extends {
+    __fragmentOn: infer U extends keyof FragmentsMap;
+  }
+    ? OmitRecursively<
+        FieldsSelection<FragmentsMap[U]["root"], Omit<T, "__fragmentOn">>,
+        "__fragmentOn"
+      >
+    : never;
+}
+
+// This is a BaseHub-specific thing:
+
+type RecursiveCollection<T, Key extends keyof T> = T & {
+  [key in Key]: { items: RecursiveCollection<T, Key> };
+};
+
+export function fragmentOnRecursiveCollection<
+  TypeName extends keyof FragmentsMap,
+  Selection extends FragmentsMap[TypeName]["selection"],
+  RecursiveKey extends keyof FragmentsMap[TypeName]["selection"],
+>(
+  name: TypeName,
+  fields: Selection,
+  options: {
+    recursiveKey: RecursiveKey;
+    levels: number;
+    getLevelArgs?: (level: number) => unknown;
+  }
+) {
+  const current = {
+    // @ts-ignore
+    ...fields,
+  } as RecursiveCollection<
+    { readonly __fragmentOn: TypeName } & Selection,
+    RecursiveKey
+  >;
+  if (options.levels > 0) {
+    current[options.recursiveKey] = {
+      ...(options.getLevelArgs
+        ? { __args: options.getLevelArgs(options.levels) }
+        : {}),
+      items: fragmentOnRecursiveCollection(name, fields, {
+        ...options,
+        levels: options.levels - 1,
+      }),
+    } as any;
+  }
+  return current;
+}

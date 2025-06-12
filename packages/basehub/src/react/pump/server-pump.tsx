@@ -3,13 +3,14 @@ import type { JSX } from "react";
 import type { ResponseCache } from "./types.js";
 import {
   basehub,
-  type QueryGenqlSelection as PumpQuery,
-  type QueryResult,
   generateQueryOp,
+  type QueryGenqlSelection,
+  type QueryResult,
 } from "../../index.js";
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
+import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
 
-export { PumpQuery };
+export interface PumpQuery extends QueryGenqlSelection {}
 
 // we use react.lazy to code split client-pump, which is the heavier part of next-pump, and only required when in draft
 const LazyClientPump = React.lazy(() =>
@@ -153,7 +154,7 @@ export const Pump = async <
               errors.push(_errors);
               responseHashes[index] = _responseHash;
 
-              return basehub.replaceSystemAliases(data);
+              return replaceSystemAliases(data);
             })
           : basehub(basehubProps).query(singleQuery);
         cache.set(cacheKey, {

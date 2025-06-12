@@ -19,7 +19,11 @@
     "target": "es2020",
     "strictNullChecks": true,
     "strict": true,
-    "outDir": "./dist"
+    "outDir": "../dist",
+    "rootDir": "./src",
+    "paths": {
+      "basehub": ["./index.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": [

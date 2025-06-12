@@ -2,7 +2,7 @@
 import * as React from "react";
 import { PumpProps } from "./server-pump.js";
 
-import { type QueryGenqlSelection as PumpQuery } from "../../index.js";
+import type { PumpQuery } from "./server-pump.js";
 import type { ResponseCache, PumpState } from "./types.js";
 import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
 

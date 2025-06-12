@@ -2,7 +2,7 @@
   "version": "v1",
   "packages": {
     "basehub": {
-      "signature": "f31fc319f4f00b2519d62da3096d562f",
+      "signature": "6d64fdb7367e24276a2178bf243d3704",
       "file": true,
       "replaced": "workspace:*"
     }
