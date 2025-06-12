@@ -35,6 +35,7 @@ export const ClientPump = <
   initialResolvedChildren,
   apiVersion,
   previewRef: _previewRef,
+  explicitRef,
 }: {
   children: PumpProps<Queries, Bind>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
@@ -44,6 +45,7 @@ export const ClientPump = <
   initialResolvedChildren?: React.ReactNode;
   apiVersion: string;
   previewRef: string;
+  explicitRef?: string;
 }) => {
   const pumpTokenRef = React.useRef<string | undefined>(initialPumpToken);
   const [result, setResult] = React.useState<PumpState | undefined>(
@@ -280,6 +282,12 @@ Contact support@basehub.com for help.`);
    * Subscribe to ref changes
    */
   React.useEffect(() => {
+    if (explicitRef) {
+      // in case of an explicit ref, we don't subscribe to branch switches
+      // it's fixed
+      return;
+    }
+
     function handleRefChange() {
       const previewRef =
         // @ts-ignore
@@ -293,7 +301,7 @@ Contact support@basehub.com for help.`);
     return () => {
       window.removeEventListener("__bshb_ref_changed", handleRefChange);
     };
-  }, []);
+  }, [explicitRef]);
 
   const resolvedData = React.useMemo(() => {
     // @ts-ignore

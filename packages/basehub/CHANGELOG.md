@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.0-schemaless.7
+
+### Patch Changes
+
+- fix
+
 ## 9.0.0-schemaless.6
 
 ### Patch Changes

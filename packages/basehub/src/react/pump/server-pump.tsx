@@ -238,6 +238,7 @@ export const Pump = async <
         initialResolvedChildren={resolvedChildren}
         apiVersion={apiVersion}
         previewRef={headers["x-basehub-ref"] || resolvedRef.ref}
+        explicitRef={basehubProps.ref}
       >
         {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
         {/* @ts-ignore */}
