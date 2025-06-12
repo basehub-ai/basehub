@@ -10,7 +10,7 @@ import { renderRequestTypes } from "./render/requestTypes/renderRequestTypes.js"
 import { renderResponseTypes } from "./render/responseTypes/renderResponseTypes.js";
 import { renderSchema } from "./render/schema/renderSchema.js";
 import { renderModuleAugmentation } from "./render/responseTypes/renderModuleAugmentation.js";
-import { renderTypeGuards } from "./render/typeGuards/renderTypeGuards.js";
+// import { renderTypeGuards } from "./render/typeGuards/renderTypeGuards.js";
 
 export type OutputContextRef = {
   current: { preventedClientGeneration: boolean; schemaHash: string };
@@ -58,8 +58,8 @@ export const clientTasks = (
                 renderModuleAugmentation(ctx.schema, renderCtx);
                 renderResponseTypes(ctx.schema, renderCtx);
                 renderRequestTypes(ctx.schema, renderCtx);
-                renderTypeGuards(ctx.schema, renderCtx);
-                renderEnumsMaps(ctx.schema, renderCtx);
+                // renderTypeGuards(ctx.schema, renderCtx);
+                // renderEnumsMaps(ctx.schema, renderCtx);
 
                 await writeFileToPath(
                   [output],

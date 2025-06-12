@@ -99,7 +99,7 @@ export const main = async (
     pathArgs = [output];
   } else {
     // default
-    pathArgs = [`${basehubModuleName}.config.ts`];
+    pathArgs = [`${basehubModuleName}.d.ts`];
   }
 
   const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
