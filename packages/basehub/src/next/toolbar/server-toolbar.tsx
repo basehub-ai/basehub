@@ -1,11 +1,9 @@
 import * as React from "react";
 
 // @ts-ignore
-import { draftMode } from "next/headers";
-// @ts-ignore
-import { revalidateTag } from "next/cache";
 import { basehub } from "../../index.js";
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
+import { isV0OrBolt } from "../../bin/util/is-v0.js";
 
 // we use react.lazy to code split client-toolbar
 const LazyClientConditionalRenderer = React.lazy(() =>
@@ -21,12 +19,25 @@ export const ServerToolbar = async ({
 }: ServerToolbarProps) => {
   const { isForcedDraft, resolvedRef } = await getStuffFromEnv(basehubProps);
 
+  let isDraftMode = false;
+  if (!isV0OrBolt()) {
+    try {
+      // @ts-ignore
+      const { draftMode } = await import("next/headers");
+      isDraftMode = (await draftMode()).isEnabled;
+    } catch (err) {
+      // noop
+    }
+  }
+
   const enableDraftMode_unbound = async (
     basehubProps: ServerToolbarProps,
     { bshbPreviewToken }: { bshbPreviewToken: string }
   ) => {
     "use server";
     try {
+      // @ts-ignore
+      const { draftMode } = await import("next/headers");
       const { headers, url } = await getStuffFromEnv(basehubProps);
       const appApiEndpoint = getBaseHubAppApiEndpoint(
         new URL(url),
@@ -63,6 +74,8 @@ export const ServerToolbar = async ({
     try {
       const { headers, url, isForcedDraft } =
         await getStuffFromEnv(basehubProps);
+      // @ts-ignore
+      const { draftMode } = await import("next/headers");
       if (
         (await draftMode()).isEnabled === false &&
         !isForcedDraft &&
@@ -103,7 +116,13 @@ export const ServerToolbar = async ({
 
   const disableDraftMode = async () => {
     "use server";
-    (await draftMode()).disable();
+    try {
+      // @ts-ignore
+      const { draftMode } = await import("next/headers");
+      (await draftMode()).disable();
+    } catch (err) {
+      // noop
+    }
   };
 
   const revalidateTags_unbound = async (
@@ -155,6 +174,9 @@ export const ServerToolbar = async ({
         return { success: true, message: "No tags to revalidate" };
       }
 
+      // @ts-ignore
+      const { revalidateTag } = await import("next/cache");
+
       await Promise.all(
         tags.map(async (_tag: string) => {
           const tag = _tag.startsWith("basehub-") ? _tag : `basehub-${_tag}`;
@@ -179,7 +201,7 @@ export const ServerToolbar = async ({
 
   return (
     <LazyClientConditionalRenderer
-      draft={(await draftMode()).isEnabled}
+      draft={isDraftMode}
       isForcedDraft={isForcedDraft}
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}

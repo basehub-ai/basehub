@@ -6,9 +6,8 @@ export const getGitEnv = async (opts?: Options) => {
   const execSyncSafe = async (command: string): Promise<string> => {
     if (!opts?.cli) return "";
 
-    const execSync = await import("child_process").then((m) => m.execSync);
-
     try {
+      const execSync = await import("child_process").then((m) => m.execSync);
       return execSync(command, { stdio: "pipe" }).toString().trim();
     } catch (error) {
       // If the command fails, return an empty string

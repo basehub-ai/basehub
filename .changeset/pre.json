@@ -8,7 +8,9 @@
     "playground": "0.0.215"
   },
   "changesets": [
+    "angry-news-speak",
     "dirty-books-pump",
+    "early-pots-build",
     "eighty-grapes-sit",
     "sixty-turtles-roll"
   ]

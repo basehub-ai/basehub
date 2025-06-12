@@ -1,5 +1,6 @@
 import { getStuffFromEnv } from "./bin/util/get-stuff-from-env.js";
 import { hashObject } from "./bin/util/hash.js";
+import { isV0OrBolt } from "./bin/util/is-v0.js";
 import {
   ClientOptions,
   createClient as createClientOriginal,
@@ -97,7 +98,7 @@ export const createClient = <
     let isNextjs = false;
     let isNextjsDraftMode = false;
 
-    if (options.draft === undefined) {
+    if (!isV0OrBolt() && options.draft === undefined) {
       // try to auto-detect (only if draft is not explicitly set by the user)
       try {
         // @ts-ignore
@@ -119,20 +120,23 @@ export const createClient = <
       extra.next = { revalidate: undefined };
       // @ts-expect-error
       extra.cache = "no-store";
-      // try to get ref from cookies
-      try {
-        // @ts-ignore
-        const { cookies } = await import("next/headers");
-        const cookieStore = await cookies();
-        const ref = cookieStore.get("bshb-preview-ref-" + tokenHash)?.value;
-        if (ref) {
-          extra.headers = {
-            ...extra.headers,
-            ["x-basehub-ref" as any]: ref,
-          };
+
+      if (!isV0OrBolt()) {
+        // try to get ref from cookies
+        try {
+          // @ts-ignore
+          const { cookies } = await import("next/headers");
+          const cookieStore = await cookies();
+          const ref = cookieStore.get("bshb-preview-ref-" + tokenHash)?.value;
+          if (ref) {
+            extra.headers = {
+              ...extra.headers,
+              ["x-basehub-ref" as any]: ref,
+            };
+          }
+        } catch (error) {
+          // noop
         }
-      } catch (error) {
-        // noop
       }
     }
 
@@ -140,7 +144,7 @@ export const createClient = <
 
     // only override if revalidation is not being handled by the user
     // @ts-expect-error
-    if (typeof options?.next === "undefined") {
+    if (!isV0OrBolt() && typeof options?.next === "undefined") {
       try {
         // @ts-ignore
         isNextjs = !!(await import("next/headers"));

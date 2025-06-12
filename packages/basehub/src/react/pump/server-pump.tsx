@@ -9,6 +9,7 @@ import {
 } from "../../index.js";
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
 import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
+import { isV0OrBolt } from "../../bin/util/is-v0.js";
 
 export interface PumpQuery extends QueryGenqlSelection {}
 
@@ -66,7 +67,7 @@ export const Pump = async <
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
   let isNextjsDraftMode = false;
-  if (basehubProps.draft === undefined) {
+  if (!isV0OrBolt() && basehubProps.draft === undefined) {
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
       // @ts-ignore
@@ -91,7 +92,7 @@ export const Pump = async <
   const queriesWithFallback =
     draft && noQueries ? [{ _sys: { id: true } }] : queries;
 
-  if (draft) {
+  if (!isV0OrBolt() && draft) {
     // try to get ref from cookies
     try {
       // @ts-ignore
