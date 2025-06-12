@@ -86,12 +86,13 @@ export const createClient = <
     const extra = {
       url,
       headers: {
+        ...headers,
         "x-basehub-sdk-build-id": resolvedRef.id,
       },
     };
 
     const tokenHash = hashObject({ token });
-    if (op !== "query") return {};
+    if (op !== "query") return extra;
 
     let isNextjs = false;
     let isNextjsDraftMode = false;

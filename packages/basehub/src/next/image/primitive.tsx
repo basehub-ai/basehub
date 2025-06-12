@@ -1,4 +1,3 @@
-"use client";
 // @ts-ignore
 import type { ImageLoaderProps, ImageProps } from "next/image";
 // @ts-ignore
@@ -112,6 +111,8 @@ export type BaseHubImageProps = Omit<ImageProps, "placeholder"> & {
  */
 export const BaseHubImage = forwardRef<HTMLImageElement, BaseHubImageProps>(
   (props, ref) => {
+    "use client";
+
     const unoptimized =
       props.unoptimized ??
       props.src.toString().split("?")[0]?.endsWith(".svg") ??

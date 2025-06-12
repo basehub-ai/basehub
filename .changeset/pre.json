@@ -8,6 +8,8 @@
     "playground": "0.0.215"
   },
   "changesets": [
-    "dirty-books-pump"
+    "dirty-books-pump",
+    "eighty-grapes-sit",
+    "sixty-turtles-roll"
   ]
 }
