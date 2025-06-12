@@ -211,7 +211,7 @@ export const generateMutationOp: (
 export function fragmentOn<
   TypeName extends keyof FragmentsMap,
   Selection extends FragmentsMap[TypeName]["selection"],
->(name: TypeName, fields: Selection) {
+>(name: TypeName, fields: Selection): Selection & { __fragmentOn: TypeName } {
   // @ts-ignore
   return { __fragmentOn: name, ...fields } as const;
 }

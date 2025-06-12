@@ -20,8 +20,6 @@ const CodeBlockClientController = ({
   storeSnippetSelection,
   groupId,
 }: CodeBlockClientControllerProps) => {
-  "use client";
-
   const isSingleSnippet = snippets.length === 1;
 
   const [activeSnippet, setActiveSnippet] = React.useState<

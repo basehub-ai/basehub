@@ -104,7 +104,10 @@ export const main = async (
 
   const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
 
-  async function generateSDK(silent: boolean): Promise<{
+  async function generateSDK(
+    silent: boolean,
+    prevSchemaHash: string
+  ): Promise<{
     preventedClientGeneration: boolean;
     schemaHash: string;
     newResolvedRef: ResolvedRef;
@@ -159,6 +162,7 @@ export const main = async (
       sortProperties: true,
       silent,
       packageName: basehubModuleName,
+      previousSchemaHash: prevSchemaHash,
     });
 
     if (preventedClientGeneration) {
@@ -237,6 +241,7 @@ export const main = async (
 
   if (args["--watch"]) {
     let isFirst = true;
+    let currSchemaHash = "";
 
     const { watchPromise, stopWatching } = scheduleNonOverlappingWork(
       async () => {
@@ -246,7 +251,8 @@ export const main = async (
 
         while (retryCount <= maxRetries) {
           try {
-            const result = await generateSDK(!isFirst);
+            const result = await generateSDK(!isFirst, currSchemaHash);
+            currSchemaHash = result.schemaHash;
             if (isFirst) {
               console.log(" ");
               logInsideBox([
@@ -297,7 +303,7 @@ export const main = async (
 
     await watchPromise;
   } else {
-    await generateSDK(false);
+    await generateSDK(false, "");
   }
 };
 
