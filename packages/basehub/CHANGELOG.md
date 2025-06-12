@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.0-schemaless.0
+
+### Major Changes
+
+- SDK generation is now not required. Some deprecations like \_\_scalar, "everything", and type guard functions. all else should just work.
+
 ## 8.2.11
 
 ### Patch Changes
