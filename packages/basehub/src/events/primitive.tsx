@@ -1,7 +1,6 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 import type { Scalars } from "../index.js";
 import type { Field } from "../react/form/primitive.js";
-import { getStuffFromEnv } from "../bin/util/get-stuff-from-env.js";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -63,22 +62,12 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
   ...args: EventArgs<Key>
 ) => {
   const [key, data] = args;
-  const { resolvedRef } = await getStuffFromEnv();
 
   let formDataOrJson: FormData | string;
   if (data && Object.values(data).some((value) => value instanceof File)) {
     formDataOrJson = new FormData();
     formDataOrJson.append("_system_key", key);
     formDataOrJson.append("_system_type", "create");
-    formDataOrJson.append(
-      "_system_commitId",
-      (resolvedRef.type === "commit"
-        ? resolvedRef.id
-        : resolvedRef.headCommitId) ?? ""
-    );
-    if (resolvedRef.type === "branch") {
-      formDataOrJson.append("_system_branch", resolvedRef.name);
-    }
 
     if (data) {
       // Append all data fields to FormData
@@ -96,11 +85,6 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
       key,
       data,
       type: "create",
-      commitId:
-        resolvedRef.type === "commit"
-          ? resolvedRef.id
-          : resolvedRef.headCommitId,
-      branch: resolvedRef.type === "branch" ? resolvedRef.name : undefined,
     });
   }
 

@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.0-schemaless.8
+
+### Patch Changes
+
+- make sendEvent work in the client again
+
 ## 9.0.0-schemaless.7
 
 ### Patch Changes

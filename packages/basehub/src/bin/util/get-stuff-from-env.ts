@@ -2,10 +2,22 @@
 import { getGitEnv } from "./get-git-env.js";
 import type { ResolvedRef } from "../../common-types.js";
 import { hashObject } from "./hash.js";
+import { resolve } from "path";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
 const DEFAULT_API_VERSION = "4";
+
+export type FallbackPlayground = {
+  /**
+   * team/repo
+   */
+  target: `${string}/${string}`;
+  /**
+   * The playground id
+   */
+  id: string;
+};
 
 export type Options = {
   draft?: boolean;
@@ -14,6 +26,7 @@ export type Options = {
   ref?: string | undefined;
   apiVersion?: string | undefined;
   revalidateResolvedRef?: boolean;
+  fallbackPlayground?: FallbackPlayground | undefined;
   /**
    * In case this is being called from the CLI and not the user's app runtime
    */
@@ -51,6 +64,8 @@ export const getStuffFromEnv = async (options?: Options) => {
     | "DEBUG_FORCED_URL"
     | "URL"
     | "OUTPUT"
+    | "FALLBACK_PLAYGROUND_TARGET"
+    | "FALLBACK_PLAYGROUND_ID"
     | "API_VERSION";
 
   const buildEnvVarName = (name: EnvVarName) => {
@@ -127,8 +142,14 @@ export const getStuffFromEnv = async (options?: Options) => {
     null;
 
   if (!token) {
-    console.log(tokenNotFoundErrorMessage);
-    process.exit(1);
+    if (options.fallbackPlayground) {
+      console.log(
+        `Token not found, falling back to playground targeting ${options.fallbackPlayground.target}`
+      );
+    } else {
+      console.log(tokenNotFoundErrorMessage);
+      process.exit(1);
+    }
   }
 
   const ref =
@@ -184,6 +205,12 @@ export const getStuffFromEnv = async (options?: Options) => {
 
   draft = !!draft;
 
+  const fallbackPlaygroundTarget =
+    options.fallbackPlayground?.target ??
+    getEnvVar("FALLBACK_PLAYGROUND_TARGET");
+  const fallbackPlaygroundId =
+    options.fallbackPlayground?.id ?? getEnvVar("FALLBACK_PLAYGROUND_ID");
+
   // 3.
   const {
     gitBranch,
@@ -202,6 +229,13 @@ export const getStuffFromEnv = async (options?: Options) => {
     productionDeploymentURL,
     apiVersion,
     revalidate: options.revalidateResolvedRef,
+    fallbackPlayground:
+      fallbackPlaygroundId && fallbackPlaygroundTarget
+        ? {
+            target: fallbackPlaygroundTarget as `${string}/${string}`,
+            id: fallbackPlaygroundId,
+          }
+        : undefined,
   });
 
   return {
@@ -213,12 +247,13 @@ export const getStuffFromEnv = async (options?: Options) => {
     gitBranch,
     gitCommitSHA,
     token,
+    fallbackPlayground: options.fallbackPlayground,
     gitBranchDeploymentURL,
     productionDeploymentURL,
     headers: {
-      "x-basehub-token": token,
       "x-basehub-api-version": apiVersion,
       "x-basehub-sdk-build-id": resolvedRef.id,
+      ...(token ? { "x-basehub-token": token } : {}),
       ...(ref ? { "x-basehub-ref": ref } : {}),
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
       ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
@@ -228,6 +263,12 @@ export const getStuffFromEnv = async (options?: Options) => {
         : {}),
       ...(productionDeploymentURL
         ? { "x-basehub-production-deployment-url": productionDeploymentURL }
+        : {}),
+      ...(fallbackPlaygroundId && fallbackPlaygroundTarget
+        ? {
+            "x-basehub-fallback-playground-target": fallbackPlaygroundTarget,
+            "x-basehub-fallback-playground-id": fallbackPlaygroundId,
+          }
         : {}),
     },
   };
@@ -245,9 +286,10 @@ export async function resolveRef({
   productionDeploymentURL,
   apiVersion,
   revalidate,
+  fallbackPlayground,
 }: {
   url: URL;
-  token: string;
+  token: string | null;
   ref: string | null | undefined;
   gitBranch: string | null;
   gitCommitSHA: string | null;
@@ -255,9 +297,10 @@ export async function resolveRef({
   productionDeploymentURL: string | null;
   apiVersion: string | null;
   revalidate?: boolean;
+  fallbackPlayground?: FallbackPlayground | undefined;
 }) {
   const headers = {
-    "x-basehub-token": token,
+    ...(token ? { "x-basehub-token": token } : {}),
     ...(ref ? { "x-basehub-ref": ref } : {}),
     ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
     ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
@@ -267,6 +310,12 @@ export async function resolveRef({
       : {}),
     ...(productionDeploymentURL
       ? { "x-basehub-production-deployment-url": productionDeploymentURL }
+      : {}),
+    ...(fallbackPlayground
+      ? {
+          "x-basehub-fallback-playground-target": fallbackPlayground.target,
+          "x-basehub-fallback-playground-id": fallbackPlayground.id,
+        }
       : {}),
   };
 

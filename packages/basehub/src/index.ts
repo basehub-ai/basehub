@@ -1,4 +1,7 @@
-import { getStuffFromEnv } from "./bin/util/get-stuff-from-env.js";
+import {
+  FallbackPlayground,
+  getStuffFromEnv,
+} from "./bin/util/get-stuff-from-env.js";
 import { hashObject } from "./bin/util/hash.js";
 import { isV0OrBolt } from "./bin/util/is-v0.js";
 import {
@@ -49,7 +52,12 @@ export type Options = Omit<
   | "referrer"
   | "referrerPolicy"
   | "window"
-> & { draft?: boolean; token?: string; ref?: string };
+> & {
+  draft?: boolean;
+  token?: string;
+  ref?: string;
+  fallbackPlayground?: FallbackPlayground | undefined;
+};
 
 /**
  * Create a basehub client.
@@ -70,10 +78,10 @@ export type Options = Omit<
  *
  */
 export const createClient = <
-  Q extends Record<string, any> = Record<string, any>,
-  QSel extends Record<string, any> = Record<string, any>,
-  M extends Record<string, any> = Record<string, any>,
-  MSel extends Record<string, any> = Record<string, any>,
+  Q extends Record<string, any> = Query,
+  QSel extends Record<string, any> = QueryGenqlSelection,
+  M extends Record<string, any> = Mutation,
+  MSel extends Record<string, any> = MutationGenqlSelection,
 >(
   options?: Options
 ) => {

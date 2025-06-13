@@ -39,6 +39,11 @@ export const ServerToolbar = async ({
       // @ts-ignore
       const { draftMode } = await import("next/headers");
       const { headers, url } = await getStuffFromEnv(basehubProps);
+
+      if (!headers["x-basehub-token"]) {
+        return { status: 401, response: { error: "Token not found" } };
+      }
+
       const appApiEndpoint = getBaseHubAppApiEndpoint(
         new URL(url),
         "/api/nextjs/preview-auth"
@@ -74,6 +79,11 @@ export const ServerToolbar = async ({
     try {
       const { headers, url, isForcedDraft } =
         await getStuffFromEnv(basehubProps);
+
+      if (!headers["x-basehub-token"]) {
+        return { status: 401, response: { error: "Token not found" } };
+      }
+
       // @ts-ignore
       const { draftMode } = await import("next/headers");
       if (
