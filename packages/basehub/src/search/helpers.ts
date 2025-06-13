@@ -6,8 +6,8 @@
 // Largely inspired by MurmurHash2/3, but with a focus on speed/simplicity.
 // See https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript/52171480#52171480
 
-import type { SearchResponseHit } from "typesense/lib/Typesense/Documents";
-import { BaseDoc } from "./primitive";
+import type { SearchResponseHit } from "typesense/lib/Typesense/Documents.js";
+import { BaseDoc } from "./primitive.js";
 
 // https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js
 const cyrb64 = (str: string, seed = 0) => {

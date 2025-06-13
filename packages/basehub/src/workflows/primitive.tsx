@@ -1,10 +1,5 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import {
-  // @ts-ignore
-  Scalars,
-  // @ts-ignore
-  // eslint-disable-next-line import/no-unresolved
-} from "../schema";
+import type { Scalars } from "../index.js";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -19,7 +14,12 @@ type ExtractWorkflowKey<T extends string> = T extends `${infer Base}:${string}`
   : T;
 
 // Get all event key types (bshb_event_*)
-export type WorkflowKeys = KeysStartingWith<Scalars, "bshb_workflow">;
+export type WorkflowKeys = KeysStartingWith<
+  Scalars,
+  "bshb_workflow"
+> extends never
+  ? `bshb_workflow_${string}`
+  : KeysStartingWith<Scalars, "bshb_workflow">;
 
 // Map from event key to its schema type
 type WorkflowSchemaMap = {
@@ -53,6 +53,7 @@ export const authenticateWebhook = async <
    */
   secret: Key;
 }): Promise<
+  // @ts-ignore
   | { success: true; payload: WorkflowSchemaMap[ExtractWorkflowKey<Key>] }
   | { success: false; error: string }
 > => {
@@ -65,7 +66,9 @@ export const authenticateWebhook = async <
     }
 
     let secret: string | undefined = _secret;
+    // @ts-ignore
     if (_secret.startsWith("bshb_workflow")) {
+      // @ts-ignore
       secret = _secret.split(":")[1];
     }
     if (typeof secret !== "string") {
@@ -135,6 +138,7 @@ export const authenticateWebhook = async <
 
     return {
       success: true,
+      // @ts-ignore
       payload: parsedBody as WorkflowSchemaMap[ExtractWorkflowKey<Key>],
     };
   } catch (error) {

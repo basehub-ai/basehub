@@ -1,14 +1,14 @@
 import * as React from "react";
 import get from "lodash.get";
 import { Slot } from "@radix-ui/react-slot";
-import { getHitRecentSearchKey } from "../../search/helpers";
+import { getHitRecentSearchKey } from "../../search/helpers.js";
 import {
   Hit,
   SearchOptions,
   SearchResult,
   search as searchRaw,
   decodeKey,
-} from "../../search/primitive";
+} from "../../search/primitive.js";
 
 /* -------------------------------------------------------------------------------------------------
  * useSearch

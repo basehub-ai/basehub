@@ -1,2 +1,2 @@
-export { BaseHubImage, basehubImageLoader } from "./primitive";
-export type { BaseHubImageProps } from "./primitive";
+export { BaseHubImage, basehubImageLoader } from "./primitive.js";
+export type { BaseHubImageProps } from "./primitive.js";

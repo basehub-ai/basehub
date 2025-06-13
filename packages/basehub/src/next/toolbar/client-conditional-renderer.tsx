@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { ResolvedRef } from "../../common-types";
-import { LatestBranch } from "./components/branch-swticher";
+import { ResolvedRef } from "../../common-types.js";
+import type { LatestBranch } from "./components/branch-swticher.js";
 
 const LazyClientToolbar = React.lazy(() =>
-  import("./client-toolbar").then((mod) => ({ default: mod.ClientToolbar }))
+  import("./client-toolbar.js").then((mod) => ({ default: mod.ClientToolbar }))
 );
 
 export const ClientConditionalRenderer = ({

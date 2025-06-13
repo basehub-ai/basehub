@@ -1,6 +1,7 @@
 import * as React from "react"; // important line, don't remove, as we need react to be in context.
+// @ts-ignore
 import s from "../toolbar.module.scss";
-import { Tooltip } from "./tooltip";
+import { Tooltip } from "./tooltip.js";
 
 export type LatestBranch = {
   name: string;

@@ -1,14 +1,14 @@
 import "server-only";
 import { lazy } from "react";
-import { Highlighter, HighlighterProps } from "./highlighter";
-import { Snippet } from "./types";
+import { Highlighter, HighlighterProps } from "./highlighter.js";
+import type { Snippet } from "./types.js";
 export { createCssVariablesTheme } from "shiki";
 export type { BundledLanguage as Language } from "shiki";
 import { useId } from "react";
 import { BundledLanguage } from "shiki/langs";
 import { SpecialLanguage } from "shiki/types.mjs";
 
-const LazyClientController = lazy(() => import("./client"));
+const LazyClientController = lazy(() => import("./client.js"));
 
 type CodeSnippet = Omit<Snippet, "id"> & {
   /**

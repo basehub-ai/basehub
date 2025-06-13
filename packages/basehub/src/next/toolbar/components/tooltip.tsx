@@ -1,5 +1,6 @@
-import * as React from "react";
 import debounce from "lodash.debounce";
+import * as React from "react";
+// @ts-ignore
 import s from "../toolbar.module.scss";
 
 export type Tooltip = { checkOverflow: () => void };
@@ -19,6 +20,7 @@ export const Tooltip = React.forwardRef(
   ) => {
     const tooltipContentRef = React.useRef<HTMLParagraphElement>(null);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const checkOverflow = React.useCallback(
       debounce(() => {
         if (tooltipContentRef.current) {

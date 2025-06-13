@@ -1,7 +1,7 @@
-export { SearchBox, useSearch } from "./primitive";
+export { SearchBox, useSearch } from "./primitive.js";
 export type {
   SearchBoxContext,
   UseSearchParams,
   UseSearchResult,
-} from "./primitive";
-export * from "../../search";
+} from "./primitive.js";
+export * from "../../search/index.js";

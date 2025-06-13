@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, type ReactNode } from "react";
-import { sendEvent, updateEvent } from "../../events";
+import { sendEvent, updateEvent } from "../../events/index.js";
 
 // this needs to match our BSHBEventSchema scalar type so that it _just works_
 export type Field = {
@@ -122,12 +122,17 @@ export function unstable_Form<T extends string>({
 
       if (action.type === "update") {
         await updateEvent(
+          // @ts-ignore
           action.adminKey as any,
           action.eventId,
           formattedData
         );
       } else {
-        await sendEvent(action.ingestKey as any, formattedData);
+        await sendEvent(
+          action.ingestKey as any,
+          // @ts-ignore
+          formattedData
+        );
       }
     },
     [action, fields]

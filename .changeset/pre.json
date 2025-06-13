@@ -1,0 +1,21 @@
+{
+  "mode": "pre",
+  "tag": "schemaless",
+  "initialVersions": {
+    "eslint-config-custom": "1.0.0",
+    "tsconfig": "1.0.0",
+    "basehub": "8.2.11",
+    "playground": "0.0.215"
+  },
+  "changesets": [
+    "angry-news-speak",
+    "beige-garlics-occur",
+    "dirty-books-pump",
+    "early-pots-build",
+    "eighty-grapes-sit",
+    "quick-ways-sit",
+    "selfish-bottles-refuse",
+    "sixty-turtles-roll",
+    "smooth-garlics-wink"
+  ]
+}

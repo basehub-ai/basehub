@@ -1,5 +1,59 @@
 # basehub
 
+## 9.0.0-schemaless.8
+
+### Patch Changes
+
+- make sendEvent work in the client again
+
+## 9.0.0-schemaless.7
+
+### Patch Changes
+
+- fix
+
+## 9.0.0-schemaless.6
+
+### Patch Changes
+
+- fixes
+
+## 9.0.0-schemaless.5
+
+### Patch Changes
+
+- fixe
+
+## 9.0.0-schemaless.4
+
+### Patch Changes
+
+- child_process import fix
+
+## 9.0.0-schemaless.3
+
+### Patch Changes
+
+- v0/bolt guard
+
+## 9.0.0-schemaless.2
+
+### Patch Changes
+
+- fix more bugz
+
+## 9.0.0-schemaless.1
+
+### Patch Changes
+
+- fix some bugs
+
+## 9.0.0-schemaless.0
+
+### Major Changes
+
+- SDK generation is now not required. Some deprecations like \_\_scalar, "everything", and type guard functions. all else should just work.
+
 ## 8.2.11
 
 ### Patch Changes

@@ -1,10 +1,13 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 
-import { execSync } from "child_process";
+import type { Options } from "./get-stuff-from-env.js";
 
-export const getGitEnv = () => {
-  const execSyncSafe = (command: string): string => {
+export const getGitEnv = async (opts?: Options) => {
+  const execSyncSafe = async (command: string): Promise<string> => {
+    if (!opts?.cli) return "";
+
     try {
+      const execSync = await import("child_process").then((m) => m.execSync);
       return execSync(command, { stdio: "pipe" }).toString().trim();
     } catch (error) {
       // If the command fails, return an empty string
@@ -18,8 +21,8 @@ export const getGitEnv = () => {
     process.env.RENDER_GIT_BRANCH ||
     process.env.GIT_BRANCH ||
     process.env.CF_PAGES_BRANCH ||
-    execSyncSafe("git symbolic-ref --short HEAD") ||
-    execSyncSafe("git rev-parse --abbrev-ref HEAD");
+    (await execSyncSafe("git symbolic-ref --short HEAD")) ||
+    (await execSyncSafe("git rev-parse --abbrev-ref HEAD"));
 
   const gitCommitSHA =
     process.env.VERCEL_GIT_COMMIT_SHA ||
@@ -27,7 +30,7 @@ export const getGitEnv = () => {
     process.env.RENDER_GIT_COMMIT ||
     process.env.COMMIT_SHA ||
     process.env.CF_PAGES_COMMIT_SHA ||
-    execSyncSafe("git rev-parse HEAD");
+    (await execSyncSafe("git rev-parse HEAD"));
 
   const gitBranchDeploymentURL =
     process.env.VERCEL_BRANCH_URL ||

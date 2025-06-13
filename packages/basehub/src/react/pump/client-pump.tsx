@@ -1,16 +1,12 @@
 "use client";
 import * as React from "react";
-import { PumpProps } from "./server-pump";
+import { PumpProps } from "./server-pump.js";
 
-import {
-  // @ts-ignore
-  type QueryGenqlSelection as PumpQuery,
-} from "./index";
-// @ts-ignore
-// eslint-disable-next-line import/no-unresolved
-import { replaceSystemAliases } from "../runtime/_aliasing.js";
-import type Pusher from "pusher-js/types/src/core/pusher";
-import type { ResponseCache, PumpState } from "./types";
+import type { PumpQuery } from "./server-pump.js";
+import type { ResponseCache, PumpState } from "./types.js";
+import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
+
+type Pusher = any;
 
 let pusherMounted = false;
 const subscribers = new Set<() => void>(); // we'll call these when pusher tells us to poke
@@ -39,6 +35,7 @@ export const ClientPump = <
   initialResolvedChildren,
   apiVersion,
   previewRef: _previewRef,
+  explicitRef,
 }: {
   children: PumpProps<Queries, Bind>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
@@ -48,6 +45,7 @@ export const ClientPump = <
   initialResolvedChildren?: React.ReactNode;
   apiVersion: string;
   previewRef: string;
+  explicitRef?: string;
 }) => {
   const pumpTokenRef = React.useRef<string | undefined>(initialPumpToken);
   const [result, setResult] = React.useState<PumpState | undefined>(
@@ -191,8 +189,6 @@ Contact support@basehub.com for help.`);
     }
   }, [pumpEndpoint, rawQueries, apiVersion, previewRef]);
 
-  const currentToastRef = React.useRef<string | number | null>(null);
-
   /**
    * Surface errors.
    */
@@ -239,6 +235,7 @@ Contact support@basehub.com for help.`);
 
     import("pusher-js")
       .then((mod) => {
+        // @ts-ignore
         setPusher(new mod.default(pusherAppKey, { cluster: pusherCluster }));
       })
       .catch((err) => {
@@ -285,6 +282,12 @@ Contact support@basehub.com for help.`);
    * Subscribe to ref changes
    */
   React.useEffect(() => {
+    if (explicitRef) {
+      // in case of an explicit ref, we don't subscribe to branch switches
+      // it's fixed
+      return;
+    }
+
     function handleRefChange() {
       const previewRef =
         // @ts-ignore
@@ -298,9 +301,10 @@ Contact support@basehub.com for help.`);
     return () => {
       window.removeEventListener("__bshb_ref_changed", handleRefChange);
     };
-  }, []);
+  }, [explicitRef]);
 
   const resolvedData = React.useMemo(() => {
+    // @ts-ignore
     return result?.data.map((r, i) => r ?? initialState?.data?.[i] ?? null);
   }, [initialState?.data, result?.data]);
 

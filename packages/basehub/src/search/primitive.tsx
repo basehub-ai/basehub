@@ -1,7 +1,7 @@
 import { Client } from "typesense";
-import type { SearchParams } from "typesense/lib/Typesense/Documents";
+import type { SearchParams } from "typesense/lib/Typesense/Documents.js";
 import get from "lodash.get";
-import { getHitKey } from "./helpers";
+import { getHitKey } from "./helpers.js";
 
 /* -------------------------------------------------------------------------------------------------
  * Get Search Client

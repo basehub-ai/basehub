@@ -5,6 +5,9 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   experimental: { appDir: true, serverActions: true },
+  logging: {
+    fetches: { fullUrl: true },
+  },
   images: {
     domains: ["lab.basement.studio", "assets.basehub.com", "basehub.earth"],
   },
