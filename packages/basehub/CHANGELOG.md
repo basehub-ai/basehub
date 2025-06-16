@@ -1,5 +1,35 @@
 # basehub
 
+## 9.0.0-schemaless.13
+
+### Patch Changes
+
+- remove logs
+
+## 9.0.0-schemaless.12
+
+### Patch Changes
+
+- log
+
+## 9.0.0-schemaless.11
+
+### Patch Changes
+
+- log
+
+## 9.0.0-schemaless.10
+
+### Patch Changes
+
+- more logs
+
+## 9.0.0-schemaless.9
+
+### Patch Changes
+
+- debug logs
+
 ## 9.0.0-schemaless.8
 
 ### Patch Changes

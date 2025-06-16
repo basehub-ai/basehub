@@ -2,7 +2,7 @@
 import { getGitEnv } from "./get-git-env.js";
 import type { ResolvedRef } from "../../common-types.js";
 import { hashObject } from "./hash.js";
-import { resolve } from "path";
+import { isV0OrBolt } from "./is-v0.js";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
@@ -52,7 +52,7 @@ export const getStuffFromEnv = async (options?: Options) => {
 
   let isForcedDraft = false;
   try {
-    isForcedDraft = process.env.NODE_ENV === "development";
+    isForcedDraft = process.env.NODE_ENV === "development" || isV0OrBolt();
   } catch (err) {
     // noop
   }

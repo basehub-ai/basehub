@@ -64,7 +64,7 @@ export const ServerToolbar = async ({
         return { status: 400, response: { error: "Bad request" } };
       }
       const response = await res.json();
-      if (res.status === 200) (await draftMode()).enable();
+      if (res.status === 200) (await draftMode())?.enable();
       return { status: res.status, response };
     } catch (error) {
       return { status: 500, response: { error: "Something went wrong" } };
@@ -87,7 +87,7 @@ export const ServerToolbar = async ({
       // @ts-ignore
       const { draftMode } = await import("next/headers");
       if (
-        (await draftMode()).isEnabled === false &&
+        ((await draftMode())?.isEnabled ?? false) === false &&
         !isForcedDraft &&
         !bshbPreviewToken
       ) {

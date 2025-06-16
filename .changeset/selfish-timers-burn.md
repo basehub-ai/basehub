@@ -1,0 +1,5 @@
+---
+"basehub": patch
+---
+
+remove logs
