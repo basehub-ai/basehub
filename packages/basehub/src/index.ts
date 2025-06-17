@@ -4,10 +4,7 @@ import {
 } from "./bin/util/get-stuff-from-env.js";
 import { hashObject } from "./bin/util/hash.js";
 import { isV0OrBolt } from "./bin/util/is-v0.js";
-import {
-  ClientOptions,
-  createClient as createClientOriginal,
-} from "./genql/runtime/_create-client.js";
+import { ClientOptions, createClient } from "./genql/runtime/_create-client.js";
 import {
   generateGraphqlOperation,
   GraphqlOperation,
@@ -66,18 +63,16 @@ export type Options = Omit<
  * @returns A basehub client.
  *
  * @example
- * import { createClient } from 'basehub'
+ * import { basehub } from 'basehub'
  *
- * const basehub = createClient()
- *
- * const firstQuery = await basehub.query({
+ * const firstQuery = await basehub().query({
  *   __typename: true,
  * });
  *
  * console.log(firstQuery.__typename) // => 'Query'
  *
  */
-export const createClient = <
+export const basehub = <
   Q extends Record<string, any> = Query,
   QSel extends Record<string, any> = QueryGenqlSelection,
   M extends Record<string, any> = Mutation,
@@ -177,29 +172,8 @@ export const createClient = <
     return extra;
   };
 
-  return createClientOriginal<Q, QSel, M, MSel>(options);
+  return createClient<Q, QSel, M, MSel>(options);
 };
-
-/**
- * Create a basehub client.
- *
- * @param options (optional) Options for the `fetch` request; for example in Next.js, you can do `{ next: { revalidate: 60 } }` to tweak your app's cache.
- * @returns A basehub client.
- *
- * @example
- * import { basehub } from 'basehub'
- *
- * const firstQuery = await basehub().query({
- *   __typename: true,
- * });
- *
- * console.log(firstQuery.__typename) // => 'Query'
- *
- */
-export const basehub = (...params: Parameters<typeof createClient>) =>
-  createClient<Query, QueryGenqlSelection, Mutation, MutationGenqlSelection>(
-    ...params
-  );
 
 export type QueryResult<fields extends QueryGenqlSelection> = FieldsSelection<
   Query,
@@ -292,4 +266,24 @@ export function fragmentOnRecursiveCollection<
     } as any;
   }
   return current;
+}
+
+/**
+ * Global configuration for the `basehub` SDK
+ */
+export type BaseHubConfig = Pick<
+  Options,
+  "ref" | "draft" | "fallbackPlayground" | "token"
+> & {};
+
+const BASEHUB_CONFIG = Symbol.for("basehub.config");
+
+export function setGlobalConfig(config: BaseHubConfig) {
+  // @ts-ignore
+  globalThis[BASEHUB_CONFIG] = config;
+}
+
+export function getGlobalConfig() {
+  // @ts-ignore
+  return (globalThis[BASEHUB_CONFIG] ?? null) as BaseHubConfig | null;
 }

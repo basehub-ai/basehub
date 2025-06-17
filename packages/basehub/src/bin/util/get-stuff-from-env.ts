@@ -3,6 +3,7 @@ import { getGitEnv } from "./get-git-env.js";
 import type { ResolvedRef } from "../../common-types.js";
 import { hashObject } from "./hash.js";
 import { isV0OrBolt } from "./is-v0.js";
+import { getGlobalConfig } from "../../index.js";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
@@ -49,6 +50,8 @@ export const getStuffFromEnv = async (options?: Options) => {
       dotenvLoad({ priorities: { ".dev.vars": 1 } });
     });
   }
+
+  const globalConfig = getGlobalConfig();
 
   let isForcedDraft = false;
   try {
@@ -136,19 +139,45 @@ export const getStuffFromEnv = async (options?: Options) => {
     resolvedToken ??
     basehubUrl.searchParams.get("token") ??
     getEnvVar("TOKEN") ??
+    globalConfig?.token ??
     (backwardsCompatURL
       ? backwardsCompatURL.searchParams.get("token")
       : undefined) ??
     null;
 
+  let fallbackPlayground: Options["fallbackPlayground"]; // only if token is not provided
+
   if (!token) {
-    if (options.fallbackPlayground) {
+    // Get fallback playground config early so we can use it in token validation
+    const fallbackPlaygroundTarget =
+      options.fallbackPlayground?.target ??
+      getEnvVar("FALLBACK_PLAYGROUND_TARGET") ??
+      globalConfig?.fallbackPlayground?.target;
+    const fallbackPlaygroundId =
+      options.fallbackPlayground?.id ??
+      getEnvVar("FALLBACK_PLAYGROUND_ID") ??
+      globalConfig?.fallbackPlayground?.id;
+
+    fallbackPlayground =
+      options.fallbackPlayground ??
+      (fallbackPlaygroundId && fallbackPlaygroundTarget
+        ? {
+            target: fallbackPlaygroundTarget as `${string}/${string}`,
+            id: fallbackPlaygroundId,
+          }
+        : undefined);
+
+    if (fallbackPlayground) {
       console.log(
-        `Token not found, falling back to playground targeting ${options.fallbackPlayground.target}`
+        `Token not found, falling back to playground targeting ${fallbackPlayground.target}`
       );
     } else {
-      console.log(tokenNotFoundErrorMessage);
-      process.exit(1);
+      if (options.cli) {
+        console.error(tokenNotFoundErrorMessage);
+        process.exit(1);
+      } else {
+        throw new Error(tokenNotFoundErrorMessage);
+      }
     }
   }
 
@@ -156,6 +185,7 @@ export const getStuffFromEnv = async (options?: Options) => {
     options.ref ??
     basehubUrl.searchParams.get("ref") ??
     getEnvVar("REF") ??
+    globalConfig?.ref ??
     (backwardsCompatURL
       ? backwardsCompatURL.searchParams.get("ref")
       : undefined) ??
@@ -164,6 +194,7 @@ export const getStuffFromEnv = async (options?: Options) => {
   let draft =
     basehubUrl.searchParams.get("draft") ??
     getEnvVar("DRAFT") ??
+    globalConfig?.draft ??
     (backwardsCompatURL
       ? backwardsCompatURL.searchParams.get("draft")
       : undefined) ??
@@ -192,10 +223,13 @@ export const getStuffFromEnv = async (options?: Options) => {
   // 2. let's validate the URL
 
   if (basehubUrl.pathname.split("/")[1] !== "graphql") {
-    console.log(
-      `🔴 Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql.`
-    );
-    process.exit(1);
+    const err = `🔴 Invalid URL. The URL needs to point your repo's GraphQL endpoint, so the pathname should end with /graphql.`;
+    if (options.cli) {
+      console.error(err);
+      process.exit(1);
+    } else {
+      throw new Error(err);
+    }
   }
 
   // we'll pass these via headers
@@ -204,12 +238,6 @@ export const getStuffFromEnv = async (options?: Options) => {
   basehubUrl.searchParams.delete("draft");
 
   draft = !!draft;
-
-  const fallbackPlaygroundTarget =
-    options.fallbackPlayground?.target ??
-    getEnvVar("FALLBACK_PLAYGROUND_TARGET");
-  const fallbackPlaygroundId =
-    options.fallbackPlayground?.id ?? getEnvVar("FALLBACK_PLAYGROUND_ID");
 
   // 3.
   const {
@@ -229,13 +257,7 @@ export const getStuffFromEnv = async (options?: Options) => {
     productionDeploymentURL,
     apiVersion,
     revalidate: options.revalidateResolvedRef,
-    fallbackPlayground:
-      fallbackPlaygroundId && fallbackPlaygroundTarget
-        ? {
-            target: fallbackPlaygroundTarget as `${string}/${string}`,
-            id: fallbackPlaygroundId,
-          }
-        : undefined,
+    fallbackPlayground,
   });
 
   return {
@@ -247,7 +269,7 @@ export const getStuffFromEnv = async (options?: Options) => {
     gitBranch,
     gitCommitSHA,
     token,
-    fallbackPlayground: options.fallbackPlayground,
+    fallbackPlayground,
     gitBranchDeploymentURL,
     productionDeploymentURL,
     headers: {
@@ -264,10 +286,10 @@ export const getStuffFromEnv = async (options?: Options) => {
       ...(productionDeploymentURL
         ? { "x-basehub-production-deployment-url": productionDeploymentURL }
         : {}),
-      ...(fallbackPlaygroundId && fallbackPlaygroundTarget
+      ...(fallbackPlayground
         ? {
-            "x-basehub-fallback-playground-target": fallbackPlaygroundTarget,
-            "x-basehub-fallback-playground-id": fallbackPlaygroundId,
+            "x-basehub-fallback-playground-target": fallbackPlayground.target,
+            "x-basehub-fallback-playground-id": fallbackPlayground.id,
           }
         : {}),
     },

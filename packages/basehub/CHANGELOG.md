@@ -1,5 +1,60 @@
 # basehub
 
+## 9.0.0-schemaless.22
+
+### Patch Changes
+
+- try another thing
+
+## 9.0.0-schemaless.21
+
+### Patch Changes
+
+- logz
+
+## 9.0.0-schemaless.20
+
+### Patch Changes
+
+- token fix
+
+## 9.0.0-schemaless.19
+
+### Patch Changes
+
+- fix bug
+
+## 9.0.0-schemaless.18
+
+### Patch Changes
+
+- patch process.exit
+
+## 9.0.0-schemaless.17
+
+### Patch Changes
+
+- fix
+
+## 9.0.0-schemaless.16
+
+### Patch Changes
+
+- back to config, now mutable thing
+
+## 9.0.0-schemaless.15
+
+### Patch Changes
+
+- remove createClient -- it's the same as basehub
+- remove config file gen
+
+## 9.0.0-schemaless.14
+
+### Patch Changes
+
+- config
+
 ## 9.0.0-schemaless.13
 
 ### Patch Changes

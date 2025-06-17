@@ -91,7 +91,7 @@ export const Pump = async <
   }
 
   const { headers, draft, resolvedRef } = await getStuffFromEnv(basehubProps);
-  const token = headers["x-basehub-token"];
+  const { "x-basehub-token": _token, ...headersWithoutToken } = headers;
   const apiVersion = headers["x-basehub-api-version"];
   const pumpEndpoint = "https://aws.basehub.com/pump";
 
@@ -144,8 +144,6 @@ export const Pump = async <
               headers: {
                 ...headers,
                 "content-type": "application/json",
-                "x-basehub-token": token,
-                "x-basehub-api-version": apiVersion,
               } as HeadersInit,
               body: JSON.stringify(rawQueryOp),
             }).then(async (response) => {
@@ -234,6 +232,7 @@ export const Pump = async <
           spaceID: spaceID,
         }}
         pumpEndpoint={pumpEndpoint}
+        pumpHeaders={headersWithoutToken}
         pumpToken={pumpToken ?? undefined}
         initialResolvedChildren={resolvedChildren}
         apiVersion={apiVersion}

@@ -30,6 +30,7 @@ export const ClientPump = <
   children,
   rawQueries,
   pumpEndpoint,
+  pumpHeaders,
   pumpToken: initialPumpToken,
   initialState,
   initialResolvedChildren,
@@ -40,6 +41,7 @@ export const ClientPump = <
   children: PumpProps<Queries, Bind>["children"];
   rawQueries: Array<{ query: string; variables?: any }>;
   pumpEndpoint: string;
+  pumpHeaders: Record<string, string | undefined>;
   pumpToken: string | undefined;
   initialState: PumpState | undefined;
   initialResolvedChildren?: React.ReactNode;
@@ -104,6 +106,7 @@ export const ClientPump = <
           cache: "no-store",
           method: "POST",
           headers: {
+            ...pumpHeaders,
             "content-type": "application/json",
             "x-basehub-api-version": apiVersion,
             "x-basehub-ref": previewRef,
@@ -187,7 +190,7 @@ Contact support@basehub.com for help.`);
     if (newPumpToken) {
       pumpTokenRef.current = newPumpToken;
     }
-  }, [pumpEndpoint, rawQueries, apiVersion, previewRef]);
+  }, [pumpEndpoint, pumpHeaders, rawQueries, apiVersion, previewRef]);
 
   /**
    * Surface errors.

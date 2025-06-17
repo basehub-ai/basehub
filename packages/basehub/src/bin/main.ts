@@ -7,7 +7,7 @@ import type { ResolvedRef } from "../common-types.js";
 
 const onProcessEndCallbacks: Array<() => void> = [];
 
-async function updateTsconfigIncludes(outputPath: string, silent: boolean) {
+async function updateTsconfigIncludes(includes: string[], silent: boolean) {
   const tsconfigPath = path.resolve(process.cwd(), "tsconfig.json");
 
   try {
@@ -17,45 +17,54 @@ async function updateTsconfigIncludes(outputPath: string, silent: boolean) {
 
     const tsconfigContent = fs.readFileSync(tsconfigPath, "utf-8");
     const tsconfig = JSON.parse(tsconfigContent);
-    const relativePath = path
-      .relative(process.cwd(), outputPath)
-      .replace(/\\/g, "/");
 
-    // Check if already included
-    if (tsconfig.include && tsconfig.include.includes(relativePath)) {
-      return;
+    // Convert absolute paths to relative paths
+    const relativePaths = includes.map((includePath) =>
+      path.relative(process.cwd(), includePath).replace(/\\/g, "/")
+    );
+
+    // Filter out paths that are already included
+    const newPaths = relativePaths.filter(
+      (relativePath) =>
+        !tsconfig.include || !tsconfig.include.includes(relativePath)
+    );
+
+    if (newPaths.length === 0) {
+      return; // All paths already included
     }
 
     let updatedContent = tsconfigContent;
 
     if (tsconfig.include) {
-      // Find the include array and append to it
+      // Find the include array and append new paths to it
       const includeMatch = updatedContent.match(
         /"include"\s*:\s*\[([\s\S]*?)\]/
       );
       if (includeMatch && includeMatch[1] !== undefined) {
         const [fullMatch, arrayContent] = includeMatch;
-        const newEntry =
+        const newEntries = newPaths.map((path) => `"${path}"`).join(", ");
+        const updatedArrayContent =
           arrayContent.trim() === ""
-            ? `"${relativePath}"`
-            : `${arrayContent}, "${relativePath}"`;
+            ? newEntries
+            : `${arrayContent}, ${newEntries}`;
         updatedContent = updatedContent.replace(
           fullMatch,
-          `"include": [${newEntry}]`
+          `"include": [${updatedArrayContent}]`
         );
       }
     } else {
       // Add include array at the top level - insert after the opening brace
+      const newEntries = newPaths.map((path) => `"${path}"`).join(", ");
       updatedContent = updatedContent.replace(
         /^(\s*\{\s*)/m,
-        `$1\n  "include": ["${relativePath}"],`
+        `$1\n  "include": [${newEntries}],`
       );
     }
 
     fs.writeFileSync(tsconfigPath, updatedContent);
     logIfNotSilent(
       silent,
-      `📝 Added ${relativePath} to tsconfig.json includes`
+      `📝 Added ${newPaths.join(", ")} to tsconfig.json includes`
     );
   } catch (error) {
     // Silently fail - don't break the build
@@ -66,6 +75,34 @@ async function updateTsconfigIncludes(outputPath: string, silent: boolean) {
         }`
       );
     }
+  }
+}
+
+/**
+ * Creates a basic basehub.config.mjs file if none exists yet
+ */
+async function createBasicConfigFile(silent: boolean) {
+  try {
+    const extensions = [".ts", ".mjs", ".js"];
+    const configExists = extensions.some((ext) =>
+      fs.existsSync(path.resolve(process.cwd(), `basehub.config${ext}`))
+    );
+
+    if (configExists) {
+      return; // Config file already exists, don't overwrite
+    }
+
+    const configPath = path.resolve(process.cwd(), "basehub.config.ts");
+    const configContent = `import { setGlobalConfig } from 'basehub';
+
+  setGlobalConfig({})
+  `;
+
+    fs.writeFileSync(configPath, configContent);
+    logIfNotSilent(silent, `📝 Created basic config file: basehub.config.ts`);
+    return configPath;
+  } catch (err) {
+    // no prob
   }
 }
 
@@ -178,8 +215,15 @@ export const main = async (
       console.log(`[basehub] generated in: ${basehubOutputPath}`);
     }
 
-    // Update tsconfig.json to include the generated types file
-    await updateTsconfigIncludes(basehubOutputPath, silent);
+    // Create basic config file if none exists
+    const configPath = await createBasicConfigFile(silent);
+
+    // Update tsconfig.json to include the generated types file and config file
+    const includes = [basehubOutputPath];
+    if (configPath) {
+      includes.push(configPath);
+    }
+    await updateTsconfigIncludes(includes, silent);
 
     //     if (
     //       schemaFileContents.includes("mutation<R extends MutationGenqlSelection>")

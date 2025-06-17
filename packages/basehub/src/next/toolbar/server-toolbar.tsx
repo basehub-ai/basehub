@@ -40,10 +40,6 @@ export const ServerToolbar = async ({
       const { draftMode } = await import("next/headers");
       const { headers, url } = await getStuffFromEnv(basehubProps);
 
-      if (!headers["x-basehub-token"]) {
-        return { status: 401, response: { error: "Token not found" } };
-      }
-
       const appApiEndpoint = getBaseHubAppApiEndpoint(
         new URL(url),
         "/api/nextjs/preview-auth"
@@ -54,7 +50,7 @@ export const ServerToolbar = async ({
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-basehub-token": headers["x-basehub-token"],
+          ...headers,
         },
         body: JSON.stringify({ bshbPreview: bshbPreviewToken }),
       });
@@ -80,10 +76,6 @@ export const ServerToolbar = async ({
       const { headers, url, isForcedDraft } =
         await getStuffFromEnv(basehubProps);
 
-      if (!headers["x-basehub-token"]) {
-        return { status: 401, response: { error: "Token not found" } };
-      }
-
       // @ts-ignore
       const { draftMode } = await import("next/headers");
       if (
@@ -103,7 +95,7 @@ export const ServerToolbar = async ({
         method: "GET",
         headers: {
           "content-type": "application/json",
-          "x-basehub-token": headers["x-basehub-token"],
+          ...headers,
           ...(bshbPreviewToken && {
             "x-basehub-preview-token": bshbPreviewToken,
           }),
@@ -162,10 +154,9 @@ export const ServerToolbar = async ({
       method: "GET",
       headers: {
         "content-type": "application/json",
-        "x-basehub-token": headers["x-basehub-token"],
+        ...headers,
         "x-basehub-ref": ref || headers["x-basehub-ref"],
         "x-basehub-preview-token": bshbPreviewToken,
-        "x-basehub-sdk-build-id": headers["x-basehub-sdk-build-id"],
       } as HeadersInit,
     });
 
