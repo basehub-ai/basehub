@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.1
+
+### Patch Changes
+
+- remove annoying log
+
 ## 9.0.0
 
 ### Major Changes

@@ -168,9 +168,7 @@ export const getStuffFromEnv = async (options?: Options) => {
         : undefined);
 
     if (fallbackPlayground) {
-      console.log(
-        `Token not found, falling back to playground targeting ${fallbackPlayground.target}`
-      );
+      // Token not found, falling back to playground
     } else {
       if (options.cli) {
         console.error(tokenNotFoundErrorMessage);
