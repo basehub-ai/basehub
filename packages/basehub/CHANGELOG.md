@@ -1,5 +1,37 @@
 # basehub
 
+## 9.0.0
+
+### Major Changes
+
+- d919a3a: SDK generation is now not required. Some deprecations like \_\_scalar, "everything", and type guard functions. all else should just work.
+
+### Patch Changes
+
+- 17d6cfe: v0/bolt guard
+- 5076542: fix
+- aa2db17: fix
+- aa2db17: remove createClient -- it's the same as basehub
+- fb6529e: log
+- aa2db17: config
+- 17d6cfe: child_process import fix
+- a840ad5: fix more bugz
+- aa2db17: logz
+- fb6529e: log
+- aa2db17: patch process.exit
+- fb6529e: debug logs
+- fb6529e: more logs
+- aa2db17: back to config, now mutable thing
+- aa2db17: try another thing
+- a66f5b0: fixe
+- 3be67b1: make sendEvent work in the client again
+- fb6529e: remove logs
+- aa2db17: token fix
+- aa2db17: remove config file gen
+- a840ad5: fix some bugs
+- a66f5b0: fixes
+- aa2db17: fix bug
+
 ## 9.0.0-schemaless.22
 
 ### Patch Changes
