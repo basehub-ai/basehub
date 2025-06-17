@@ -1,33 +1,60 @@
 import { Pump } from "basehub/react-pump";
+import { CodeBlock } from "basehub/react-code-block";
 
 export default function HomePage() {
   return (
-    <Pump
-      queries={[
-        {
-          homepage: {
-            heroTitle: { html: true },
+    <>
+      <CodeBlock
+        snippets={[{ code: 'const hello = "world"', language: "ts" }]}
+        theme={"andromeeda"}
+      />
+      <Pump
+        queries={[{ homepage: { heroTitle: { html: true } } }]}
+        bind={{
+          someParam: "someValue",
+        }}
+      >
+        {async (params, [data]) => {
+          "use server";
+
+          data.homepage.heroTitle?.html;
+          params.someParam;
+
+          return (
+            <div>
+              <pre>
+                <code>{JSON.stringify(data, null, 2)}</code>
+              </pre>
+            </div>
+          );
+        }}
+      </Pump>
+      this one targets a different ref
+      <Pump
+        _ref="FdhB3Vr5gK0s4S582524R"
+        queries={[
+          {
+            homepage: {
+              _id: true,
+              branching: {
+                sectionTitle: true,
+              },
+            },
           },
-        },
-      ]}
-      bind={{
-        someParam: "someValue",
-      }}
-    >
-      {async (params, [data]) => {
-        "use server";
+        ]}
+      >
+        {async ([data]) => {
+          "use server";
 
-        data.homepage.heroTitle?.html;
-        params.someParam;
-
-        return (
-          <div>
-            <pre>
-              <code>{JSON.stringify(data, null, 2)}</code>
-            </pre>
-          </div>
-        );
-      }}
-    </Pump>
+          return (
+            <div>
+              <pre>
+                <code>{JSON.stringify(data, null, 2)}</code>
+              </pre>
+            </div>
+          );
+        }}
+      </Pump>
+    </>
   );
 }

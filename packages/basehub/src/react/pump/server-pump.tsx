@@ -1,28 +1,22 @@
 import * as React from "react";
 import type { JSX } from "react";
-import type { ResponseCache } from "./types";
+import type { ResponseCache } from "./types.js";
 import {
-  // @ts-ignore
   basehub,
-  // @ts-ignore
-  type QueryGenqlSelection as PumpQuery,
-  // @ts-ignore
-  type QueryResult,
-  // @ts-ignore
   generateQueryOp,
-  // @ts-ignore
-  getStuffFromEnv,
-  // @ts-ignore
-  resolvedRef,
-  // @ts-ignore
-  isNextjs,
-} from "../index";
+  type QueryGenqlSelection,
+  type QueryResult,
+  type Options,
+} from "../../index.js";
+import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
+import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
+import { isV0OrBolt } from "../../bin/util/is-v0.js";
 
-export { PumpQuery };
+export interface PumpQuery extends QueryGenqlSelection {}
 
 // we use react.lazy to code split client-pump, which is the heavier part of next-pump, and only required when in draft
 const LazyClientPump = React.lazy(() =>
-  import("./client-pump").then((mod) => ({ default: mod.ClientPump }))
+  import("./client-pump.js").then((mod) => ({ default: mod.ClientPump }))
 );
 
 const cache = new Map<
@@ -53,7 +47,12 @@ export type PumpProps<
       ) => React.ReactNode | Promise<React.ReactNode>;
   queries: [...Queries]; // Tuple type for better type inference
   bind?: Bind;
-} & Parameters<typeof basehub>[0];
+} & Omit<Options, "ref"> & {
+    /**
+     * same as "ref", but to avoid React complaining about the "ref" prop
+     */
+    _ref?: Options["ref"];
+  };
 
 // Utility type to infer result types from an array of queries
 export type QueryResults<Queries extends Array<PumpQuery>> = {
@@ -67,31 +66,32 @@ export const Pump = async <
   children,
   queries,
   bind,
-  ...basehubProps
+  _ref,
+  ..._basehubProps
 }: PumpProps<Queries, Bind>): Promise<JSX.Element> => {
+  const basehubProps = { ..._basehubProps, ref: _ref };
   // passed to the client to toast
   const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
-  if (isNextjs) {
-    let isNextjsDraftMode = false;
-    if (basehubProps.draft === undefined) {
-      // try to auto-detect (only if draft is not explicitly set by the user)
-      try {
-        const { draftMode } = await import("next/headers");
-        isNextjsDraftMode = (await draftMode()).isEnabled;
-      } catch (error) {
-        // noop, not using nextjs
-      }
-    }
-
-    if (isNextjsDraftMode && basehubProps.draft === undefined) {
-      basehubProps.draft = true;
+  let isNextjsDraftMode = false;
+  if (!isV0OrBolt() && basehubProps.draft === undefined) {
+    // try to auto-detect (only if draft is not explicitly set by the user)
+    try {
+      // @ts-ignore
+      const { draftMode } = await import("next/headers");
+      isNextjsDraftMode = (await draftMode()).isEnabled;
+    } catch (error) {
+      // noop, not using nextjs
     }
   }
 
-  const { headers, draft } = getStuffFromEnv(basehubProps);
-  const token = headers["x-basehub-token"];
+  if (isNextjsDraftMode && basehubProps.draft === undefined) {
+    basehubProps.draft = true;
+  }
+
+  const { headers, draft, resolvedRef } = await getStuffFromEnv(basehubProps);
+  const { "x-basehub-token": _token, ...headersWithoutToken } = headers;
   const apiVersion = headers["x-basehub-api-version"];
   const pumpEndpoint = "https://aws.basehub.com/pump";
 
@@ -100,20 +100,19 @@ export const Pump = async <
   const queriesWithFallback =
     draft && noQueries ? [{ _sys: { id: true } }] : queries;
 
-  if (draft) {
+  if (!isV0OrBolt() && draft) {
     // try to get ref from cookies
-    if (isNextjs) {
-      try {
-        const { cookies } = await import("next/headers");
-        const cookieStore = await cookies();
-        const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
-          ?.value;
-        if (ref) {
-          headers["x-basehub-ref"] = ref;
-        }
-      } catch (error) {
-        // noop
+    try {
+      // @ts-ignore
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
+        ?.value;
+      if (ref) {
+        headers["x-basehub-ref"] = ref;
       }
+    } catch (error) {
+      // noop
     }
   }
 
@@ -140,14 +139,12 @@ export const Pump = async <
       if (!data) {
         const dataPromise = draft
           ? fetch(pumpEndpoint, {
-              ...(isNextjs ? { cache: "no-store" } : {}),
+              cache: "no-store",
               method: "POST",
               headers: {
                 ...headers,
                 "content-type": "application/json",
-                "x-basehub-token": token,
-                "x-basehub-api-version": apiVersion,
-              },
+              } as HeadersInit,
               body: JSON.stringify(rawQueryOp),
             }).then(async (response) => {
               const {
@@ -164,7 +161,7 @@ export const Pump = async <
               errors.push(_errors);
               responseHashes[index] = _responseHash;
 
-              return basehub.replaceSystemAliases(data);
+              return replaceSystemAliases(data);
             })
           : basehub(basehubProps).query(singleQuery);
         cache.set(cacheKey, {
@@ -179,6 +176,7 @@ export const Pump = async <
   );
 
   if (bind) {
+    // @ts-ignore
     children = children.bind(null, bind);
   }
 
@@ -234,10 +232,12 @@ export const Pump = async <
           spaceID: spaceID,
         }}
         pumpEndpoint={pumpEndpoint}
+        pumpHeaders={headersWithoutToken}
         pumpToken={pumpToken ?? undefined}
         initialResolvedChildren={resolvedChildren}
         apiVersion={apiVersion}
         previewRef={headers["x-basehub-ref"] || resolvedRef.ref}
+        explicitRef={basehubProps.ref}
       >
         {/* We pass the raw `children` param as it might be a server action that will be re-executed from the client as data comes in */}
         {/* @ts-ignore */}
@@ -246,7 +246,7 @@ export const Pump = async <
     );
   }
 
-  return resolvedChildren;
+  return resolvedChildren as any;
 };
 
 /**
@@ -256,18 +256,19 @@ export const Pump = async <
 export const createPump = <
   Query extends PumpQuery[],
   Params extends Record<string, unknown> | void,
-  Bind extends unknown = undefined,
+  Bind = undefined,
 >(
   queries: Query | ((params: Params) => Query)
 ) => {
   return (
     props: Omit<PumpProps<Query, Bind>, "queries"> &
       (Params extends void ? unknown : { params: Params })
-  ): JSX.Element => {
+  ): Promise<JSX.Element> => {
     // Dynamically call query function based on whether query is a function and params are provided
     const queryResult =
       typeof queries === "function" ? queries((props as any).params) : queries;
 
+    // @ts-ignore
     return <Pump {...props} queries={queryResult} />;
   };
 };

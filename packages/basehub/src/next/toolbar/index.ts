@@ -1,1 +1,1 @@
-export { ServerToolbar as Toolbar } from "./server-toolbar";
+export { ServerToolbar as Toolbar } from "./server-toolbar.js";

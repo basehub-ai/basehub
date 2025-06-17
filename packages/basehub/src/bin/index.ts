@@ -1,22 +1,26 @@
 #!/usr/bin/env node
 
 import arg from "arg";
-import { main } from "./main";
-import { formatError } from "./util/format-error";
+import { main } from "./main.js";
+import { formatError } from "./util/format-error.js";
 import fs from "fs";
 import resolvePkg from "resolve-pkg";
 
 function getVersion() {
-  const basehubModulePath = resolvePkg("basehub");
+  try {
+    const basehubModulePath = resolvePkg("basehub");
 
-  // Get package.json
-  const packageJson = JSON.parse(
-    fs.readFileSync(`${basehubModulePath}/package.json`, "utf-8")
-  );
-  // Get version from package.json
-  const version = packageJson.version;
+    // Get package.json
+    const packageJson = JSON.parse(
+      fs.readFileSync(`${basehubModulePath}/package.json`, "utf-8")
+    );
+    // Get version from package.json
+    const version = packageJson.version;
 
-  return version;
+    return version;
+  } catch (e) {
+    return "1.0.0";
+  }
 }
 
 // Show usage and exit with code
@@ -51,6 +55,7 @@ const args = arg(
   {
     // types
     "--output": String,
+    "--package-name": String,
     "--token": String,
     "--ref": String,
     "--env-prefix": String,
@@ -63,6 +68,7 @@ const args = arg(
     "--debug": Boolean,
     // aliases
     "-o": "--output",
+    "-pn": "--package-name",
     "-t": "--token",
     "-r": "--ref",
     "-ep": "--env-prefix",

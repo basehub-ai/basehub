@@ -2,59 +2,92 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "8.2.11",
+  "version": "9.0.0",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
   "homepage": "https://basehub.com",
   "bin": {
-    "basehub": "./dist/bin.cjs"
+    "basehub": "./dist/bin.js"
   },
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
   "files": [
-    "dts",
     "dist",
-    "scripts",
-    "index.js",
-    "index.d.ts",
-    "react-pump.js",
-    "react-pump.d.ts",
-    "next-toolbar.js",
-    "next-toolbar.d.ts",
-    "src/next/toolbar",
-    "src/react/pump",
-    "src/events",
-    "src/workflows",
-    "react-svg.js",
-    "react-svg.d.ts",
-    "react-icon.js",
-    "react-icon.d.ts",
-    "react-rich-text.js",
-    "react-rich-text.d.ts",
-    "react-form.js",
-    "react-form.d.ts",
-    "react-code-block",
-    "react-search.js",
-    "react-search.d.ts",
-    "api-transaction.d.ts",
-    "events.js",
-    "events.d.ts",
-    "workflows.js",
-    "workflows.d.ts",
-    "search.js",
-    "search.d.ts",
-    "next-image.js",
-    "next-image.d.ts"
+    "README.md"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react-pump": {
+      "import": "./dist/react/pump/index.js",
+      "types": "./dist/react/pump/index.d.ts"
+    },
+    "./next-toolbar": {
+      "import": "./dist/next/toolbar/index.js",
+      "types": "./dist/next/toolbar/index.d.ts"
+    },
+    "./events": {
+      "import": "./dist/events/index.js",
+      "types": "./dist/events/index.d.ts"
+    },
+    "./workflows": {
+      "import": "./dist/workflows/index.js",
+      "types": "./dist/workflows/index.d.ts"
+    },
+    "./react-icon": {
+      "import": "./dist/react/icon/index.js",
+      "types": "./dist/react/icon/index.d.ts"
+    },
+    "./react-form": {
+      "import": "./dist/react/form/index.js",
+      "types": "./dist/react/form/index.d.ts"
+    },
+    "./react-svg": {
+      "import": "./dist/react/icon/index.js",
+      "types": "./dist/react/icon/index.d.ts"
+    },
+    "./search": {
+      "import": "./dist/search/index.js",
+      "types": "./dist/search/index.d.ts"
+    },
+    "./react-search": {
+      "import": "./dist/react/search/index.js",
+      "types": "./dist/react/search/index.d.ts"
+    },
+    "./react-rich-text": {
+      "import": "./dist/react/rich-text/index.js",
+      "types": "./dist/react/rich-text/index.d.ts"
+    },
+    "./next-image": {
+      "import": "./dist/next/image/index.js",
+      "types": "./dist/next/image/index.d.ts"
+    },
+    "./react-code-block": {
+      "import": "./dist/react/code-block/index.js",
+      "types": "./dist/react/code-block/index.d.ts"
+    },
+    "./react-code-block/client": {
+      "import": "./dist/react/code-block/client/index.js",
+      "types": "./dist/react/code-block/client/index.d.ts"
+    },
+    "./api-transaction": {
+      "import": "./dist/api-transaction.js",
+      "types": "./dist/api-transaction.d.ts"
+    }
+  },
   "sideEffects": false,
   "scripts": {
     "emit-dts": "dts-bundle-generator --inline-declare-externals --external-inlines @basehub/mutation-api-helpers --no-check -o dts/src/api-transaction.d.ts src/api-transaction.ts && node scripts/fix-api-transaction-types.mjs && tsc --project tsconfig.dts-only.json",
     "dev": "pnpm emit-dts && pnpm build --watch",
     "build": "pnpm build:bin && pnpm build:client",
-    "build:bin": "pnpm emit-dts && tsup --config tsup-bin.config.ts",
-    "build:client": "tsup --config tsup-client.config.ts"
+    "build:bin": "pnpm emit-dts && tsup --config tsup.bin.ts",
+    "build:client": "tsup --config tsup.config.ts",
+    "yalc:push": "pnpm build && yalc push",
+    "test": "vitest"
   },
   "dependencies": {
     "@basehub/genql": "9.0.0-canary.13",
@@ -66,20 +99,30 @@
     "esbuild": "0.25.5",
     "esbuild-plugin-d.ts": "1.3.1",
     "github-slugger": "^2.0.0",
+    "graphql": "^16.8.1",
     "hast-util-to-jsx-runtime": "^2.3.0",
+    "listr2": "^8.3.3",
+    "lodash.camelcase": "^4.3.0",
     "lodash.debounce": "^4.0.8",
     "lodash.get": "^4.4.2",
+    "lodash.uniq": "^4.5.0",
+    "mkdirp": "^3.0.1",
+    "prettier": "3.0.3",
     "pusher-js": "^8.3.0",
     "resolve-pkg": "2.0.0",
+    "rimraf": "^6.0.1",
     "server-only": "^0.0.1",
     "shiki": "1.17.7",
-    "typesense": "^1.8.2",
-    "zod": "^3.22.1"
+    "typesense": "^1.8.2"
   },
   "devDependencies": {
     "@basehub/mutation-api-helpers": "2.0.11",
+    "@graphql-tools/graphql-file-loader": "^7.5.17",
+    "@graphql-tools/load": "^7.8.14",
+    "@types/lodash.camelcase": "^4.3.1",
     "@types/lodash.debounce": "^4.0.9",
     "@types/lodash.get": "4.4.9",
+    "@types/lodash.uniq": "^4.5.9",
     "@types/node": "18.13.0",
     "@types/react": "18.2.20",
     "@types/react-dom": "18.2.7",
@@ -91,6 +134,7 @@
     "react-dom": "18.2.0",
     "tsconfig": "workspace:*",
     "tsup": "8.0.2",
-    "type-fest": "3.0.0"
+    "type-fest": "3.0.0",
+    "vitest": "^3.2.3"
   }
 }

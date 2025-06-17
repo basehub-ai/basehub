@@ -1,5 +1,176 @@
 # basehub
 
+## 9.0.0
+
+### Major Changes
+
+- d919a3a: SDK generation is now not required. Some deprecations like \_\_scalar, "everything", and type guard functions. all else should just work.
+
+### Patch Changes
+
+- 17d6cfe: v0/bolt guard
+- 5076542: fix
+- aa2db17: fix
+- aa2db17: remove createClient -- it's the same as basehub
+- fb6529e: log
+- aa2db17: config
+- 17d6cfe: child_process import fix
+- a840ad5: fix more bugz
+- aa2db17: logz
+- fb6529e: log
+- aa2db17: patch process.exit
+- fb6529e: debug logs
+- fb6529e: more logs
+- aa2db17: back to config, now mutable thing
+- aa2db17: try another thing
+- a66f5b0: fixe
+- 3be67b1: make sendEvent work in the client again
+- fb6529e: remove logs
+- aa2db17: token fix
+- aa2db17: remove config file gen
+- a840ad5: fix some bugs
+- a66f5b0: fixes
+- aa2db17: fix bug
+
+## 9.0.0-schemaless.22
+
+### Patch Changes
+
+- try another thing
+
+## 9.0.0-schemaless.21
+
+### Patch Changes
+
+- logz
+
+## 9.0.0-schemaless.20
+
+### Patch Changes
+
+- token fix
+
+## 9.0.0-schemaless.19
+
+### Patch Changes
+
+- fix bug
+
+## 9.0.0-schemaless.18
+
+### Patch Changes
+
+- patch process.exit
+
+## 9.0.0-schemaless.17
+
+### Patch Changes
+
+- fix
+
+## 9.0.0-schemaless.16
+
+### Patch Changes
+
+- back to config, now mutable thing
+
+## 9.0.0-schemaless.15
+
+### Patch Changes
+
+- remove createClient -- it's the same as basehub
+- remove config file gen
+
+## 9.0.0-schemaless.14
+
+### Patch Changes
+
+- config
+
+## 9.0.0-schemaless.13
+
+### Patch Changes
+
+- remove logs
+
+## 9.0.0-schemaless.12
+
+### Patch Changes
+
+- log
+
+## 9.0.0-schemaless.11
+
+### Patch Changes
+
+- log
+
+## 9.0.0-schemaless.10
+
+### Patch Changes
+
+- more logs
+
+## 9.0.0-schemaless.9
+
+### Patch Changes
+
+- debug logs
+
+## 9.0.0-schemaless.8
+
+### Patch Changes
+
+- make sendEvent work in the client again
+
+## 9.0.0-schemaless.7
+
+### Patch Changes
+
+- fix
+
+## 9.0.0-schemaless.6
+
+### Patch Changes
+
+- fixes
+
+## 9.0.0-schemaless.5
+
+### Patch Changes
+
+- fixe
+
+## 9.0.0-schemaless.4
+
+### Patch Changes
+
+- child_process import fix
+
+## 9.0.0-schemaless.3
+
+### Patch Changes
+
+- v0/bolt guard
+
+## 9.0.0-schemaless.2
+
+### Patch Changes
+
+- fix more bugz
+
+## 9.0.0-schemaless.1
+
+### Patch Changes
+
+- fix some bugs
+
+## 9.0.0-schemaless.0
+
+### Major Changes
+
+- SDK generation is now not required. Some deprecations like \_\_scalar, "everything", and type guard functions. all else should just work.
+
 ## 8.2.11
 
 ### Patch Changes

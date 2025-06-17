@@ -2,15 +2,17 @@
 /* eslint-disable @next/next/no-img-element */
 import type { JSX, ReactNode } from "react";
 import GithubSlugger from "github-slugger";
-import { extractTextFromNode } from "./util/heading-id";
-import type { Language } from "../code-block";
+import { extractTextFromNode } from "./util/heading-id.js";
+import type { Language } from "../code-block/index.js";
 import type {
   RichTextNode,
   RichTextTocNode,
   Mark,
-} from "../../../dts/src/api-transaction";
+} from "../../../dts/src/api-transaction.js";
 
 const isDev = process.env.NODE_ENV === "development";
+
+export { RichTextNode, RichTextTocNode };
 
 const SUFFIX_CUSTOM_MARK = "_mark";
 type SUFFIX_CUSTOM_BLOCK_MARK = typeof SUFFIX_CUSTOM_MARK;

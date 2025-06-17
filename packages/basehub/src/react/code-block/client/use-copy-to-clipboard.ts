@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useCodeBlockContext } from "./context";
+import { useCodeBlockContext } from "./context.js";
 
 export const useCopyToClipboard = (opts?: { copiedDurationMs?: number }) => {
   const { activeSnippet, groupId } = useCodeBlockContext();

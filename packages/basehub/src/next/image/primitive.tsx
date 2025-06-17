@@ -1,4 +1,6 @@
+// @ts-ignore
 import type { ImageLoaderProps, ImageProps } from "next/image";
+// @ts-ignore
 import Image from "next/image";
 import { forwardRef } from "react";
 

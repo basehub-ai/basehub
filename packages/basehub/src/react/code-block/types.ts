@@ -1,4 +1,4 @@
-import { HighlighterProps } from "./highlighter";
+import type { HighlighterProps } from "./highlighter.js";
 
 export type Snippet = {
   id: string;

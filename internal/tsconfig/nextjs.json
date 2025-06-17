@@ -12,6 +12,7 @@
     "noEmit": true,
     "incremental": true,
     "esModuleInterop": true,
+    "moduleResolution": "bundler",
     "module": "esnext",
     "resolveJsonModule": true,
     "isolatedModules": true,

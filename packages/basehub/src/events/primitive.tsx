@@ -1,18 +1,6 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
-import type {
-  // @ts-ignore
-  Scalars,
-  // @ts-ignore
-  // eslint-disable-next-line import/no-unresolved
-} from "../schema";
-import {
-  // @ts-ignore
-  resolvedRef,
-  // @ts-ignore
-  // eslint-disable-next-line import/no-unresolved
-} from "../index";
-import type { ResolvedRef } from "../common-types";
-import type { Field } from "../react/form/primitive";
+import type { Scalars } from "../index.js";
+import type { Field } from "../react/form/primitive.js";
 
 /* -------------------------------------------------------------------------------------------------
  * Client
@@ -45,8 +33,11 @@ type ExtractEventKey<T extends string> = T extends `${infer Base}:${string}`
   : T;
 
 // Get all event key types (bshb_event_*)
-export type EventKeys = KeysStartingWith<Scalars, "bshb_event">;
+export type EventKeys = KeysStartingWith<Scalars, "bshb_event"> extends never
+  ? `bshb_event_${string}`
+  : KeysStartingWith<Scalars, "bshb_event">;
 export type EventSchema<Key extends `${EventKeys}:${string}`> =
+  // @ts-ignore
   EventSchemaMap[ExtractEventKey<Key>];
 
 // Map from event key to its schema type
@@ -61,30 +52,22 @@ type NullableEventSchemaMap = {
 };
 
 export type EventArgs<Key extends string> =
+  // @ts-ignore
   EventSchemaMap[ExtractEventKey<Key>] extends never
     ? [Key]
-    : [Key, EventSchemaMap[ExtractEventKey<Key>]];
+    : // @ts-ignore
+      [Key, EventSchemaMap[ExtractEventKey<Key>]];
 
 export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
   ...args: EventArgs<Key>
 ) => {
   const [key, data] = args;
-  const parsedResolvedRef = resolvedRef as ResolvedRef;
 
   let formDataOrJson: FormData | string;
   if (data && Object.values(data).some((value) => value instanceof File)) {
     formDataOrJson = new FormData();
     formDataOrJson.append("_system_key", key);
     formDataOrJson.append("_system_type", "create");
-    formDataOrJson.append(
-      "_system_commitId",
-      (parsedResolvedRef.type === "commit"
-        ? parsedResolvedRef.id
-        : parsedResolvedRef.headCommitId) ?? ""
-    );
-    if (parsedResolvedRef.type === "branch") {
-      formDataOrJson.append("_system_branch", parsedResolvedRef.name);
-    }
 
     if (data) {
       // Append all data fields to FormData
@@ -102,14 +85,6 @@ export const sendEvent = async <Key extends `${EventKeys}:${string}`>(
       key,
       data,
       type: "create",
-      commitId:
-        parsedResolvedRef.type === "commit"
-          ? parsedResolvedRef.id
-          : parsedResolvedRef.headCommitId,
-      branch:
-        parsedResolvedRef.type === "branch"
-          ? parsedResolvedRef.name
-          : undefined,
     });
   }
 
@@ -183,15 +158,18 @@ type MapScalarTypeToOrder<T extends Record<string, any>> = {
 
 type GetOptions<
   K extends string,
-  Select extends
-    | Partial<Record<keyof Scalars[`schema_${K}`], boolean>>
-    | undefined = undefined,
+  Select extends // @ts-ignore
+
+      | Partial<Record<keyof Scalars[`schema_${K}`], boolean>>
+      | undefined = undefined,
 > =
   | {
       type: "table";
       first?: number;
       skip?: number;
+      // @ts-ignore
       filter?: MapScalarTypeToFilters<Scalars[`schema_${K}`]>;
+      // @ts-ignore
       orderBy?: MapScalarTypeToOrder<Scalars[`schema_${K}`]>;
       select?: Select;
     }
@@ -203,11 +181,14 @@ type GetOptions<
 // Type for table-based response
 type TableResponse<
   K extends string,
+  // @ts-ignore
   T extends Record<keyof Scalars[`schema_${K}`], unknown>,
+  // @ts-ignore
   Select extends Partial<Record<keyof Scalars[`schema_${K}`], boolean>>,
 > =
   | {
       success: true;
+      // @ts-ignore
       data: Array<{ date: string; id: string } & Pick<T, keyof Select>>;
     }
   | {
@@ -230,11 +211,13 @@ type TimeSeriesResponse =
 export function getEvents<
   Key extends `${EventKeys}:${string}`,
   Select extends Partial<
+    // @ts-ignore
     Record<keyof Scalars[`schema_${ExtractEventKey<Key>}`], boolean>
   >,
 >(
   key: Key,
   options: Extract<GetOptions<ExtractEventKey<Key>, Select>, { type: "table" }>
+  // @ts-ignore
 ): Promise<TableResponse<Key, EventSchemaMap[ExtractEventKey<Key>], Select>>;
 
 // Time-series type overload
@@ -289,6 +272,7 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
 export async function updateEvent<Key extends `${EventKeys}:${string}`>(
   key: Key,
   id: string,
+  // @ts-ignore
   data: Partial<NullableEventSchemaMap[ExtractEventKey<Key>]>
 ) {
   let formDataOrJson: FormData | string;
@@ -362,6 +346,7 @@ export function parseFormData<
   key: Key,
   schema: Schema,
   formData: FormData
+  // @ts-ignore
 ): SafeReturn<EventSchemaMap[ExtractEventKey<Key>]> {
   const formattedData: Record<string, unknown> = {};
   const errors: Record<string, string> = {};
@@ -473,6 +458,7 @@ export function parseFormData<
   }
 
   return {
+    // @ts-ignore
     data: formattedData as EventSchemaMap[ExtractEventKey<Key>],
     success: true,
   };
