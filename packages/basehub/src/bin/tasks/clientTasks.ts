@@ -1,10 +1,7 @@
 import crypto from "crypto";
-import { GraphQLSchema, GraphQLEnumType, isEnumType } from "graphql";
 import { ListrTask, Listr } from "listr2";
-import { camelCase, capitalize } from "./utils.js";
 import { Config } from "./main.js";
 import { writeFileToPath } from "./helpers/files.js";
-import { excludedTypes } from "./render/common/excludedTypes.js";
 import { RenderContext } from "./render/common/RenderContext.js";
 import { renderRequestTypes } from "./render/requestTypes/renderRequestTypes.js";
 import { renderResponseTypes } from "./render/responseTypes/renderResponseTypes.js";
@@ -13,6 +10,9 @@ import {
   renderModuleAugmentation,
   enhanceMutationGenqlSelection,
 } from "./render/responseTypes/renderModuleAugmentation.js";
+// import { GraphQLSchema, GraphQLEnumType, isEnumType } from "graphql";
+// import { excludedTypes } from "./render/common/excludedTypes.js";
+// import { camelCase, capitalize } from "./utils.js";
 // import { renderTypeGuards } from "./render/typeGuards/renderTypeGuards.js";
 
 export type OutputContextRef = {
@@ -66,7 +66,7 @@ export const clientTasks = (
 
                 await writeFileToPath(
                   [output],
-                  "// @ts-nocheck\n/* istanbul ignore file */\n/* tslint:disable */\n/* eslint-disable */\n\n" +
+                  "/* istanbul ignore file */\n/* tslint:disable */\n/* eslint-disable */\n// @ts-nocheck\n\n" +
                     enhanceMutationGenqlSelection(
                       await renderCtx.toCode("typescript")
                     )
@@ -92,37 +92,37 @@ export const clientTasks = (
   ];
 };
 
-function renderEnumsMaps(schema: GraphQLSchema, ctx: RenderContext) {
-  const typeMap = schema.getTypeMap();
+// function renderEnumsMaps(schema: GraphQLSchema, ctx: RenderContext) {
+//   const typeMap = schema.getTypeMap();
 
-  const enums: GraphQLEnumType[] = [];
-  for (const name in typeMap) {
-    if (excludedTypes.includes(name)) continue;
+//   const enums: GraphQLEnumType[] = [];
+//   for (const name in typeMap) {
+//     if (excludedTypes.includes(name)) continue;
 
-    const type = typeMap[name];
+//     const type = typeMap[name];
 
-    if (isEnumType(type)) {
-      enums.push(type);
-    }
-  }
-  if (enums.length === 0) return;
+//     if (isEnumType(type)) {
+//       enums.push(type);
+//     }
+//   }
+//   if (enums.length === 0) return;
 
-  ctx.addCodeBlock(
-    enums
-      .map(
-        (type) =>
-          `export const ${"enum" + capitalize(camelCase(type.name))} = {\n` +
-          type
-            .getValues()
-            .map((v) => {
-              if (!v?.name) {
-                return "";
-              }
-              return `   ${v.name}: '${v.name}' as const`;
-            })
-            .join(",\n") +
-          `\n}\n`
-      )
-      .join("\n")
-  );
-}
+//   ctx.addCodeBlock(
+//     enums
+//       .map(
+//         (type) =>
+//           `export const ${"enum" + capitalize(camelCase(type.name))} = {\n` +
+//           type
+//             .getValues()
+//             .map((v) => {
+//               if (!v?.name) {
+//                 return "";
+//               }
+//               return `   ${v.name}: '${v.name}' as const`;
+//             })
+//             .join(",\n") +
+//           `\n}\n`
+//       )
+//       .join("\n")
+//   );
+// }
