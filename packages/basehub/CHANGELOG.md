@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.3
+
+### Patch Changes
+
+- fix undefined being sent as a header
+
 ## 9.0.2
 
 ### Patch Changes

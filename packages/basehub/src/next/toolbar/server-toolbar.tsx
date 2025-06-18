@@ -155,8 +155,10 @@ export const ServerToolbar = async ({
       headers: {
         "content-type": "application/json",
         ...headers,
-        "x-basehub-ref": ref || headers["x-basehub-ref"],
-        "x-basehub-preview-token": bshbPreviewToken,
+        ...(ref && { "x-basehub-ref": ref }),
+        ...(bshbPreviewToken && {
+          "x-basehub-preview-token": bshbPreviewToken,
+        }),
       } as HeadersInit,
     });
 
