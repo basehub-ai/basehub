@@ -1,4 +1,4 @@
-import type { RichTextNode } from "../../../../dts/src/api-transaction.js";
+import type { RichTextNode } from "@basehub/mutation-api-helpers";
 
 export function extractTextFromNode(node?: RichTextNode) {
   let textContent = "";
