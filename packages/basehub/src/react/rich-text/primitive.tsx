@@ -8,7 +8,7 @@ import type {
   RichTextNode,
   RichTextTocNode,
   Mark,
-} from "../../../dts/src/api-transaction.js";
+} from "@basehub/mutation-api-helpers";
 
 const isDev = process.env.NODE_ENV === "development";
 
