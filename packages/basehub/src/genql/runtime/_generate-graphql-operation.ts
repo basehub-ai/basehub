@@ -22,6 +22,27 @@ export interface GraphqlOperation {
   operationName?: string;
 }
 
+function toGraphQLInput(value: any): string {
+  if (value === null) {
+    return "null";
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map(toGraphQLInput).join(",")}]`;
+  }
+  if (typeof value === "object") {
+    return `{${Object.entries(value)
+      .map(([k, v]) => `${k}:${toGraphQLInput(v)}`)
+      .join(",")}}`;
+  }
+  if (typeof value === "string") {
+    return JSON.stringify(value);
+  }
+  if (typeof value === "boolean" || typeof value === "number") {
+    return String(value);
+  }
+  return "null";
+}
+
 const parseRequest = (
   request: Request | undefined,
   ctx: Context,
@@ -57,17 +78,13 @@ const parseRequest = (
     const argStrings = argNames.map((argName) => {
       let value = args[argName];
       if (typeof value === "object") {
-        // stringify the object
-        value = JSON.stringify(value);
-        // strip quotes except for string values
-        value = value.replace(/"([^"]+)":/g, "$1:");
+        value = toGraphQLInput(value);
       } else if (
         typeof value === "string" &&
         argsThatShouldNotBeEnums.includes(argName)
       ) {
         value = JSON.stringify(value);
       }
-
       return `${argName}:${value}`;
     });
     return `(${argStrings})${parseRequest(fields, ctx, path, options)}`;
