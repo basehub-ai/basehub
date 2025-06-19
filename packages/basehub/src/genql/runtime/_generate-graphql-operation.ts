@@ -65,7 +65,7 @@ const parseRequest = (
           ["transaction", "transactionAsync"].includes(path?.[0] || "") &&
           argName === "data";
         if (stringifyObject) {
-          value = '"' + value + '"';
+          value = JSON.stringify(value);
         } else {
           // strip quotes except for string values
           value = value.replace(/"([^"]+)":/g, "$1:");

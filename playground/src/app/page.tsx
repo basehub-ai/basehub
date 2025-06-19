@@ -1,23 +1,26 @@
 import { Pump } from "basehub/react-pump";
 import { CodeBlock } from "basehub/react-code-block";
-// import { basehub } from "basehub";
+import { generateMutationOp } from "basehub";
 
 export default async function HomePage() {
-  // await basehub().mutation({
-  //   transaction: {
-  //     __args: {
-  //       data: {
-  //         some: {
-  //           dude: true,
-  //         },
-  //       },
-  //     },
-  //     id: true,
-  //   },
-  // });
+  const d = generateMutationOp({
+    transaction: {
+      __args: {
+        data: {
+          some: {
+            dude: true,
+          },
+        },
+      },
+      id: true,
+    },
+  });
+
+  console.log(d);
 
   return (
     <>
+      <pre>{JSON.stringify(d.query)}</pre>
       <CodeBlock
         snippets={[{ code: 'const hello = "world"', language: "ts" }]}
         theme={"andromeeda"}
