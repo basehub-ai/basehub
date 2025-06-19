@@ -77,7 +77,9 @@ const parseRequest = (
 
     const argStrings = argNames.map((argName) => {
       let value = args[argName];
-      if (typeof value === "object") {
+      if (argName === "data" && typeof value === "object" && value !== null) {
+        value = JSON.stringify(value);
+      } else if (typeof value === "object") {
         value = toGraphQLInput(value);
       } else if (
         typeof value === "string" &&
