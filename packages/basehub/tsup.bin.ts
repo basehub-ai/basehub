@@ -8,6 +8,6 @@ export default defineConfig((_options) => {
       bin: "./src/bin/index.ts",
     },
     format: ["esm"],
-    outDir: "dist",
+    outDir: "dist-bin",
   };
 });

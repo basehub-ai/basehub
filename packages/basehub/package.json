@@ -2,81 +2,97 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "9.0.3",
+  "version": "9.0.4",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
   "homepage": "https://basehub.com",
   "bin": {
-    "basehub": "./dist/bin.js"
+    "basehub": "./dist-bin/bin.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
   "files": [
     "dist",
+    "dist-bin",
     "README.md"
   ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs"
     },
     "./react-pump": {
       "import": "./dist/react/pump/index.js",
-      "types": "./dist/react/pump/index.d.ts"
+      "types": "./dist/react/pump/index.d.ts",
+      "require": "./dist/react/pump/index.cjs"
     },
     "./next-toolbar": {
       "import": "./dist/next/toolbar/index.js",
-      "types": "./dist/next/toolbar/index.d.ts"
+      "types": "./dist/next/toolbar/index.d.ts",
+      "require": "./dist/next/toolbar/index.cjs"
     },
     "./events": {
       "import": "./dist/events/index.js",
-      "types": "./dist/events/index.d.ts"
+      "types": "./dist/events/index.d.ts",
+      "require": "./dist/events/index.cjs"
     },
     "./workflows": {
       "import": "./dist/workflows/index.js",
-      "types": "./dist/workflows/index.d.ts"
+      "types": "./dist/workflows/index.d.ts",
+      "require": "./dist/workflows/index.cjs"
     },
     "./react-icon": {
       "import": "./dist/react/icon/index.js",
-      "types": "./dist/react/icon/index.d.ts"
+      "types": "./dist/react/icon/index.d.ts",
+      "require": "./dist/react/icon/index.cjs"
     },
     "./react-form": {
       "import": "./dist/react/form/index.js",
-      "types": "./dist/react/form/index.d.ts"
+      "types": "./dist/react/form/index.d.ts",
+      "require": "./dist/react/form/index.cjs"
     },
     "./react-svg": {
       "import": "./dist/react/icon/index.js",
-      "types": "./dist/react/icon/index.d.ts"
+      "types": "./dist/react/icon/index.d.ts",
+      "require": "./dist/react/icon/index.cjs"
     },
     "./search": {
       "import": "./dist/search/index.js",
-      "types": "./dist/search/index.d.ts"
+      "types": "./dist/search/index.d.ts",
+      "require": "./dist/search/index.cjs"
     },
     "./react-search": {
       "import": "./dist/react/search/index.js",
-      "types": "./dist/react/search/index.d.ts"
+      "types": "./dist/react/search/index.d.ts",
+      "require": "./dist/react/search/index.cjs"
     },
     "./react-rich-text": {
       "import": "./dist/react/rich-text/index.js",
-      "types": "./dist/react/rich-text/index.d.ts"
+      "types": "./dist/react/rich-text/index.d.ts",
+      "require": "./dist/react/rich-text/index.cjs"
     },
     "./next-image": {
       "import": "./dist/next/image/index.js",
-      "types": "./dist/next/image/index.d.ts"
+      "types": "./dist/next/image/index.d.ts",
+      "require": "./dist/next/image/index.cjs"
     },
     "./react-code-block": {
       "import": "./dist/react/code-block/index.js",
-      "types": "./dist/react/code-block/index.d.ts"
+      "types": "./dist/react/code-block/index.d.ts",
+      "require": "./dist/react/code-block/index.cjs"
     },
     "./react-code-block/client": {
       "import": "./dist/react/code-block/client/index.js",
-      "types": "./dist/react/code-block/client/index.d.ts"
+      "types": "./dist/react/code-block/client/index.d.ts",
+      "require": "./dist/react/code-block/client/index.cjs"
     },
     "./api-transaction": {
       "import": "./dist/api-transaction.js",
-      "types": "./dist/api-transaction.d.ts"
+      "types": "./dist/api-transaction.d.ts",
+      "require": "./dist/api-transaction.cjs"
     }
   },
   "sideEffects": false,

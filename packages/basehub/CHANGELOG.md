@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.4
+
+### Patch Changes
+
+- generate cjs also 😫
+
 ## 9.0.3
 
 ### Patch Changes

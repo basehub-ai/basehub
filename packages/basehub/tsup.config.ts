@@ -11,7 +11,7 @@ export default defineConfig((_options: Options) => {
     dts: true,
     outDir: "dist",
     splitting: true,
-    format: ["esm"],
+    format: ["esm", "cjs"],
     external: ["react", "react-dom", "next"],
     noExternal: [
       "dotenv-mono",
