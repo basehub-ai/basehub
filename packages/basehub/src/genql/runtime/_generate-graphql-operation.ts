@@ -23,6 +23,7 @@ export interface GraphqlOperation {
 }
 
 const parseRequest = (
+  operation: "query" | "mutation" | "subscription",
   request: Request | undefined,
   ctx: Context,
   path: string[],
@@ -35,7 +36,7 @@ const parseRequest = (
     const argNames = Object.keys(args);
 
     if (argNames.length === 0) {
-      return parseRequest(fields, ctx, path, options);
+      return parseRequest(operation, fields, ctx, path, options);
     }
 
     const argsThatShouldNotBeEnums = [
@@ -59,8 +60,16 @@ const parseRequest = (
       if (typeof value === "object") {
         // stringify the object
         value = JSON.stringify(value);
-        // strip quotes except for string values
-        value = value.replace(/"([^"]+)":/g, "$1:");
+        const stringifyObject =
+          operation === "mutation" &&
+          ["transaction", "transactionAsync"].includes(path?.[0] || "") &&
+          argName === "data";
+        if (stringifyObject) {
+          value = '"' + value + '"';
+        } else {
+          // strip quotes except for string values
+          value = value.replace(/"([^"]+)":/g, "$1:");
+        }
       } else if (
         typeof value === "string" &&
         argsThatShouldNotBeEnums.includes(argName)
@@ -70,7 +79,13 @@ const parseRequest = (
 
       return `${argName}:${value}`;
     });
-    return `(${argStrings})${parseRequest(fields, ctx, path, options)}`;
+    return `(${argStrings})${parseRequest(
+      operation,
+      fields,
+      ctx,
+      path,
+      options
+    )}`;
   } else if (typeof request === "object" && Object.keys(request).length > 0) {
     const fields = request;
     const fieldNames = Object.keys(fields).filter((k) => Boolean(fields[k]));
@@ -81,7 +96,7 @@ const parseRequest = (
         if (f.startsWith("on_")) {
           ctx.fragmentCounter++;
           const implementationFragment = `f${ctx.fragmentCounter}`;
-          const parsed = parseRequest(fields[f], ctx, [...path, f], {
+          const parsed = parseRequest(operation, fields[f], ctx, [...path, f], {
             ...options,
             aliasPrefix: implementationFragment,
           });
@@ -115,7 +130,13 @@ const parseRequest = (
           }
 
           // For object fields, parse recursively
-          const parsed = parseRequest(fields[f], ctx, [...path, f], options);
+          const parsed = parseRequest(
+            operation,
+            fields[f],
+            ctx,
+            [...path, f],
+            options
+          );
 
           // If the parsed result is empty and this is an object type,
           // we should include at least one field or it will be invalid GraphQL
@@ -151,7 +172,7 @@ export const generateGraphqlOperation = (
     fragmentCounter: 0,
     fragments: [],
   };
-  const result = parseRequest(fields, ctx, []);
+  const result = parseRequest(operation, fields, ctx, []);
 
   const operationName = fields?.__name || "";
 

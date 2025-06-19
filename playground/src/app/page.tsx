@@ -1,7 +1,21 @@
 import { Pump } from "basehub/react-pump";
 import { CodeBlock } from "basehub/react-code-block";
+// import { basehub } from "basehub";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // await basehub().mutation({
+  //   transaction: {
+  //     __args: {
+  //       data: {
+  //         some: {
+  //           dude: true,
+  //         },
+  //       },
+  //     },
+  //     id: true,
+  //   },
+  // });
+
   return (
     <>
       <CodeBlock
