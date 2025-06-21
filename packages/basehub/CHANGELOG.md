@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.7
+
+### Patch Changes
+
+- fix getEvents response type
+
 ## 9.0.6
 
 ### Patch Changes

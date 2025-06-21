@@ -249,6 +249,8 @@ export async function getEvents<Key extends `${EventKeys}:${string}`>(
           id,
           ...("value" in rest && typeof rest.value === "string"
             ? JSON.parse(rest.value)
+            : "value" in rest && typeof rest.value === "object"
+            ? rest.value
             : rest),
         })),
       };
