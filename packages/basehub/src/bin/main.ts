@@ -4,6 +4,7 @@ import { Args } from "./index.js";
 import fs from "fs";
 import { getStuffFromEnv, Options } from "./util/get-stuff-from-env.js";
 import type { ResolvedRef } from "../common-types.js";
+import { version } from "../version.js";
 
 const onProcessEndCallbacks: Array<() => void> = [];
 
@@ -110,7 +111,8 @@ export const main = async (
   args: Args,
   opts: { forceDraft?: boolean; version: string }
 ) => {
-  const sdkBuildId = "bshb_sdk_" + Math.random().toString(16).slice(2);
+  const sdkBuildId =
+    "bshb_sdk__" + version + "__" + Math.random().toString(16).slice(2);
   const now = Date.now();
   let previousResolvedRef: ResolvedRef | null = null;
 

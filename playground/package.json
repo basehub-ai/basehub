@@ -1,7 +1,7 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.222",
+  "version": "0.0.223",
   "scripts": {
     "dev": "next dev --port 3003",
     "build": "next build",
@@ -33,7 +33,6 @@
     "lodash.uniq": "^4.5.0",
     "mkdirp": "^3.0.1",
     "prettier": "3.0.3",
-    "resolve-pkg": "2.0.0",
     "rimraf": "^6.0.1",
     "sass": "1.62.0",
     "tsconfig": "workspace:*"

@@ -3,25 +3,7 @@
 import arg from "arg";
 import { main } from "./main.js";
 import { formatError } from "./util/format-error.js";
-import fs from "fs";
-import resolvePkg from "resolve-pkg";
-
-function getVersion() {
-  try {
-    const basehubModulePath = resolvePkg("basehub");
-
-    // Get package.json
-    const packageJson = JSON.parse(
-      fs.readFileSync(`${basehubModulePath}/package.json`, "utf-8")
-    );
-    // Get version from package.json
-    const version = packageJson.version;
-
-    return version;
-  } catch (e) {
-    return "1.0.0";
-  }
-}
+import { version } from "../version.js";
 
 // Show usage and exit with code
 async function help(code: number) {
@@ -81,8 +63,6 @@ const args = arg(
   },
   { permissive: true }
 );
-
-const version = getVersion();
 
 if (args["--version"] || args["-v"]) {
   console.log(`basehub v${version}`);
