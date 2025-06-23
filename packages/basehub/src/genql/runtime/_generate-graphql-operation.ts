@@ -53,6 +53,7 @@ const parseRequest = (
       "rotate",
       "sharpen",
       "trim",
+      "autoCommit",
     ];
 
     const argStrings = argNames.map((argName) => {
