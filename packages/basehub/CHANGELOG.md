@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.10
+
+### Patch Changes
+
+- expose /vibe with v0 helpers
+
 ## 9.0.9
 
 ### Patch Changes

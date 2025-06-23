@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "9.0.9",
+  "version": "9.0.10",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -93,6 +93,11 @@
       "import": "./dist/api-transaction.js",
       "types": "./dist/api-transaction.d.ts",
       "require": "./dist/api-transaction.cjs"
+    },
+    "./vibe": {
+      "import": "./dist/vibe.js",
+      "types": "./dist/vibe.d.ts",
+      "require": "./dist/vibe.cjs"
     }
   },
   "sideEffects": false,

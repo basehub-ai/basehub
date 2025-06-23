@@ -2,7 +2,7 @@
 import { getGitEnv } from "./get-git-env.js";
 import type { ResolvedRef } from "../../common-types.js";
 import { hashObject } from "./hash.js";
-import { isV0OrBolt } from "./is-v0.js";
+import { isV0OrBolt } from "../../vibe.js";
 import { getGlobalConfig } from "../../index.js";
 
 export const basehubAPIOrigin = "https://api.basehub.com";

@@ -3,7 +3,7 @@ import * as React from "react";
 // @ts-ignore
 import { basehub } from "../../index.js";
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
-import { isV0OrBolt } from "../../bin/util/is-v0.js";
+import { isV0OrBolt } from "../../vibe.js";
 
 // we use react.lazy to code split client-toolbar
 const LazyClientConditionalRenderer = React.lazy(() =>

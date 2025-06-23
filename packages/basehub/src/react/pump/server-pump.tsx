@@ -10,7 +10,7 @@ import {
 } from "../../index.js";
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
 import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
-import { isV0OrBolt } from "../../bin/util/is-v0.js";
+import { isV0OrBolt } from "../../vibe.js";
 
 export interface PumpQuery extends QueryGenqlSelection {}
 

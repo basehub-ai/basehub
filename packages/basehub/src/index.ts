@@ -3,7 +3,7 @@ import {
   getStuffFromEnv,
 } from "./bin/util/get-stuff-from-env.js";
 import { hashObject } from "./bin/util/hash.js";
-import { isV0OrBolt } from "./bin/util/is-v0.js";
+import { isV0OrBolt } from "./vibe.js";
 import { ClientOptions, createClient } from "./genql/runtime/_create-client.js";
 import {
   generateGraphqlOperation,
@@ -274,6 +274,7 @@ export function fragmentOnRecursiveCollection<
 export type BaseHubConfig = Pick<
   Options,
   "ref" | "draft" | "fallbackPlayground" | "token"
+  // eslint-disable-next-line @typescript-eslint/ban-types
 > & {};
 
 const BASEHUB_CONFIG = Symbol.for("basehub.config");
