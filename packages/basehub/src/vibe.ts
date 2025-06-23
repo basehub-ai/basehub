@@ -71,7 +71,7 @@ export const getV0ChatId = (): string | null => {
 
     chatId = storage.getItem("__bshb_vibe_chatId");
 
-    if (!chatId) return chatId;
+    if (chatId) return chatId;
 
     // generate, then store
     const newChatId = Math.random().toString(36).substring(2, 15);
