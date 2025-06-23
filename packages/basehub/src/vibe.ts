@@ -24,7 +24,9 @@ export const isV0OrBolt = () => {
   return isV0() || isBolt();
 };
 
-export const getV0ChatId = (): string | null => {
+// this isn't useful, actually, as v0 changes the URL of the preview with every new chat :(
+// export const getV0ChatId
+const _getV0ChatId = (): string | null => {
   try {
     if (!isV0()) return null;
 

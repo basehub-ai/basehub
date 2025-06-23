@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.12
+
+### Patch Changes
+
+- un-export getV0ChatId
+
 ## 9.0.11
 
 ### Patch Changes
