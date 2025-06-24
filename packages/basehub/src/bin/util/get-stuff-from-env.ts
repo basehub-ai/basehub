@@ -118,14 +118,12 @@ export const getStuffFromEnv = async (options?: Options) => {
 
   const resolveTokenParam = (token: string | null) => {
     if (!token) return null;
-    // console.warn(
-    //   `🚧 Warning! The --token parameter will be deprecated in the next major version. You should use --env-prefix instead.`
-    // );
     const isRaw = token.startsWith("bshb_");
     if (isRaw) {
-      console.warn(
-        `🚧 Warning! You're using a raw token. This will be deprecated in the next major version. You should use an environment variable.`
-      );
+      // don't warn, it's annoying
+      // console.warn(
+      //   `🚧 Warning! You're using a raw token. This will be deprecated in the next major version. You should use an environment variable.`
+      // );
       return token;
     }
     tokenNotFoundErrorMessage = `🔴 Token not found. Make sure to include the ${token} env var.`;
