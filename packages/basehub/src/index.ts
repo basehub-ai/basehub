@@ -85,65 +85,26 @@ export const basehub = <
   }
 
   options.getExtraFetchOptions = async (op, _body, originalRequest) => {
-    const { url, headers, token, resolvedRef } = await getStuffFromEnv(options);
+    const { url, headers, resolvedRef, draft } = await getStuffFromEnv(options);
 
     const extra = {
       url,
-      headers: {
-        ...headers,
-        "x-basehub-sdk-build-id": resolvedRef.id,
-      },
+      headers: { ...headers },
     };
 
-    const tokenHash = hashObject({ token });
     if (op !== "query") return extra;
 
     let isNextjs = false;
-    let isNextjsDraftMode = false;
 
-    if (!isV0OrBolt() && options.draft === undefined) {
-      // try to auto-detect (only if draft is not explicitly set by the user)
-      try {
-        // @ts-ignore
-        const { draftMode } = await import("next/headers");
-        isNextjsDraftMode = (await draftMode()).isEnabled;
-      } catch (error) {
-        // noop, not using nextjs
-      }
-    }
-
-    const isDraftResolved =
-      false || isNextjsDraftMode || options.draft === true;
-
-    if (isDraftResolved) {
-      extra.headers = { ...extra.headers, ["x-basehub-draft" as any]: "true" };
-
+    if (draft) {
       // get rid of automatic nextjs caching
       // @ts-expect-error
       extra.next = { revalidate: undefined };
       // @ts-expect-error
       extra.cache = "no-store";
-
-      if (!isV0OrBolt()) {
-        // try to get ref from cookies
-        try {
-          // @ts-ignore
-          const { cookies } = await import("next/headers");
-          const cookieStore = await cookies();
-          const ref = cookieStore.get("bshb-preview-ref-" + tokenHash)?.value;
-          if (ref) {
-            extra.headers = {
-              ...extra.headers,
-              ["x-basehub-ref" as any]: ref,
-            };
-          }
-        } catch (error) {
-          // noop
-        }
-      }
     }
 
-    if (isDraftResolved) return extra;
+    if (draft) return extra;
 
     // only override if revalidation is not being handled by the user
     // @ts-expect-error

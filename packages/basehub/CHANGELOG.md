@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.13
+
+### Patch Changes
+
+- fix branch switcher behavior
+
 ## 9.0.12
 
 ### Patch Changes

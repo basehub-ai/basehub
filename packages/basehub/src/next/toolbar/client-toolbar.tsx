@@ -55,9 +55,7 @@ export const ClientToolbar = ({
   const [previewRef, _setPreviewRef] = React.useState(resolvedRef.ref);
   const [isDefaultRefSelected, setIsDefaultRefSelected] = React.useState(true);
   const [isLoadingRef, setIsLoadingRef] = React.useState(true);
-  const [latestBranches, setLatestBranches] = React.useState<LatestBranch[]>(
-    []
-  );
+  const [latestBranches, setLatestBranches] = React.useState<LatestBranch[]>();
 
   const currentMessageTimeout = React.useRef(0);
 

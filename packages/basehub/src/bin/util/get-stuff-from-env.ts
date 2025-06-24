@@ -4,6 +4,7 @@ import type { ResolvedRef } from "../../common-types.js";
 import { hashObject } from "./hash.js";
 import { isV0OrBolt } from "../../vibe.js";
 import { getGlobalConfig } from "../../index.js";
+import { version } from "../../version.js";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
@@ -258,9 +259,47 @@ export const getStuffFromEnv = async (options?: Options) => {
     fallbackPlayground,
   });
 
+  let isNextjs = false;
+  let isNextjsDraftMode = false;
+  if (!isV0OrBolt() && !draft) {
+    // try to auto-detect (only if draft is not explicitly set by the user)
+    try {
+      // @ts-ignore
+      const { draftMode } = await import("next/headers");
+      isNextjs = true;
+      isNextjsDraftMode = (await draftMode()).isEnabled;
+    } catch (error) {
+      // noop, not using nextjs
+    }
+  }
+
+  if (isNextjsDraftMode) {
+    draft = true;
+  }
+
+  let previewRef: string | undefined;
+  if (draft && isNextjs && !isV0OrBolt()) {
+    // try to get ref from cookies
+    try {
+      // @ts-ignore
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
+        ?.value as string | undefined;
+      if (ref) {
+        previewRef = ref;
+      }
+    } catch (error) {
+      // noop
+    }
+  }
+
   return {
     draft,
+    isNextjs,
+    previewRef,
     isForcedDraft,
+    isNextjsDraftMode,
     output: getEnvVar("OUTPUT") ?? options.cli?.output ?? null,
     resolvedRef,
     url: basehubUrl.toString(),
@@ -272,9 +311,11 @@ export const getStuffFromEnv = async (options?: Options) => {
     productionDeploymentURL,
     headers: {
       "x-basehub-api-version": apiVersion,
-      "x-basehub-sdk-build-id": resolvedRef.id,
+      "x-basehub-sdk-build-id": `bshb_sdk__${version}__${resolvedRef.id}`,
       ...(token ? { "x-basehub-token": token } : {}),
       ...(ref ? { "x-basehub-ref": ref } : {}),
+      // override if present
+      ...(previewRef ? { "x-basehub-ref": previewRef } : {}),
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
       ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),

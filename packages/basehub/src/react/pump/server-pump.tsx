@@ -100,22 +100,6 @@ export const Pump = async <
   const queriesWithFallback =
     draft && noQueries ? [{ _sys: { id: true } }] : queries;
 
-  if (!isV0OrBolt() && draft) {
-    // try to get ref from cookies
-    try {
-      // @ts-ignore
-      const { cookies } = await import("next/headers");
-      const cookieStore = await cookies();
-      const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
-        ?.value;
-      if (ref) {
-        headers["x-basehub-ref"] = ref;
-      }
-    } catch (error) {
-      // noop
-    }
-  }
-
   const results: Array<{
     data: QueryResults<Queries>[number] | undefined;
     rawQueryOp: { query: string; variables?: any };

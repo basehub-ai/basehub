@@ -19,7 +19,7 @@ export const BranchSwitcher = ({
   isForcedDraft: boolean;
   draft: boolean;
   apiRref: string;
-  latestBranches: LatestBranch[];
+  latestBranches: LatestBranch[] | undefined;
   onRefChange: (ref: string, opts: { enableDraftMode: boolean }) => void;
   getAndSetLatestBranches: () => Promise<void>;
 }) => {
@@ -27,6 +27,7 @@ export const BranchSwitcher = ({
   const selectRef = React.useRef<HTMLSelectElement>(null);
 
   const sortedLatestBranches = React.useMemo(() => {
+    if (!latestBranches) return [];
     return [...latestBranches].sort((a, b) => {
       if (a.isDefault) return -1;
       if (b.isDefault) return 1;
