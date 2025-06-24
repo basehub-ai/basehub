@@ -56,6 +56,8 @@ const parseRequest = (
       "autoCommit",
     ];
 
+    const objectsThatShouldHoldEnums = ["variants"];
+
     const argStrings = argNames.map((argName) => {
       let value = args[argName];
       if (typeof value === "object") {
@@ -67,6 +69,12 @@ const parseRequest = (
           argName === "data";
         if (stringifyObject) {
           value = JSON.stringify(value);
+        } else if (objectsThatShouldHoldEnums.includes(argName)) {
+          // strip all quotes INCLUDING string values
+          // First remove quotes around property names
+          value = value.replace(/"([^"]+)":/g, "$1:");
+          // Then remove quotes around string values, preserving escaped quotes
+          value = value.replace(/:"([^"]*)"/g, ":$1");
         } else {
           // strip quotes except for string values
           value = value.replace(/"([^"]+)":/g, "$1:");

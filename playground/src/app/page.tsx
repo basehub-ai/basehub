@@ -1,43 +1,39 @@
+import { basehub } from "basehub";
 import { Pump } from "basehub/react-pump";
-import { CodeBlock } from "basehub/react-code-block";
 
 export default async function HomePage() {
+  const data = await basehub().query({
+    blog: {
+      __args: {
+        variants: {
+          language: "en",
+        },
+      },
+      _title: true,
+      posts: {
+        item: {
+          _id: true,
+        },
+      },
+    },
+  });
+
   return (
     <>
-      <CodeBlock
-        snippets={[{ code: 'const hello = "world"', language: "ts" }]}
-        theme={"andromeeda"}
-      />
       <Pump
-        queries={[{ homepage: { heroTitle: { html: true } } }]}
-        bind={{
-          someParam: "someValue",
-        }}
-      >
-        {async (params, [data]) => {
-          "use server";
-
-          data.homepage.heroTitle?.html;
-          params.someParam;
-
-          return (
-            <div>
-              <pre>
-                <code>{JSON.stringify(data, null, 2)}</code>
-              </pre>
-            </div>
-          );
-        }}
-      </Pump>
-      this one targets a different ref
-      <Pump
-        _ref="FdhB3Vr5gK0s4S582524R"
         queries={[
           {
-            homepage: {
-              _id: true,
-              branching: {
-                sectionTitle: true,
+            blog: {
+              __args: {
+                variants: {
+                  language: "en",
+                },
+              },
+              _title: true,
+              posts: {
+                item: {
+                  _id: true,
+                },
               },
             },
           },
@@ -45,6 +41,8 @@ export default async function HomePage() {
       >
         {async ([data]) => {
           "use server";
+
+          console.log(data);
 
           return (
             <div>

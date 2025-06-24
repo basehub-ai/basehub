@@ -82,18 +82,29 @@ async function updateTsconfigIncludes(includes: string[], silent: boolean) {
 /**
  * Creates a basic basehub.config.mjs file if none exists yet
  */
-async function createBasicConfigFile(silent: boolean) {
+async function createBasicConfigFile(silent: boolean, options: Options) {
   try {
+    const pathArgs: string[] = [];
+    if (options.cli?.output) {
+      pathArgs.push(options.cli.output);
+    }
+
     const extensions = [".ts", ".mjs", ".js"];
     const configExists = extensions.some((ext) =>
-      fs.existsSync(path.resolve(process.cwd(), `basehub.config${ext}`))
+      fs.existsSync(
+        path.resolve(process.cwd(), ...pathArgs, `basehub.config${ext}`)
+      )
     );
 
     if (configExists) {
       return; // Config file already exists, don't overwrite
     }
 
-    const configPath = path.resolve(process.cwd(), "basehub.config.ts");
+    const configPath = path.resolve(
+      process.cwd(),
+      ...pathArgs,
+      "basehub.config.ts"
+    );
     const configContent = `import { setGlobalConfig } from 'basehub';
 
 setGlobalConfig({})
@@ -135,7 +146,7 @@ export const main = async (
 
   let pathArgs: string[] = [];
   if (output) {
-    pathArgs = [output];
+    pathArgs = [output, `${basehubModuleName}.d.ts`];
   } else {
     // default
     pathArgs = [`${basehubModuleName}.d.ts`];
@@ -218,7 +229,7 @@ export const main = async (
     }
 
     // Create basic config file if none exists
-    const configPath = await createBasicConfigFile(silent);
+    const configPath = await createBasicConfigFile(silent, options);
 
     // Update tsconfig.json to include the generated types file and config file
     const includes = [basehubOutputPath];

@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.15
+
+### Patch Changes
+
+- fix variant args, and output option
+
 ## 9.0.14
 
 ### Patch Changes
