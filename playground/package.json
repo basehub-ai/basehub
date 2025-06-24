@@ -8,10 +8,10 @@
     "build:analyze": "cross-env ANALYZE=true pnpm build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "basehub dev --output ./src/lib/basehub"
+    "generate": "basehub --output ./src/lib/basehub"
   },
   "dependencies": {
-    "basehub": "file:.yalc/basehub",
+    "basehub": "workspace:*",
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
     "next": "^14.2.3",
