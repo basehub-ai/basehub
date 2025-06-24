@@ -259,14 +259,12 @@ export const getStuffFromEnv = async (options?: Options) => {
     fallbackPlayground,
   });
 
-  let isNextjs = false;
   let isNextjsDraftMode = false;
   if (!isV0OrBolt() && !draft) {
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
       // @ts-ignore
       const { draftMode } = await import("next/headers");
-      isNextjs = true;
       isNextjsDraftMode = (await draftMode()).isEnabled;
     } catch (error) {
       // noop, not using nextjs
@@ -278,7 +276,7 @@ export const getStuffFromEnv = async (options?: Options) => {
   }
 
   let previewRef: string | undefined;
-  if (draft && isNextjs && !isV0OrBolt()) {
+  if (draft && !isV0OrBolt()) {
     // try to get ref from cookies
     try {
       // @ts-ignore
@@ -296,7 +294,6 @@ export const getStuffFromEnv = async (options?: Options) => {
 
   return {
     draft,
-    isNextjs,
     previewRef,
     isForcedDraft,
     isNextjsDraftMode,
