@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.19
+
+### Patch Changes
+
+- 6e7a0ff: Add "authorId" to args that shouldn't be enums
+
 ## 9.0.18
 
 ### Patch Changes
