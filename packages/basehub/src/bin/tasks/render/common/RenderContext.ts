@@ -1,7 +1,6 @@
 import { GraphQLSchema } from "graphql";
 import { BuiltInParserName } from "prettier";
 import type { Config } from "../../main.js";
-import { prettify } from "../../helpers/prettify.js";
 import { relativeImportPath } from "./relativeImportPath.js";
 
 interface Import {
@@ -85,15 +84,12 @@ export class RenderContext {
     else return;
   }
 
-  toCode(parser?: BuiltInParserName, pretty = false) {
+  toCode(parser?: BuiltInParserName) {
     const blocks = [...this.codeBlocks];
 
     if (parser && (parser === "typescript" || parser === "babel")) {
       const importBlock = this.getImportBlock();
       if (importBlock) blocks.unshift(importBlock);
-    }
-    if (parser && pretty) {
-      return prettify(blocks.join("\n\n"), parser);
     }
     if (parser) {
       return blocks.join("\n\n");
