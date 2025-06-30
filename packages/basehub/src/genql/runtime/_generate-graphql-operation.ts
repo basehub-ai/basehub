@@ -54,6 +54,7 @@ const parseRequest = (
       "sharpen",
       "trim",
       "autoCommit",
+      "authorId",
     ];
 
     const objectsThatShouldHoldEnums = ["variants"];
