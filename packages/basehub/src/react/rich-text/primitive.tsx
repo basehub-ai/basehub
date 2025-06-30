@@ -7,7 +7,6 @@ import type { Language } from "../code-block/index.js";
 import type {
   RichTextNode,
   RichTextTocNode,
-  Mark,
 } from "@basehub/mutation-api-helpers";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -61,7 +60,7 @@ type LinkAttributes = {
     }
 );
 
-type Marks = Array<Mark>;
+type Marks = Array<any>;
 
 type Handlers = {
   p: (props: { children: ReactNode }) => ReactNode;
