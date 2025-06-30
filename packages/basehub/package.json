@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "9.0.17",
+  "version": "9.0.18",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -110,7 +110,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@basehub/mutation-api-helpers": "2.0.11",
+    "@basehub/mutation-api-helpers": "2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@shikijs/transformers": "1.17.7",
     "@xmldom/xmldom": "^0.9.6",

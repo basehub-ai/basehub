@@ -65,8 +65,8 @@ importers:
   packages/basehub:
     dependencies:
       '@basehub/mutation-api-helpers':
-        specifier: 2.0.11
-        version: 2.0.11
+        specifier: 2.1.2
+        version: 2.1.2(zod@3.23.8)
       '@radix-ui/react-slot':
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.2.20)(react@18.2.0)
@@ -115,9 +115,6 @@ importers:
       mkdirp:
         specifier: ^3.0.1
         version: 3.0.1
-      prettier:
-        specifier: 3.0.3
-        version: 3.0.3
       pusher-js:
         specifier: ^8.3.0
         version: 8.3.0
@@ -283,8 +280,10 @@ packages:
     resolution: {integrity: sha512-Ja18XcETdEl5mzzACGd+DKgaGJzPTCow7EglgwTmHdwokzDFYh/MHua6lU6DV/hjF2IaOJ4oX2nqnjG7RElKOw==}
     engines: {node: '>=6.9.0'}
 
-  '@basehub/mutation-api-helpers@2.0.11':
-    resolution: {integrity: sha512-OWudSZELX/XOchBxmifu5bAZ+88E52OX2sz9O8ryGnF1COkQ90vQVV75ZguxY1SHjX7v9jfG5AUaop0muCX3Wg==}
+  '@basehub/mutation-api-helpers@2.1.2':
+    resolution: {integrity: sha512-qqJM1Lc37JYX0u4SL5OunZkU3TBijoCRHuvT4ju8MIYHVtv0ii3TViIDhCYKO92CcjGOCkd5u014H/fZB5H8uA==}
+    peerDependencies:
+      zod: ^3.25.0
 
   '@changesets/apply-release-plan@6.1.4':
     resolution: {integrity: sha512-FMpKF1fRlJyCZVYHr3CbinpZZ+6MwvOtWUuO8uo+svcATEoc1zRDcj23pAurJ2TZ/uVz1wFHH6K3NlACy0PLew==}
@@ -4485,7 +4484,9 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@basehub/mutation-api-helpers@2.0.11': {}
+  '@basehub/mutation-api-helpers@2.1.2(zod@3.23.8)':
+    dependencies:
+      zod: 3.23.8
 
   '@changesets/apply-release-plan@6.1.4':
     dependencies:
