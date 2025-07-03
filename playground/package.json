@@ -1,7 +1,7 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.233",
+  "version": "0.0.234",
   "scripts": {
     "dev": "next dev --port 3003",
     "build": "next build",
