@@ -1,11 +1,7 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 
-import type { Options } from "./get-stuff-from-env.js";
-
-export const getGitEnv = async (opts?: Options) => {
+export const getGitEnv = async () => {
   const execSyncSafe = async (command: string): Promise<string> => {
-    if (!opts?.cli) return "";
-
     try {
       const execSync = await import("child_process").then((m) => m.execSync);
       return execSync(command, { stdio: "pipe" }).toString().trim();
