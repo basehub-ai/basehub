@@ -1,7 +1,17 @@
 /* eslint-disable turbo/no-undeclared-env-vars */
 
+function isNode() {
+  return (
+    typeof process !== "undefined" &&
+    process.versions != null &&
+    process.versions.node != null
+  );
+}
+
 export const getGitEnv = async () => {
   const execSyncSafe = async (command: string): Promise<string> => {
+    if (!isNode()) return "";
+
     try {
       const execSync = await import("child_process").then((m) => m.execSync);
       return execSync(command, { stdio: "pipe" }).toString().trim();
