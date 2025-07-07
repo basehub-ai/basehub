@@ -242,7 +242,7 @@ export const getStuffFromEnv = async (options?: Options) => {
     gitCommitSHA,
     gitBranchDeploymentURL,
     productionDeploymentURL,
-  } = await getGitEnv(options);
+  } = await getGitEnv();
 
   const resolvedRef = await resolveRef({
     url: basehubUrl,
