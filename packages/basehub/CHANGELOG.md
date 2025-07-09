@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.21
+
+### Patch Changes
+
+- fix potential infinite loop on odr
+
 ## 9.0.20
 
 ### Patch Changes

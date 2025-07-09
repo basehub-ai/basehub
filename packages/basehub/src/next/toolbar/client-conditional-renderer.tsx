@@ -93,7 +93,9 @@ export const ClientConditionalRenderer = ({
 
   React.useEffect(() => {
     const url = new URL(window.location.href);
-    const shouldRevalidate = url.searchParams.get("__bshb-odr") === "true";
+    const shouldRevalidate =
+      url.searchParams.get("__bshb-odr") === "true" &&
+      !document.documentElement.dataset.basehubOdrStatus;
     const odrToken = url.searchParams.get("__bshb-odr-token");
     const ref = url.searchParams.get("__bshb-odr-ref");
     if (shouldRevalidate && odrToken) {
