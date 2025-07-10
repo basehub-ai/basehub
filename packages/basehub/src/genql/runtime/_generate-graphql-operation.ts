@@ -53,6 +53,9 @@ const parseRequest = (
       "rotate",
       "sharpen",
       "trim",
+      // signedUrl args
+      "fileName",
+      // transaction args
       "autoCommit",
       "authorId",
     ];
