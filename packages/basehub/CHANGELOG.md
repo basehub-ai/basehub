@@ -1,5 +1,11 @@
 # basehub
 
+## 9.0.22
+
+### Patch Changes
+
+- 9b8c87e: Add "fileName" to excluded args
+
 ## 9.0.21
 
 ### Patch Changes
