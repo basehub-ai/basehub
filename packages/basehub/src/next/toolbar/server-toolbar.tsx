@@ -22,8 +22,8 @@ export const ServerToolbar = async ({
   let isDraftMode = false;
   if (!isV0OrBolt()) {
     try {
-      const nextHeaders = "next/headers";
-      const { draftMode } = await import(nextHeaders);
+      // @ts-ignore
+      const { draftMode } = await import(/* @vite-ignore */ "next/headers");
       isDraftMode = (await draftMode()).isEnabled;
     } catch (err) {
       // noop
@@ -36,9 +36,8 @@ export const ServerToolbar = async ({
   ) => {
     "use server";
     try {
-      const nextHeaders = "next/headers";
       // @ts-ignore
-      const { draftMode } = await import(nextHeaders);
+      const { draftMode } = await import(/* @vite-ignore */ "next/headers");
       const { headers, url } = await getStuffFromEnv(basehubProps);
 
       const appApiEndpoint = getBaseHubAppApiEndpoint(
@@ -77,9 +76,8 @@ export const ServerToolbar = async ({
       const { headers, url, isForcedDraft } =
         await getStuffFromEnv(basehubProps);
 
-      const nextHeaders = "next/headers";
       // @ts-ignore
-      const { draftMode } = await import(nextHeaders);
+      const { draftMode } = await import(/* @vite-ignore */ "next/headers");
       if (
         ((await draftMode())?.isEnabled ?? false) === false &&
         !isForcedDraft &&
@@ -121,8 +119,8 @@ export const ServerToolbar = async ({
   const disableDraftMode = async () => {
     "use server";
     try {
-      const nextHeaders = "next/headers";
-      const { draftMode } = await import(nextHeaders);
+      // @ts-ignore
+      const { draftMode } = await import(/* @vite-ignore */ "next/headers");
       (await draftMode()).disable();
     } catch (err) {
       // noop
@@ -179,9 +177,8 @@ export const ServerToolbar = async ({
         return { success: true, message: "No tags to revalidate" };
       }
 
-      const nextCache = "next/cache";
       // @ts-ignore
-      const { revalidateTag } = await import(nextCache);
+      const { revalidateTag } = await import(/* @vite-ignore */ "next/cache");
 
       await Promise.all(
         tags.map(async (_tag: string) => {

@@ -5,8 +5,9 @@ import type { Options } from "./get-stuff-from-env.js";
 export const getGitEnv = async (_opts?: Options) => {
   const execSyncSafe = async (command: string): Promise<string> => {
     try {
-      const childProcess = "child_process";
-      const execSync = await import(childProcess).then((m) => m.execSync);
+      const execSync = await import(/* @vite-ignore */ "child_process").then(
+        (m) => m.execSync
+      );
       return execSync(command, { stdio: "pipe" }).toString().trim();
     } catch (error) {
       // If the command fails, return an empty string

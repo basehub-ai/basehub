@@ -1,5 +1,11 @@
 # basehub
 
+## 9.2.1
+
+### Patch Changes
+
+- fix dynamic next/\* imports
+
 ## 9.2.0
 
 ### Minor Changes
