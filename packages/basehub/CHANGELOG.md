@@ -1,5 +1,11 @@
 # basehub
 
+## 9.1.0
+
+### Minor Changes
+
+- 408938e: FIX: Avoid importing next.js headers when importing basehub in another js framework
+
 ## 9.0.22
 
 ### Patch Changes
