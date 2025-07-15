@@ -78,8 +78,9 @@ export const Pump = async <
   if (!isV0OrBolt() && basehubProps.draft === undefined) {
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
+      const nextHeaders = "next/headers";
       // @ts-ignore
-      const { draftMode } = await import("next/headers");
+      const { draftMode } = await import(nextHeaders);
       isNextjsDraftMode = (await draftMode()).isEnabled;
     } catch (error) {
       // noop, not using nextjs

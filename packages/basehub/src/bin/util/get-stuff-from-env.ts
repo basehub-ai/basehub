@@ -261,8 +261,9 @@ export const getStuffFromEnv = async (options?: Options) => {
   if (!isV0OrBolt() && !draft) {
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
+      const nextHeaders = "next/headers";
       // @ts-ignore
-      const { draftMode } = await import("next/headers");
+      const { draftMode } = await import(nextHeaders);
       isNextjsDraftMode = (await draftMode()).isEnabled;
     } catch (error) {
       // noop, not using nextjs
@@ -277,8 +278,9 @@ export const getStuffFromEnv = async (options?: Options) => {
   if (draft && !isV0OrBolt()) {
     // try to get ref from cookies
     try {
+      const nextHeaders = "next/headers";
       // @ts-ignore
-      const { cookies } = await import("next/headers");
+      const { cookies } = await import(nextHeaders);
       const cookieStore = await cookies();
       const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
         ?.value as string | undefined;
