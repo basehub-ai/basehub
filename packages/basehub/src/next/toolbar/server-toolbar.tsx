@@ -23,7 +23,6 @@ export const ServerToolbar = async ({
   if (!isV0OrBolt()) {
     try {
       const nextHeaders = "next/headers";
-      // @ts-ignore
       const { draftMode } = await import(nextHeaders);
       isDraftMode = (await draftMode()).isEnabled;
     } catch (err) {
@@ -123,7 +122,6 @@ export const ServerToolbar = async ({
     "use server";
     try {
       const nextHeaders = "next/headers";
-      // @ts-ignore
       const { draftMode } = await import(nextHeaders);
       (await draftMode()).disable();
     } catch (err) {

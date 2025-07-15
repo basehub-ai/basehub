@@ -111,7 +111,6 @@ export const basehub = <
     if (!isV0OrBolt() && typeof options?.next === "undefined") {
       try {
         const nextHeaders = "next/headers";
-        // @ts-ignore
         isNextjs = !!(await import(nextHeaders));
       } catch (error) {
         // noop, not using nextjs

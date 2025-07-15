@@ -79,7 +79,6 @@ export const Pump = async <
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
       const nextHeaders = "next/headers";
-      // @ts-ignore
       const { draftMode } = await import(nextHeaders);
       isNextjsDraftMode = (await draftMode()).isEnabled;
     } catch (error) {
