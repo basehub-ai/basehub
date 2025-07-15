@@ -1,5 +1,11 @@
 # basehub
 
+## 9.2.0
+
+### Minor Changes
+
+- replace basehub.d.ts with basehub-types.d.ts to prevent namespace conflicts
+
 ## 9.1.0
 
 ### Minor Changes

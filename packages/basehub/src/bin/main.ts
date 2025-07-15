@@ -141,15 +141,40 @@ export const main = async (
   };
 
   const basehubModuleName = args["--package-name"] || "basehub";
+  const basehubTypesModuleName = args["--package-name"] || "basehub-types";
 
   const { output } = await getStuffFromEnv({ ...options });
 
   let pathArgs: string[] = [];
   if (output) {
-    pathArgs = [output, `${basehubModuleName}.d.ts`];
+    pathArgs = [output, `${basehubTypesModuleName}.d.ts`];
   } else {
     // default
-    pathArgs = [`${basehubModuleName}.d.ts`];
+    pathArgs = [`${basehubTypesModuleName}.d.ts`];
+  }
+
+  // REMOVE IN NEXT MAJOR VERSION
+  // little quality-of-life thing to delete the old basehub.d.ts file
+  try {
+    if (basehubTypesModuleName === "basehub-types") {
+      // delete the basehub.d.ts if it's there
+      let pathArgsDeprecated: string[] = [];
+      if (output) {
+        pathArgsDeprecated = [output, `basehub.d.ts`];
+      } else {
+        // default
+        pathArgsDeprecated = [`basehub.d.ts`];
+      }
+      const basehubOutputPathDeprecated = path.resolve(
+        process.cwd(),
+        ...pathArgsDeprecated
+      );
+      if (fs.existsSync(basehubOutputPathDeprecated)) {
+        fs.unlinkSync(basehubOutputPathDeprecated);
+      }
+    }
+  } catch (err) {
+    // noop
   }
 
   const basehubOutputPath = path.resolve(process.cwd(), ...pathArgs);
