@@ -58,6 +58,8 @@ const parseRequest = (
       // transaction args
       "autoCommit",
       "authorId",
+      // in _structure it's an enum, in an image it's a string
+      ...(["_structure"].includes(path?.[0] || "") ? [] : ["format"]),
     ];
 
     const objectsThatShouldHoldEnums = ["variants"];

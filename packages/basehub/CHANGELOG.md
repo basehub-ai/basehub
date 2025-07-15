@@ -1,5 +1,11 @@
 # basehub
 
+## 9.2.2
+
+### Patch Changes
+
+- lil fix on enum args
+
 ## 9.2.1
 
 ### Patch Changes
