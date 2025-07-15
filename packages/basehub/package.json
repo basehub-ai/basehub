@@ -129,7 +129,6 @@
     "mkdirp": "^3.0.1",
     "pusher-js": "^8.3.0",
     "rimraf": "^6.0.1",
-    "server-only": "^0.0.1",
     "shiki": "1.17.7",
     "typesense": "^1.8.2"
   },
@@ -153,5 +152,13 @@
     "tsup": "8.0.2",
     "type-fest": "3.0.0",
     "vitest": "^3.2.3"
+  },
+  "peerDependencies": {
+    "server-only": "^0.0.1"
+  },
+  "peerDependenciesMeta": {
+    "server-only": {
+      "optional": true
+    }
   }
 }

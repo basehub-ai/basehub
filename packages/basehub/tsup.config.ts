@@ -12,7 +12,7 @@ export default defineConfig((_options: Options) => {
     outDir: "dist",
     splitting: true,
     format: ["esm", "cjs"],
-    external: ["react", "react-dom", "next"],
+    external: ["react", "react-dom", "next", "server-only"],
     noExternal: [
       "dotenv-mono",
       "arg",

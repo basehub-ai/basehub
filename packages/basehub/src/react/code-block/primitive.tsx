@@ -1,4 +1,3 @@
-import "server-only";
 import { lazy } from "react";
 import { Highlighter, HighlighterProps } from "./highlighter.js";
 import type { Snippet } from "./types.js";
@@ -7,6 +6,13 @@ export type { BundledLanguage as Language } from "shiki";
 import { useId } from "react";
 import { BundledLanguage } from "shiki/langs";
 import { SpecialLanguage } from "shiki/types.mjs";
+
+// Ensure this component only runs on the server
+if (typeof window !== "undefined") {
+  console.warn(
+    "CodeBlock should only be used on the server side. Consider using the client version for client-side rendering."
+  );
+}
 
 const LazyClientController = lazy(() => import("./client.js"));
 
