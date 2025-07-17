@@ -1,5 +1,11 @@
 # basehub
 
+## 9.2.3
+
+### Patch Changes
+
+- bddacb8: Icon primitive support image tag and tspan tag
+
 ## 9.2.2
 
 ### Patch Changes
