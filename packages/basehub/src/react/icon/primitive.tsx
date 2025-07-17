@@ -25,6 +25,9 @@ export const supportedSvgTags = [
   "clipPath",
   "radialGradient",
   "pattern",
+  "image",
+  "use",
+  "tspan",
 ] as const;
 
 type SvgComponent = (typeof supportedSvgTags)[number];
@@ -59,6 +62,9 @@ const DEFAULT_COMPONENTS: ComponentsOverride = {
   clipPath: (props) => React.createElement("clipPath", props),
   radialGradient: (props) => React.createElement("radialGradient", props),
   pattern: (props) => React.createElement("pattern", props),
+  image: (props) => React.createElement("image", props),
+  use: (props) => React.createElement("use", props),
+  tspan: (props) => React.createElement("tspan", props),
 };
 
 const XML_NAMESPACE_MAPPING: Record<string, string> = {
