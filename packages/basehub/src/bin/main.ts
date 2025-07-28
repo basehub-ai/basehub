@@ -108,7 +108,7 @@ async function createBasicConfigFile(silent: boolean, options: Options) {
     const configContent = `import { setGlobalConfig } from 'basehub';
 
 setGlobalConfig({})
-  `;
+`;
 
     fs.writeFileSync(configPath, configContent);
     logIfNotSilent(silent, `📝 Created basic config file: basehub.config.ts`);
