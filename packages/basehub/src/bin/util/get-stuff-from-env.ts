@@ -38,6 +38,7 @@ export type Options = {
      */
     output?: string | undefined;
     packageName?: string | undefined;
+    banner?: string | undefined;
   };
 };
 
@@ -290,6 +291,10 @@ export const getStuffFromEnv = async (options?: Options) => {
     }
   }
 
+  const sdkBuildId = `bshb_sdk__${version}__${resolvedRef.id}${
+    gitBranch ? `__git_branch_${gitBranch}` : ""
+  }${gitCommitSHA ? `__git_commit_sha_${gitCommitSHA}` : ""}`;
+
   return {
     draft,
     previewRef,
@@ -304,9 +309,10 @@ export const getStuffFromEnv = async (options?: Options) => {
     fallbackPlayground,
     gitBranchDeploymentURL,
     productionDeploymentURL,
+    sdkBuildId,
     headers: {
       "x-basehub-api-version": apiVersion,
-      "x-basehub-sdk-build-id": `bshb_sdk__${version}__${resolvedRef.id}`,
+      "x-basehub-sdk-build-id": sdkBuildId,
       ...(token ? { "x-basehub-token": token } : {}),
       ...(ref ? { "x-basehub-ref": ref } : {}),
       // override if present

@@ -1,5 +1,11 @@
 # basehub
 
+## 9.2.4
+
+### Patch Changes
+
+- improve sdkBuildId value
+
 ## 9.2.3
 
 ### Patch Changes

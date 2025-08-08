@@ -13,6 +13,7 @@ export interface Config {
   scalarTypes?: { [k: string]: string };
   sortProperties?: boolean;
   silent?: boolean;
+  banner?: string;
   /**
    * Will compare the schema hash with the previous one to decide if the client should be regenerated.
    */

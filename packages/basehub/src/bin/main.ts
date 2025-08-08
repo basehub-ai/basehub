@@ -4,7 +4,6 @@ import { Args } from "./index.js";
 import fs from "fs";
 import { getStuffFromEnv, Options } from "./util/get-stuff-from-env.js";
 import type { ResolvedRef } from "../common-types.js";
-import { version } from "../version.js";
 
 const onProcessEndCallbacks: Array<() => void> = [];
 
@@ -122,8 +121,6 @@ export const main = async (
   args: Args,
   opts: { forceDraft?: boolean; version: string }
 ) => {
-  const sdkBuildId =
-    "bshb_sdk__" + version + "__" + Math.random().toString(16).slice(2);
   const now = Date.now();
   let previousResolvedRef: ResolvedRef | null = null;
 
@@ -133,6 +130,7 @@ export const main = async (
     cli: {
       output: args["--output"],
       packageName: args["--package-name"],
+      banner: args["--banner"],
     },
     draft: args["--draft"],
     ref: args["--ref"],
@@ -143,7 +141,7 @@ export const main = async (
   const basehubModuleName = args["--package-name"] || "basehub";
   const basehubTypesModuleName = args["--package-name"] || "basehub-types";
 
-  const { output } = await getStuffFromEnv({ ...options });
+  const { output, sdkBuildId } = await getStuffFromEnv({ ...options });
 
   let pathArgs: string[] = [];
   if (output) {
@@ -238,6 +236,7 @@ export const main = async (
       silent,
       packageName: basehubModuleName,
       previousSchemaHash: prevSchemaHash,
+      banner: options.cli?.banner,
     });
 
     if (preventedClientGeneration) {
@@ -268,8 +267,7 @@ export const main = async (
     //     ) {
     //       // edit `MutationGenqlSelection` to receive the Transaction directly instead of a string
     //       schemaFileContents = schemaFileContents.replace(
-    //         "mutation<R extends MutationGenqlSelection>",
-    //         `mutation<
+    //         "mutation<
     // R extends Omit<MutationGenqlSelection, "transaction" | "transactionAsync"> & {
     //       transaction?: TransactionStatusGenqlSelection & {
     //         __args: Omit<

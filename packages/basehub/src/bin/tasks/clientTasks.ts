@@ -64,13 +64,17 @@ export const clientTasks = (
                 // renderTypeGuards(ctx.schema, renderCtx);
                 // renderEnumsMaps(ctx.schema, renderCtx);
 
-                await writeFileToPath(
-                  [output],
-                  "/* istanbul ignore file */\n/* tslint:disable */\n/* eslint-disable */\n// @ts-nocheck\n\n" +
-                    enhanceMutationGenqlSelection(
-                      await renderCtx.toCode("typescript")
-                    )
-                );
+                const baseHeader =
+                  "/* istanbul ignore file */\n/* tslint:disable */\n/* eslint-disable */\n// @ts-nocheck\n\n";
+                const banner = config.banner ? `${config.banner}\n\n` : "";
+                const content =
+                  banner +
+                  baseHeader +
+                  enhanceMutationGenqlSelection(
+                    await renderCtx.toCode("typescript")
+                  );
+
+                await writeFileToPath([output], content);
               },
             },
           ],
