@@ -1,5 +1,11 @@
 # basehub
 
+## 9.2.6
+
+### Patch Changes
+
+- dont log sdk build id
+
 ## 9.2.5
 
 ### Patch Changes

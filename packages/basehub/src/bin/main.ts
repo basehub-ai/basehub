@@ -141,7 +141,7 @@ export const main = async (
   const basehubModuleName = args["--package-name"] || "basehub";
   const basehubTypesModuleName = args["--package-name"] || "basehub-types";
 
-  const { output, sdkBuildId } = await getStuffFromEnv({ ...options });
+  const { output } = await getStuffFromEnv({ ...options });
 
   let pathArgs: string[] = [];
   if (output) {
@@ -194,7 +194,7 @@ export const main = async (
 
     if (!silent) {
       logInsideBox([
-        `🎫 SDK Version: ${opts.version} (build id: ${sdkBuildId})`,
+        `🎫 SDK Version: ${opts.version}`,
         `🔗 Endpoint: ${url.toString()}`,
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,
