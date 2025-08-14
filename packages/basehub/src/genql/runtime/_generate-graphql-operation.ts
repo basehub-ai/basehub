@@ -238,7 +238,19 @@ export const getFieldFromPath = (
     });
 
     if (!field) {
-      throw new Error(`type \`${type.name}\` does not have a field \`${f}\``);
+      throw new Error(
+        `type \`${type.name}\` does not have a field \`${f}\`. ` +
+        `This often happens when:
+1. The field name is misspelled
+2. The field doesn't exist in your BaseHub schema
+3. BaseHub types are not properly generated or imported
+
+To fix this:
+- Double-check the field name spelling
+- Verify the field exists in your BaseHub schema
+- Run 'npx basehub' to regenerate types
+- Ensure the generated types are properly imported`
+      );
     }
 
     current = field;
