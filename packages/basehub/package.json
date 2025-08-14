@@ -2,7 +2,7 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "9.2.6",
+  "version": "9.2.7-canary.1",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
@@ -130,6 +130,7 @@
     "pusher-js": "^8.3.0",
     "rimraf": "^6.0.1",
     "shiki": "1.17.7",
+    "type-fest": "4.41.0",
     "typesense": "^1.8.2"
   },
   "devDependencies": {
@@ -150,7 +151,6 @@
     "react-dom": "18.2.0",
     "tsconfig": "workspace:*",
     "tsup": "8.0.2",
-    "type-fest": "3.0.0",
     "vitest": "^3.2.3"
   }
 }

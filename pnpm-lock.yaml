@@ -49,7 +49,7 @@ importers:
         version: 9.0.0(eslint@8.52.0)
       eslint-config-turbo:
         specifier: latest
-        version: 2.5.4(eslint@8.52.0)(turbo@1.10.12)
+        version: 2.5.5(eslint@8.52.0)(turbo@1.10.12)
       eslint-import-resolver-typescript:
         specifier: ^3.6.1
         version: 3.6.1(@typescript-eslint/parser@6.9.0(eslint@8.52.0)(typescript@5.4.5))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0)(eslint@8.52.0)
@@ -124,6 +124,9 @@ importers:
       shiki:
         specifier: 1.17.7
         version: 1.17.7
+      type-fest:
+        specifier: 4.41.0
+        version: 4.41.0
       typesense:
         specifier: ^1.8.2
         version: 1.8.2(@babel/runtime@7.24.6)
@@ -179,9 +182,6 @@ importers:
       tsup:
         specifier: 8.0.2
         version: 8.0.2(postcss@8.4.38)(typescript@5.4.5)
-      type-fest:
-        specifier: 3.0.0
-        version: 3.0.0
       vitest:
         specifier: ^3.2.3
         version: 3.2.3(@types/debug@4.1.12)(@types/node@18.13.0)(sass@1.62.0)(yaml@2.4.2)
@@ -2018,8 +2018,8 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-config-turbo@2.5.4:
-    resolution: {integrity: sha512-OpjpDLXIaus0N/Y+pMj17K430xjpd6WTo0xPUESqYZ9BkMngv2n0ZdjktgJTbJVnDmK7gHrXgJAljtdIMcYBIg==}
+  eslint-config-turbo@2.5.5:
+    resolution: {integrity: sha512-23lKrCr66HQR62aa94n2dBGUUFz0GzM6N1KwmcREZHxomZ5Ik2rDm00wAz95lOEkhzSt6IaxW00Uz0az/Fcq5Q==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -2083,8 +2083,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-turbo@2.5.4:
-    resolution: {integrity: sha512-IZsW61DFj5mLMMaCJxhh1VE4HvNhfdnHnAaXajgne+LUzdyHk2NvYT0ECSa/1SssArcqgTvV74MrLL68hWLLFw==}
+  eslint-plugin-turbo@2.5.5:
+    resolution: {integrity: sha512-IlN65X6W7rgK88u5xl1xC+7FIGKA7eyaca0yxZQ9CBNV6keAaqtjZQLw8ZfXdv7T+MzTLYkYOeOHAv8yCRUx4Q==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -3789,6 +3789,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
@@ -6273,10 +6274,10 @@ snapshots:
     dependencies:
       eslint: 8.52.0
 
-  eslint-config-turbo@2.5.4(eslint@8.52.0)(turbo@1.10.12):
+  eslint-config-turbo@2.5.5(eslint@8.52.0)(turbo@1.10.12):
     dependencies:
       eslint: 8.52.0
-      eslint-plugin-turbo: 2.5.4(eslint@8.52.0)(turbo@1.10.12)
+      eslint-plugin-turbo: 2.5.5(eslint@8.52.0)(turbo@1.10.12)
       turbo: 1.10.12
 
   eslint-import-resolver-node@0.3.9:
@@ -6386,7 +6387,7 @@ snapshots:
       semver: 6.3.1
       string.prototype.matchall: 4.0.11
 
-  eslint-plugin-turbo@2.5.4(eslint@8.52.0)(turbo@1.10.12):
+  eslint-plugin-turbo@2.5.5(eslint@8.52.0)(turbo@1.10.12):
     dependencies:
       dotenv: 16.0.3
       eslint: 8.52.0

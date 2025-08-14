@@ -82,6 +82,7 @@ export const objectType = (
   }
 
   fieldStrings.push("__typename?: boolean | number");
+  fieldStrings.push(`__fragmentOn?: "${type.name}"`);
 
   // add indentation
   fieldStrings = fieldStrings.map((x) =>

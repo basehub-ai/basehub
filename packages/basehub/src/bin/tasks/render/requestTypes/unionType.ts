@@ -19,6 +19,7 @@ export const unionType = (type: GraphQLUnionType, ctx: RenderContext) => {
   );
 
   fieldStrings.push("__typename?: boolean | number");
+  fieldStrings.push(`__fragmentOn?: "${type.name}"`);
 
   ctx.addCodeBlock(
     `${typeComment(type)}export interface ${requestTypeName(

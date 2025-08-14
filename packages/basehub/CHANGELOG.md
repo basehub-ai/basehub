@@ -1,5 +1,17 @@
 # basehub
 
+## 9.2.7-canary.1
+
+### Patch Changes
+
+- fix
+
+## 9.2.7-canary.0
+
+### Patch Changes
+
+- ensure typescript shows an error if extra properties are sent (as our gql api will return an error)
+
 ## 9.2.6
 
 ### Patch Changes

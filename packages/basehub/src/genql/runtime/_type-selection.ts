@@ -88,6 +88,11 @@ type Scalar = string | number | Date | boolean | null | undefined;
 
 type Anify<T> = { [P in keyof T]?: any };
 
-type FieldsToRemove = "__isUnion" | "__scalar" | "__name" | "__args";
+type FieldsToRemove =
+  | "__isUnion"
+  | "__scalar"
+  | "__name"
+  | "__fragmentOn"
+  | "__args";
 
 type Nil = undefined | null;

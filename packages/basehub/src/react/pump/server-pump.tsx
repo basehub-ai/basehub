@@ -1,3 +1,4 @@
+import type { Exact } from "type-fest";
 import * as React from "react";
 import type { JSX } from "react";
 import type { ResponseCache } from "./types.js";
@@ -13,6 +14,10 @@ import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
 import { isV0OrBolt } from "../../vibe.js";
 
 export interface PumpQuery extends QueryGenqlSelection {}
+
+type ExactPumpQueries<Queries extends Array<PumpQuery>> = {
+  [K in keyof Queries]: Queries[K] & Exact<PumpQuery, Queries[K]>;
+};
 
 // we use react.lazy to code split client-pump, which is the heavier part of next-pump, and only required when in draft
 const LazyClientPump = React.lazy(() =>
@@ -45,11 +50,11 @@ export type PumpProps<
         boundProps: Bind,
         data: QueryResults<Queries>
       ) => React.ReactNode | Promise<React.ReactNode>;
-  queries: [...Queries]; // Tuple type for better type inference
+  queries: [...ExactPumpQueries<Queries>]; // Tuple type for better type inference
   bind?: Bind;
 } & Omit<Options, "ref"> & {
     /**
-     * same as "ref", but to avoid React complaining about the "ref" prop
+     * same as "ref" (like to fetch from a specific branch or commit), but to avoid React complaining about the "ref" prop
      */
     _ref?: Options["ref"];
   };
@@ -147,7 +152,7 @@ export const Pump = async <
 
               return replaceSystemAliases(data);
             })
-          : basehub(basehubProps).query(singleQuery);
+          : basehub(basehubProps).query(singleQuery as any);
         cache.set(cacheKey, {
           start: performance.now(),
           data: dataPromise,
@@ -242,7 +247,9 @@ export const createPump = <
   Params extends Record<string, unknown> | void,
   Bind = undefined,
 >(
-  queries: Query | ((params: Params) => Query)
+  queries:
+    | ExactPumpQueries<Query>
+    | ((params: Params) => ExactPumpQueries<Query>)
 ) => {
   return (
     props: Omit<PumpProps<Query, Bind>, "queries"> &

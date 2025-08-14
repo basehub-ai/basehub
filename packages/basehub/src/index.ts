@@ -19,6 +19,8 @@ export interface QueryGenqlSelection {}
 export interface MutationGenqlSelection {}
 export interface FragmentsMap {}
 
+export * from "./fragment.js";
+
 // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
 // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
 export function cacheTagFromQuery(
@@ -141,7 +143,7 @@ export type QueryResult<fields extends QueryGenqlSelection> = FieldsSelection<
   fields
 >;
 export const generateQueryOp: (
-  fields: QueryGenqlSelection & { __name?: string }
+  fields: QueryGenqlSelection
 ) => GraphqlOperation = function (fields) {
   return generateGraphqlOperation("query", fields as any);
 };
@@ -149,85 +151,10 @@ export const generateQueryOp: (
 export type MutationResult<fields extends MutationGenqlSelection> =
   FieldsSelection<Mutation, fields>;
 export const generateMutationOp: (
-  fields: MutationGenqlSelection & { __name?: string }
+  fields: MutationGenqlSelection
 ) => GraphqlOperation = function (fields) {
   return generateGraphqlOperation("mutation", fields as any);
 };
-
-// type helper
-
-export function fragmentOn<
-  TypeName extends keyof FragmentsMap,
-  Selection extends FragmentsMap[TypeName]["selection"],
->(name: TypeName, fields: Selection): Selection & { __fragmentOn: TypeName } {
-  // @ts-ignore
-  return { __fragmentOn: name, ...fields } as const;
-}
-
-// credits: https://stackoverflow.com/a/54487392
-type OmitDistributive<T, K extends PropertyKey> = T extends any
-  ? T extends object
-    ? Id<OmitRecursively<T, K>>
-    : T
-  : never;
-// eslint-disable-next-line @typescript-eslint/ban-types
-type Id<T> = {} & { [P in keyof T]: T[P] }; // Cosmetic use only makes the tooltips expad the type can be removed
-type OmitRecursively<T, K extends PropertyKey> = Omit<
-  { [P in keyof T]: OmitDistributive<T[P], K> },
-  K
->;
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace fragmentOn {
-  export type infer<T> = T extends {
-    __fragmentOn: infer U extends keyof FragmentsMap;
-  }
-    ? OmitRecursively<
-        FieldsSelection<FragmentsMap[U]["root"], Omit<T, "__fragmentOn">>,
-        "__fragmentOn"
-      >
-    : never;
-}
-
-// This is a BaseHub-specific thing:
-
-type RecursiveCollection<T, Key extends keyof T> = T & {
-  [key in Key]: { items: RecursiveCollection<T, Key> };
-};
-
-export function fragmentOnRecursiveCollection<
-  TypeName extends keyof FragmentsMap,
-  Selection extends FragmentsMap[TypeName]["selection"],
-  RecursiveKey extends keyof FragmentsMap[TypeName]["selection"],
->(
-  name: TypeName,
-  fields: Selection,
-  options: {
-    recursiveKey: RecursiveKey;
-    levels: number;
-    getLevelArgs?: (level: number) => unknown;
-  }
-) {
-  const current = {
-    // @ts-ignore
-    ...fields,
-  } as RecursiveCollection<
-    { readonly __fragmentOn: TypeName } & Selection,
-    RecursiveKey
-  >;
-  if (options.levels > 0) {
-    current[options.recursiveKey] = {
-      ...(options.getLevelArgs
-        ? { __args: options.getLevelArgs(options.levels) }
-        : {}),
-      items: fragmentOnRecursiveCollection(name, fields, {
-        ...options,
-        levels: options.levels - 1,
-      }),
-    } as any;
-  }
-  return current;
-}
 
 /**
  * Global configuration for the `basehub` SDK
