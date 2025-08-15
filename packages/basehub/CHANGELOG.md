@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.0
+
+### Minor Changes
+
+- upgrade some deps with vulnerabilities
+
 ## 9.2.7
 
 ### Patch Changes
