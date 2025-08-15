@@ -13,7 +13,7 @@
     "release": "pnpm build && pnpm changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.22.0",
+    "@changesets/cli": "^2.29.5",
     "eslint-config-custom": "workspace:*",
     "pkg-pr-new": "^0.0.30",
     "prettier": "3.0.3",
