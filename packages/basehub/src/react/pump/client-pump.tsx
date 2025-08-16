@@ -28,11 +28,11 @@ export const ClientPump = <
   Bind extends unknown | undefined = undefined,
 >({
   children,
-  rawQueries,
+  rawQueries: _rawQueries,
   pumpEndpoint,
-  pumpHeaders,
+  pumpHeaders: _pumpHeaders,
   pumpToken: initialPumpToken,
-  initialState,
+  initialState: _initialState,
   initialResolvedChildren,
   apiVersion,
   previewRef: _previewRef,
@@ -49,6 +49,11 @@ export const ClientPump = <
   previewRef: string;
   explicitRef?: string;
 }) => {
+  const childrenRef = React.useRef(children);
+  childrenRef.current = children;
+  const [initialState] = React.useState(_initialState);
+  const [rawQueries] = React.useState(_rawQueries);
+  const [pumpHeaders] = React.useState(_pumpHeaders);
   const pumpTokenRef = React.useRef<string | undefined>(initialPumpToken);
   const [result, setResult] = React.useState<PumpState | undefined>(
     initialState
@@ -313,10 +318,10 @@ Contact support@basehub.com for help.`);
 
   const [resolvedChildren, setResolvedChildren] =
     React.useState<React.ReactNode>(
-      typeof children === "function"
+      typeof childrenRef.current === "function"
         ? // if function, we'll resolve in React.useEffect below
           initialResolvedChildren
-        : children
+        : childrenRef.current
     );
 
   /**
@@ -324,18 +329,18 @@ Contact support@basehub.com for help.`);
    */
   React.useEffect(() => {
     if (!resolvedData) return;
-    if (typeof children === "function") {
+    if (typeof childrenRef.current === "function") {
       // @ts-ignore
-      const res = children(resolvedData);
+      const res = childrenRef.current(resolvedData);
       if (res instanceof Promise) {
         res.then(setResolvedChildren);
       } else {
         setResolvedChildren(res);
       }
     } else {
-      setResolvedChildren(children);
+      setResolvedChildren(childrenRef.current);
     }
-  }, [children, resolvedData]);
+  }, [resolvedData]);
 
   return resolvedChildren ?? initialResolvedChildren;
 };

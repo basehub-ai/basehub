@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.1
+
+### Patch Changes
+
+- prevent re-renders due to weird next (or react?) updates
+
 ## 9.3.0
 
 ### Minor Changes

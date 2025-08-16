@@ -12,11 +12,9 @@ const LazyClientToolbar = React.lazy(() =>
 export const ClientConditionalRenderer = ({
   draft,
   isForcedDraft,
-  enableDraftMode,
-  disableDraftMode,
+  resolvedRef: _resolvedRef,
   revalidateTags,
-  resolvedRef,
-  getLatestBranches,
+  ...actions
 }: {
   draft: boolean;
   isForcedDraft: boolean;
@@ -35,6 +33,9 @@ export const ClientConditionalRenderer = ({
   resolvedRef: ResolvedRef;
 }) => {
   const [hasRendered, setHasRendered] = React.useState(false);
+  const [resolvedRef] = React.useState(_resolvedRef);
+  const revalidateTagsRef = React.useRef(revalidateTags);
+  revalidateTagsRef.current = revalidateTags;
 
   React.useEffect(() => {
     setHasRendered(true);
@@ -99,7 +100,8 @@ export const ClientConditionalRenderer = ({
     const odrToken = url.searchParams.get("__bshb-odr-token");
     const ref = url.searchParams.get("__bshb-odr-ref");
     if (shouldRevalidate && odrToken) {
-      revalidateTags({ bshbPreviewToken: odrToken, ...(ref ? { ref } : {}) })
+      revalidateTagsRef
+        .current({ bshbPreviewToken: odrToken, ...(ref ? { ref } : {}) })
         .then(({ success, message }) => {
           document.documentElement.dataset.basehubOdrStatus = success
             ? "success"
@@ -125,7 +127,7 @@ export const ClientConditionalRenderer = ({
             errorMessage;
         });
     }
-  }, [revalidateTags]);
+  }, []);
 
   if (
     (!bshbPreviewToken && !isForcedDraft) ||
@@ -136,15 +138,13 @@ export const ClientConditionalRenderer = ({
   }
   const Portal = createPortal(
     <LazyClientToolbar
-      disableDraftMode={disableDraftMode}
-      enableDraftMode={enableDraftMode}
+      {...actions}
       draft={draft}
       isForcedDraft={isForcedDraft}
       bshbPreviewToken={bshbPreviewToken}
       shouldAutoEnableDraft={shouldAutoEnableDraft}
       seekAndStoreBshbPreviewToken={seekAndStoreBshbPreviewToken}
       resolvedRef={resolvedRef}
-      getLatestBranches={getLatestBranches}
       bshbPreviewLSName={bshbPreviewLSName}
     />,
     document.body
