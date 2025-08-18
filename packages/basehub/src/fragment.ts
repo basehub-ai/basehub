@@ -1,13 +1,14 @@
-import type { Exact } from "type-fest";
 import type { FieldsSelection } from "./genql/runtime/_type-selection.js";
 import type { FragmentsMap } from "./index.js";
+import { GraphQLExact, StripAllArgs } from "./type-helpers.js";
 
 export function fragmentOn<
   TypeName extends keyof FragmentsMap,
-  Selection extends FragmentsMap[TypeName]["selection"],
+  const Selection extends FragmentsMap[TypeName]["selection"],
 >(
   name: TypeName,
-  fields: Selection & Exact<FragmentsMap[TypeName]["selection"], Selection>
+  fields: Selection &
+    GraphQLExact<StripAllArgs<Selection>, FragmentsMap[TypeName]["selection"]>
 ): Selection & { __fragmentOn: TypeName } {
   // @ts-ignore
   return { __fragmentOn: name, ...fields } as const;
@@ -46,11 +47,12 @@ type RecursiveCollection<T, Key extends keyof T> = T & {
 
 export function fragmentOnRecursiveCollection<
   TypeName extends keyof FragmentsMap,
-  Selection extends FragmentsMap[TypeName]["selection"],
+  const Selection extends FragmentsMap[TypeName]["selection"],
   RecursiveKey extends keyof FragmentsMap[TypeName]["selection"],
 >(
   name: TypeName,
-  fields: Selection & Exact<FragmentsMap[TypeName]["selection"], Selection>,
+  fields: Selection &
+    GraphQLExact<StripAllArgs<Selection>, FragmentsMap[TypeName]["selection"]>,
   options: {
     recursiveKey: RecursiveKey;
     levels: number;
