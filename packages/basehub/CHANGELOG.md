@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.2
+
+### Patch Changes
+
+- fix exessive type checking
+
 ## 9.3.1
 
 ### Patch Changes
