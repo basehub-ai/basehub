@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.5
+
+### Patch Changes
+
+- warmup run so revalidations don't timeout
+
 ## 9.3.4
 
 ### Patch Changes

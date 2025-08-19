@@ -25,7 +25,12 @@ export const ClientConditionalRenderer = ({
   revalidateTags: (o: {
     bshbPreviewToken: string;
     ref?: string;
-  }) => Promise<{ success: boolean; message?: string }>;
+    warmupRun?: boolean;
+  }) => Promise<{
+    success: boolean;
+    message?: string;
+    fetchData?: { url: string; options: RequestInit };
+  }>;
   getLatestBranches: (o: { bshbPreviewToken: string | undefined }) => Promise<{
     status: number;
     response: LatestBranch[] | { error: string };
@@ -100,9 +105,29 @@ export const ClientConditionalRenderer = ({
     const odrToken = url.searchParams.get("__bshb-odr-token");
     const ref = url.searchParams.get("__bshb-odr-ref");
     if (shouldRevalidate && odrToken) {
+      // first call is a warmup call to pre-cache the work
+      // the whole thing could take > 5 seconds in big repos, and we don't wanna hit nextjs' 5 second default timeout
+      // so the warmup
       revalidateTagsRef
-        .current({ bshbPreviewToken: odrToken, ...(ref ? { ref } : {}) })
-        .then(({ success, message }) => {
+        .current({
+          warmupRun: true,
+          bshbPreviewToken: odrToken,
+          ...(ref ? { ref } : {}),
+        })
+        .then(async (dryRunResult) => {
+          if (dryRunResult.success && dryRunResult.fetchData) {
+            // this next one won't be warmupRun, it'll actually compute and cache the tags
+            // but we won't use the result here. it's just so that the next call is fast
+            await fetch(
+              dryRunResult.fetchData.url,
+              dryRunResult.fetchData.options
+            );
+          }
+
+          const { success, message } = await revalidateTagsRef.current({
+            bshbPreviewToken: odrToken,
+            ...(ref ? { ref } : {}),
+          });
           document.documentElement.dataset.basehubOdrStatus = success
             ? "success"
             : "error";

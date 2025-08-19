@@ -132,9 +132,11 @@ export const ServerToolbar = async ({
     {
       bshbPreviewToken,
       ref,
+      warmupRun,
     }: {
       bshbPreviewToken: string;
       ref?: string;
+      warmupRun?: boolean;
     }
   ) => {
     "use server";
@@ -150,7 +152,7 @@ export const ServerToolbar = async ({
         return { success: false, error: "Unauthorized" };
       }
 
-      const res = await fetch(appApiEndpoint, {
+      const init = {
         cache: "no-store",
         method: "GET",
         headers: {
@@ -161,12 +163,26 @@ export const ServerToolbar = async ({
             "x-basehub-preview-token": bshbPreviewToken,
           }),
         } as HeadersInit,
-      });
+      } satisfies RequestInit;
 
+      const res = await fetch(
+        appApiEndpoint + (warmupRun ? "?warmupRun=true" : ""),
+        init
+      );
+
+      // this ensures the client is authenticated (before sending down sensitive data in the dryRun response)
       if (res.status !== 200) {
         return {
           success: false,
           message: `Received status ${res.status} from server`,
+        };
+      }
+
+      if (warmupRun) {
+        return {
+          success: true,
+          message: "ok",
+          fetchData: { url: appApiEndpoint, options: init },
         };
       }
 
