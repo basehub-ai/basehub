@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.6
+
+### Patch Changes
+
+- prevent headers from being mutated
+
 ## 9.3.5
 
 ### Patch Changes

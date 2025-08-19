@@ -167,7 +167,7 @@ export const ServerToolbar = async ({
 
       const res = await fetch(
         appApiEndpoint + (warmupRun ? "?warmupRun=true" : ""),
-        init
+        structuredClone(init)
       );
 
       // this ensures the client is authenticated (before sending down sensitive data in the dryRun response)
