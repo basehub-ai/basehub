@@ -310,6 +310,7 @@ export const getStuffFromEnv = async (options?: Options) => {
     gitBranchDeploymentURL,
     productionDeploymentURL,
     sdkBuildId,
+    apiVersion,
     headers: {
       "x-basehub-api-version": apiVersion,
       "x-basehub-sdk-build-id": sdkBuildId,

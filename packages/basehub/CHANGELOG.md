@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.4
+
+### Patch Changes
+
+- log api v
+
 ## 9.3.3
 
 ### Patch Changes
