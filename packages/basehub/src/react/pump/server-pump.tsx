@@ -1,4 +1,3 @@
-import type { Exact } from "type-fest";
 import * as React from "react";
 import type { JSX } from "react";
 import type { ResponseCache } from "./types.js";
@@ -12,11 +11,13 @@ import {
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
 import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
 import { isV0OrBolt } from "../../vibe.js";
+import { GraphQLExact, StripAllArgs } from "../../type-helpers.js";
 
 export interface PumpQuery extends QueryGenqlSelection {}
 
 type ExactPumpQueries<Queries extends Array<PumpQuery>> = {
-  [K in keyof Queries]: Queries[K] & Exact<PumpQuery, Queries[K]>;
+  [K in keyof Queries]: Queries[K] &
+    GraphQLExact<StripAllArgs<PumpQuery>, Queries[K]>;
 };
 
 // we use react.lazy to code split client-pump, which is the heavier part of next-pump, and only required when in draft
