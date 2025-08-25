@@ -10,7 +10,8 @@
     "generate": "turbo run generate",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "version:packages": "pnpm changeset version",
-    "release": "pnpm build && pnpm changeset publish"
+    "release": "pnpm build && pnpm changeset publish",
+    "install-playground-vercel": "pnpm install --filter basehub && pnpm build && pnpm install --filter playground"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.5",

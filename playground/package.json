@@ -11,7 +11,7 @@
     "generate": "basehub --output ./src/lib/basehub"
   },
   "dependencies": {
-    "basehub": "file:.yalc/basehub",
+    "basehub": "workspace:*",
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
     "next": "^15.4.6",
