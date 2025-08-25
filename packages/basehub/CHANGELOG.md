@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.8
+
+### Patch Changes
+
+- upgrade types
+
 ## 9.3.7
 
 ### Patch Changes
