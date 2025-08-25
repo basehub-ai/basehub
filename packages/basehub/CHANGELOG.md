@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.7
+
+### Patch Changes
+
+- fix transaction types
+
 ## 9.3.6
 
 ### Patch Changes

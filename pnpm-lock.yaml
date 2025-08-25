@@ -66,7 +66,7 @@ importers:
     dependencies:
       '@basehub/mutation-api-helpers':
         specifier: 2.1.3
-        version: 2.1.3(zod@3.23.8)
+        version: 2.1.3(zod@4.1.1)
       '@radix-ui/react-slot':
         specifier: ^1.1.0
         version: 1.1.0(@types/react@18.2.20)(react@19.1.1)
@@ -127,6 +127,9 @@ importers:
       typesense:
         specifier: ^1.8.2
         version: 1.8.2(@babel/runtime@7.24.6)
+      zod:
+        specifier: ^3.25.0 || ^4.0.0
+        version: 4.1.1
     devDependencies:
       '@graphql-tools/graphql-file-loader':
         specifier: ^7.5.17
@@ -186,8 +189,8 @@ importers:
   playground:
     dependencies:
       basehub:
-        specifier: workspace:*
-        version: link:../packages/basehub
+        specifier: file:.yalc/basehub
+        version: file:playground/.yalc/basehub(@babel/runtime@7.24.6)(@types/react@18.2.20)(react@19.1.1)
       clsx:
         specifier: ^1.2.1
         version: 1.2.1
@@ -1274,6 +1277,10 @@ packages:
 
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+
+  basehub@file:playground/.yalc/basehub:
+    resolution: {directory: playground/.yalc/basehub, type: directory}
+    hasBin: true
 
   before-after-hook@2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
@@ -4004,8 +4011,11 @@ packages:
     resolution: {integrity: sha512-Mb6GzuRyUEl8X+6V6xzHbd4XV0au/4gOYrYP+CAfHL32uPmGswES+v2YqonZiW1NZWVA3jkssCKSU2knonm/aQ==}
     engines: {node: '>=20'}
 
-  zod@3.23.8:
-    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zod@4.1.1:
+    resolution: {integrity: sha512-SgMZK/h8Tigt9nnKkfJMvB/mKjiJXaX26xegP4sa+0wHIFVFWVlsQGdhklDmuargBD3Hsi3rsQRIzwJIhTPJHA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -4016,9 +4026,9 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@basehub/mutation-api-helpers@2.1.3(zod@3.23.8)':
+  '@basehub/mutation-api-helpers@2.1.3(zod@4.1.1)':
     dependencies:
-      zod: 3.23.8
+      zod: 4.1.1
 
   '@changesets/apply-release-plan@7.0.12':
     dependencies:
@@ -5046,6 +5056,37 @@ snapshots:
   balanced-match@3.0.1: {}
 
   base64-js@1.5.1: {}
+
+  basehub@file:playground/.yalc/basehub(@babel/runtime@7.24.6)(@types/react@18.2.20)(react@19.1.1):
+    dependencies:
+      '@basehub/mutation-api-helpers': 2.1.3(zod@4.1.1)
+      '@radix-ui/react-slot': 1.1.0(@types/react@18.2.20)(react@19.1.1)
+      '@shikijs/transformers': 1.17.7
+      '@xmldom/xmldom': 0.9.6
+      arg: 5.0.1
+      axios: 1.11.0
+      dotenv-mono: 1.3.10
+      github-slugger: 2.0.0
+      graphql: 16.8.1
+      hast-util-to-jsx-runtime: 2.3.0
+      listr2: 8.3.3
+      lodash.camelcase: 4.3.0
+      lodash.debounce: 4.0.8
+      lodash.get: 4.4.2
+      lodash.uniq: 4.5.0
+      mkdirp: 3.0.1
+      pusher-js: 8.3.0
+      rimraf: 6.0.1
+      shiki: 1.17.7
+      type-fest: 4.41.0
+      typesense: 1.8.2(@babel/runtime@7.24.6)
+      zod: 4.1.1
+    transitivePeerDependencies:
+      - '@babel/runtime'
+      - '@types/react'
+      - debug
+      - react
+      - supports-color
 
   before-after-hook@2.2.3: {}
 
@@ -7263,7 +7304,7 @@ snapshots:
       quick-lru: 7.0.0
       url-join: 5.0.0
       validate-npm-package-name: 5.0.1
-      zod: 3.23.8
+      zod: 3.25.76
       zod-package-json: 1.0.3
 
   query-string@9.1.1:
@@ -8184,8 +8225,10 @@ snapshots:
 
   zod-package-json@1.0.3:
     dependencies:
-      zod: 3.23.8
+      zod: 3.25.76
 
-  zod@3.23.8: {}
+  zod@3.25.76: {}
+
+  zod@4.1.1: {}
 
   zwitch@2.0.4: {}

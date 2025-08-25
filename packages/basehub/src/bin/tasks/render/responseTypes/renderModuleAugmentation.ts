@@ -36,10 +36,17 @@ interface _Scalars extends Scalars {}`
 
 export const enhanceMutationGenqlSelection = (schemaFileContents: string) => {
   // edit `MutationGenqlSelection` to receive the Transaction directly instead of a string
-  return schemaFileContents.replace(
-    `    /** Transaction data. */
+  return schemaFileContents
+    .replace(
+      `    /** Transaction data. */
     data: Scalars['String']`,
-    `    /** Transaction data. */
+      `    /** Transaction data. */
     data: Transaction | Scalars['String']`
-  );
+    )
+    .replace(
+      `    /** Transaction data. */
+    data: Scalars["String"]`,
+      `    /** Transaction data. */
+    data: Transaction | Scalars["String"]`
+    );
 };
