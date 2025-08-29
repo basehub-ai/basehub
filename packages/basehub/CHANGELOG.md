@@ -1,5 +1,12 @@
 # basehub
 
+## 9.3.9
+
+### Patch Changes
+
+- 22049bb: fix nextjs fast refresh
+- dd8405c: surface errors in pump
+
 ## 9.3.9-canary.1
 
 ### Patch Changes
