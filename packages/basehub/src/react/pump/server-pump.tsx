@@ -12,6 +12,7 @@ import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
 import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
 import { isV0OrBolt } from "../../vibe.js";
 import { GraphQLExact, StripAllArgs } from "../../type-helpers.js";
+import { GenqlError } from "../../genql/runtime/_error.js";
 
 export interface PumpQuery extends QueryGenqlSelection {}
 
@@ -77,7 +78,6 @@ export const Pump = async <
 }: PumpProps<Queries, Bind>): Promise<JSX.Element> => {
   const basehubProps = { ..._basehubProps, ref: _ref };
   // passed to the client to toast
-  const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
   let isNextjsDraftMode = false;
@@ -148,8 +148,11 @@ export const Pump = async <
               pumpToken = newPumpToken;
               pusherData = _pusherData;
               spaceID = _spaceID;
-              errors.push(_errors);
               responseHashes[index] = _responseHash;
+
+              if (_errors?.length) {
+                throw new GenqlError(_errors || [], data);
+              }
 
               return replaceSystemAliases(data);
             })
@@ -188,7 +191,6 @@ export const Pump = async <
   if (draft) {
     if (!pumpToken || !spaceID || !pusherData) {
       console.log("Results (length):", results?.length);
-      console.log("Errors:", JSON.stringify(errors, null, 2));
       console.log("Pump Endpoint:", pumpEndpoint);
       console.log("Pump Token:", pumpToken);
       console.log("Space ID:", spaceID);
@@ -216,7 +218,7 @@ export const Pump = async <
         initialState={{
           // @ts-ignore
           data: !noQueries ? results.map((r) => r.data ?? null) : [],
-          errors,
+          errors: [],
           responseHashes,
           pusherData: pusherData,
           spaceID: spaceID,

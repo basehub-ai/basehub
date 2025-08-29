@@ -1,5 +1,11 @@
 # basehub
 
+## 9.3.9-canary.0
+
+### Patch Changes
+
+- surface errors in pump
+
 ## 9.3.8
 
 ### Patch Changes
