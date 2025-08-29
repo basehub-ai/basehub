@@ -340,7 +340,11 @@ Contact support@basehub.com for help.`);
     } else {
       setResolvedChildren(childrenRef.current);
     }
-  }, [resolvedData]);
+  }, [
+    resolvedData,
+    // keep this dep so next.js fast-refresh works OK
+    children,
+  ]);
 
   return resolvedChildren ?? initialResolvedChildren;
 };

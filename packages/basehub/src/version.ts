@@ -1,1 +1,1 @@
-export const version = "9.3.7";
+export const version = "9.3.9-canary.0";
