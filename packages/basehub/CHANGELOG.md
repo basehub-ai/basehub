@@ -1,5 +1,11 @@
 # basehub
 
+## 9.4.1
+
+### Patch Changes
+
+- fix rich text slugger hydration mismatch in react strict mode
+
 ## 9.4.0
 
 ### Minor Changes

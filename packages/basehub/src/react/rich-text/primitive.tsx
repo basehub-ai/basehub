@@ -216,7 +216,18 @@ export const RichText = <
       value = contentRaw.content;
     }
   }
+
   const slugger = new GithubSlugger();
+  const sluggerCache = new Map<string, string>();
+
+  const getSlug = (text: string) => {
+    if (sluggerCache.has(text)) {
+      return sluggerCache.get(text)!;
+    }
+    const slug = slugger.slug(text);
+    sluggerCache.set(text, slug);
+    return slug;
+  };
 
   return (
     <>
@@ -227,7 +238,7 @@ export const RichText = <
             key={index}
             components={props.components}
             blocks={props.blocks}
-            slugger={slugger}
+            getSlug={getSlug}
             disableDefaultComponents={props.disableDefaultComponents}
           />
         );
@@ -319,14 +330,14 @@ const Node = ({
   node,
   components,
   blocks,
-  slugger,
+  getSlug,
   disableDefaultComponents,
 }: {
   node: RichTextNode;
   components?: Partial<Handlers>;
   blocks?: readonly CustomBlockBase[];
   parent?: RichTextNode;
-  slugger: GithubSlugger;
+  getSlug: (text: string) => string;
   disableDefaultComponents?: boolean;
 }) => {
   const children = node.content?.map((childNode, index) => {
@@ -337,7 +348,7 @@ const Node = ({
         key={index}
         components={components}
         blocks={blocks}
-        slugger={slugger}
+        getSlug={getSlug}
         disableDefaultComponents={disableDefaultComponents}
       />
     );
@@ -408,7 +419,7 @@ const Node = ({
       Handler =
         components?.[handlerTag] ??
         (disableDefaultComponents ? () => <></> : defaultHandlers[handlerTag]);
-      const id = slugger.slug(extractTextFromNode(node));
+      const id = getSlug(extractTextFromNode(node));
 
       props = { children, id } satisfies ExtractPropsForHandler<Handlers["h1"]>;
       break;
@@ -455,7 +466,7 @@ const Node = ({
           parent={node}
           components={components}
           blocks={blocks}
-          slugger={slugger}
+          getSlug={getSlug}
           disableDefaultComponents={disableDefaultComponents}
         />
       );
@@ -807,6 +818,16 @@ export type TOCProps = {
 
 export const TOC = (props: TOCProps): JSX.Element => {
   const slugger = new GithubSlugger();
+  const sluggerCache = new Map<string, string>();
+
+  const getSlug = (text: string) => {
+    if (sluggerCache.has(text)) {
+      return sluggerCache.get(text)!;
+    }
+    const slug = slugger.slug(text);
+    sluggerCache.set(text, slug);
+    return slug;
+  };
 
   const value = (props.content ?? props.children) as RichTextTocNode[];
 
@@ -818,7 +839,7 @@ export const TOC = (props: TOCProps): JSX.Element => {
             node={node as RichTextNode}
             key={index}
             components={props.components}
-            slugger={slugger}
+            getSlug={getSlug}
             disableDefaultComponents={props.disableDefaultComponents}
           />
         );
