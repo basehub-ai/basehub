@@ -99,7 +99,7 @@ export const Pump = async <
   const { headers, draft, resolvedRef } = await getStuffFromEnv(basehubProps);
   const { "x-basehub-token": _token, ...headersWithoutToken } = headers;
   const apiVersion = headers["x-basehub-api-version"];
-  const pumpEndpoint = "https://aws.basehub.com/pump";
+  const pumpEndpoint = "https://pump-router.basehub.com/graphql";
 
   const noQueries = queries.length === 0;
 
@@ -151,7 +151,14 @@ export const Pump = async <
               responseHashes[index] = _responseHash;
 
               if (_errors?.length) {
-                throw new GenqlError(_errors || [], data);
+                throw new GenqlError(
+                  _errors || [],
+                  data,
+                  headers["x-basehub-ref"] &&
+                  headers["x-basehub-ref"] !== resolvedRef.ref
+                    ? `⚠️ Not fetching from "${resolvedRef.ref}", but actually from "${headers["x-basehub-ref"]}" (probably due to a branch cookie set with the Toolbar).`
+                    : undefined
+                );
               }
 
               return replaceSystemAliases(data);

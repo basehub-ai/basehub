@@ -1,5 +1,15 @@
 # basehub
 
+## 9.4.0
+
+### Minor Changes
+
+- change pump endpoint to new one
+
+### Patch Changes
+
+- improve error message
+
 ## 9.3.9
 
 ### Patch Changes
