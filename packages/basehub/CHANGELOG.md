@@ -1,5 +1,11 @@
 # basehub
 
+## 9.5.0
+
+### Minor Changes
+
+- fix cache tag!
+
 ## 9.4.2
 
 ### Patch Changes

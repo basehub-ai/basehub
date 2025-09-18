@@ -23,14 +23,14 @@ export * from "./fragment.js";
 
 // we include the resolvedRef.id to make sure the cache tag is unique per basehub ref
 // solves a nice problem which we'd otherwise have, being that if the dev wants to hit a different basehub branch, we don't want to respond with the same cache tag as the previous branch
-export function cacheTagFromQuery(
-  query: Record<string, unknown>,
-  refId: string,
-  apiVersion: string | undefined
-) {
-  const result =
-    "basehub-" +
-    hashObject({ ...query, refId, ...(apiVersion ? { apiVersion } : {}) });
+export function cacheTagFromQuery({
+  query,
+  sdkBuildId,
+}: {
+  query: Record<string, unknown>;
+  sdkBuildId: string;
+}) {
+  const result = "basehub-" + hashObject({ ...query, sdkBuildId });
   return result;
 }
 
@@ -87,7 +87,7 @@ export const basehub = <
   }
 
   options.getExtraFetchOptions = async (op, _body, originalRequest) => {
-    const { url, headers, resolvedRef, draft } = await getStuffFromEnv(options);
+    const { url, headers, sdkBuildId, draft } = await getStuffFromEnv(options);
 
     const extra = {
       url,
@@ -118,11 +118,10 @@ export const basehub = <
         // noop, not using nextjs
       }
       if (isNextjs) {
-        const cacheTag = cacheTagFromQuery(
-          originalRequest,
-          resolvedRef.id,
-          headers["x-basehub-api-version"]
-        );
+        const cacheTag = cacheTagFromQuery({
+          query: originalRequest,
+          sdkBuildId,
+        });
         // @ts-expect-error
         extra.next = { tags: [cacheTag] };
         extra.headers = {
