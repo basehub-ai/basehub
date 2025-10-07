@@ -1,0 +1,14 @@
+{
+  "mode": "pre",
+  "tag": "debug-logs",
+  "initialVersions": {
+    "eslint-config-custom": "1.0.0",
+    "tsconfig": "1.0.0",
+    "basehub": "9.5.0",
+    "playground": "0.0.258"
+  },
+  "changesets": [
+    "good-mice-show",
+    "six-buttons-show"
+  ]
+}

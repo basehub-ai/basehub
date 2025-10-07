@@ -5,6 +5,7 @@ import { hashObject } from "./hash.js";
 import { isV0OrBolt } from "../../vibe.js";
 import { getGlobalConfig } from "../../index.js";
 import { version } from "../../version.js";
+import { debugLog, getDebugCallStack } from "../../debug-utils.js";
 
 export const basehubAPIOrigin = "https://api.basehub.com";
 const defaultEnvVarPrefix = "BASEHUB";
@@ -43,6 +44,8 @@ export type Options = {
 };
 
 export const getStuffFromEnv = async (options?: Options) => {
+  debugLog("[BaseHub Debug] getStuffFromEnv called from:", getDebugCallStack());
+
   if (!options) {
     options = {};
   }
@@ -262,10 +265,35 @@ export const getStuffFromEnv = async (options?: Options) => {
   if (!isV0OrBolt() && !draft) {
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
+      debugLog(
+        "[BaseHub Debug] Attempting to import draftMode from next/headers in get-stuff-from-env.ts"
+      );
+      debugLog(
+        "[BaseHub Debug] Current execution context - isV0OrBolt():",
+        isV0OrBolt(),
+        "draft:",
+        draft
+      );
       // @ts-ignore
       const { draftMode } = await import(/* @vite-ignore */ "next/headers");
-      isNextjsDraftMode = (await draftMode()).isEnabled;
+      debugLog(
+        "[BaseHub Debug] Successfully imported draftMode, calling draftMode()"
+      );
+      const draftModeInstance = await draftMode();
+      debugLog("[BaseHub Debug] Got draftMode instance, checking isEnabled");
+      isNextjsDraftMode = draftModeInstance.isEnabled;
+      debugLog("[BaseHub Debug] draftMode().isEnabled =", isNextjsDraftMode);
     } catch (error) {
+      debugLog(
+        "[BaseHub Debug] Error accessing draftMode in get-stuff-from-env.ts:",
+        error
+      );
+      debugLog(
+        "[BaseHub Debug] Error name:",
+        (error as any)?.name,
+        "Error message:",
+        (error as any)?.message
+      );
       // noop, not using nextjs
     }
   }
@@ -278,15 +306,42 @@ export const getStuffFromEnv = async (options?: Options) => {
   if (draft && !isV0OrBolt()) {
     // try to get ref from cookies
     try {
+      debugLog(
+        "[BaseHub Debug] Attempting to import cookies from next/headers in get-stuff-from-env.ts"
+      );
+      debugLog(
+        "[BaseHub Debug] Current execution context - draft:",
+        draft,
+        "isV0OrBolt():",
+        isV0OrBolt()
+      );
       // @ts-ignore
       const { cookies } = await import(/* @vite-ignore */ "next/headers");
+      debugLog(
+        "[BaseHub Debug] Successfully imported cookies, calling cookies()"
+      );
       const cookieStore = await cookies();
-      const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
-        ?.value as string | undefined;
+      debugLog("[BaseHub Debug] Successfully got cookie store");
+      const cookieName = "bshb-preview-ref-" + resolvedRef.repoHash;
+      debugLog("[BaseHub Debug] Looking for cookie:", cookieName);
+      const ref = cookieStore.get(cookieName)?.value as string | undefined;
       if (ref) {
         previewRef = ref;
+        debugLog("[BaseHub Debug] Found preview ref in cookies:", ref);
+      } else {
+        debugLog("[BaseHub Debug] No preview ref found in cookies");
       }
     } catch (error) {
+      debugLog(
+        "[BaseHub Debug] Error accessing cookies in get-stuff-from-env.ts:",
+        error
+      );
+      debugLog(
+        "[BaseHub Debug] Error name:",
+        (error as any)?.name,
+        "Error message:",
+        (error as any)?.message
+      );
       // noop
     }
   }

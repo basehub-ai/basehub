@@ -1,5 +1,17 @@
 # basehub
 
+## 9.5.1-debug-logs.1
+
+### Patch Changes
+
+- more logs
+
+## 9.5.1-debug-logs.0
+
+### Patch Changes
+
+- add some debug logs
+
 ## 9.5.0
 
 ### Minor Changes

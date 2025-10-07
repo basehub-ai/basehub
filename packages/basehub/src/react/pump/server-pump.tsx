@@ -13,6 +13,7 @@ import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
 import { isV0OrBolt } from "../../vibe.js";
 import { GraphQLExact, StripAllArgs } from "../../type-helpers.js";
 import { GenqlError } from "../../genql/runtime/_error.js";
+import { debugLog } from "../../debug-utils.js";
 
 export interface PumpQuery extends QueryGenqlSelection {}
 
@@ -84,10 +85,24 @@ export const Pump = async <
   if (!isV0OrBolt() && basehubProps.draft === undefined) {
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
+      debugLog(
+        "[BaseHub Debug] Attempting to import draftMode from next/headers in server-pump.tsx"
+      );
       // @ts-ignore
       const { draftMode } = await import(/* @vite-ignore */ "next/headers");
+      debugLog(
+        "[BaseHub Debug] Successfully imported draftMode, calling draftMode() in server-pump.tsx"
+      );
       isNextjsDraftMode = (await draftMode()).isEnabled;
+      debugLog(
+        "[BaseHub Debug] draftMode().isEnabled in server-pump.tsx =",
+        isNextjsDraftMode
+      );
     } catch (error) {
+      debugLog(
+        "[BaseHub Debug] Error accessing draftMode in server-pump.tsx:",
+        error
+      );
       // noop, not using nextjs
     }
   }
