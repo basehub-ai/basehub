@@ -228,15 +228,26 @@ export const ServerToolbar = async ({
         return { success: true, message: "No tags to revalidate" };
       }
 
+      debugLog(
+        "[BaseHub Debug] Attempting to import revalidateTag from next/cache"
+      );
       // @ts-ignore
       const { revalidateTag } = await import(/* @vite-ignore */ "next/cache");
+      debugLog(
+        "[BaseHub Debug] Successfully imported revalidateTag, revalidating",
+        tags.length,
+        "tags"
+      );
 
       await Promise.all(
         tags.map(async (_tag: string) => {
           const tag = _tag.startsWith("basehub-") ? _tag : `basehub-${_tag}`;
+          debugLog("[BaseHub Debug] Calling revalidateTag for tag:", tag);
           await revalidateTag(tag);
         })
       );
+
+      debugLog("[BaseHub Debug] Successfully revalidated all tags");
 
       return { success: true, message: `Revalidated ${tags.length} tags` };
     } catch (error) {

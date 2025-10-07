@@ -1,19 +1,6 @@
-const isDebugEnabled = () => {
-  try {
-    return (
-      // eslint-disable-next-line turbo/no-undeclared-env-vars
-      process?.env?.BASEHUB_DEBUG === "true" ||
-      process?.env?.NODE_ENV === "development"
-    );
-  } catch {
-    return false;
-  }
-};
-
 export const debugLog = (...args: any[]) => {
-  if (isDebugEnabled()) {
-    console.log(...args);
-  }
+  // Always log in this debug version
+  console.log(...args);
 };
 
 export const getDebugCallStack = () => {

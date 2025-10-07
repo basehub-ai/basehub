@@ -1,5 +1,12 @@
 # playground
 
+## 0.0.259-debug-logs.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@9.5.1-debug-logs.1
+
 ## 0.0.259-debug-logs.0
 
 ### Patch Changes
