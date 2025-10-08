@@ -1,5 +1,11 @@
 # basehub
 
+## 9.5.1
+
+### Patch Changes
+
+- expose bshb as well
+
 ## 9.5.0
 
 ### Minor Changes

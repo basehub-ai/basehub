@@ -2,13 +2,14 @@
   "name": "basehub",
   "description": "A very fast Headless CMS.",
   "author": "JB <jb@basehub.com>",
-  "version": "9.5.0",
+  "version": "9.5.1",
   "license": "MIT",
   "repository": "basehub-ai/basehub",
   "bugs": "https://github.com/basehub-ai/basehub/issues",
   "homepage": "https://basehub.com",
   "bin": {
-    "basehub": "./dist-bin/bin.js"
+    "basehub": "./dist-bin/bin.js",
+    "bshb": "./dist-bin/bin.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
