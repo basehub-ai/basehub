@@ -41,7 +41,6 @@ const parseRequest = (
 
     const argsThatShouldNotBeEnums = [
       // image processing args
-      "format",
       "anim",
       "background",
       "border",

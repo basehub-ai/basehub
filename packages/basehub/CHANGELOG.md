@@ -1,5 +1,11 @@
 # basehub
 
+## 9.5.2
+
+### Patch Changes
+
+- fix
+
 ## 9.5.1
 
 ### Patch Changes
