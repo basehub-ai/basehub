@@ -1,5 +1,118 @@
 # basehub
 
+## 9.5.3
+
+### Patch Changes
+
+- upgrade axios
+
+## 9.5.2
+
+### Patch Changes
+
+- fix
+
+## 9.5.1
+
+### Patch Changes
+
+- expose bshb as well
+
+## 9.5.0
+
+### Minor Changes
+
+- fix cache tag!
+
+## 9.4.2
+
+### Patch Changes
+
+- fix
+
+## 9.4.1
+
+### Patch Changes
+
+- fix rich text slugger hydration mismatch in react strict mode
+
+## 9.4.0
+
+### Minor Changes
+
+- change pump endpoint to new one
+
+### Patch Changes
+
+- improve error message
+
+## 9.3.9
+
+### Patch Changes
+
+- 22049bb: fix nextjs fast refresh
+- dd8405c: surface errors in pump
+
+## 9.3.9-canary.1
+
+### Patch Changes
+
+- fix nextjs fast refresh
+
+## 9.3.9-canary.0
+
+### Patch Changes
+
+- surface errors in pump
+
+## 9.3.8
+
+### Patch Changes
+
+- upgrade types
+
+## 9.3.7
+
+### Patch Changes
+
+- fix transaction types
+
+## 9.3.6
+
+### Patch Changes
+
+- prevent headers from being mutated
+
+## 9.3.5
+
+### Patch Changes
+
+- warmup run so revalidations don't timeout
+
+## 9.3.4
+
+### Patch Changes
+
+- log api v
+
+## 9.3.3
+
+### Patch Changes
+
+- fix type issue
+
+## 9.3.2
+
+### Patch Changes
+
+- fix exessive type checking
+
+## 9.3.1
+
+### Patch Changes
+
+- prevent re-renders due to weird next (or react?) updates
+
 ## 9.3.0
 
 ### Minor Changes

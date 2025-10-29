@@ -187,14 +187,15 @@ export const main = async (
   }> {
     logIfNotSilent(silent, "🪄 Generating...");
 
-    const { url, headers, draft, resolvedRef, token } = await getStuffFromEnv({
-      ...options,
-      revalidateResolvedRef: true,
-    });
+    const { url, headers, draft, resolvedRef, token, apiVersion } =
+      await getStuffFromEnv({
+        ...options,
+        revalidateResolvedRef: true,
+      });
 
     if (!silent) {
       logInsideBox([
-        `🎫 SDK Version: ${opts.version}`,
+        `🎫 SDK Version: ${opts.version} (API v${apiVersion})`,
         `🔗 Endpoint: ${url.toString()}`,
         `${draft ? "🟡" : "🔵"} Draft: ${draft ? "enabled" : "disabled"}`,
         `📦 Output: ${basehubOutputPath}`,

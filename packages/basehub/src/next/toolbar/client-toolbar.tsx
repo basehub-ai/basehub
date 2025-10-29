@@ -16,12 +16,12 @@ const TOOLBAR_POSITION_STORAGE_KEY = "bshb_toolbar_pos";
 export const ClientToolbar = ({
   draft,
   isForcedDraft,
-  enableDraftMode,
-  disableDraftMode,
   bshbPreviewToken,
   shouldAutoEnableDraft,
   seekAndStoreBshbPreviewToken,
   resolvedRef,
+  enableDraftMode,
+  disableDraftMode,
   getLatestBranches,
 }: {
   draft: boolean;
@@ -45,6 +45,12 @@ export const ClientToolbar = ({
     response: LatestBranch[] | { error: string };
   }>;
 }) => {
+  const enableDraftModeRef = React.useRef(enableDraftMode);
+  enableDraftModeRef.current = enableDraftMode;
+  const disableDraftModeRef = React.useRef(disableDraftMode);
+  disableDraftModeRef.current = disableDraftMode;
+  const getLatestBranchesRef = React.useRef(getLatestBranches);
+  getLatestBranchesRef.current = getLatestBranches;
   const [toolbarRef, setToolbarRef] = React.useState<HTMLDivElement | null>(
     null
   );
@@ -74,7 +80,8 @@ export const ClientToolbar = ({
   const triggerDraftMode = React.useCallback(
     (previewToken: string) => {
       setLoading(true);
-      enableDraftMode({ bshbPreviewToken: previewToken })
+      enableDraftModeRef
+        .current({ bshbPreviewToken: previewToken })
         .then(({ status, response }) => {
           if (status === 200) {
             setLatestBranches((p) => response.latestBranches ?? p);
@@ -88,7 +95,7 @@ export const ClientToolbar = ({
         })
         .finally(() => setLoading(false));
     },
-    [enableDraftMode, displayMessage]
+    [displayMessage]
   );
 
   const bshbPreviewRefCookieName = `bshb-preview-ref-${resolvedRef.repoHash}`;
@@ -145,7 +152,7 @@ export const ClientToolbar = ({
 
   const getAndSetLatestBranches = React.useCallback(async () => {
     let result: LatestBranch[] = [];
-    const res = await getLatestBranches({ bshbPreviewToken });
+    const res = await getLatestBranchesRef.current({ bshbPreviewToken });
     if (!res) return;
     if (Array.isArray(res.response)) {
       result = res.response;
@@ -153,7 +160,7 @@ export const ClientToolbar = ({
       console.error(`BaseHub Toolbar Error: ${res.response.error}`);
     }
     setLatestBranches(result);
-  }, [bshbPreviewToken, getLatestBranches]);
+  }, [bshbPreviewToken]);
 
   /**
    * Get latest branches every 30 seconds (we'll also get 'em on load and when the user hovers the branch switcher)
@@ -402,7 +409,8 @@ export const ClientToolbar = ({
 
                 if (draft) {
                   setLoading(true);
-                  disableDraftMode()
+                  disableDraftModeRef
+                    .current()
                     .then(() => {
                       const url = new URL(window.location.href);
                       url.searchParams.delete("bshb-preview");

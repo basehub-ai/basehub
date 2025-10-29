@@ -132,46 +132,62 @@ export const ServerToolbar = async ({
     {
       bshbPreviewToken,
       ref,
+      warmupRun,
     }: {
       bshbPreviewToken: string;
       ref?: string;
+      warmupRun?: boolean;
     }
   ) => {
     "use server";
 
-    const { headers, url } = await getStuffFromEnv(basehubProps);
-    const appApiEndpoint = getBaseHubAppApiEndpoint(
-      new URL(url),
-      "/api/nextjs/pending-tags"
-    );
-
-    if (!bshbPreviewToken) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const res = await fetch(appApiEndpoint, {
-      cache: "no-store",
-      method: "GET",
-      headers: {
-        "content-type": "application/json",
-        ...headers,
-        ...(ref && { "x-basehub-ref": ref }),
-        ...(bshbPreviewToken && {
-          "x-basehub-preview-token": bshbPreviewToken,
-        }),
-      } as HeadersInit,
-    });
-
-    if (res.status !== 200) {
-      return {
-        success: false,
-        message: `Received status ${res.status} from server`,
-      };
-    }
-
-    const response = await res.json();
-
     try {
+      const { headers, url } = await getStuffFromEnv(basehubProps);
+      const appApiEndpoint = getBaseHubAppApiEndpoint(
+        new URL(url),
+        "/api/nextjs/pending-tags"
+      );
+
+      if (!bshbPreviewToken) {
+        return { success: false, error: "Unauthorized" };
+      }
+
+      const init = {
+        cache: "no-store",
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+          ...headers,
+          ...(ref && { "x-basehub-ref": ref }),
+          ...(bshbPreviewToken && {
+            "x-basehub-preview-token": bshbPreviewToken,
+          }),
+        } as HeadersInit,
+      } satisfies RequestInit;
+
+      const res = await fetch(
+        appApiEndpoint + (warmupRun ? "?warmupRun=true" : ""),
+        structuredClone(init)
+      );
+
+      // this ensures the client is authenticated (before sending down sensitive data in the dryRun response)
+      if (res.status !== 200) {
+        return {
+          success: false,
+          message: `Received status ${res.status} from server`,
+        };
+      }
+
+      if (warmupRun) {
+        return {
+          success: true,
+          message: "ok",
+          fetchData: { url: appApiEndpoint, options: init },
+        };
+      }
+
+      const response = await res.json();
+
       const { tags } = response;
       if (!tags || !Array.isArray(tags) || tags.length === 0) {
         return { success: true, message: "No tags to revalidate" };
@@ -189,7 +205,6 @@ export const ServerToolbar = async ({
 
       return { success: true, message: `Revalidated ${tags.length} tags` };
     } catch (error) {
-      console.log(response);
       console.error(error);
       return {
         success: false,

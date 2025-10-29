@@ -1,4 +1,3 @@
-import type { Exact } from "type-fest";
 import * as React from "react";
 import type { JSX } from "react";
 import type { ResponseCache } from "./types.js";
@@ -12,11 +11,14 @@ import {
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
 import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
 import { isV0OrBolt } from "../../vibe.js";
+import { GraphQLExact, StripAllArgs } from "../../type-helpers.js";
+import { GenqlError } from "../../genql/runtime/_error.js";
 
 export interface PumpQuery extends QueryGenqlSelection {}
 
 type ExactPumpQueries<Queries extends Array<PumpQuery>> = {
-  [K in keyof Queries]: Queries[K] & Exact<PumpQuery, Queries[K]>;
+  [K in keyof Queries]: Queries[K] &
+    GraphQLExact<StripAllArgs<PumpQuery>, Queries[K]>;
 };
 
 // we use react.lazy to code split client-pump, which is the heavier part of next-pump, and only required when in draft
@@ -76,7 +78,6 @@ export const Pump = async <
 }: PumpProps<Queries, Bind>): Promise<JSX.Element> => {
   const basehubProps = { ..._basehubProps, ref: _ref };
   // passed to the client to toast
-  const errors: Array<ResponseCache["errors"]> = [];
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
 
   let isNextjsDraftMode = false;
@@ -98,7 +99,7 @@ export const Pump = async <
   const { headers, draft, resolvedRef } = await getStuffFromEnv(basehubProps);
   const { "x-basehub-token": _token, ...headersWithoutToken } = headers;
   const apiVersion = headers["x-basehub-api-version"];
-  const pumpEndpoint = "https://aws.basehub.com/pump";
+  const pumpEndpoint = "https://pump-router.basehub.com/graphql";
 
   const noQueries = queries.length === 0;
 
@@ -147,8 +148,18 @@ export const Pump = async <
               pumpToken = newPumpToken;
               pusherData = _pusherData;
               spaceID = _spaceID;
-              errors.push(_errors);
               responseHashes[index] = _responseHash;
+
+              if (_errors?.length) {
+                throw new GenqlError(
+                  _errors || [],
+                  data,
+                  headers["x-basehub-ref"] &&
+                  headers["x-basehub-ref"] !== resolvedRef.ref
+                    ? `⚠️ Not fetching from "${resolvedRef.ref}", but actually from "${headers["x-basehub-ref"]}" (probably due to a branch cookie set with the Toolbar).`
+                    : undefined
+                );
+              }
 
               return replaceSystemAliases(data);
             })
@@ -187,7 +198,6 @@ export const Pump = async <
   if (draft) {
     if (!pumpToken || !spaceID || !pusherData) {
       console.log("Results (length):", results?.length);
-      console.log("Errors:", JSON.stringify(errors, null, 2));
       console.log("Pump Endpoint:", pumpEndpoint);
       console.log("Pump Token:", pumpToken);
       console.log("Space ID:", spaceID);
@@ -215,7 +225,7 @@ export const Pump = async <
         initialState={{
           // @ts-ignore
           data: !noQueries ? results.map((r) => r.data ?? null) : [],
-          errors,
+          errors: [],
           responseHashes,
           pusherData: pusherData,
           spaceID: spaceID,

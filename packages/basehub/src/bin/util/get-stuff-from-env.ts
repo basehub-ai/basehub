@@ -179,7 +179,7 @@ export const getStuffFromEnv = async (options?: Options) => {
     }
   }
 
-  const ref =
+  let ref =
     options.ref ??
     basehubUrl.searchParams.get("ref") ??
     getEnvVar("REF") ??
@@ -295,6 +295,10 @@ export const getStuffFromEnv = async (options?: Options) => {
     gitBranch ? `__git_branch_${gitBranch}` : ""
   }${gitCommitSHA ? `__git_commit_sha_${gitCommitSHA}` : ""}`;
 
+  if (!ref && resolvedRef) {
+    ref = resolvedRef.ref;
+  }
+
   return {
     draft,
     previewRef,
@@ -310,6 +314,7 @@ export const getStuffFromEnv = async (options?: Options) => {
     gitBranchDeploymentURL,
     productionDeploymentURL,
     sdkBuildId,
+    apiVersion,
     headers: {
       "x-basehub-api-version": apiVersion,
       "x-basehub-sdk-build-id": sdkBuildId,

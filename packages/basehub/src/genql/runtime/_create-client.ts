@@ -1,4 +1,3 @@
-import type { Exact } from "type-fest";
 import { type BatchOptions, createFetcher } from "./_fetcher.js";
 import type { ExecutionResult } from "./_types.js";
 import {
@@ -7,6 +6,7 @@ import {
 } from "./_generate-graphql-operation.js";
 import { replaceSystemAliases } from "./_aliasing.js";
 import { FieldsSelection } from "./_type-selection.js";
+import { GraphQLExact, StripAllArgs } from "../../type-helpers.js";
 
 export type Headers =
   | HeadersInit
@@ -38,10 +38,10 @@ export type GetClient<
   MSel extends Record<string, any> = Record<string, any>,
 > = {
   query<R extends QSel>(
-    request: R & Exact<QSel, R>
+    request: R & GraphQLExact<StripAllArgs<QSel>, R>
   ): Promise<FieldsSelection<Q, R>>;
   mutation<R extends MSel>(
-    request: R & Exact<MSel, R>
+    request: R & GraphQLExact<StripAllArgs<MSel>, R>
   ): Promise<FieldsSelection<M, R>>;
 };
 
@@ -55,9 +55,7 @@ export const createClient = <
   ...options
 }: ClientOptions): GetClient<Q, QSel, M, MSel> => {
   return {
-    query: async <R extends QSel>(
-      request: R & Exact<QSel, R>
-    ): Promise<FieldsSelection<Q, R>> => {
+    query: async (request) => {
       const body = generateGraphqlOperation("query", request as any);
       const extraFetchOptions = await getExtraFetchOptions?.(
         "query",
@@ -68,9 +66,7 @@ export const createClient = <
       const result = await fetcher(body as GraphqlOperation, extraFetchOptions);
       return replaceSystemAliases(result);
     },
-    mutation: async <R extends MSel>(
-      request: R & Exact<MSel, R>
-    ): Promise<FieldsSelection<M, R>> => {
+    mutation: async (request) => {
       const body = generateGraphqlOperation("mutation", request as any);
       const extraFetchOptions = await getExtraFetchOptions?.(
         "mutation",
