@@ -1,5 +1,11 @@
 # basehub
 
+## 9.5.3
+
+### Patch Changes
+
+- upgrade axios
+
 ## 9.5.2
 
 ### Patch Changes
