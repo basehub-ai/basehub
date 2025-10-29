@@ -25,8 +25,6 @@ export default async function HomePage() {
         {async ([data]) => {
           "use server";
 
-          console.log(data);
-
           return (
             <div>
               <pre>

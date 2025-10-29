@@ -14,14 +14,14 @@
     "basehub": "workspace:*",
     "clsx": "^1.2.1",
     "eslint-config-custom": "workspace:*",
-    "next": "^15.4.6",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
+    "next": "^16.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "react-tweet": "^3.1.1",
     "sharp": "^0.32.0"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "13.4.16",
+    "@next/bundle-analyzer": "16.0.0",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "arg": "5.0.1",
