@@ -30,6 +30,10 @@ export type Options = {
   revalidateResolvedRef?: boolean;
   fallbackPlayground?: FallbackPlayground | undefined;
   /**
+   * Helper to avoid calling headers() or cookies() inside Next.js 16 Cache Components
+   */
+  isInsideCacheComponent?: boolean;
+  /**
    * In case this is being called from the CLI and not the user's app runtime
    */
   cli?: {
@@ -218,6 +222,9 @@ export const getStuffFromEnv = async (options?: Options) => {
     apiVersion = options.apiVersion;
   }
 
+  // Helper to avoid calling headers() or cookies() inside Nextjs 16 Cache Components
+  let isInsideCacheComponent = options.isInsideCacheComponent ?? false;
+
   // 2. let's validate the URL
 
   if (basehubUrl.pathname.split("/")[1] !== "graphql") {
@@ -275,7 +282,7 @@ export const getStuffFromEnv = async (options?: Options) => {
   }
 
   let previewRef: string | undefined;
-  if (draft && !isV0OrBolt()) {
+  if (draft && !isV0OrBolt() && !isInsideCacheComponent) {
     // try to get ref from cookies
     try {
       // @ts-ignore
