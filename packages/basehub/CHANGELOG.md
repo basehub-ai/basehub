@@ -1,5 +1,11 @@
 # basehub
 
+## 9.5.4-canary.0
+
+### Patch Changes
+
+- add isInsideCacheComponent option
+
 ## 9.5.3
 
 ### Patch Changes
