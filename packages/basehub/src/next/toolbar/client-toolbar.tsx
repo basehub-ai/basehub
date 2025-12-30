@@ -98,6 +98,29 @@ export const ClientToolbar = ({
     [displayMessage]
   );
 
+  const bshbPreviewRefCookieName = `bshb-preview-ref-${resolvedRef.repoHash}`;
+  const previewRefCookieManager = React.useMemo(
+    () => ({
+      set: (ref: string) => {
+        document.cookie = `${bshbPreviewRefCookieName}=${ref}; path=/; Max-Age=${
+          60 * 60 * 24 * 30 * 365 // 1 year
+        }`;
+      },
+      clear: () => {
+        document.cookie = `${bshbPreviewRefCookieName}=; path=/; Max-Age=-1`;
+      },
+      get: (): string | null => {
+        return (
+          document.cookie
+            .split("; ")
+            .find((row) => row.startsWith(bshbPreviewRefCookieName))
+            ?.split("=")[1] ?? null
+        );
+      },
+    }),
+    [bshbPreviewRefCookieName]
+  );
+
   const [hasAutoEnabledDraftOnce, setHasAutoEnabledDraftOnce] =
     React.useState(false);
 
@@ -164,95 +187,26 @@ export const ClientToolbar = ({
       // @ts-ignore
       window.__bshb_ref = ref;
       window.dispatchEvent(new CustomEvent("__bshb_ref_changed"));
+      previewRefCookieManager.set(ref);
       setIsDefaultRefSelected(ref === resolvedRef.ref);
     },
-    [resolvedRef.ref]
+    [previewRefCookieManager, resolvedRef.ref]
   );
 
-  /** Load ref from url on initial load. */
+  /** Load ref from url or cookie. */
   React.useEffect(() => {
     const url = new URL(window.location.href);
-    const urlRef = url.searchParams.get("bshb-preview-ref");
-    if (urlRef) {
-      setRefWithEvents(urlRef);
+    let previewRef = url.searchParams.get("bshb-preview-ref");
+    if (!previewRef) {
+      previewRef = previewRefCookieManager.get();
     }
+
     setIsLoadingRef(false);
-  }, [setRefWithEvents]);
 
-  /**
-   * On popstate (browser back/forward), override URL with current branch selection.
-   * This ensures "last selected branch wins" regardless of history.
-   */
-  React.useEffect(() => {
-    const overrideUrlWithCurrentRef = () => {
-      // @ts-ignore
-      const currentRef = window.__bshb_ref as string | undefined;
-      if (!currentRef || currentRef === resolvedRef.ref) {
-        // Default ref - remove param if present
-        const url = new URL(window.location.href);
-        if (url.searchParams.has("bshb-preview-ref")) {
-          url.searchParams.delete("bshb-preview-ref");
-          window.history.replaceState(null, "", url.toString());
-        }
-        return;
-      }
+    if (!previewRef) return;
 
-      const url = new URL(window.location.href);
-      if (url.searchParams.get("bshb-preview-ref") !== currentRef) {
-        url.searchParams.set("bshb-preview-ref", currentRef);
-        window.history.replaceState(null, "", url.toString());
-      }
-    };
-
-    window.addEventListener("popstate", overrideUrlWithCurrentRef);
-    return () => window.removeEventListener("popstate", overrideUrlWithCurrentRef);
-  }, [resolvedRef.ref]);
-
-  /**
-   * Intercept History API to automatically preserve bshb-preview-ref param across navigations.
-   * This ensures the server knows which branch to fetch from on client-side navigations.
-   */
-  React.useEffect(() => {
-    const originalPushState = history.pushState.bind(history);
-    const originalReplaceState = history.replaceState.bind(history);
-
-    const patchUrl = (url: string | URL | null | undefined): string | URL | null | undefined => {
-      if (!url) return url;
-
-      // Get current ref from window (set by setRefWithEvents)
-      // @ts-ignore
-      const currentRef = window.__bshb_ref as string | undefined;
-      if (!currentRef || currentRef === resolvedRef.ref) {
-        // Default ref, no need to add param
-        return url;
-      }
-
-      try {
-        const newUrl = new URL(url.toString(), window.location.origin);
-        // Don't override if already set
-        if (!newUrl.searchParams.has("bshb-preview-ref")) {
-          newUrl.searchParams.set("bshb-preview-ref", currentRef);
-        }
-        return newUrl.toString();
-      } catch {
-        // Invalid URL, return as-is
-        return url;
-      }
-    };
-
-    history.pushState = function (state, title, url) {
-      return originalPushState(state, title, patchUrl(url));
-    };
-
-    history.replaceState = function (state, title, url) {
-      return originalReplaceState(state, title, patchUrl(url));
-    };
-
-    return () => {
-      history.pushState = originalPushState;
-      history.replaceState = originalReplaceState;
-    };
-  }, [resolvedRef.ref]);
+    setRefWithEvents(previewRef);
+  }, [previewRefCookieManager, setRefWithEvents, resolvedRef.repoHash]);
 
   /** If selected ref is equal to resolvedRef (from build), then we consider this the default state. */
   React.useEffect(() => {
@@ -262,18 +216,25 @@ export const ClientToolbar = ({
 
   /**
    * If the build ref changes and the user was selecting it, we set the ref to the new build ref.
-   * We also clear the URL param, as this is the default state.
+   * We also clear the cookie, as this is the default state.
    */
   React.useEffect(() => {
     if (isLoadingRef) return;
 
     if (isDefaultRefSelected) {
       setRefWithEvents(resolvedRef.ref);
+      previewRefCookieManager.clear();
       const url = new URL(window.location.href);
       url.searchParams.delete("bshb-preview-ref");
       window.history.replaceState(null, "", url.toString());
     }
-  }, [isDefaultRefSelected, isLoadingRef, resolvedRef.ref, setRefWithEvents]);
+  }, [
+    isDefaultRefSelected,
+    isLoadingRef,
+    previewRefCookieManager,
+    resolvedRef.ref,
+    setRefWithEvents,
+  ]);
 
   /** Position tooltip when message changes. */
   React.useLayoutEffect(() => {
@@ -377,6 +338,16 @@ export const ClientToolbar = ({
       window.removeEventListener("resize", repositionToolbar);
     };
   }, [getStoredToolbarPosition, dragToolbar]);
+
+  React.useEffect(() => {
+    if (!latestBranches) return;
+    // make sure selected branch is in latestBranches else we need to clear the cookie
+    const fromCookie = previewRefCookieManager.get();
+    if (!fromCookie) return;
+    if (!latestBranches.find((branch) => branch.name === fromCookie)) {
+      previewRefCookieManager.clear();
+    }
+  }, [latestBranches, previewRefCookieManager]);
 
   const tooltip = isForcedDraft
     ? "Draft enforced by dev env"

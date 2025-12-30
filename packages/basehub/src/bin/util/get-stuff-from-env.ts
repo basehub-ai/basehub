@@ -262,8 +262,18 @@ export const getStuffFromEnv = async (options?: Options) => {
     fallbackPlayground,
   });
 
+  let isNextjs = false;
+  if (!isV0OrBolt()) {
+    try {
+      // @ts-ignore
+      isNextjs = !!(await import(/* @vite-ignore */ "next/headers"));
+    } catch (error) {
+      // noop, not using nextjs
+    }
+  }
+
   let isNextjsDraftMode = false;
-  if (!isV0OrBolt() && !draft && options.draft === undefined) {
+  if (isNextjs && !isV0OrBolt()) {
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
       // @ts-ignore
@@ -274,8 +284,25 @@ export const getStuffFromEnv = async (options?: Options) => {
     }
   }
 
-  if (isNextjsDraftMode) {
+  if (isNextjsDraftMode && !draft && options.draft === undefined) {
     draft = true;
+  }
+
+  let previewRef: string | undefined;
+  if (draft && !isV0OrBolt() && (!isNextjs || isNextjsDraftMode)) {
+    // try to get ref from cookies
+    try {
+      // @ts-ignore
+      const { cookies } = await import(/* @vite-ignore */ "next/headers");
+      const cookieStore = await cookies();
+      const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
+        ?.value as string | undefined;
+      if (ref) {
+        previewRef = ref;
+      }
+    } catch (error) {
+      // noop
+    }
   }
 
   const sdkBuildId = `bshb_sdk__${version}__${resolvedRef.id}${
@@ -288,6 +315,7 @@ export const getStuffFromEnv = async (options?: Options) => {
 
   return {
     draft,
+    previewRef,
     isForcedDraft,
     isNextjsDraftMode,
     output: getEnvVar("OUTPUT") ?? options.cli?.output ?? null,
@@ -306,6 +334,8 @@ export const getStuffFromEnv = async (options?: Options) => {
       "x-basehub-sdk-build-id": sdkBuildId,
       ...(token ? { "x-basehub-token": token } : {}),
       ...(ref ? { "x-basehub-ref": ref } : {}),
+      // override if present
+      ...(previewRef ? { "x-basehub-ref": previewRef } : {}),
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
       ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
