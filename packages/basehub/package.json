@@ -146,10 +146,10 @@
     "@types/react-dom": "18.2.7",
     "dts-bundle-generator": "^9.5.1",
     "esbuild-scss-modules-plugin": "^1.1.1",
-    "next": "^15.4.6",
+    "next": "^16.1.1",
     "pkg-pr-new": "^0.0.54",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
+    "react": "19.1.2",
+    "react-dom": "19.1.2",
     "tsconfig": "workspace:*",
     "tsup": "8.5.0",
     "vitest": "^3.2.3"
