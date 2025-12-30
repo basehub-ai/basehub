@@ -56,8 +56,6 @@ export type Options = Omit<
   token?: string;
   ref?: string;
   fallbackPlayground?: FallbackPlayground | undefined;
-  // Helper to avoid calling headers() or cookies() inside Next.js 16 Cache Components
-  isInsideCacheComponent?: boolean;
 };
 
 /**

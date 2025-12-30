@@ -30,10 +30,6 @@ export type Options = {
   revalidateResolvedRef?: boolean;
   fallbackPlayground?: FallbackPlayground | undefined;
   /**
-   * Helper to avoid calling headers() or cookies() inside Next.js 16 Cache Components
-   */
-  isInsideCacheComponent?: boolean;
-  /**
    * In case this is being called from the CLI and not the user's app runtime
    */
   cli?: {
@@ -222,9 +218,6 @@ export const getStuffFromEnv = async (options?: Options) => {
     apiVersion = options.apiVersion;
   }
 
-  // Helper to avoid calling headers() or cookies() inside Nextjs 16 Cache Components
-  let isInsideCacheComponent = options.isInsideCacheComponent ?? false;
-
   // 2. let's validate the URL
 
   if (basehubUrl.pathname.split("/")[1] !== "graphql") {
@@ -285,23 +278,6 @@ export const getStuffFromEnv = async (options?: Options) => {
     draft = true;
   }
 
-  let previewRef: string | undefined;
-  if (draft && !isV0OrBolt() && !isInsideCacheComponent) {
-    // try to get ref from cookies
-    try {
-      // @ts-ignore
-      const { cookies } = await import(/* @vite-ignore */ "next/headers");
-      const cookieStore = await cookies();
-      const ref = cookieStore.get("bshb-preview-ref-" + resolvedRef.repoHash)
-        ?.value as string | undefined;
-      if (ref) {
-        previewRef = ref;
-      }
-    } catch (error) {
-      // noop
-    }
-  }
-
   const sdkBuildId = `bshb_sdk__${version}__${resolvedRef.id}${
     gitBranch ? `__git_branch_${gitBranch}` : ""
   }${gitCommitSHA ? `__git_commit_sha_${gitCommitSHA}` : ""}`;
@@ -312,7 +288,6 @@ export const getStuffFromEnv = async (options?: Options) => {
 
   return {
     draft,
-    previewRef,
     isForcedDraft,
     isNextjsDraftMode,
     output: getEnvVar("OUTPUT") ?? options.cli?.output ?? null,
@@ -331,8 +306,6 @@ export const getStuffFromEnv = async (options?: Options) => {
       "x-basehub-sdk-build-id": sdkBuildId,
       ...(token ? { "x-basehub-token": token } : {}),
       ...(ref ? { "x-basehub-ref": ref } : {}),
-      // override if present
-      ...(previewRef ? { "x-basehub-ref": previewRef } : {}),
       ...(gitBranch ? { "x-basehub-git-branch": gitBranch } : {}),
       ...(gitCommitSHA ? { "x-basehub-git-commit-sha": gitCommitSHA } : {}),
       ...(draft ? { "x-basehub-draft": "true" } : {}),
