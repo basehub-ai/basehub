@@ -13,5 +13,5 @@
     }
   },
   "exclude": ["node_modules"],
-  "include": ["src", "next-env.d.ts", ".next/types/**/*.ts", "src/lib/basehub/basehub.d.ts", "src/lib/basehub/basehub.config.ts"]
+  "include": ["src", "next-env.d.ts", ".next/types/**/*.ts", "src/lib/basehub/basehub.d.ts", "src/lib/basehub/basehub.config.ts", "src/lib/basehub/basehub-types.d.ts", "basehub-types.d.ts", "basehub.config.ts"]
 }
