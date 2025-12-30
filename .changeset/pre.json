@@ -4,10 +4,8 @@
   "initialVersions": {
     "eslint-config-custom": "1.0.0",
     "tsconfig": "1.0.0",
-    "basehub": "9.5.3",
-    "playground": "0.0.261"
+    "basehub": "9.5.4-canary.0",
+    "playground": "0.0.262-canary.0"
   },
-  "changesets": [
-    "tall-pandas-judge"
-  ]
+  "changesets": ["hip-dingos-check"]
 }
