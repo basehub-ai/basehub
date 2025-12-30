@@ -10,7 +10,6 @@ import {
 } from "../../index.js";
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
 import { replaceSystemAliases } from "../../genql/runtime/_aliasing.js";
-import { isV0OrBolt } from "../../vibe.js";
 import { GraphQLExact, StripAllArgs } from "../../type-helpers.js";
 import { GenqlError } from "../../genql/runtime/_error.js";
 
@@ -79,22 +78,6 @@ export const Pump = async <
   const basehubProps = { ..._basehubProps, ref: _ref };
   // passed to the client to toast
   const responseHashes: Array<ResponseCache["responseHash"]> = [];
-
-  let isNextjsDraftMode = false;
-  if (!isV0OrBolt() && basehubProps.draft === undefined) {
-    // try to auto-detect (only if draft is not explicitly set by the user)
-    try {
-      // @ts-ignore
-      const { draftMode } = await import(/* @vite-ignore */ "next/headers");
-      isNextjsDraftMode = (await draftMode()).isEnabled;
-    } catch (error) {
-      // noop, not using nextjs
-    }
-  }
-
-  if (isNextjsDraftMode && basehubProps.draft === undefined) {
-    basehubProps.draft = true;
-  }
 
   const { headers, draft, resolvedRef } = await getStuffFromEnv(basehubProps);
   const { "x-basehub-token": _token, ...headersWithoutToken } = headers;
