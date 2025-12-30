@@ -1,7 +1,7 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.0.262-canary.0",
+  "version": "0.0.262-canary.1",
   "scripts": {
     "dev": "basehub dev & next dev --webpack",
     "build": "basehub && next build --webpack",
