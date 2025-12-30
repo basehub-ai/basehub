@@ -1,6 +1,7 @@
+import { Toolbar } from "basehub/next-toolbar";
 import "./global.css";
 import type { Metadata } from "next";
-import { Toolbar } from "basehub/next-toolbar";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "BaseHub SDK Playground",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Toolbar />
+      <Suspense>
+        <Toolbar />
+      </Suspense>
       <body>{children}</body>
     </html>
   );
