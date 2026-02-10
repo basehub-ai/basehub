@@ -238,6 +238,22 @@ export const getStuffFromEnv = async (options?: Options) => {
   draft = !!draft;
 
   // 3.
+  let isNextjsDraftMode = false;
+  if (!isV0OrBolt() && !draft) {
+    // try to auto-detect (only if draft is not explicitly set by the user)
+    try {
+      // @ts-ignore
+      const { draftMode } = await import(/* @vite-ignore */ "next/headers");
+      isNextjsDraftMode = (await draftMode()).isEnabled;
+    } catch (error) {
+      // noop, not using nextjs
+    }
+  }
+
+  if (isNextjsDraftMode) {
+    draft = true;
+  }
+
   const {
     gitBranch,
     gitCommitSHA,
@@ -256,23 +272,8 @@ export const getStuffFromEnv = async (options?: Options) => {
     apiVersion,
     revalidate: options.revalidateResolvedRef,
     fallbackPlayground,
+    draft: !!draft,
   });
-
-  let isNextjsDraftMode = false;
-  if (!isV0OrBolt() && !draft) {
-    // try to auto-detect (only if draft is not explicitly set by the user)
-    try {
-      // @ts-ignore
-      const { draftMode } = await import(/* @vite-ignore */ "next/headers");
-      isNextjsDraftMode = (await draftMode()).isEnabled;
-    } catch (error) {
-      // noop, not using nextjs
-    }
-  }
-
-  if (isNextjsDraftMode) {
-    draft = true;
-  }
 
   let previewRef: string | undefined;
   if (draft && !isV0OrBolt()) {
@@ -354,6 +355,7 @@ export async function resolveRef({
   apiVersion,
   revalidate,
   fallbackPlayground,
+  draft,
 }: {
   url: URL;
   token: string | null;
@@ -365,6 +367,7 @@ export async function resolveRef({
   apiVersion: string | null;
   revalidate?: boolean;
   fallbackPlayground?: FallbackPlayground | undefined;
+  draft?: boolean;
 }) {
   const headers = {
     ...(token ? { "x-basehub-token": token } : {}),
@@ -405,7 +408,7 @@ export async function resolveRef({
       "Content-Type": "application/json",
       ...headers,
     },
-    cache: "no-store",
+    ...(draft ? { cache: "no-store" as const } : {}),
     body: JSON.stringify({}),
   });
 
