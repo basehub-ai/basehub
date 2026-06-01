@@ -152,6 +152,6 @@
     "react-dom": "19.1.1",
     "tsconfig": "workspace:*",
     "tsup": "8.5.0",
-    "vitest": "^3.2.3"
+    "vitest": "^4.1.0"
   }
 }
