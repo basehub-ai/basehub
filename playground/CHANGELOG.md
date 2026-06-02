@@ -1,5 +1,13 @@
 # playground
 
+## 0.0.262
+
+### Patch Changes
+
+- 3c5d639: Add partial support for Next.js Cache Components. This allows doing BaseHub queries inside Cache Components without throwing errors, with the caveat that the toolbar branch selector won't work. This version doesn't change any behaviors for projects without Cache Components enabled.
+- Updated dependencies [3c5d639]
+  - basehub@9.6.0
+
 ## 0.0.262-canary.1
 
 ### Patch Changes
