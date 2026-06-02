@@ -108,27 +108,33 @@ export const basehub = <
 
     if (draft) return extra;
 
+    // nextjs-specific options
+    try {
+      // @ts-ignore
+      isNextjs = !!(await import(/* @vite-ignore */ "next/headers"));
+    } catch (error) {
+      // noop, not using nextjs
+    }
+
+    // @ts-expect-error
+    if (isNextjs && options.next) {
+      // @ts-expect-error
+      extra.next = options.next;
+    }
+
     // only override if revalidation is not being handled by the user
     // @ts-expect-error
-    if (!isV0OrBolt() && typeof options?.next === "undefined") {
-      try {
-        // @ts-ignore
-        isNextjs = !!(await import(/* @vite-ignore */ "next/headers"));
-      } catch (error) {
-        // noop, not using nextjs
-      }
-      if (isNextjs) {
-        const cacheTag = cacheTagFromQuery({
-          query: originalRequest,
-          sdkBuildId,
-        });
-        // @ts-expect-error
-        extra.next = { tags: [cacheTag] };
-        extra.headers = {
-          ...extra.headers,
-          ["x-basehub-cache-tag" as any]: cacheTag,
-        };
-      }
+    if (!isV0OrBolt() && isNextjs && typeof options?.next === "undefined") {
+      const cacheTag = cacheTagFromQuery({
+        query: originalRequest,
+        sdkBuildId,
+      });
+      // @ts-expect-error
+      extra.next = { tags: [cacheTag] };
+      extra.headers = {
+        ...extra.headers,
+        ["x-basehub-cache-tag" as any]: cacheTag,
+      };
     }
 
     return extra;

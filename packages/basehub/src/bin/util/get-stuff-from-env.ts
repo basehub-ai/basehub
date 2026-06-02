@@ -133,7 +133,7 @@ export const getStuffFromEnv = async (options?: Options) => {
     return ""; // empty string to prevent fallback
   };
 
-  const resolvedToken = resolveTokenParam(options?.token ?? null);
+  const resolvedToken = resolveTokenParam(options.token ?? null);
 
   const token =
     resolvedToken ??
@@ -202,8 +202,8 @@ export const getStuffFromEnv = async (options?: Options) => {
     draft = true;
   }
 
-  if (options?.draft) {
-    draft = true;
+  if (options.draft !== undefined) {
+    draft = options.draft;
   }
 
   let apiVersion =
@@ -214,7 +214,7 @@ export const getStuffFromEnv = async (options?: Options) => {
       : undefined) ??
     DEFAULT_API_VERSION;
 
-  if (options?.apiVersion) {
+  if (options.apiVersion) {
     apiVersion = options.apiVersion;
   }
 
@@ -235,6 +235,10 @@ export const getStuffFromEnv = async (options?: Options) => {
   basehubUrl.searchParams.delete("ref");
   basehubUrl.searchParams.delete("draft");
 
+  // Handle string "false" from URL params or env vars
+  if (draft === "false" || draft === "0") {
+    draft = false;
+  }
   draft = !!draft;
 
   // 3.
@@ -258,8 +262,18 @@ export const getStuffFromEnv = async (options?: Options) => {
     fallbackPlayground,
   });
 
+  let isNextjs = false;
+  if (!isV0OrBolt()) {
+    try {
+      // @ts-ignore
+      isNextjs = !!(await import(/* @vite-ignore */ "next/headers"));
+    } catch (error) {
+      // noop, not using nextjs
+    }
+  }
+
   let isNextjsDraftMode = false;
-  if (!isV0OrBolt() && !draft) {
+  if (isNextjs && !isV0OrBolt()) {
     // try to auto-detect (only if draft is not explicitly set by the user)
     try {
       // @ts-ignore
@@ -270,12 +284,12 @@ export const getStuffFromEnv = async (options?: Options) => {
     }
   }
 
-  if (isNextjsDraftMode) {
+  if (isNextjsDraftMode && !draft && options.draft === undefined) {
     draft = true;
   }
 
   let previewRef: string | undefined;
-  if (draft && !isV0OrBolt()) {
+  if (draft && !isV0OrBolt() && (!isNextjs || isNextjsDraftMode)) {
     // try to get ref from cookies
     try {
       // @ts-ignore

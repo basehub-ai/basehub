@@ -1,5 +1,22 @@
 # playground
 
+## 0.0.262-canary.1
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@9.5.4-canary.1
+  - next
+  - node and react types
+  - @next/bundle-analyzer
+
+## 0.0.262-canary.0
+
+### Patch Changes
+
+- Updated dependencies
+  - basehub@9.5.4-canary.0
+
 ## 0.0.261
 
 ### Patch Changes

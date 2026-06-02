@@ -15,7 +15,6 @@ import {
 } from "@shikijs/transformers";
 import { toJsxRuntime, Components } from "hast-util-to-jsx-runtime";
 
-// @ts-expect-error: the react types are missing.
 // eslint-disable-next-line import/namespace
 const production = { Fragment: prod.Fragment, jsx: prod.jsx, jsxs: prod.jsxs };
 
@@ -80,9 +79,10 @@ export const Highlighter = async ({
     ],
   });
 
-  const content = toJsxRuntime(hast, { ...production, components });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const content = toJsxRuntime(hast, { ...production, components } as any);
 
-  const RootComp = components?.div ?? "div";
+  const RootComp = (components?.div ?? "div") as React.ElementType;
 
   return (
     <RootComp

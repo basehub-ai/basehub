@@ -1,5 +1,19 @@
 # basehub
 
+## 9.5.4-canary.1
+
+### Patch Changes
+
+- add support for nextjs cache components
+- upgrade next
+- upgrade node and react types
+
+## 9.5.4-canary.0
+
+### Patch Changes
+
+- add isInsideCacheComponent option
+
 ## 9.5.3
 
 ### Patch Changes

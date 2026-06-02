@@ -384,7 +384,7 @@ const useIsoLayoutEffect =
 const Input = React.forwardRef<
   HTMLInputElement,
   Omit<
-    JSX.IntrinsicElements["input"] & {
+    React.JSX.IntrinsicElements["input"] & {
       asChild?: boolean;
       disableSelectionPrefill?: boolean;
     },
@@ -479,7 +479,7 @@ const Input = React.forwardRef<
 
 const Placeholder = React.forwardRef<
   HTMLDivElement,
-  Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
+  Omit<React.JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
 >(({ asChild, ...props }, ref) => {
   const { result } = useContext();
   const Comp = asChild ? Slot : "div";
@@ -494,7 +494,7 @@ const Placeholder = React.forwardRef<
 
 const Empty = React.forwardRef<
   HTMLDivElement,
-  Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
+  Omit<React.JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
 >(({ asChild, ...props }, ref) => {
   const { result } = useContext();
   const Comp = asChild ? Slot : "div";
@@ -509,7 +509,7 @@ const Empty = React.forwardRef<
 
 const HitList = React.forwardRef<
   HTMLDivElement,
-  Omit<JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
+  Omit<React.JSX.IntrinsicElements["div"] & { asChild?: boolean }, "ref">
 >(({ asChild, onMouseMove, ...props }, ref) => {
   const { id, onIndexChange } = useContext();
   const Comp = asChild ? Slot : "div";
@@ -556,7 +556,7 @@ const useHitContext = () => {
 const HitItem = React.forwardRef<
   HTMLAnchorElement,
   Omit<
-    JSX.IntrinsicElements["a"] & {
+    React.JSX.IntrinsicElements["a"] & {
       asChild?: boolean;
       hit: Hit;
       href: string;

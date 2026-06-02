@@ -1,20 +1,12 @@
+import { Toolbar } from "basehub/next-toolbar";
 import "./global.css";
 import type { Metadata } from "next";
-import { Toolbar } from "basehub/next-toolbar";
+import { Suspense } from "react";
+import { draftMode } from "next/headers";
 
 export const metadata: Metadata = {
   title: "BaseHub SDK Playground",
   description: "The first AI-native headless cms.",
-  viewport: {
-    height: "device-height",
-    initialScale: 1,
-    width: "device-width",
-  },
-  icons: {
-    icon: "/next.svg",
-    shortcut: "/next.svg",
-  },
-  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({
@@ -24,8 +16,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Suspense>
+        <Toolbar />
+      </Suspense>
       <body>{children}</body>
-      <Toolbar />
     </html>
   );
 }

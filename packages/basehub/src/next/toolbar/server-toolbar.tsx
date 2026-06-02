@@ -3,7 +3,6 @@ import * as React from "react";
 // @ts-ignore
 import { basehub } from "../../index.js";
 import { getStuffFromEnv } from "../../bin/util/get-stuff-from-env.js";
-import { isV0OrBolt } from "../../vibe.js";
 
 // we use react.lazy to code split client-toolbar
 const LazyClientConditionalRenderer = React.lazy(() =>
@@ -17,18 +16,8 @@ type ServerToolbarProps = Parameters<typeof basehub>[0];
 export const ServerToolbar = async ({
   ...basehubProps
 }: ServerToolbarProps) => {
-  const { isForcedDraft, resolvedRef } = await getStuffFromEnv(basehubProps);
-
-  let isDraftMode = false;
-  if (!isV0OrBolt()) {
-    try {
-      // @ts-ignore
-      const { draftMode } = await import(/* @vite-ignore */ "next/headers");
-      isDraftMode = (await draftMode()).isEnabled;
-    } catch (err) {
-      // noop
-    }
-  }
+  const { isForcedDraft, resolvedRef, isNextjsDraftMode } =
+    await getStuffFromEnv(basehubProps);
 
   const enableDraftMode_unbound = async (
     basehubProps: ServerToolbarProps,
@@ -219,7 +208,7 @@ export const ServerToolbar = async ({
 
   return (
     <LazyClientConditionalRenderer
-      draft={isDraftMode}
+      draft={isNextjsDraftMode}
       isForcedDraft={isForcedDraft}
       enableDraftMode={enableDraftMode}
       disableDraftMode={disableDraftMode}
