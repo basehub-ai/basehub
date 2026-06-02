@@ -9,14 +9,6 @@ export const metadata: Metadata = {
   description: "The first AI-native headless cms.",
 };
 
-async function SuspendedDraftMode({ children }: { children: React.ReactNode }) {
-  const draftModeInstance = await draftMode();
-  if (draftModeInstance.isEnabled) {
-    return <Suspense>{children}</Suspense>;
-  }
-  return children;
-}
-
 export default function RootLayout({
   children,
 }: {
@@ -24,12 +16,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <SuspendedDraftMode>
-        <Suspense>
-          <Toolbar />
-        </Suspense>
-        <body>{children}</body>
-      </SuspendedDraftMode>
+      <Suspense>
+        <Toolbar />
+      </Suspense>
+      <body>{children}</body>
     </html>
   );
 }
